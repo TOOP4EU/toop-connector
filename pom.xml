@@ -107,6 +107,11 @@
         <artifactId>toop-dp-adapter</artifactId>
         <version>${project.version}</version>
       </dependency>
+      <dependency>
+        <groupId>eu.toop</groupId>
+        <artifactId>toop-message-exchange</artifactId>
+        <version>${project.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -142,6 +147,7 @@
     <module>toop-smm-client</module>
     <module>toop-dc-adapter</module>
     <module>toop-dp-adapter</module>
+    <module>toop-message-exchange</module>
     <module>toop-mp-webapp</module>
   </modules>
 </project>
