@@ -99,12 +99,12 @@
       </dependency>
       <dependency>
         <groupId>eu.toop</groupId>
-        <artifactId>toop-dc-client</artifactId>
+        <artifactId>toop-dc-adapter</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>eu.toop</groupId>
-        <artifactId>toop-dp-client</artifactId>
+        <artifactId>toop-dp-adapter</artifactId>
         <version>${project.version}</version>
       </dependency>
     </dependencies>
@@ -140,8 +140,8 @@
   <modules>
     <module>toop-r2d2-client</module>
     <module>toop-smm-client</module>
-    <module>toop-dc-client</module>
-    <module>toop-dp-client</module>
+    <module>toop-dc-adapter</module>
+    <module>toop-dp-adapter</module>
     <module>toop-mp-webapp</module>
   </modules>
 </project>
