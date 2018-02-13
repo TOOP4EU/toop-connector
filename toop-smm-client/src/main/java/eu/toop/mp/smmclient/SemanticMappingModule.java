@@ -1,5 +1,6 @@
 package eu.toop.mp.smmclient;
 
+import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.List;
@@ -13,10 +14,6 @@ import javax.xml.bind.Unmarshaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.toop.mp.DataRequestInfoType;
-import eu.toop.mp.DataRequestType;
-import eu.toop.mp.ObjectFactory;
-
 public class SemanticMappingModule implements Module {
 
 	/**
@@ -24,11 +21,11 @@ public class SemanticMappingModule implements Module {
 	 */
 	private static final Logger LOG = LoggerFactory.getLogger(SemanticMappingModule.class);
 
-	public String addTOOPConcepts(String messageXml) {
+	public String addTOOPConcepts(final String messageXml) {
 		return convertConcepts(messageXml, true);
 	}
 
-	public String addCountryConcepts(String messageXml) {
+	public String addCountryConcepts(final String messageXml) {
 		return convertConcepts(messageXml, false);
 	}
 
@@ -36,7 +33,7 @@ public class SemanticMappingModule implements Module {
 	 * Lots of the logic is the same when converting between TOOP <-> Country. So a
 	 * single method is convienient. The boolean indicates which route we need to
 	 * take.
-	 * 
+	 *
 	 * @param messageXml
 	 *            The message to convert.
 	 * @param fromTOOPtoCountry
@@ -45,7 +42,7 @@ public class SemanticMappingModule implements Module {
 	 *            TOOP concepts.
 	 * @return The converted (complemented) message.
 	 */
-	public String convertConcepts(String messageXml, boolean fromTOOPtoCountry) {
+	public String convertConcepts(final String messageXml, final boolean fromTOOPtoCountry) {
 
 		// for now we do nothing with fromTOOPtoCountry.
 
@@ -53,13 +50,13 @@ public class SemanticMappingModule implements Module {
 
 		String result = null;
 		try {
-			JAXBContext context = JAXBContext.newInstance(ObjectFactory.class);
-			Unmarshaller u = context.createUnmarshaller();
-			StringReader sr = new StringReader(messageXml);
+			final JAXBContext context = JAXBContext.newInstance(ObjectFactory.class);
+			final Unmarshaller u = context.createUnmarshaller();
+			final StringReader sr = new StringReader(messageXml);
 
 			@SuppressWarnings("unchecked") // the unchecked cast is unavoidable when working with JAXB.
-			JAXBElement<eu.toop.mp.DataRequestType> elem = (JAXBElement<DataRequestType>) u.unmarshal(sr);
-			DataRequestType type = (DataRequestType) elem.getValue();
+      final JAXBElement<DataRequestType> elem = (JAXBElement<DataRequestType>) u.unmarshal(sr);
+			final DataRequestType type = elem.getValue();
 
 			/**
 			 * Somehow I do not manage to avoid the JAXBElement here. According to this it
@@ -72,17 +69,18 @@ public class SemanticMappingModule implements Module {
 			 * Semantic Mapping Service here and request the translation of a particular
 			 * concept.
 			 */
-			List<DataRequestInfoType> drit = type.getDataConsumerRequest().getDataRequestInfo();
+			final List<DataRequestInfoType> drit = type.getDataConsumerRequest().getDataRequestInfo();
 			if (!drit.isEmpty()) {
 				drit.forEach((i) -> i.setToopConcept("Modified!"));
 			}
 
-			Marshaller m = context.createMarshaller();
+			final Marshaller m = context.createMarshaller();
 			m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-			StringWriter sw = new StringWriter();
-			m.marshal(elem, sw);
-			result = sw.toString();
-		} catch (JAXBException e) {
+			try (final StringWriter sw = new StringWriter()) {
+			  m.marshal(elem, sw);
+			  result = sw.toString();
+			}
+		} catch (final IOException | JAXBException e) {
 			LOG.error("An error occured while JAXB unmarshalling", e);
 		}
 
