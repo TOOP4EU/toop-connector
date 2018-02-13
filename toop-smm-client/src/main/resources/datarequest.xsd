@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<xs:complexType name="DataRequestType">
+		<xs:sequence>
+			<xs:element name="DocumentIdentifier" type="xs:string"></xs:element>
+			<xs:element name="DocumentIssueDate" type="xs:string"></xs:element>
+			<xs:element name="DocumentIssueTime" type="xs:string"></xs:element>
+			<xs:element name="DocumentVerseionIdentifier" type="xs:string"></xs:element>
+			<xs:element name="CopyIndicator" type="xs:string"></xs:element>
+			<xs:element name="BusinessProcessTypeIdentifier" type="xs:string"></xs:element>
+			<xs:element name="SpecificationIdentification" type="xs:string"></xs:element>
+			<xs:element name="DataConsumer" type="DataConsumerType"></xs:element>
+			<xs:element name="DataConsumerRequest" type="DataConsumerRequestType"></xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+
+	<xs:complexType name="DataConsumerType">
+		<xs:sequence>
+			<xs:element name="DCName" type="xs:string"></xs:element>
+			<xs:element name="DCIdentifier" type="xs:string"></xs:element>
+			<xs:element name="DCElectronicAddressIdentifier" type="xs:string"></xs:element>
+			<xs:element name="DCCountry" type="xs:string"></xs:element>
+			<xs:element name="DCName" type="xs:string"></xs:element>
+			<xs:element name="DataSubject" type="DataSubjectType"
+				minOccurs="0" maxOccurs="1"></xs:element>
+			<xs:element name="DataOwner" type="DataOwnerType"
+				minOccurs="0" maxOccurs="1"></xs:element>
+			<xs:element name="DataConsumerAuthorization" type="DataConsumerAuthorizationType"
+				minOccurs="0" maxOccurs="1"></xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+
+	<xs:complexType name="DataConsumerRequestType">
+		<xs:sequence>
+			<xs:element name="DocumentRequestIndicator" type="xs:string"></xs:element>
+			<xs:element name="DocumentRequestTypeCode" type="xs:string"></xs:element>
+			<xs:element name="DataConsumerRequestIdentifer" type="xs:string"></xs:element>
+			<xs:element name="DataRequestInfo" type="DataRequestInfoType"
+				minOccurs="0" maxOccurs="unbounded"></xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="DataSubjectType">
+		<xs:sequence>
+			<xs:element name="OrganisationIdentifer" type="xs:string"></xs:element>
+			<xs:element name="OrganisationName" type="xs:string"></xs:element>
+			<xs:element name="CountryOfRegistration" type="xs:string"></xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="DataOwnerType">
+		<xs:sequence>
+			<xs:element name="NaturalPersonFirstName" type="xs:string"></xs:element>
+			<xs:element name="NaturalPersonFamilyName" type="xs:string"></xs:element>
+			<xs:element name="NaturalPersonBirthPlace" type="xs:string"></xs:element>
+			<xs:element name="NaturalPersonBirthData" type="xs:string"></xs:element>
+			<xs:element name="NaturalPersonIdentifier" type="xs:string"></xs:element>
+			<xs:element name="NaturalPersonNationality" type="xs:string"></xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="DataConsumerAuthorizationType">
+		<xs:sequence>
+			<xs:element name="ConsentToken" type="xs:string"></xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="DataRequestInfoType">
+		<xs:sequence>
+			<xs:element name="DataRequestIdentifier" type="xs:string"></xs:element>
+			<xs:element name="DataConsumerConcept" type="xs:string"></xs:element>
+			<xs:element name="DataConsumerConceptIdentifier" type="xs:string"></xs:element>
+			<xs:element name="DataConsumerConceptURI" type="xs:string"></xs:element>
+			<xs:element name="DataConsumerNamespace" type="xs:string"></xs:element>
+			<xs:element name="DataConsumerDataFormat" type="xs:string"></xs:element>
+			<xs:element name="ToopConcept" type="xs:string"></xs:element>
+			<xs:element name="ToopDataType" type="xs:string"></xs:element>
+			<xs:element name="ToopConceptSuperclass" type="xs:string"></xs:element>
+			<xs:element name="ToopConceptIdentifier" type="xs:string"></xs:element>
+			<xs:element name="ToopConceptURI" type="xs:string"></xs:element>
+			<xs:element name="ToopConceptDomain" type="xs:string"></xs:element>
+			<xs:element name="ToopNamespace" type="xs:string"></xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+
+	<xs:element name="DataRequest" type="DataRequestType" />
+
+</xs:schema>
