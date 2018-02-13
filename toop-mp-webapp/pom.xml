@@ -120,38 +120,5 @@
         <targetPath>${project.build.directory}/test-classes</targetPath>
       </resource>
     </resources>
-    
-    <plugins>
-      <plugin>
-        <groupId>com.helger.maven</groupId>
-        <artifactId>ph-jscompress-maven-plugin</artifactId>
-        <version>2.2.0</version><!--$NO-MVN-MAN-VER$-->
-        <executions>
-          <execution>
-            <goals>
-              <goal>jscompress</goal>
-            </goals>
-            <configuration>
-              <sourceDirectory>${basedir}/src/main/webapp</sourceDirectory>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>com.helger.maven</groupId>
-        <artifactId>ph-csscompress-maven-plugin</artifactId>
-        <version>6.0.0</version><!--$NO-MVN-MAN-VER$-->
-        <executions>
-          <execution>
-            <goals>
-              <goal>csscompress</goal>
-            </goals>
-            <configuration>
-              <sourceDirectory>${basedir}/src/main/webapp</sourceDirectory>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
   </build>
 </project>
