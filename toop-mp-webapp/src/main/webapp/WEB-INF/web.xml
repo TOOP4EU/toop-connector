@@ -34,12 +34,16 @@
     <session-timeout>60</session-timeout>
   </session-config>
 
+  <listener>
+    <listener-class>eu.toop.mp.daemon.MessageProcessorStartUp</listener-class>
+  </listener>
+
   <servlet>
     <servlet-name>ToopMPServletDC</servlet-name>
     <servlet-class>eu.toop.mp.dcadapter.servlet.ToopMPServletDC</servlet-class>
   </servlet>
   <servlet-mapping>
     <servlet-name>ToopMPServletDC</servlet-name>
-    <url-pattern>/dc-data-request</url-pattern>
+    <url-pattern>/*</url-pattern>
   </servlet-mapping>
 </web-app>

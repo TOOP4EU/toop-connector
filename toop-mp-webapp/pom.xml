@@ -49,6 +49,10 @@
       <email>ph(at)helger.com</email>
       <url>http://www.helger.com</url>
     </developer>
+    <developer>
+      <id>jerry</id>
+      <name>Jerry Dimitriou</name>
+    </developer>
   </developers>
 
   <dependencies>

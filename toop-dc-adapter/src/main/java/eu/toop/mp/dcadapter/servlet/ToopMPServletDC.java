@@ -31,8 +31,9 @@ public class ToopMPServletDC extends HttpServlet {
                 targetFile.toPath(),
                 StandardCopyOption.REPLACE_EXISTING);
 
-        //MessageSubmissionHandler msMgr;
-
-        }
+        // add file in queue for consumption
+            MessageQueue.INSTANCE.add(targetFile);
+        log.info("Added file to MessageQueue");
+    }
 
 }
