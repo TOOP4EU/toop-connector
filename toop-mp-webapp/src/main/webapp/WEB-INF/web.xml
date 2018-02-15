@@ -26,9 +26,20 @@
   <session-config>
     <session-timeout>60</session-timeout>
   </session-config>
-  
-  <!-- The welcome file is only required for the initial redirect -->
-  <welcome-file-list>
-    <welcome-file>index.html</welcome-file>
-  </welcome-file-list>
+
+  <display-name>TOOP Demo UI</display-name>
+  <description>https://github.com/toop4eu/toop-demo-ui</description>
+
+  <session-config>
+    <session-timeout>60</session-timeout>
+  </session-config>
+
+  <servlet>
+    <servlet-name>ToopMPServletDC</servlet-name>
+    <servlet-class>eu.toop.mp.dcadapter.servlet.ToopMPServletDC</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>ToopMPServletDC</servlet-name>
+    <url-pattern>/dc-data-request</url-pattern>
+  </servlet-mapping>
 </web-app>

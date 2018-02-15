@@ -30,6 +30,10 @@ public final class RunInJettyTOOPMP
 {
   public static void main (final String [] args) throws Exception
   {
-    new JettyStarter (RunInJettyTOOPMP.class).run ();
+    JettyStarter js = new JettyStarter (RunInJettyTOOPMP.class).setAllowAnnotationBasedConfig(false);
+      System.out.println("resource: "+js.getWebXmlResource());
+      //js.setWebXmlResource("/WEB-INF/web.xml");
+      System.out.println("resource: "+js.getWebXmlResource());
+      js.run();
   }
 }
