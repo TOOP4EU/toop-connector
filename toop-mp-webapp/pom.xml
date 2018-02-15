@@ -68,7 +68,12 @@
       <groupId>eu.toop</groupId>
       <artifactId>toop-dp-adapter</artifactId>
     </dependency>
-    
+    <dependency>
+      <groupId>eu.toop</groupId>
+      <artifactId>toop-message-exchange</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+    </dependency>
+
     <!-- Logging -->
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
@@ -86,7 +91,7 @@
       <groupId>org.slf4j</groupId>
       <artifactId>jul-to-slf4j</artifactId>
     </dependency>
-  
+
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
@@ -120,5 +125,12 @@
         <targetPath>${project.build.directory}/test-classes</targetPath>
       </resource>
     </resources>
+    <plugins>
+      <plugin>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-maven-plugin</artifactId>
+        <version>9.4.8.v20171121</version>
+      </plugin>
+    </plugins>
   </build>
 </project>
