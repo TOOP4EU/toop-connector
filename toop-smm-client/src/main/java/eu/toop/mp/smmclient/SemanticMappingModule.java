@@ -31,7 +31,7 @@ public class SemanticMappingModule implements Module {
 
 	/**
 	 * Lots of the logic is the same when converting between TOOP <-> Country. So a
-	 * single method is convienient. The boolean indicates which route we need to
+	 * single method is convenient. The boolean indicates which route we need to
 	 * take.
 	 *
 	 * @param messageXml
