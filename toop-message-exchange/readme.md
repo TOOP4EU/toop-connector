@@ -1,11 +1,11 @@
-#Message Exchange Module
+# Message Exchange Module
 This module is a bridge between the Message processor and AS4 gateways. It provides two interfaces:
 * `sendMessage()`
 * receiveMessage by implementing the `IMessageHandler.handleMessage(MEMessage meMessage);`
 
 In order to access these interfaces please used the <code>eu.toop.mp.me.MEMDelegate</code> class.
 
-##Sending a message
+## Sending a message
 
 In order to send a message to the gateway please use 
 ```java
