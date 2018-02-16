@@ -1,0 +1,32 @@
+<env:Envelope xmlns:env="http://www.w3.org/2003/05/soap-envelope">
+  <env:Header>
+    <eb:Messaging xmlns="" xmlns:S11="http://schemas.xmlsoap.org/soap/envelope/"
+                  xmlns:eb="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/"
+                  xmlns:ns4="http://www.w3.org/2000/09/xmldsig#"
+                  xmlns:ns5="http://docs.oasis-open.org/ebxml-bp/ebbp-signals-2.0"
+                  xmlns:ns6="http://www.w3.org/1999/xlink" xmlns:xmime="http://www.w3.org/2005/05/xmlmime"
+                  env:mustUnderstand="true">
+      <eb:SignalMessage>
+        <eb:MessageInfo>
+          <eb:Timestamp>${timeStamp}</eb:Timestamp>
+          <eb:MessageId>${messageId}</eb:MessageId>
+        </eb:MessageInfo>
+        <eb:Error category="${category}" errorCode="${errorCode}" origin="${origin}" refToMessageInError="${refToMessageInError}"
+                  severity="${severity}" shortDescription="${shortDescription}">
+          <eb:Description xml:lang="">${description}</eb:Description>
+          <eb:ErrorDetail>${errorDetail}</eb:ErrorDetail>
+        </eb:Error>
+      </eb:SignalMessage>
+    </eb:Messaging>
+  </env:Header>
+  <env:Body>
+    <env:Fault>
+      <env:Code>
+        <env:Value>${faultCode}</env:Value>
+      </env:Code>
+      <env:Reason>
+        <env:Text xml:lang="en">${reason}</env:Text>
+      </env:Reason>
+    </env:Fault>
+  </env:Body>
+</env:Envelope>

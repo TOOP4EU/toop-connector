@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ns2:Messaging
+    xmlns:soapenv="http://www.w3.org/2003/05/soap-envelope"
+    xmlns:ns2="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/"
+    soapenv:mustUnderstand="true">
+  <ns2:UserMessage>
+    <ns2:MessageInfo>
+      <ns2:Timestamp>${timeStamp}</ns2:Timestamp>
+      <ns2:MessageId>${ebmsMessageID}</ns2:MessageId>
+    </ns2:MessageInfo>
+    <ns2:PartyInfo>
+      <ns2:From>
+        <ns2:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">${from}</ns2:PartyId>
+        <ns2:Role>${fromRole}</ns2:Role>
+      </ns2:From>
+      <ns2:To>
+        <ns2:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">${to}</ns2:PartyId>
+        <ns2:Role>${toRole}</ns2:Role>
+      </ns2:To>
+    </ns2:PartyInfo>
+    <ns2:CollaborationInfo>
+      <ns2:Service>${service}</ns2:Service>
+      <ns2:Action>${action}</ns2:Action>
+      <ns2:ConversationId>${conversationId}</ns2:ConversationId>
+    </ns2:CollaborationInfo>
+    <ns2:MessageProperties>
+      ${messageProperties}
+    </ns2:MessageProperties>
+    <ns2:PayloadInfo>
+      ${partInfo}
+    </ns2:PayloadInfo>
+  </ns2:UserMessage>
+</ns2:Messaging>

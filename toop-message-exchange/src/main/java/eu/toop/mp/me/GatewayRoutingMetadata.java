@@ -1,71 +1,50 @@
 package eu.toop.mp.me;
 
 import com.helger.commons.annotations.DevelopersNote;
-import com.sun.istack.internal.NotNull;
-import com.sun.istack.internal.Nullable;
+import eu.toop.mp.r2d2client.R2D2Endpoint;
 
 /**
  * @author: myildiz
  * @date: 15.02.2018.
  */
-@DevelopersNote("The fields are intentionally left public. No getter/setter needed")
-public class RoutingMetadata {
+@DevelopersNote("Currently there is no IR2D2Endpoint so the endpoint is encapsulated directly")
+public class GatewayRoutingMetadata {
   /**
-   * The actual sender of the data
+   * document type ID
    */
-  @NotNull
-  public String originalSender;
+  private String documentTypeId;
 
   /**
-   * The final recipient (on the other MS side)
+   * Process ID
    */
-  @NotNull
-  public String finalRecipient;
+  private String processId;
 
   /**
-   * Ref to message id - referencing to the previous ebms message id if any
+   * The target endpoint
    */
-  @Nullable
-  public String refToMessageId;
-  /**
-   * Conversation ID
-   */
-  @Nullable
-  public String conversationId;
-  /**
-   * EBMS message ID
-   */
-  @Nullable
-  public String messageId;
-  /**
-   * TO party ID
-   */
-  @NotNull
-  public String to;
-  /**
-   * TO party Role
-   */
-  @NotNull
-  public String toPartyRole;
-  /**
-   * FROM party ID
-   */
-  @NotNull
-  public String from;
-  /**
-   * FROM party ID
-   */
-  @NotNull
-  public String fromPartyRole;
-  /**
-   * //CollaborationInfo/service
-   */
-  @NotNull
-  public String service;
+  private R2D2Endpoint endpoint;
 
-  /**
-   * //CollaborationInfo/action
-   */
-  @NotNull
-  public String action;
+  public String getDocumentTypeId() {
+    return documentTypeId;
+  }
+
+  public String getProcessId() {
+    return processId;
+  }
+
+  public R2D2Endpoint getEndpoint() {
+    return endpoint;
+  }
+
+  public void setDocumentTypeId(String documentTypeId) {
+    this.documentTypeId = documentTypeId;
+  }
+
+  public void setProcessId(String processId) {
+    this.processId = processId;
+  }
+
+  public void setEndpoint(R2D2Endpoint endpoint) {
+    this.endpoint = endpoint;
+  }
 }

@@ -5,4 +5,9 @@ package eu.toop.mp.me;
  * @date: 15.02.2018.
  */
 public interface IMessageHandler {
+  /**
+   * implement this method to receive messages when an inbound message arrives to the AS4 endpoint
+   * @param meMessage the object that contains the payloads and their metadata
+   */
+  void handleMessage(MEMessage meMessage);
 }
