@@ -237,7 +237,7 @@ public class SoapUtil {
     }
   }
 
-  public static MEMessage soap2MEMessage(SOAPMessage message) {
+  public static MEMessage soap2MEMessage(SOAPMessage message) throws Exception {
     return Util.soap2MEMessage(message);
   }
 

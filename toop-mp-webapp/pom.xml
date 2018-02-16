@@ -49,6 +49,10 @@
       <email>ph(at)helger.com</email>
       <url>http://www.helger.com</url>
     </developer>
+    <developer>
+      <id>jerry</id>
+      <name>Jerry Dimitriou</name>
+    </developer>
   </developers>
 
   <dependencies>
@@ -124,12 +128,15 @@
         <targetPath>${project.build.directory}/test-classes</targetPath>
       </resource>
     </resources>
-    <plugins>
-      <plugin>
-        <groupId>org.eclipse.jetty</groupId>
-        <artifactId>jetty-maven-plugin</artifactId>
-        <version>9.4.8.v20171121</version>
-      </plugin>
-    </plugins>
+      <plugins>
+          <plugin>
+              <groupId>org.eclipse.jetty</groupId>
+              <artifactId>jetty-maven-plugin</artifactId>
+              <version>9.4.8.v20171121</version>
+              <configuration>
+                  <scanIntervalSeconds>3</scanIntervalSeconds>
+              </configuration>
+          </plugin>
+      </plugins>
   </build>
 </project>

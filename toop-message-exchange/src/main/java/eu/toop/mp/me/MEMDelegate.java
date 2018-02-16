@@ -1,7 +1,6 @@
 package eu.toop.mp.me;
 
 import com.sun.istack.internal.NotNull;
-import eu.toop.mp.r2d2client.R2D2Endpoint;
 
 import javax.xml.soap.SOAPMessage;
 import java.net.URL;
@@ -37,9 +36,9 @@ public class MEMDelegate {
    * The V1 message sending interface for the message exchange module
    *
    * @param gatewayRoutingMetadata The container for the endpoint information and docid/procid
-   * @param meMessage the payloads and their metadata to be sent to the gateway.
+   * @param meMessage              the payloads and their metadata to be sent to the gateway.
    */
-  public void sendMessage(GatewayRoutingMetadata gatewayRoutingMetadata, MEMessage meMessage){
+  public void sendMessage(GatewayRoutingMetadata gatewayRoutingMetadata, MEMessage meMessage) {
     SubmissionData submissionData = Util.inferSubmissionData(gatewayRoutingMetadata);
     SOAPMessage soapMessage = Util.convert2Soap(submissionData, meMessage);
     SoapUtil.sendSOAPMessage(soapMessage, gatewayURL);
@@ -70,11 +69,16 @@ public class MEMDelegate {
 
   /**
    * Dispatch the received inobund message form the AS4 gateway to the handlers
+   *
    * @param message
    */
   public void dispatchMessage(SOAPMessage message) {
-    for (IMessageHandler messageHandler : messageHandlers){
-      messageHandler.handleMessage(SoapUtil.soap2MEMessage(message));
+    for (IMessageHandler messageHandler : messageHandlers) {
+      try {
+        messageHandler.handleMessage(SoapUtil.soap2MEMessage(message));
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
     }
   }
 }

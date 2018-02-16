@@ -381,6 +381,7 @@ public class Util {
     //FIXME: The original sender must be some real value
     submissionData.originalSender = "originalSender";
     submissionData.finalRecipient = gatewayRoutingMetadata.getEndpoint().getParticipantID().getURIEncoded();
+
     return submissionData;
   }
 }
