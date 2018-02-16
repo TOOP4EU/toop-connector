@@ -176,17 +176,17 @@ public class R2D2Client implements IR2D2Client
 
   @Nonnull
   @ReturnsMutableCopy
-  public ICommonsList <R2D2Endpoint> getEndpoints (@Nonnull @Nonempty final String sCountryCode,
-                                                   @Nonnull final IDocumentTypeIdentifier aDocumentTypeID,
-                                                   @Nonnull final IProcessIdentifier aProcessID,
-                                                   final boolean bProductionSystem)
+  public ICommonsList <IR2D2Endpoint> getEndpoints (@Nonnull @Nonempty final String sCountryCode,
+                                                    @Nonnull final IDocumentTypeIdentifier aDocumentTypeID,
+                                                    @Nonnull final IProcessIdentifier aProcessID,
+                                                    final boolean bProductionSystem)
   {
     ValueEnforcer.notEmpty (sCountryCode, "CountryCode");
     ValueEnforcer.isTrue (sCountryCode.length () == 2, "CountryCode must have length 2");
     ValueEnforcer.notNull (aDocumentTypeID, "DocumentTypeID");
     ValueEnforcer.notNull (aProcessID, "ProcessID");
 
-    final ICommonsList <R2D2Endpoint> ret = new CommonsArrayList <> ();
+    final ICommonsList <IR2D2Endpoint> ret = new CommonsArrayList <> ();
 
     // Query PEPPOL Directory
     final ICommonsSet <IParticipantIdentifier> aPIs = _getAllRecipientIDsFromDirectory (sCountryCode,
@@ -197,7 +197,7 @@ public class R2D2Client implements IR2D2Client
     for (final IParticipantIdentifier aPI : aPIs)
     {
       // Single SMP query
-      final ICommonsList <R2D2Endpoint> aLocal = getEndpoints (aPI, aDocumentTypeID, aProcessID, bProductionSystem);
+      final ICommonsList <IR2D2Endpoint> aLocal = getEndpoints (aPI, aDocumentTypeID, aProcessID, bProductionSystem);
       ret.addAll (aLocal);
     }
     return ret;
@@ -205,16 +205,16 @@ public class R2D2Client implements IR2D2Client
 
   @Nonnull
   @ReturnsMutableCopy
-  public ICommonsList <R2D2Endpoint> getEndpoints (@Nonnull final IParticipantIdentifier aRecipientID,
-                                                   @Nonnull final IDocumentTypeIdentifier aDocumentTypeID,
-                                                   @Nonnull final IProcessIdentifier aProcessID,
-                                                   final boolean bProductionSystem)
+  public ICommonsList <IR2D2Endpoint> getEndpoints (@Nonnull final IParticipantIdentifier aRecipientID,
+                                                    @Nonnull final IDocumentTypeIdentifier aDocumentTypeID,
+                                                    @Nonnull final IProcessIdentifier aProcessID,
+                                                    final boolean bProductionSystem)
   {
     ValueEnforcer.notNull (aRecipientID, "Recipient");
     ValueEnforcer.notNull (aDocumentTypeID, "DocumentTypeID");
     ValueEnforcer.notNull (aProcessID, "ProcessID");
 
-    final ICommonsList <R2D2Endpoint> ret = new CommonsArrayList <> ();
+    final ICommonsList <IR2D2Endpoint> ret = new CommonsArrayList <> ();
     final BDXRClient aSMPClient = new BDXRClient (R2D2Settings.getSMPUrlProvider (),
                                                   aRecipientID,
                                                   R2D2Settings.getSML (bProductionSystem));
