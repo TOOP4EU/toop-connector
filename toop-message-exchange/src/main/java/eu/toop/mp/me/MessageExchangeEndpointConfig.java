@@ -10,7 +10,7 @@ import java.util.Properties;
  * @author: myildiz
  * @date: 15.02.2018.
  */
-public class GatewayConfig {
+public class MessageExchangeEndpointConfig {
   /**
    * The URL of the gateway
    */
@@ -55,7 +55,7 @@ public class GatewayConfig {
     //initialize settings, read from resource
     Properties properties = new Properties();
     try {
-      properties.load(GatewayConfig.class.getResourceAsStream("gateway.properties"));
+      properties.load(MessageExchangeEndpointConfig.class.getResourceAsStream("/message-exchange.properties"));
 
       GW_URL = new URL(properties.getProperty("GW_URL"));
       GW_PARTY_ID = properties.getProperty("GW_PARTY_ID");
@@ -67,6 +67,7 @@ public class GatewayConfig {
       ME_NAME = properties.getProperty("ME_NAME");
 
     } catch (IOException e) {
+      e.printStackTrace();
       throw new RuntimeException("Error during initialization of the gateway configuration");
     }
   }

@@ -16,7 +16,8 @@
     limitations under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>eu.toop</groupId>
@@ -60,23 +61,22 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <groupId>eu.toop</groupId>
+      <artifactId>toop-r2d2-client</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.helger</groupId>
       <artifactId>ph-commons</artifactId>
-      <version>5.6.0</version>
+      <version>9.0.1</version>
     </dependency>
     <dependency>
       <groupId>com.helger</groupId>
       <artifactId>peppol-commons</artifactId>
-      <version>6.0.0</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>eu.toop</groupId>
-      <artifactId>toop-r2d2-client</artifactId>
     </dependency>
   </dependencies>
   <build>

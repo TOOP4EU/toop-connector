@@ -31,7 +31,7 @@ public class AS4InterfaceServlet extends HttpServlet {
     //Convert the request headers into MimeHeaders
     MimeHeaders mimeHeaders = readMimeHeaders(req);
     try {
-      SOAPMessage message = SoapUtil.createEmptyMessage(mimeHeaders, req.getInputStream());
+      SOAPMessage message = SoapUtil.createMessage(mimeHeaders, req.getInputStream());
       MEMDelegate.get().dispatchMessage(message);
       byte[] successReceipt = EBMSUtils.createSuccessReceipt(message);
       resp.getOutputStream().write(successReceipt);

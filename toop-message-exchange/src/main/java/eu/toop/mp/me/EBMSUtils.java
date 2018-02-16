@@ -2,7 +2,7 @@ package eu.toop.mp.me;
 
 
 import com.helger.commons.ValueEnforcer;
-import com.helger.commons.io.streams.StreamUtils;
+import com.helger.commons.io.stream.StreamHelper;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -11,7 +11,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.naming.InvalidNameException;
 import javax.naming.ldap.LdapName;
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.soap.AttachmentPart;
 import javax.xml.soap.SOAPException;
@@ -25,9 +24,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.Charset;
 import java.security.cert.X509Certificate;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -48,10 +44,10 @@ public class EBMSUtils {
   public static byte[] createSuccessReceipt(SOAPMessage message) {
     try {
       ValueEnforcer.notNull(message, "SOAPMessage");
-      StreamSource stylesource = new StreamSource(EBMSUtils.class.getResourceAsStream("receipt-generator.xslt"));
+      StreamSource stylesource = new StreamSource(EBMSUtils.class.getResourceAsStream("/receipt-generator.xslt"));
       Transformer transformer = TransformerFactory.newInstance().newTransformer(stylesource);
-      transformer.setParameter("messageid", genereateEbmsMessageId(GatewayConfig.getMEMName()));
-      transformer.setParameter("timestamp", getTimestamp());
+      transformer.setParameter("messageid", genereateEbmsMessageId(MessageExchangeEndpointConfig.getMEMName()));
+      transformer.setParameter("timestamp", DateTimeUtils.getCurrentTimestamp());
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
       transformer.transform(new DOMSource(message.getSOAPPart()), new StreamResult(baos));
       return baos.toByteArray();
@@ -74,7 +70,7 @@ public class EBMSUtils {
   public byte[] createFault(@Nonnull SOAPMessage soapMessage, @Nullable String faultMessage) {
     ValueEnforcer.notNull(soapMessage, "SOAPMessage");
 
-    String xml = StreamUtils.getAllBytesAsString(EBMSUtils.class.getResourceAsStream("fault-template.xml"), UTF_8);
+    String xml = StreamHelper.getAllBytesAsString(EBMSUtils.class.getResourceAsStream("/fault-template.xml"), UTF_8);
 
     Element element;
     try {
@@ -89,7 +85,7 @@ public class EBMSUtils {
     if (fm == null)
       fm = "Unknown Error";
 
-    String ebmsMessageId = genereateEbmsMessageId(GatewayConfig.getMEMName());
+    String ebmsMessageId = genereateEbmsMessageId(MessageExchangeEndpointConfig.getMEMName());
     String category = "CONTENT";
     String errorCode = "EBMS:0004";
     String origin = "ebms";
@@ -109,7 +105,7 @@ public class EBMSUtils {
     String keyFaultCode = "${faultCode}";
     String keyReason = "${reason}";
     xml = xml
-        .replace("${timeStamp}", getTimestamp())
+        .replace("${timeStamp}", DateTimeUtils.getCurrentTimestamp())
         .replace("${refToMessageInError}", refToMessageInError)
         .replace("${messageId}", ebmsMessageId)
         .replace(keyCategory, category)
@@ -122,12 +118,6 @@ public class EBMSUtils {
         .replace(keyFaultCode, faultCode)
         .replace(keyReason, reason);
     return xml.getBytes(UTF_8);
-  }
-
-  public static String getTimestamp() {
-    ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
-    //Don't use DateTimeFormatter.ISO_DATE_TIME
-    return now.format(DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH:mm:ss.SSSX"));
   }
 
   /**
@@ -149,10 +139,10 @@ public class EBMSUtils {
    * @param meMessage
    * @return
    */
-  public static SOAPMessage convert2Soap(SubmissionData metadata, MEMessage meMessage) {
+  public static SOAPMessage convert2MEOutboundAS4Message(SubmissionData metadata, MEMessage meMessage) {
     try {
       LOG.debug("Convert submission data to SOAP Message");
-      String xml = StreamUtils.getAllBytesAsString(EBMSUtils.class.getResourceAsStream("as4template.xml"), UTF_8);
+      String xml = StreamHelper.getAllBytesAsString(EBMSUtils.class.getResourceAsStream("/as4template.xml"), UTF_8);
 
       String keyTimeStamp = "${timeStamp}";
       String keyMessageId = "${ebmsMessageID}";
@@ -166,21 +156,22 @@ public class EBMSUtils {
       String keyPartInfo = "${partInfo}";
       String keyConversationId = "${conversationId}";
 
-      String ebmsMessageId = metadata.messageId;
       String conversationId = metadata.conversationId;
 
       xml = xml
-          .replace(keyTimeStamp, getTimestamp())
-          .replace(keyMessageId, ebmsMessageId)
+          .replace(keyTimeStamp, DateTimeUtils.getCurrentTimestamp())
+          .replace(keyMessageId, genereateEbmsMessageId(MessageExchangeEndpointConfig.ME_NAME))
           .replace(keyConversationId, conversationId)
-          .replace(keyFrom, GatewayConfig.ME_PARTY_ID)
-          .replace(keyFromPartyRole, GatewayConfig.ME_PARTY_ROLE)
-          .replace(keyTo, GatewayConfig.GW_PARTY_ID)
-          .replace(keyToPartyRole, GatewayConfig.GW_PARTY_ROLE)
-          .replace(keyAction, GatewayConfig.SUBMIT_ACTION)
-          .replace(keyService, GatewayConfig.SUBMIT_SERVICE)
+          .replace(keyFrom, MessageExchangeEndpointConfig.ME_PARTY_ID)
+          .replace(keyFromPartyRole, MessageExchangeEndpointConfig.ME_PARTY_ROLE)
+          .replace(keyTo, MessageExchangeEndpointConfig.GW_PARTY_ID)
+          .replace(keyToPartyRole, MessageExchangeEndpointConfig.GW_PARTY_ROLE)
+          .replace(keyAction, MessageExchangeEndpointConfig.SUBMIT_ACTION)
+          .replace(keyService, MessageExchangeEndpointConfig.SUBMIT_SERVICE)
           .replace(keyMessageProps, generateMessageProperties(metadata))
           .replace(keyPartInfo, generatePartInfo(meMessage));
+
+      System.out.println(xml);
 
       DocumentBuilderFactory instance = DocumentBuilderFactory.newInstance();
       instance.setNamespaceAware(true);
@@ -235,22 +226,22 @@ public class EBMSUtils {
    */
   public static String generateMessageProperties(SubmissionData submissionData) {
     StringBuilder propertiesBuilder = new StringBuilder();
-    propertiesBuilder.append("<ns2:Property name=\"MessageId\">" + submissionData.messageId + "</ns2:Property>\n");
-    propertiesBuilder.append("<ns2:Property name=\"ConversationId\">" + submissionData.conversationId + "</ns2:Property>\n");
+    propertiesBuilder.append("      <ns2:Property name=\"MessageId\">" + submissionData.messageId + "</ns2:Property>\n");
+    propertiesBuilder.append("      <ns2:Property name=\"ConversationId\">" + submissionData.conversationId + "</ns2:Property>\n");
 
     if (submissionData.refToMessageId != null) {
-      propertiesBuilder.append("<ns2:Property name=\"RefToMessageId\">" + submissionData.refToMessageId + "</ns2:Property>\n");
+      propertiesBuilder.append("      <ns2:Property name=\"RefToMessageId\">" + submissionData.refToMessageId + "</ns2:Property>\n");
     }
 
-    propertiesBuilder.append("<ns2:Property name=\"Service\">" + submissionData.service + "</ns2:Property>\n");
-    propertiesBuilder.append("<ns2:Property name=\"Action\">" + submissionData.action + "</ns2:Property>\n");
-    propertiesBuilder.append("<ns2:Property name=\"ToPartyId\">" + submissionData.to + "</ns2:Property>\n");
-    propertiesBuilder.append("<ns2:Property name=\"ToPartyRole\">" + submissionData.toPartyRole + "</ns2:Property>\n");
+    propertiesBuilder.append("      <ns2:Property name=\"Service\">" + submissionData.service + "</ns2:Property>\n");
+    propertiesBuilder.append("      <ns2:Property name=\"Action\">" + submissionData.action + "</ns2:Property>\n");
+    propertiesBuilder.append("      <ns2:Property name=\"ToPartyId\">" + submissionData.to + "</ns2:Property>\n");
+    propertiesBuilder.append("      <ns2:Property name=\"ToPartyRole\">" + submissionData.toPartyRole + "</ns2:Property>\n");
     //the GW is the sender of the C2 ---> C3 Message
-    propertiesBuilder.append("<ns2:Property name=\"FromPartyId\">" + GatewayConfig.GW_PARTY_ID + "</ns2:Property>\n");
-    propertiesBuilder.append("<ns2:Property name=\"FromPartyRole\">" + submissionData.fromPartyRole + "</ns2:Property>\n");
-    propertiesBuilder.append("<ns2:Property name=\"originalSender\">" + submissionData.originalSender + "</ns2:Property>\n");
-    propertiesBuilder.append("<ns2:Property name=\"finalRecipient\">" + submissionData.finalRecipient + "</ns2:Property>");
+    propertiesBuilder.append("      <ns2:Property name=\"FromPartyId\">" + MessageExchangeEndpointConfig.GW_PARTY_ID + "</ns2:Property>\n");
+    propertiesBuilder.append("      <ns2:Property name=\"FromPartyRole\">" + submissionData.fromPartyRole + "</ns2:Property>\n");
+    propertiesBuilder.append("      <ns2:Property name=\"originalSender\">" + submissionData.originalSender + "</ns2:Property>\n");
+    propertiesBuilder.append("      <ns2:Property name=\"finalRecipient\">" + submissionData.finalRecipient + "</ns2:Property>");
 
 
     return propertiesBuilder.toString();
@@ -269,9 +260,11 @@ public class EBMSUtils {
       partInfoBuilder
           .append("<ns2:PartInfo href=\"cid:")
           .append(mEPayload.getPayloadId())
-          .append("\">\n<ns2:PartProperties><ns2:Property name=\"MimeType\">")
+          .append("\">\n        <ns2:PartProperties>\n          <ns2:Property name=\"MimeType\">")
           .append(mEPayload.getMimeType())
-          .append("</ns2:Property>\n");
+          .append("</ns2:Property>")
+          .append("\n        </ns2:PartProperties>\n")
+          .append("      </ns2:PartInfo>");
     });
     return partInfoBuilder.toString();
   }
@@ -294,9 +287,6 @@ public class EBMSUtils {
 
     Element properties = SoapXPathUtil.findSingleNode(message.getSOAPHeader(), "//:MessageProperties");
     List<MEPayload> payloads = new ArrayList<>(message.countAttachments());
-
-
-    Node node = SoapXPathUtil.findSingleNode(properties, ".//:Property[@name='ToPartyId']/text()");
 
     message.getAttachments().forEachRemaining(attObj -> {
       AttachmentPart att = (AttachmentPart) attObj;
@@ -355,7 +345,7 @@ public class EBMSUtils {
     //we need the certificate to obtain the to party id
     ValueEnforcer.notNull(certificate, "Endpoint Certificate");
     SubmissionData submissionData = new SubmissionData();
-    submissionData.messageId = genereateEbmsMessageId(GatewayConfig.getMEMName());
+    submissionData.messageId = genereateEbmsMessageId(MessageExchangeEndpointConfig.getMEMName());
     submissionData.action = gatewayRoutingMetadata.getDocumentTypeId();
     submissionData.service = gatewayRoutingMetadata.getProcessId();
 
