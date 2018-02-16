@@ -2,7 +2,7 @@ package eu.toop.mp.me.servlet;
 
 import eu.toop.mp.me.MEMDelegate;
 import eu.toop.mp.me.SoapUtil;
-import eu.toop.mp.me.Util;
+import eu.toop.mp.me.EBMSUtils;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -33,7 +33,7 @@ public class AS4InterfaceServlet extends HttpServlet {
     try {
       SOAPMessage message = SoapUtil.createEmptyMessage(mimeHeaders, req.getInputStream());
       MEMDelegate.get().dispatchMessage(message);
-      byte[] successReceipt = Util.createSuccessReceipt(message);
+      byte[] successReceipt = EBMSUtils.createSuccessReceipt(message);
       resp.getOutputStream().write(successReceipt);
       resp.setStatus(HttpServletResponse.SC_OK);
     } catch (SOAPException e) {
