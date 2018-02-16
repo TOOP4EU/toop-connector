@@ -44,7 +44,7 @@ public class SemanticMappingModule implements Module {
 	 */
 	public String convertConcepts(final String messageXml, final boolean fromTOOPtoCountry) {
 
-		// for now we do nothing with fromTOOPtoCountry.
+		// for now we use fromTOOPtoCountry only as a test.
 
 		LOG.trace("Message: {}", messageXml);
 
@@ -71,7 +71,12 @@ public class SemanticMappingModule implements Module {
 			 */
 			final List<DataRequestInfoType> drit = type.getDataConsumerRequest().getDataRequestInfo();
 			if (!drit.isEmpty()) {
-				drit.forEach((i) -> i.setToopConcept("Modified!"));
+				if (fromTOOPtoCountry) {
+					drit.forEach((i) -> i.setDataConsumerConcept("Modified!"));
+				}
+				else {
+					drit.forEach((i) -> i.setToopConcept("Modified!"));					
+				}
 			}
 
 			final Marshaller m = context.createMarshaller();
