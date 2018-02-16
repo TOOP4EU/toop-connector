@@ -1,9 +1,7 @@
 package eu.toop.mp.me;
 
-import com.sun.istack.internal.NotNull;
-
+import javax.annotation.Nonnull;
 import javax.xml.soap.SOAPMessage;
-import java.net.URL;
 import java.util.ArrayList;
 
 /**
@@ -52,7 +50,7 @@ public class MEMDelegate {
    *
    * @param iMessageHandler
    */
-  public void registerMessageHandler(@NotNull IMessageHandler iMessageHandler) {
+  public void registerMessageHandler(@Nonnull IMessageHandler iMessageHandler) {
     this.messageHandlers.add(iMessageHandler);
   }
 
@@ -61,7 +59,7 @@ public class MEMDelegate {
    *
    * @param iMessageHandler
    */
-  public void deRegisterMessageHandler(@NotNull IMessageHandler iMessageHandler) {
+  public void deRegisterMessageHandler(@Nonnull IMessageHandler iMessageHandler) {
     this.messageHandlers.remove(iMessageHandler);
   }
 
