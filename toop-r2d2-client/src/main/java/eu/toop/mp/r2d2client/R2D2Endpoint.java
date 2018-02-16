@@ -1,6 +1,20 @@
+/**
+ * Copyright (C) 2018 toop.eu
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package eu.toop.mp.r2d2client;
 
-import java.io.Serializable;
 import java.security.cert.X509Certificate;
 
 import javax.annotation.Nonnull;
@@ -14,13 +28,14 @@ import com.helger.commons.string.ToStringGenerator;
 import com.helger.peppol.identifier.generic.participant.IParticipantIdentifier;
 
 /**
- * This class contains a single result endpoint for an R2D2 query.
+ * This class contains a single result endpoint for an R2D2 query. Default
+ * implementation of {@link IR2D2Endpoint}.
  *
  * @author Philip Helger, BRZ, AT
  */
 @Immutable
 @MustImplementEqualsAndHashcode
-public class R2D2Endpoint implements Serializable
+public class R2D2Endpoint implements IR2D2Endpoint
 {
   private final IParticipantIdentifier m_aParticipantID;
   private final String m_sTransportProtocol;
@@ -57,20 +72,12 @@ public class R2D2Endpoint implements Serializable
     m_aCert = aCert;
   }
 
-  /**
-   * @return The participant or service group as specified in the constructor.
-   *         Never <code>null</code>.
-   */
   @Nonnull
   public IParticipantIdentifier getParticipantID ()
   {
     return m_aParticipantID;
   }
 
-  /**
-   * @return The transport profile ID from the constructor. Neither
-   *         <code>null</code> nor empty.
-   */
   @Nonnull
   @Nonempty
   public String getTransportProtocol ()
@@ -78,10 +85,6 @@ public class R2D2Endpoint implements Serializable
     return m_sTransportProtocol;
   }
 
-  /**
-   * @return The endpoint URL from the constructor. Neither <code>null</code>
-   *         nor empty.
-   */
   @Nonnull
   @Nonempty
   public String getEndpointURL ()
@@ -89,9 +92,6 @@ public class R2D2Endpoint implements Serializable
     return m_sEndpointURL;
   }
 
-  /**
-   * @return The encoded certificate as specified in the constructor.
-   */
   @Nonnull
   public X509Certificate getCertificate ()
   {

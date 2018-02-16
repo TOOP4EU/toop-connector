@@ -11,8 +11,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.naming.InvalidNameException;
 import javax.naming.ldap.LdapName;
-import javax.naming.ldap.Rdn;
-import javax.security.auth.x500.X500Principal;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.soap.AttachmentPart;
@@ -34,7 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class Util {
+public class EBMSUtils {
 
   private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SoapUtil.class);
 
@@ -50,8 +48,7 @@ public class Util {
   public static byte[] createSuccessReceipt(SOAPMessage message) {
     try {
       ValueEnforcer.notNull(message, "SOAPMessage");
-      DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-      StreamSource stylesource = new StreamSource(Util.class.getResourceAsStream("receipt-generator.xslt"));
+      StreamSource stylesource = new StreamSource(EBMSUtils.class.getResourceAsStream("receipt-generator.xslt"));
       Transformer transformer = TransformerFactory.newInstance().newTransformer(stylesource);
       transformer.setParameter("messageid", genereateEbmsMessageId(GatewayConfig.getMEMName()));
       transformer.setParameter("timestamp", getTimestamp());
@@ -77,7 +74,7 @@ public class Util {
   public byte[] createFault(@Nonnull SOAPMessage soapMessage, @Nullable String faultMessage) {
     ValueEnforcer.notNull(soapMessage, "SOAPMessage");
 
-    String xml = StreamUtils.getAllBytesAsString(Util.class.getResourceAsStream("fault-template.xml"), UTF_8);
+    String xml = StreamUtils.getAllBytesAsString(EBMSUtils.class.getResourceAsStream("fault-template.xml"), UTF_8);
 
     Element element;
     try {
@@ -155,7 +152,7 @@ public class Util {
   public static SOAPMessage convert2Soap(SubmissionData metadata, MEMessage meMessage) {
     try {
       LOG.debug("Convert submission data to SOAP Message");
-      String xml = StreamUtils.getAllBytesAsString(Util.class.getResourceAsStream("as4template.xml"), UTF_8);
+      String xml = StreamUtils.getAllBytesAsString(EBMSUtils.class.getResourceAsStream("as4template.xml"), UTF_8);
 
       String keyTimeStamp = "${timeStamp}";
       String keyMessageId = "${ebmsMessageID}";

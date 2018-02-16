@@ -36,8 +36,8 @@ public class MEMDelegate {
    * @param meMessage              the payloads and their metadata to be sent to the gateway.
    */
   public void sendMessage(GatewayRoutingMetadata gatewayRoutingMetadata, MEMessage meMessage) {
-    SubmissionData submissionData = Util.inferSubmissionData(gatewayRoutingMetadata);
-    SOAPMessage soapMessage = Util.convert2Soap(submissionData, meMessage);
+    SubmissionData submissionData = EBMSUtils.inferSubmissionData(gatewayRoutingMetadata);
+    SOAPMessage soapMessage = EBMSUtils.convert2Soap(submissionData, meMessage);
     SoapUtil.sendSOAPMessage(soapMessage, GatewayConfig.GW_URL);
   }
 
