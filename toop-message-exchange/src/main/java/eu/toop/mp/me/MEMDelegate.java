@@ -18,7 +18,6 @@ public class MEMDelegate {
    * Singleton instance
    */
   private static final MEMDelegate instance = new MEMDelegate();
-  private URL gatewayURL;
 
   public static MEMDelegate get() {
     return instance;
@@ -41,7 +40,7 @@ public class MEMDelegate {
   public void sendMessage(GatewayRoutingMetadata gatewayRoutingMetadata, MEMessage meMessage) {
     SubmissionData submissionData = Util.inferSubmissionData(gatewayRoutingMetadata);
     SOAPMessage soapMessage = Util.convert2Soap(submissionData, meMessage);
-    SoapUtil.sendSOAPMessage(soapMessage, gatewayURL);
+    SoapUtil.sendSOAPMessage(soapMessage, GatewayConfig.GW_URL);
   }
 
 

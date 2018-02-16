@@ -1,6 +1,7 @@
 package eu.toop.mp.me;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.Properties;
 
 /**
@@ -10,6 +11,11 @@ import java.util.Properties;
  * @date: 15.02.2018.
  */
 public class GatewayConfig {
+  /**
+   * The URL of the gateway
+   */
+  public static URL GW_URL;
+
   /**
    * The party id of the Gateway
    */
@@ -51,13 +57,14 @@ public class GatewayConfig {
     try {
       properties.load(GatewayConfig.class.getResourceAsStream("gateway.properties"));
 
+      GW_URL = new URL(properties.getProperty("GW_URL"));
       GW_PARTY_ID = properties.getProperty("GW_PARTY_ID");
       ME_PARTY_ID = properties.getProperty("ME_PARTY_ID");
       GW_PARTY_ROLE = properties.getProperty("GW_PARTY_ROLE");
       ME_PARTY_ROLE = properties.getProperty("ME_PARTY_ROLE");
       SUBMIT_ACTION = properties.getProperty("SUBMIT_ACTION");
       SUBMIT_SERVICE = properties.getProperty("SUBMIT_SERVICE");
-      ME_NAME = properties.getProperty("MEM_NAME");
+      ME_NAME = properties.getProperty("ME_NAME");
 
     } catch (IOException e) {
       throw new RuntimeException("Error during initialization of the gateway configuration");
