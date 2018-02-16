@@ -98,3 +98,6 @@ MEMDelegate.get().registerMessageHandler(handler);
 
 Coming soon...
 
+## Sample Test Case
+
+Please run `eu.toop.mp.me.TestSendReceive.testSendReceive()` with junit, or simply run a `mvn install` or `mvn verify` under the `toop-message-exchange module` folder to run the test.
