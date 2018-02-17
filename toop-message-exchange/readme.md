@@ -27,14 +27,14 @@ MEMDelegate.get().sendMessage(metadata, meMessage);
 This message will create this AS4 message:
 
 ```xml
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
-  <SOAP-ENV:Header>
-    <ns2:Messaging xmlns:ns2="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns:soapenv="http://www.w3.org/2003/05/soap-envelope" soapenv:mustUnderstand="true">
+------=_Part_1_1846412426.1518908192312
+Content-Type: text/xml; charset=utf-8
+
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"><SOAP-ENV:Header><ns2:Messaging xmlns:ns2="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns:soapenv="http://www.w3.org/2003/05/soap-envelope" soapenv:mustUnderstand="true">
   <ns2:UserMessage>
     <ns2:MessageInfo>
-      <ns2:Timestamp>2018-02-16T20:58:31.806Z</ns2:Timestamp>
-      <ns2:MessageId>9c282a7c-498b-416c-a83c-2049c4551e9d@message-exchange.toop.eu</ns2:MessageId>
+      <ns2:Timestamp>2018-02-17T22:56:32.260Z</ns2:Timestamp>
+      <ns2:MessageId>970cde01-bd25-458a-bb23-655cb6931c49@message-exchange.toop.eu</ns2:MessageId>
     </ns2:MessageInfo>
     <ns2:PartyInfo>
       <ns2:From>
@@ -54,7 +54,7 @@ This message will create this AS4 message:
     </ns2:CollaborationInfo>
 
     <ns2:MessageProperties>
-            <ns2:Property name="MessageId">519c3c6d-c6f3-4459-a014-5ed2ca2b62a7@message-exchange.toop.eu</ns2:Property>
+            <ns2:Property name="MessageId">423789fa-335d-4290-b14c-67253a60f7c4@message-exchange.toop.eu</ns2:Property>
       <ns2:Property name="ConversationId">1</ns2:Property>
       <ns2:Property name="Service">dummy-process</ns2:Property>
       <ns2:Property name="Action">top-sercret-pdf-documents-only</ns2:Property>
@@ -75,10 +75,13 @@ This message will create this AS4 message:
     </ns2:PayloadInfo>
 
   </ns2:UserMessage>
-</ns2:Messaging>
-  </SOAP-ENV:Header>
-  <SOAP-ENV:Body/>
-</SOAP-ENV:Envelope>
+</ns2:Messaging></SOAP-ENV:Header><SOAP-ENV:Body/></SOAP-ENV:Envelope>
+------=_Part_1_1846412426.1518908192312
+Content-Type: application/xml
+Content-ID: <xmlpayload@dp>
+
+<sample>xml</sample>
+------=_Part_1_1846412426.1518908192312--
 ```
 
 This message will be sent to the gateway, where a new message will be created based on the `//MessageProperties/Property` values.
