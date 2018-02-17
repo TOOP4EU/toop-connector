@@ -14,7 +14,11 @@ metadata.setDocumentTypeId("top-sercret-pdf-documents-only");
 metadata.setProcessId("dummy-process");
 metadata.setEndpoint(sampleEndpoint());
 
-MEPayload payload = MEPayloadFactory.createPayload("xmlpayload@dp","application/xml", "<sample>xml</sample>".getBytes());
+String payloadId = "xmlpayload@dp";
+String contentType = "application/xml";
+byte[] payloadData = "<sample>xml</sample>".getBytes();
+
+MEPayload payload = MEPayloadFactory.createPayload(payloadId, contentType, payloadData);
 MEMessage meMessage = MEMessageFactory.createMEMessage(payload);
 
 MEMDelegate.get().sendMessage(metadata, meMessage);
