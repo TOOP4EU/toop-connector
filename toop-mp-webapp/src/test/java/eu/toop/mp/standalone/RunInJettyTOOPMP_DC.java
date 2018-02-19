@@ -29,9 +29,6 @@ import com.helger.photon.jetty.JettyStarter;
 public final class RunInJettyTOOPMP_DC {
   public static void main(final String[] args) throws Exception {
     final JettyStarter js = new JettyStarter(RunInJettyTOOPMP_DC.class).setPort(8090).setStopPort(8092);
-    System.out.println("resource: " + js.getWebXmlResource());
-    // js.setWebXmlResource("/WEB-INF/web.xml");
-    System.out.println("resource: " + js.getWebXmlResource());
     js.run();
   }
 }
