@@ -42,21 +42,24 @@ public class MessageProcessorDC extends AbstractGlobalWebSingleton {
     public void runAsync(@Nonnull final IMSDataRequest aCurrentObject) throws Exception {
       s_aLogger.info("Received asynch request: " + aCurrentObject);
       // 1. invoke SMM
+      // TODO
 
       // 2. invoke R2D2 client
-      final IDocumentTypeIdentifier aDocTypeID = R2D2Settings.getIdentifierFactory()
-          .parseDocumentTypeIdentifier(aCurrentObject.getDocumentTypeID());
-      final IProcessIdentifier aProcessID = R2D2Settings.getIdentifierFactory()
-          .parseProcessIdentifier(aCurrentObject.getProcessID());
-      final ICommonsList<IR2D2Endpoint> aEndpoints = new R2D2Client().getEndpoints(
-          aCurrentObject.getDestinationCountryCode(), aDocTypeID, aProcessID, aCurrentObject.isProduction());
+      ICommonsList<IR2D2Endpoint> aEndpoints;
+      {
+        final IDocumentTypeIdentifier aDocTypeID = R2D2Settings.getIdentifierFactory()
+            .parseDocumentTypeIdentifier(aCurrentObject.getDocumentTypeID());
+        final IProcessIdentifier aProcessID = R2D2Settings.getIdentifierFactory()
+            .parseProcessIdentifier(aCurrentObject.getProcessID());
+        aEndpoints = new R2D2Client().getEndpoints(aCurrentObject.getDestinationCountryCode(), aDocTypeID, aProcessID,
+            aCurrentObject.isProduction());
+        s_aLogger.info("R2D2 found the following endpoints[" + aEndpoints.size() + "]: " + aEndpoints);
+      }
 
-      // 3. execute message exchange
-
-      // 4. gather results
-
-      // 5. send back to DC
-
+      // 3. start message exchange
+      for (final IR2D2Endpoint aEP : aEndpoints) {
+        // TODO Invoke message exchange
+      }
     }
   }
 
