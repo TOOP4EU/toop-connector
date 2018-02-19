@@ -21,7 +21,6 @@ package eu.toop.mp.dpadapter;
  * @author Philip Helger
  */
 @Deprecated
-public enum EDummy
-{
+public enum EDummy {
   DUMMY1
 }

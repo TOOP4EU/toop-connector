@@ -9,5 +9,5 @@ import java.util.concurrent.TransferQueue;
  */
 
 public class MessageQueue {
-    public static final TransferQueue<File> INSTANCE = new LinkedTransferQueue<>();
+  public static final TransferQueue<File> INSTANCE = new LinkedTransferQueue<>();
 }

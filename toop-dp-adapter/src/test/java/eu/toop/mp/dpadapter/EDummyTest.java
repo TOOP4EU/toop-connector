@@ -25,12 +25,10 @@ import org.junit.jupiter.api.Test;
  *
  * @author Philip Helger
  */
-public final class EDummyTest
-{
+public final class EDummyTest {
   @Test
-  public void testDummy ()
-  {
-    assertTrue (true, "JUnit5 is working");
-    assertFalse (false, "JUnit5 is working");
+  public void testDummy() {
+    assertTrue(true, "JUnit5 is working");
+    assertFalse(false, "JUnit5 is working");
   }
 }

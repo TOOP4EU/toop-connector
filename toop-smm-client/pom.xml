@@ -36,7 +36,6 @@
 			<id>philip</id>
 			<name>Philip Helger</name>
 			<email>ph(at)helger.com</email>
-			<url>http://www.helger.com</url>
 		</developer>
 		<developer>
 			<id>verhoosel</id>
@@ -51,6 +50,11 @@
 		</developer>
 	</developers>
   <dependencies>
+    <dependency>
+      <groupId>com.helger</groupId>
+      <artifactId>ph-commons</artifactId>
+    </dependency>
+    <!-- Test only -->
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
