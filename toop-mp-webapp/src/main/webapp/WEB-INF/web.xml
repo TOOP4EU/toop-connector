@@ -27,15 +27,6 @@
     <session-timeout>60</session-timeout>
   </session-config>
 
-  <servlet>
-    <servlet-name>as4-interface</servlet-name>
-    <servlet-class>eu.toop.mp.me.servlet.AS4InterfaceServlet</servlet-class>
-  </servlet>
-  <display-name>TOOP Demo UI</display-name>
-  <servlet-mapping>
-    <servlet-name>as4-interface</servlet-name>
-    <url-pattern>/as4Interface</url-pattern>
-  </servlet-mapping>
   <description>https://github.com/toop4eu/toop-demo-ui</description>
 
   <session-config>
@@ -50,7 +41,7 @@
     <servlet-name>ToopMPServletDC</servlet-name>
     <url-pattern>/*</url-pattern>
   </servlet-mapping>
-  
+
   <servlet>
     <servlet-name>as4-interface</servlet-name>
     <servlet-class>eu.toop.mp.me.servlet.AS4InterfaceServlet</servlet-class>

@@ -29,7 +29,7 @@ class SMMTest {
 	@Test
 	void testAddTOOPConcepts() {
 		String result = m.addCountryConcepts(this.exampleXml);
-		LOG.debug(result);
+		LOG.info(result);
 		assertNotNull(result);
 		assertTrue(!result.isEmpty());
 	}
@@ -38,7 +38,7 @@ class SMMTest {
 	void testAddCountryConcepts() {
 		String result = m.addTOOPConcepts(this.exampleXml);
 
-		LOG.debug(result);
+		LOG.info(result);
 
 		assertNotNull(result);
 		assertTrue(!result.isEmpty());

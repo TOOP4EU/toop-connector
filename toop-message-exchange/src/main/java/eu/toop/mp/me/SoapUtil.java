@@ -29,13 +29,18 @@ public class SoapUtil {
   public static final String MIME_HEADER_CONTENT_LOCATION = "Content-Location";
   public static final String MIME_HEADER_CONTENT_TYPE = "Content-Type";
 
-  private static MessageFactory messageFactory = null;
+  private static MessageFactory messageFactory;
   private static SOAPConnectionFactory soapConnectionFactory = null;
 
 
   private static DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 
   static {
+    try {
+      messageFactory = MessageFactory.newInstance();
+      soapConnectionFactory = SOAPConnectionFactory.newInstance();
+    } catch (SOAPException e) {
+    }
     factory.setNamespaceAware(true);
   }
 
@@ -172,7 +177,7 @@ public class SoapUtil {
     }
   }
 
-  public static SOAPMessage createEmptyMessage(MimeHeaders headers, InputStream is) throws IOException, SOAPException {
+  public static SOAPMessage createMessage(MimeHeaders headers, InputStream is) throws IOException, SOAPException {
     return messageFactory.createMessage(headers, is);
   }
 
