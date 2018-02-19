@@ -20,20 +20,18 @@ import javax.annotation.concurrent.Immutable;
 import com.helger.photon.jetty.JettyStarter;
 
 /**
- * Run as a standalone web application in Jetty on port 8080.<br>
- * http://localhost:8080/
+ * Run as a standalone web application in Jetty on port 8090.<br>
+ * http://localhost:8090/
  *
  * @author Philip Helger
  */
 @Immutable
-public final class RunInJettyTOOPMP
-{
-  public static void main (final String [] args) throws Exception
-  {
-    JettyStarter js = new JettyStarter (RunInJettyTOOPMP.class).setAllowAnnotationBasedConfig(false);
-      System.out.println("resource: "+js.getWebXmlResource());
-      //js.setWebXmlResource("/WEB-INF/web.xml");
-      System.out.println("resource: "+js.getWebXmlResource());
-      js.run();
+public final class RunInJettyTOOPMP_DC {
+  public static void main(final String[] args) throws Exception {
+    final JettyStarter js = new JettyStarter(RunInJettyTOOPMP_DC.class).setPort(8090).setStopPort(8092);
+    System.out.println("resource: " + js.getWebXmlResource());
+    // js.setWebXmlResource("/WEB-INF/web.xml");
+    System.out.println("resource: " + js.getWebXmlResource());
+    js.run();
   }
 }
