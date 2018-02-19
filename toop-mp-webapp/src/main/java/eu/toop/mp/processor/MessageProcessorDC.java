@@ -13,10 +13,12 @@ import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.UsedViaReflection;
 import com.helger.commons.collection.impl.ICommonsList;
 import com.helger.commons.concurrent.BasicThreadFactory;
+import com.helger.commons.concurrent.ExecutorServiceHelper;
 import com.helger.commons.concurrent.collector.ConcurrentCollectorSingle;
 import com.helger.commons.concurrent.collector.IConcurrentPerformer;
 import com.helger.peppol.identifier.generic.doctype.IDocumentTypeIdentifier;
 import com.helger.peppol.identifier.generic.process.IProcessIdentifier;
+import com.helger.scope.IScope;
 import com.helger.web.scope.singleton.AbstractGlobalWebSingleton;
 
 import eu.toop.commons.exchange.IMSDataRequest;
@@ -39,7 +41,7 @@ public class MessageProcessorDC extends AbstractGlobalWebSingleton {
   static final class Performer implements IConcurrentPerformer<IMSDataRequest> {
     private static final Logger s_aLogger = LoggerFactory.getLogger(MessageProcessorDC.Performer.class);
 
-    public void runAsync(@Nonnull final IMSDataRequest aCurrentObject) throws Exception {
+    public void runAsync (@Nonnull final IMSDataRequest aCurrentObject) throws Exception {
       s_aLogger.info("Received asynch request: " + aCurrentObject);
       // 1. invoke SMM
       // TODO
@@ -48,11 +50,11 @@ public class MessageProcessorDC extends AbstractGlobalWebSingleton {
       ICommonsList<IR2D2Endpoint> aEndpoints;
       {
         final IDocumentTypeIdentifier aDocTypeID = R2D2Settings.getIdentifierFactory()
-            .parseDocumentTypeIdentifier(aCurrentObject.getDocumentTypeID());
+                                                               .parseDocumentTypeIdentifier(aCurrentObject.getDocumentTypeID());
         final IProcessIdentifier aProcessID = R2D2Settings.getIdentifierFactory()
-            .parseProcessIdentifier(aCurrentObject.getProcessID());
+                                                          .parseProcessIdentifier(aCurrentObject.getProcessID());
         aEndpoints = new R2D2Client().getEndpoints(aCurrentObject.getDestinationCountryCode(), aDocTypeID, aProcessID,
-            aCurrentObject.isProduction());
+                                                   aCurrentObject.isProduction());
         s_aLogger.info("R2D2 found the following endpoints[" + aEndpoints.size() + "]: " + aEndpoints);
       }
 
@@ -64,26 +66,33 @@ public class MessageProcessorDC extends AbstractGlobalWebSingleton {
   }
 
   // Just to have custom named threads....
-  private static final ThreadFactory s_aThreadFactory = new BasicThreadFactory.Builder().setNamingPattern("MPDC")
-      .setDaemon(true).build();
+  private static final ThreadFactory s_aThreadFactory = new BasicThreadFactory.Builder().setNamingPattern("MPDC-%d")
+                                                                                        .setDaemon(true).build();
   private final ConcurrentCollectorSingle<IMSDataRequest> m_aCollector = new ConcurrentCollectorSingle<>();
-  private final ExecutorService m_aSenderThreadPool;
+  private final ExecutorService m_aExecutorPool;
 
   @Deprecated
   @UsedViaReflection
-  public MessageProcessorDC() {
+  public MessageProcessorDC () {
     m_aCollector.setPerformer(new Performer());
-    m_aSenderThreadPool = Executors.newSingleThreadExecutor(s_aThreadFactory);
-    m_aSenderThreadPool.submit(m_aCollector::collect);
+    m_aExecutorPool = Executors.newSingleThreadExecutor(s_aThreadFactory);
+    m_aExecutorPool.submit(m_aCollector::collect);
   }
 
   /**
-   *
-   * @return The global accessor method.
+   * The global accessor method.
+   * 
+   * @return The one and only {@link MessageProcessorDC} instance.
    */
   @Nonnull
-  public static MessageProcessorDC getInstance() {
+  public static MessageProcessorDC getInstance () {
     return getGlobalSingleton(MessageProcessorDC.class);
+  }
+
+  @Override
+  protected void onDestroy (@Nonnull final IScope aScopeInDestruction) throws Exception {
+    // Shutdown executor service
+    ExecutorServiceHelper.shutdownAndWaitUntilAllTasksAreFinished(m_aExecutorPool);
   }
 
   /**
@@ -92,7 +101,7 @@ public class MessageProcessorDC extends AbstractGlobalWebSingleton {
    * @param aMsg
    *          The message to be queued. May not be <code>null</code>.
    */
-  public void enqueue(@Nonnull final IMSDataRequest aMsg) {
+  public void enqueue (@Nonnull final IMSDataRequest aMsg) {
     ValueEnforcer.notNull(aMsg, "Msg");
     m_aCollector.queueObject(aMsg);
   }
