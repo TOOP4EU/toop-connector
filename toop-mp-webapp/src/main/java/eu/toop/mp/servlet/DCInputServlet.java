@@ -13,16 +13,17 @@ import org.slf4j.LoggerFactory;
 
 import com.helger.servlet.response.UnifiedResponse;
 
+import eu.toop.commons.exchange.IMSDataRequest;
 import eu.toop.commons.exchange.message.ToopMessageBuilder;
 import eu.toop.commons.exchange.message.ToopRequestMessage;
 import eu.toop.commons.exchange.mock.MSDataRequest;
-import eu.toop.commons.exchange.mock.ToopDataRequest;
+import eu.toop.mp.processor.MessageProcessorDC;
 
 /**
  * This method is called by the <code>toop-interface</code> project in the
  * direction DC to DP.<br>
  * The input is an ASiC archive that contains the fields for a
- * {@link ToopRequestMessage}.
+ * {@link ToopRequestMessage} where only {@link IMSDataRequest} is used.
  *
  * @author Philip Helger
  */
@@ -37,15 +38,25 @@ public class DCInputServlet extends HttpServlet {
 
     // Parse POST data
     final ToopRequestMessage aMsg = ToopMessageBuilder.parseRequestMessage(aHttpServletRequest.getInputStream(),
-        MSDataRequest.getDeserializerFunction(), ToopDataRequest.getDeserializerFunction());
+        MSDataRequest.getDeserializerFunction());
 
     if (aMsg == null) {
       // The message content is invalid
       s_aLogger.error("The request does not contain an ASiC archive!");
       aUR.setStatus(HttpServletResponse.SC_BAD_REQUEST);
     } else {
-      // TODO ctd
-      aUR.setStatus(HttpServletResponse.SC_NO_CONTENT);
+      final IMSDataRequest aMSRequest = aMsg.getMSDataRequest();
+      if (aMSRequest == null) {
+        // The message content is invalid
+        s_aLogger.error("The ASiC archive does not contain an MSDataRequest!");
+        aUR.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+      } else {
+        // Enqueue to processor and we're good
+        MessageProcessorDC.getInstance().enqueue(aMSRequest);
+
+        // Done - no content
+        aUR.setStatus(HttpServletResponse.SC_NO_CONTENT);
+      }
     }
 
     // Done
