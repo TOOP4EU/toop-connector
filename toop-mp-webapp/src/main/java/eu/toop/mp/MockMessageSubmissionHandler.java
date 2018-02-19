@@ -1,65 +1,69 @@
 package eu.toop.mp;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.TransferQueue;
+
+import javax.annotation.Nonnull;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.util.concurrent.TransferQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 /**
- * Mock implementation of {@link IMessageSubmissionHandler}. This class receives the payload
- * from the toop dc/dp adapter and starts processing on a new thread.
+ * Mock implementation of {@link IMessageSubmissionHandler}. This class receives
+ * the payload from the toop dc/dp adapter and starts processing on a new
+ * thread.
  */
-
 public class MockMessageSubmissionHandler implements IMessageSubmissionHandler {
 
-    private final MessageProcessingThread messageProcessingThread;
+	private final MessageProcessingThread messageProcessor;
+	private Thread m_aThread;
 
-    public MockMessageSubmissionHandler(TransferQueue<File> queue) {
+	public MockMessageSubmissionHandler(final TransferQueue<File> queue) {
+		messageProcessor = new MessageProcessingThread(queue);
+	}
 
-        messageProcessingThread = new MessageProcessingThread(queue);
-    }
+	@Override
+	public void startProcessing() {
+		if (m_aThread != null)
+			throw new IllegalStateException("Thread already running!");
+		m_aThread = new Thread(messageProcessor, "MessageSubmissionHandler");
+		m_aThread.setDaemon(true);
+		m_aThread.start();
+	}
 
-    @Override
-    public void startProcessing() {
-        Thread t = new Thread(messageProcessingThread);
-        t.setDaemon(true);
-        t.start();
-    }
+	public void close() throws IOException {
+		if (m_aThread != null)
+			m_aThread.interrupt();
+		m_aThread = null;
+	}
 }
 
 /**
  * Runnable class to be called for starting a new thread.
  */
 class MessageProcessingThread implements Runnable {
+	private static final Logger log = LoggerFactory.getLogger(MessageProcessingThread.class);
 
-    private final TransferQueue<File> queue;
-    private static final Logger log = LoggerFactory.getLogger(MessageProcessingThread.class);
+	private final TransferQueue<File> queue;
 
-    MessageProcessingThread(TransferQueue<File> q) {
-        this.queue = q;
-    }
+	MessageProcessingThread(@Nonnull final TransferQueue<File> q) {
+		this.queue = q;
+	}
 
-    @Override
-    public void run() {
+	@Override
+	public void run() {
+		while (true) {
+			try {
+				if (queue.isEmpty()) {
+					log.info("Queue is empty... Waiting for files");
+				}
 
-        boolean flag = true;
-        while (flag) {
-
-            try {
-
-                if (queue.isEmpty()) {
-                    log.info("Queue is empty... Waiting for files");
-                }
-
-                File nextFile = queue.take();
-                log.info("Fetched file {} from Transfer Queue", nextFile.getAbsolutePath());
-
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-                flag = false;
-            }
-        }
-    }
+				final File nextFile = queue.take();
+				log.info("Fetched file {} from Transfer Queue", nextFile.getAbsolutePath());
+			} catch (final InterruptedException e) {
+				break;
+			}
+		}
+	}
 }
