@@ -16,16 +16,12 @@ public final class SMMTest {
   private static final Logger LOG = LoggerFactory.getLogger(SMMTest.class);
   private static final String EXAMPLE = "/datarequest.xml";
 
-  private final Module m;
-  private final String exampleXml;
-
-  public SMMTest() {
-    m = new SemanticMappingModule();
-    exampleXml = StreamHelper.getAllBytesAsString(new ClassPathResource(EXAMPLE), StandardCharsets.UTF_8);
-  }
+  private final Module m = new SemanticMappingModule();
+  private final String exampleXml = StreamHelper.getAllBytesAsString(new ClassPathResource(EXAMPLE),
+      StandardCharsets.UTF_8);
 
   @Test
-  void testAddTOOPConcepts() {
+  public void testAddTOOPConcepts() {
     final String result = m.addCountryConcepts(this.exampleXml);
     LOG.info(result);
     assertNotNull(result);
@@ -33,7 +29,7 @@ public final class SMMTest {
   }
 
   @Test
-  void testAddCountryConcepts() {
+  public void testAddCountryConcepts() {
     final String result = m.addTOOPConcepts(this.exampleXml);
 
     LOG.info(result);
