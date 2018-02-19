@@ -11,12 +11,18 @@ import org.slf4j.LoggerFactory;
 
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.UsedViaReflection;
+import com.helger.commons.collection.impl.ICommonsList;
 import com.helger.commons.concurrent.BasicThreadFactory;
 import com.helger.commons.concurrent.collector.ConcurrentCollectorSingle;
 import com.helger.commons.concurrent.collector.IConcurrentPerformer;
+import com.helger.peppol.identifier.generic.doctype.IDocumentTypeIdentifier;
+import com.helger.peppol.identifier.generic.process.IProcessIdentifier;
 import com.helger.web.scope.singleton.AbstractGlobalWebSingleton;
 
 import eu.toop.commons.exchange.IMSDataRequest;
+import eu.toop.mp.r2d2client.IR2D2Endpoint;
+import eu.toop.mp.r2d2client.R2D2Client;
+import eu.toop.mp.r2d2client.R2D2Settings;
 
 /**
  * The global message processor that handles DC requests. This is only the queue
@@ -38,6 +44,12 @@ public class MessageProcessorDC extends AbstractGlobalWebSingleton {
       // 1. invoke SMM
 
       // 2. invoke R2D2 client
+      final IDocumentTypeIdentifier aDocTypeID = R2D2Settings.getIdentifierFactory()
+          .parseDocumentTypeIdentifier(aCurrentObject.getDocumentTypeID());
+      final IProcessIdentifier aProcessID = R2D2Settings.getIdentifierFactory()
+          .parseProcessIdentifier(aCurrentObject.getProcessID());
+      final ICommonsList<IR2D2Endpoint> aEndpoints = new R2D2Client().getEndpoints(
+          aCurrentObject.getDestinationCountryCode(), aDocTypeID, aProcessID, aCurrentObject.isProduction());
 
       // 3. execute message exchange
 
@@ -73,7 +85,7 @@ public class MessageProcessorDC extends AbstractGlobalWebSingleton {
 
   /**
    * Queue a new action item.
-   * 
+   *
    * @param aMsg
    *          The message to be queued. May not be <code>null</code>.
    */

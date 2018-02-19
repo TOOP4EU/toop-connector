@@ -54,8 +54,8 @@ public class DCInputServlet extends HttpServlet {
 
       try (final NonBlockingByteArrayOutputStream archiveOutput = new NonBlockingByteArrayOutputStream()) {
         // Create dummy request
-        ToopMessageBuilder.createRequestMessage(new MSDataRequest("DE", "urn:abc:whatsoever-document-type-ID",
-            "msg-id-" + PDTFactory.getCurrentLocalDateTime().toString()), archiveOutput, aSH);
+        ToopMessageBuilder.createRequestMessage(new MSDataRequest("DE", "foobar::urn:abc:whatsoever-document-type-ID",
+            "test::anyProcID", false, "msg-id-" + PDTFactory.getCurrentLocalDateTime().toString()), archiveOutput, aSH);
         // Get ASiC bytes
         aMockRequest.setContent(archiveOutput.toByteArray());
       }

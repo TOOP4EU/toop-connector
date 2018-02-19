@@ -78,14 +78,6 @@
     </dependency>
     <dependency>
       <groupId>eu.toop</groupId>
-      <artifactId>toop-dc-adapter</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>eu.toop</groupId>
-      <artifactId>toop-dp-adapter</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>eu.toop</groupId>
       <artifactId>toop-message-exchange</artifactId>
     </dependency>
     
