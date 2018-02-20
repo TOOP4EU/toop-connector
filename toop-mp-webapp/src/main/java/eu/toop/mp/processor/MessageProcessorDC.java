@@ -1,5 +1,6 @@
 package eu.toop.mp.processor;
 
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -9,6 +10,7 @@ import javax.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.helger.asic.AsicUtils;
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.UsedViaReflection;
 import com.helger.commons.collection.impl.ICommonsList;
@@ -17,12 +19,20 @@ import com.helger.commons.concurrent.ExecutorServiceHelper;
 import com.helger.commons.concurrent.collector.ConcurrentCollectorSingle;
 import com.helger.commons.concurrent.collector.IConcurrentPerformer;
 import com.helger.commons.id.factory.GlobalIDFactory;
+import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 import com.helger.peppol.identifier.generic.doctype.IDocumentTypeIdentifier;
 import com.helger.peppol.identifier.generic.process.IProcessIdentifier;
 import com.helger.scope.IScope;
 import com.helger.web.scope.singleton.AbstractGlobalWebSingleton;
 
 import eu.toop.commons.exchange.IMSDataRequest;
+import eu.toop.commons.exchange.IToopDataRequest;
+import eu.toop.commons.exchange.message.ToopMessageBuilder;
+import eu.toop.commons.exchange.mock.ToopDataRequest;
+import eu.toop.mp.me.GatewayRoutingMetadata;
+import eu.toop.mp.me.MEMDelegate;
+import eu.toop.mp.me.MEMessage;
+import eu.toop.mp.me.MEPayload;
 import eu.toop.mp.r2d2client.IR2D2Endpoint;
 import eu.toop.mp.r2d2client.R2D2Client;
 import eu.toop.mp.r2d2client.R2D2Settings;
@@ -45,12 +55,16 @@ public class MessageProcessorDC extends AbstractGlobalWebSingleton {
     public void runAsync (@Nonnull final IMSDataRequest aCurrentObject) throws Exception {
       // This is the unique ID of this request message and must be used throughout the
       // whole process for identification
-      final String sID = GlobalIDFactory.getNewPersistentStringID ();
+      final String sID = GlobalIDFactory.getNewPersistentStringID () + UUID.randomUUID ().toString ();
       final String sLogPrefix = "[" + sID + "] ";
 
       s_aLogger.info (sLogPrefix + "Received asynch request: " + aCurrentObject);
       // 1. invoke SMM
-      // TODO
+      IToopDataRequest aToopDataRequest;
+      {
+        // TODO mock only
+        aToopDataRequest = new ToopDataRequest (sID);
+      }
 
       // 2. invoke R2D2 client
       ICommonsList<IR2D2Endpoint> aEndpoints;
@@ -65,8 +79,27 @@ public class MessageProcessorDC extends AbstractGlobalWebSingleton {
       }
 
       // 3. start message exchange
-      for (final IR2D2Endpoint aEP : aEndpoints) {
-        // TODO Invoke message exchange
+      {
+        // Combine MS data and TOOP data into a single ASiC message
+        // Do this only once and not for every endpoint
+        MEMessage meMessage;
+        try (final NonBlockingByteArrayOutputStream aBAOS = new NonBlockingByteArrayOutputStream ()) {
+          ToopMessageBuilder.createRequestMessage (aCurrentObject, aToopDataRequest, aBAOS,
+                                                   MPConfig.getSignatureHelper ());
+
+          // build MEM once
+          final MEPayload aPayload = new MEPayload (AsicUtils.MIMETYPE_ASICE, sID, aBAOS.toByteArray ());
+          meMessage = new MEMessage (aPayload);
+        }
+
+        for (final IR2D2Endpoint aEP : aEndpoints) {
+          final GatewayRoutingMetadata metadata = new GatewayRoutingMetadata ();
+          metadata.setDocumentTypeId (aCurrentObject.getDocumentTypeID ());
+          metadata.setProcessId (aCurrentObject.getProcessID ());
+          metadata.setEndpoint (aEP);
+
+          MEMDelegate.get ().sendMessage (metadata, meMessage);
+        }
       }
     }
   }

@@ -59,9 +59,9 @@ public interface IR2D2Client {
    *         endpoints.
    */
   @Nonnull
-  List<IR2D2Endpoint> getEndpoints(@Nonnull @Nonempty String sCountryCode,
-      @Nonnull IDocumentTypeIdentifier aDocumentTypeID, @Nonnull IProcessIdentifier aProcessID,
-      boolean bProductionSystem);
+  List<IR2D2Endpoint> getEndpoints (@Nonnull @Nonempty String sCountryCode,
+                                    @Nonnull IDocumentTypeIdentifier aDocumentTypeID,
+                                    @Nonnull IProcessIdentifier aProcessID, boolean bProductionSystem);
 
   /**
    * Get a list of all endpoints that match the specified requirements. This is
@@ -86,7 +86,7 @@ public interface IR2D2Client {
    *         endpoints.
    */
   @Nonnull
-  List<IR2D2Endpoint> getEndpoints(@Nonnull IParticipantIdentifier aRecipientID,
-      @Nonnull IDocumentTypeIdentifier aDocumentTypeID, @Nonnull IProcessIdentifier aProcessID,
-      boolean bProductionSystem);
+  List<IR2D2Endpoint> getEndpoints (@Nonnull IParticipantIdentifier aRecipientID,
+                                    @Nonnull IDocumentTypeIdentifier aDocumentTypeID,
+                                    @Nonnull IProcessIdentifier aProcessID, boolean bProductionSystem);
 }

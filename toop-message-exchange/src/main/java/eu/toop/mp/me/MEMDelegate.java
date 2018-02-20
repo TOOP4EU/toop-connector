@@ -1,8 +1,10 @@
 package eu.toop.mp.me;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.annotation.Nonnull;
 import javax.xml.soap.SOAPMessage;
-import java.util.ArrayList;
 
 /**
  * The API Entry class for the Message Exchange API.
@@ -11,7 +13,6 @@ import java.util.ArrayList;
  * @date: 15.02.2018.
  */
 public class MEMDelegate {
-
   /**
    * Singleton instance
    */
@@ -22,7 +23,7 @@ public class MEMDelegate {
   }
 
 
-  private ArrayList<IMessageHandler> messageHandlers = new ArrayList<IMessageHandler>();
+  private final List<IMessageHandler> messageHandlers = new ArrayList<>();
 
   private MEMDelegate() {
 
@@ -35,9 +36,9 @@ public class MEMDelegate {
    * @param gatewayRoutingMetadata The container for the endpoint information and docid/procid
    * @param meMessage              the payloads and their metadata to be sent to the gateway.
    */
-  public void sendMessage(GatewayRoutingMetadata gatewayRoutingMetadata, MEMessage meMessage) {
-    SubmissionData submissionData = EBMSUtils.inferSubmissionData(gatewayRoutingMetadata);
-    SOAPMessage soapMessage = EBMSUtils.convert2MEOutboundAS4Message(submissionData, meMessage);
+  public void sendMessage(final GatewayRoutingMetadata gatewayRoutingMetadata, final MEMessage meMessage) {
+    final SubmissionData submissionData = EBMSUtils.inferSubmissionData(gatewayRoutingMetadata);
+    final SOAPMessage soapMessage = EBMSUtils.convert2MEOutboundAS4Message(submissionData, meMessage);
     SoapUtil.sendSOAPMessage(soapMessage, MessageExchangeEndpointConfig.GW_URL);
   }
 
@@ -48,32 +49,32 @@ public class MEMDelegate {
    * Duplicate checking skipped for now. So if you register a handler twice, its handle method will
    * be called twice.
    *
-   * @param iMessageHandler
+   * @param iMessageHandler message handler to be added
    */
-  public void registerMessageHandler(@Nonnull IMessageHandler iMessageHandler) {
+  public void registerMessageHandler(@Nonnull final IMessageHandler iMessageHandler) {
     this.messageHandlers.add(iMessageHandler);
   }
 
   /**
    * Remove a message handler from this delegate
    *
-   * @param iMessageHandler
+   * @param iMessageHandler Message handler to be removed
    */
-  public void deRegisterMessageHandler(@Nonnull IMessageHandler iMessageHandler) {
+  public void deRegisterMessageHandler(@Nonnull final IMessageHandler iMessageHandler) {
     this.messageHandlers.remove(iMessageHandler);
   }
 
 
   /**
-   * Dispatch the received inobund message form the AS4 gateway to the handlers
+   * Dispatch the received inbound message form the AS4 gateway to the handlers
    *
-   * @param message
+   * @param message message to be dispatched
    */
-  public void dispatchMessage(SOAPMessage message) {
-    for (IMessageHandler messageHandler : messageHandlers) {
+  public void dispatchMessage(final SOAPMessage message) {
+    for (final IMessageHandler messageHandler : messageHandlers) {
       try {
         messageHandler.handleMessage(SoapUtil.soap2MEMessage(message));
-      } catch (Exception e) {
+      } catch (final Exception e) {
         throw new RuntimeException(e);
       }
     }

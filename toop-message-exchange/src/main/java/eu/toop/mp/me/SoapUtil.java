@@ -1,19 +1,34 @@
 package eu.toop.mp.me;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PushbackInputStream;
+import java.io.StringWriter;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.soap.*;
+import javax.xml.soap.AttachmentPart;
+import javax.xml.soap.MessageFactory;
+import javax.xml.soap.MimeHeaders;
+import javax.xml.soap.SOAPConnection;
+import javax.xml.soap.SOAPConnectionFactory;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.*;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
+
+import com.helger.commons.exception.InitializationException;
+import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 
 /**
  * @author: myildiz
@@ -39,7 +54,8 @@ public class SoapUtil {
     try {
       messageFactory = MessageFactory.newInstance();
       soapConnectionFactory = SOAPConnectionFactory.newInstance();
-    } catch (SOAPException e) {
+    } catch (final SOAPException e) {
+      throw new InitializationException ("Failed to init factories", e);
     }
     factory.setNamespaceAware(true);
   }
@@ -52,19 +68,19 @@ public class SoapUtil {
    * @param node
    * @return
    */
-  public static String prettyPrint(org.w3c.dom.Node node) {
+  public static String prettyPrint(final org.w3c.dom.Node node) {
     Transformer transformer = null;
     try {
       transformer = TransformerFactory.newInstance().newTransformer();
       transformer.setOutputProperty(OutputKeys.INDENT, "yes");
       transformer.setOutputProperty(OutputKeys.DOCTYPE_PUBLIC, "yes");
       transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
-      StreamResult result = new StreamResult(new StringWriter());
-      DOMSource source = new DOMSource(node);
+      final StreamResult result = new StreamResult(new StringWriter());
+      final DOMSource source = new DOMSource(node);
       transformer.transform(source, result);
-      String xmlString = result.getWriter().toString();
+      final String xmlString = result.getWriter().toString();
       return xmlString;
-    } catch (Exception e) {
+    } catch (final Exception e) {
       e.printStackTrace();
       return "";
     }
@@ -78,8 +94,8 @@ public class SoapUtil {
   public static SOAPMessage createEmptyMessage() {
     try {
       return messageFactory.createMessage();
-    } catch (SOAPException e) {
-      throw new RuntimeException(e);
+    } catch (final SOAPException e) {
+      throw new IllegalStateException(e);
     }
   }
 
@@ -90,12 +106,12 @@ public class SoapUtil {
    * @param message the SOAPMessage to be serialized to XML
    * @return XML as byte array
    */
-  public static byte[] messageToXml(SOAPMessage message) {
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+  public static byte[] messageToXml(final SOAPMessage message) {
+    final ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
       message.writeTo(baos);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
+    } catch (final Exception e) {
+      throw new IllegalStateException(e);
     }
     return baos.toByteArray();
   }
@@ -106,7 +122,7 @@ public class SoapUtil {
    * @param serialized XML as byte array
    * @return
    */
-  public static SOAPMessage xmlToMessage(byte[] serialized) {
+  public static SOAPMessage xmlToMessage(final byte[] serialized) {
     return deserializeSOAPMessage(new ByteArrayInputStream(serialized));
   }
 
@@ -117,18 +133,18 @@ public class SoapUtil {
    * @param inputStream InputStream containing the XML.
    * @return
    */
-  public static SOAPMessage deserializeSOAPMessage(InputStream inputStream) {
-    PushbackInputStream pushbackInputStream = new PushbackInputStream(inputStream, 100);
+  public static SOAPMessage deserializeSOAPMessage(final InputStream inputStream) {
+    final PushbackInputStream pushbackInputStream = new PushbackInputStream(inputStream, 100);
     try {
-      byte[] identifier2 = new byte[100];
+      final byte[] identifier2 = new byte[100];
       MimeHeaders headers = null;
-      int len = pushbackInputStream.read(identifier2, 0, identifier2.length);
+      final int len = pushbackInputStream.read(identifier2, 0, identifier2.length);
       pushbackInputStream.unread(identifier2, 0, len);
       //check the first two characters and see if they are '-'
 
       if (identifier2[0] == '-' && identifier2[1] == '-') {
         //get the line and parse the part identifier
-        byte[] partIdentifier = new byte[100];
+        final byte[] partIdentifier = new byte[100];
 
         int index = 0;
 
@@ -142,7 +158,7 @@ public class SoapUtil {
         //now put back
         pushbackInputStream.unread(partIdentifier, 0, index);
 
-        String part = new String(partIdentifier, 2, index - 2).trim();
+        final String part = new String(partIdentifier, 2, index - 2).trim();
 
         System.out.println(part);
         headers = new MimeHeaders();
@@ -152,12 +168,12 @@ public class SoapUtil {
         //try to read directly
         return messageFactory.createMessage(null, pushbackInputStream);
       }
-    } catch (RuntimeException e) {
+    } catch (final RuntimeException e) {
       LOG.error(e.getMessage(), e);
       throw e;
-    } catch (Exception e) {
+    } catch (final Exception e) {
       LOG.error(e.getMessage(), e);
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     }
   }
 
@@ -168,44 +184,38 @@ public class SoapUtil {
    * @param endpoint
    * @return
    */
-  public static SOAPMessage sendSOAPMessage(SOAPMessage message, URL endpoint) {
+  public static SOAPMessage sendSOAPMessage(final SOAPMessage message, final URL endpoint) {
     try {
-      SOAPConnection connection = soapConnectionFactory.createConnection();
+      final SOAPConnection connection = soapConnectionFactory.createConnection();
       return connection.call(message, endpoint);
-    } catch (SOAPException e) {
-      throw new RuntimeException(e);
+    } catch (final SOAPException e) {
+      throw new IllegalStateException(e);
     }
   }
 
-  public static SOAPMessage createMessage(MimeHeaders headers, InputStream is) throws IOException, SOAPException {
+  public static SOAPMessage createMessage(final MimeHeaders headers, final InputStream is) throws IOException, SOAPException {
     return messageFactory.createMessage(headers, is);
   }
 
-  protected static Map<String, String> getHeaders(String attachmentId) {
-    Map<String, String> headers = new HashMap<>();
+  protected static Map<String, String> getHeaders(final String attachmentId) {
+    final Map<String, String> headers = new HashMap<>();
     headers.put(MIME_HEADER_CONTENT_DESCRIPTION, "Attachment");
     headers.put(MIME_HEADER_CONTENT_DISPOSITION, "attachment; filename=\"fname.ext\"");
     headers.put(MIME_HEADER_CONTENT_ID, "<attachment=" + attachmentId + ">");
     headers.put(MIME_HEADER_CONTENT_LOCATION, "http://ws.apache.org");
     headers.put(MIME_HEADER_CONTENT_TYPE, "text/xml; charset=UTF-8");
+    // TODO mock only
     headers.put("TestHeader", "testHeaderValue");
     return headers;
   }
 
-  public static List<AttachmentPart> getAttachments(SOAPMessage msg) {
+  public static List<AttachmentPart> getAttachments(final SOAPMessage msg) {
     final List<AttachmentPart> atp = new ArrayList<>();
-
-    msg.getAttachments().forEachRemaining(new Consumer<AttachmentPart>() {
-      @Override
-      public void accept(AttachmentPart o) {
-        atp.add(o);
-      }
-    });
-
+    msg.getAttachments().forEachRemaining(o -> atp.add((AttachmentPart) o));
     try {
       msg.saveChanges();
-    } catch (SOAPException e) {
-      throw new RuntimeException(e);
+    } catch (final SOAPException e) {
+      throw new IllegalStateException(e);
     }
     return atp;
   }
@@ -216,46 +226,46 @@ public class SoapUtil {
    * @param atp
    * @return
    */
-  public static byte[] getAttachmentContent(AttachmentPart atp) {
+  public static byte[] getAttachmentContent(final AttachmentPart atp) {
     try {
       return atp.getRawContentBytes();
-    } catch (SOAPException e) {
-      throw new RuntimeException(e);
+    } catch (final SOAPException e) {
+      throw new IllegalStateException(e);
     }
   }
 
-  public static void setAttachmentContent(AttachmentPart atp, byte[] content) {
+  public static void setAttachmentContent(final AttachmentPart atp, final byte[] content) {
     try {
       atp.setRawContentBytes(content, 0, content.length, atp.getContentType());
-    } catch (SOAPException e) {
-      throw new RuntimeException(e);
+    } catch (final SOAPException e) {
+      throw new IllegalStateException(e);
     }
   }
 
-  public static void replaceAttachments(SOAPMessage msg, List<AttachmentPart> attachmentParts) {
+  public static void replaceAttachments(final SOAPMessage msg, final List<AttachmentPart> attachmentParts) {
     try {
       msg.removeAllAttachments();
       msg.saveChanges();
       attachmentParts.forEach(msg::addAttachmentPart);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
+    } catch (final Exception e) {
+      throw new IllegalStateException(e);
     }
   }
 
-  public static MEMessage soap2MEMessage(SOAPMessage message) throws Exception {
+  public static MEMessage soap2MEMessage(final SOAPMessage message) throws Exception {
     return EBMSUtils.soap2MEMessage(message);
   }
 
-  public static String describe(SOAPMessage message) {
+  public static String describe(final SOAPMessage message) {
     final StringBuilder sb = new StringBuilder();
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    final NonBlockingByteArrayOutputStream baos = new NonBlockingByteArrayOutputStream();
 
     try {
       message.writeTo(baos);
 
-      sb.append(new String(baos.toByteArray()));
-    } catch (Exception e) {
-      e.printStackTrace();
+      sb.append(baos.getAsString (StandardCharsets.UTF_8));
+    } catch (final Exception e) {
+      LOG.error ("Whatsoever", e);
       sb.append("Error");
     }
 

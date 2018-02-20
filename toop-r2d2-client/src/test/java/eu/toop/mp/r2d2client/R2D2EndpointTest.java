@@ -39,61 +39,61 @@ public final class R2D2EndpointTest {
   static {
     // The web page certificate from Google
     final String sValidCert = "MIIDVDCCAjygAwIBAgIDAjRWMA0GCSqGSIb3DQEBBQUAMEIxCzAJBgNVBAYTAlVT\r\n"
-        + "MRYwFAYDVQQKEw1HZW9UcnVzdCBJbmMuMRswGQYDVQQDExJHZW9UcnVzdCBHbG9i\r\n"
-        + "YWwgQ0EwHhcNMDIwNTIxMDQwMDAwWhcNMjIwNTIxMDQwMDAwWjBCMQswCQYDVQQG\r\n"
-        + "EwJVUzEWMBQGA1UEChMNR2VvVHJ1c3QgSW5jLjEbMBkGA1UEAxMSR2VvVHJ1c3Qg\r\n"
-        + "R2xvYmFsIENBMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA2swYYzD9\r\n"
-        + "9BcjGlZ+W988bDjkcbd4kdS8odhM+KhDtgPpTSEHCIjaWC9mOSm9BXiLnTjoBbdq\r\n"
-        + "fnGk5sRgprDvgOSJKA+eJdbtg/OtppHHmMlCGDUUna2YRpIuT8rxh0PBFpVXLVDv\r\n"
-        + "iS2Aelet8u5fa9IAjbkU+BQVNdnARqN7csiRv8lVK83Qlz6cJmTM386DGXHKTubU\r\n"
-        + "1XupGc1V3sjs0l44U+VcT4wt/lAjNvxm5suOpDkZALeVAjmRCw7+OC7RHQWa9k0+\r\n"
-        + "bw8HHa8sHo9gOeL6NlMTOdReJivbPagUvTLrGAMoUgRx5aszPeE4uwc2hGKceeoW\r\n"
-        + "MPRfwCvocWvk+QIDAQABo1MwUTAPBgNVHRMBAf8EBTADAQH/MB0GA1UdDgQWBBTA\r\n"
-        + "ephojYn7qwVkDBF9qn1luMrMTjAfBgNVHSMEGDAWgBTAephojYn7qwVkDBF9qn1l\r\n"
-        + "uMrMTjANBgkqhkiG9w0BAQUFAAOCAQEANeMpauUvXVSOKVCUn5kaFOSPeCpilKIn\r\n"
-        + "Z57QzxpeR+nBsqTP3UEaBU6bS+5Kb1VSsyShNwrrZHYqLizz/Tt1kL/6cdjHPTfS\r\n"
-        + "tQWVYrmm3ok9Nns4d0iXrKYgjy6myQzCsplFAMfOEVEiIuCl6rYVSAlk6l5PdPcF\r\n"
-        + "PseKUgzbFbS9bZvlxrFUaKnjaZC2mqUPuLk/IH2uSrW4nOQdtqvmlKXBx4Ot2/Un\r\n"
-        + "hw4EbNX/3aBd7YdStysVAq45pmp06drE57xNNB6pXE0zX5IJL4hmXXeXxx12E6nV\r\n"
-        + "5fEWCRE11azbJHFwLJhWC9kXtNHjUStedejV0NxPNO3CBWaAocvmMw==";
+                              + "MRYwFAYDVQQKEw1HZW9UcnVzdCBJbmMuMRswGQYDVQQDExJHZW9UcnVzdCBHbG9i\r\n"
+                              + "YWwgQ0EwHhcNMDIwNTIxMDQwMDAwWhcNMjIwNTIxMDQwMDAwWjBCMQswCQYDVQQG\r\n"
+                              + "EwJVUzEWMBQGA1UEChMNR2VvVHJ1c3QgSW5jLjEbMBkGA1UEAxMSR2VvVHJ1c3Qg\r\n"
+                              + "R2xvYmFsIENBMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA2swYYzD9\r\n"
+                              + "9BcjGlZ+W988bDjkcbd4kdS8odhM+KhDtgPpTSEHCIjaWC9mOSm9BXiLnTjoBbdq\r\n"
+                              + "fnGk5sRgprDvgOSJKA+eJdbtg/OtppHHmMlCGDUUna2YRpIuT8rxh0PBFpVXLVDv\r\n"
+                              + "iS2Aelet8u5fa9IAjbkU+BQVNdnARqN7csiRv8lVK83Qlz6cJmTM386DGXHKTubU\r\n"
+                              + "1XupGc1V3sjs0l44U+VcT4wt/lAjNvxm5suOpDkZALeVAjmRCw7+OC7RHQWa9k0+\r\n"
+                              + "bw8HHa8sHo9gOeL6NlMTOdReJivbPagUvTLrGAMoUgRx5aszPeE4uwc2hGKceeoW\r\n"
+                              + "MPRfwCvocWvk+QIDAQABo1MwUTAPBgNVHRMBAf8EBTADAQH/MB0GA1UdDgQWBBTA\r\n"
+                              + "ephojYn7qwVkDBF9qn1luMrMTjAfBgNVHSMEGDAWgBTAephojYn7qwVkDBF9qn1l\r\n"
+                              + "uMrMTjANBgkqhkiG9w0BAQUFAAOCAQEANeMpauUvXVSOKVCUn5kaFOSPeCpilKIn\r\n"
+                              + "Z57QzxpeR+nBsqTP3UEaBU6bS+5Kb1VSsyShNwrrZHYqLizz/Tt1kL/6cdjHPTfS\r\n"
+                              + "tQWVYrmm3ok9Nns4d0iXrKYgjy6myQzCsplFAMfOEVEiIuCl6rYVSAlk6l5PdPcF\r\n"
+                              + "PseKUgzbFbS9bZvlxrFUaKnjaZC2mqUPuLk/IH2uSrW4nOQdtqvmlKXBx4Ot2/Un\r\n"
+                              + "hw4EbNX/3aBd7YdStysVAq45pmp06drE57xNNB6pXE0zX5IJL4hmXXeXxx12E6nV\r\n"
+                              + "5fEWCRE11azbJHFwLJhWC9kXtNHjUStedejV0NxPNO3CBWaAocvmMw==";
     try {
-      TEST_CERT = CertificateHelper.convertStringToCertficate(sValidCert);
-      assertNotNull(TEST_CERT);
+      TEST_CERT = CertificateHelper.convertStringToCertficate (sValidCert);
+      assertNotNull (TEST_CERT);
     } catch (final CertificateException ex) {
-      throw new InitializationException(ex);
+      throw new InitializationException (ex);
     }
   }
 
   @Test
-  public void testGetter() {
-    final IParticipantIdentifier aPI = R2D2Settings.getIdentifierFactory()
-        .createParticipantIdentifierWithDefaultScheme("1234:test");
+  public void testGetter () {
+    final IParticipantIdentifier aPI = R2D2Settings.getIdentifierFactory ()
+                                                   .createParticipantIdentifierWithDefaultScheme ("1234:test");
     final String sTransportProtocol = "AS4";
     final String sEndpointURL = "http://example.org/as4";
-    final R2D2Endpoint aEP = new R2D2Endpoint(aPI, sTransportProtocol, sEndpointURL, TEST_CERT);
-    assertEquals(aPI, aEP.getParticipantID());
-    assertEquals(sTransportProtocol, aEP.getTransportProtocol());
-    assertEquals(sEndpointURL, aEP.getEndpointURL());
-    assertEquals(TEST_CERT, aEP.getCertificate());
+    final R2D2Endpoint aEP = new R2D2Endpoint (aPI, sTransportProtocol, sEndpointURL, TEST_CERT);
+    assertEquals (aPI, aEP.getParticipantID ());
+    assertEquals (sTransportProtocol, aEP.getTransportProtocol ());
+    assertEquals (sEndpointURL, aEP.getEndpointURL ());
+    assertEquals (TEST_CERT, aEP.getCertificate ());
   }
 
   @Test
-  public void testEquals() {
-    final IParticipantIdentifier aPI = R2D2Settings.getIdentifierFactory()
-        .createParticipantIdentifierWithDefaultScheme("1234:test");
-    final IParticipantIdentifier aPI2 = R2D2Settings.getIdentifierFactory()
-        .createParticipantIdentifierWithDefaultScheme("1234:test2");
+  public void testEquals () {
+    final IParticipantIdentifier aPI = R2D2Settings.getIdentifierFactory ()
+                                                   .createParticipantIdentifierWithDefaultScheme ("1234:test");
+    final IParticipantIdentifier aPI2 = R2D2Settings.getIdentifierFactory ()
+                                                    .createParticipantIdentifierWithDefaultScheme ("1234:test2");
     final String sTransportProtocol = "AS4";
     final String sTransportProtocol2 = "AS2";
     final String sEndpointURL = "http://example.org/as4";
     final String sEndpointURL2 = "http://example.org/as2";
-    assertEquals(new R2D2Endpoint(aPI, sTransportProtocol, sEndpointURL, TEST_CERT),
-        new R2D2Endpoint(aPI, sTransportProtocol, sEndpointURL, TEST_CERT));
-    assertNotEquals(new R2D2Endpoint(aPI, sTransportProtocol, sEndpointURL, TEST_CERT),
-        new R2D2Endpoint(aPI2, sTransportProtocol, sEndpointURL, TEST_CERT));
-    assertNotEquals(new R2D2Endpoint(aPI, sTransportProtocol, sEndpointURL, TEST_CERT),
-        new R2D2Endpoint(aPI, sTransportProtocol2, sEndpointURL, TEST_CERT));
-    assertNotEquals(new R2D2Endpoint(aPI, sTransportProtocol, sEndpointURL, TEST_CERT),
-        new R2D2Endpoint(aPI, sTransportProtocol, sEndpointURL2, TEST_CERT));
+    assertEquals (new R2D2Endpoint (aPI, sTransportProtocol, sEndpointURL, TEST_CERT),
+                  new R2D2Endpoint (aPI, sTransportProtocol, sEndpointURL, TEST_CERT));
+    assertNotEquals (new R2D2Endpoint (aPI, sTransportProtocol, sEndpointURL, TEST_CERT),
+                     new R2D2Endpoint (aPI2, sTransportProtocol, sEndpointURL, TEST_CERT));
+    assertNotEquals (new R2D2Endpoint (aPI, sTransportProtocol, sEndpointURL, TEST_CERT),
+                     new R2D2Endpoint (aPI, sTransportProtocol2, sEndpointURL, TEST_CERT));
+    assertNotEquals (new R2D2Endpoint (aPI, sTransportProtocol, sEndpointURL, TEST_CERT),
+                     new R2D2Endpoint (aPI, sTransportProtocol, sEndpointURL2, TEST_CERT));
   }
 }

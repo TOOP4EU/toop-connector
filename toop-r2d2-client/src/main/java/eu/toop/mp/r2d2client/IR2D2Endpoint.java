@@ -37,7 +37,7 @@ public interface IR2D2Endpoint extends Serializable {
    *         Never <code>null</code>.
    */
   @Nonnull
-  IParticipantIdentifier getParticipantID();
+  IParticipantIdentifier getParticipantID ();
 
   /**
    * @return The transport profile ID from the constructor. Neither
@@ -45,7 +45,7 @@ public interface IR2D2Endpoint extends Serializable {
    */
   @Nonnull
   @Nonempty
-  String getTransportProtocol();
+  String getTransportProtocol ();
 
   /**
    * @return The endpoint URL from the constructor. Neither <code>null</code> nor
@@ -53,11 +53,11 @@ public interface IR2D2Endpoint extends Serializable {
    */
   @Nonnull
   @Nonempty
-  String getEndpointURL();
+  String getEndpointURL ();
 
   /**
    * @return The encoded certificate as specified in the constructor.
    */
   @Nonnull
-  X509Certificate getCertificate();
+  X509Certificate getCertificate ();
 }

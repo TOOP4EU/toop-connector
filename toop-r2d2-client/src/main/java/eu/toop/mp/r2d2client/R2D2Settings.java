@@ -31,7 +31,7 @@ import com.helger.peppol.url.IPeppolURLProvider;
  */
 @Immutable
 public final class R2D2Settings {
-  private R2D2Settings() {
+  private R2D2Settings () {
   }
 
   /**
@@ -43,7 +43,7 @@ public final class R2D2Settings {
    * @return A new URL and never <code>null</code>. Never ends with a "/".
    */
   @Nonnull
-  public static String getPEPPOLDirectoryURL(final boolean bProduction) {
+  public static String getPEPPOLDirectoryURL (final boolean bProduction) {
     // TODO use correct URLs
     return "http://directory.central.toop";
   }
@@ -56,17 +56,17 @@ public final class R2D2Settings {
    * @return Never <code>null</code>.
    */
   @Nonnull
-  public static ESML getSML(final boolean bProduction) {
+  public static ESML getSML (final boolean bProduction) {
     return bProduction ? ESML.DIGIT_PRODUCTION : ESML.DIGIT_TEST;
   }
 
   @Nonnull
-  public static IIdentifierFactory getIdentifierFactory() {
+  public static IIdentifierFactory getIdentifierFactory () {
     return SimpleIdentifierFactory.INSTANCE;
   }
 
   @Nonnull
-  public static IPeppolURLProvider getSMPUrlProvider() {
+  public static IPeppolURLProvider getSMPUrlProvider () {
     return EsensURLProvider.INSTANCE;
   }
 }

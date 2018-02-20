@@ -1,8 +1,8 @@
 package eu.toop.mp.me.servlet;
 
-import eu.toop.mp.me.MEMDelegate;
-import eu.toop.mp.me.SoapUtil;
-import eu.toop.mp.me.EBMSUtils;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Enumeration;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -11,43 +11,55 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.soap.MimeHeaders;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
-import java.io.IOException;
-import java.util.Enumeration;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import eu.toop.mp.me.EBMSUtils;
+import eu.toop.mp.me.MEMDelegate;
+import eu.toop.mp.me.SoapUtil;
 
 /**
  * @author: myildiz
  * @date: 15.02.2018.
  */
 public class AS4InterfaceServlet extends HttpServlet {
+  private static final Logger LOG = LoggerFactory.getLogger (AS4InterfaceServlet.class);
+
   @Override
-  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-    resp.setStatus(HttpServletResponse.SC_OK);
-    resp.getOutputStream().println("Please use POST");
+  protected void doGet (final HttpServletRequest req,
+                        final HttpServletResponse resp) throws ServletException, IOException {
+    resp.setStatus (HttpServletResponse.SC_OK);
+    resp.getOutputStream ().println ("Please use POST");
   }
 
-
   @Override
-  protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-    //Convert the request headers into MimeHeaders
-    MimeHeaders mimeHeaders = readMimeHeaders(req);
+  protected void doPost (final HttpServletRequest req,
+                         final HttpServletResponse resp) throws ServletException, IOException {
+    // Convert the request headers into MimeHeaders
+    final MimeHeaders mimeHeaders = _readMimeHeaders (req);
     try {
-      SOAPMessage message = SoapUtil.createMessage(mimeHeaders, req.getInputStream());
-      MEMDelegate.get().dispatchMessage(message);
-      byte[] successReceipt = EBMSUtils.createSuccessReceipt(message);
-      resp.getOutputStream().write(successReceipt);
-      resp.setStatus(HttpServletResponse.SC_OK);
-    } catch (SOAPException e) {
-      resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-      throw new IOException(e.getMessage(), e);
+      final SOAPMessage message = SoapUtil.createMessage (mimeHeaders, req.getInputStream ());
+      MEMDelegate.get ().dispatchMessage (message);
+      final byte[] successReceipt = EBMSUtils.createSuccessReceipt (message);
+
+      final OutputStream aOS = resp.getOutputStream ();
+      aOS.write (successReceipt);
+      aOS.flush ();
+      resp.setStatus (HttpServletResponse.SC_OK);
+    } catch (final SOAPException e) {
+      LOG.error ("Failed to process incoming AS4 message", e);
+      resp.setStatus (HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      throw new ServletException ("Failed to process incoming AS4 message", e);
     }
   }
 
-  private MimeHeaders readMimeHeaders(HttpServletRequest req) {
-    MimeHeaders mimeHeaders = new MimeHeaders();
-    Enumeration<String> headerNames = req.getHeaderNames();
-    while (headerNames.hasMoreElements()) {
-      String header = headerNames.nextElement();
-      mimeHeaders.addHeader(header, req.getHeader(header));
+  private MimeHeaders _readMimeHeaders (final HttpServletRequest req) {
+    final MimeHeaders mimeHeaders = new MimeHeaders ();
+    final Enumeration<String> headerNames = req.getHeaderNames ();
+    while (headerNames.hasMoreElements ()) {
+      final String header = headerNames.nextElement ();
+      mimeHeaders.addHeader (header, req.getHeader (header));
     }
     return mimeHeaders;
   }

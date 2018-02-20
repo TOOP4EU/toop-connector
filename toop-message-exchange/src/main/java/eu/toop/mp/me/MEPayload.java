@@ -1,108 +1,79 @@
 package eu.toop.mp.me;
 
+import java.util.UUID;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.concurrent.Immutable;
+
+import com.helger.commons.ValueEnforcer;
+import com.helger.commons.annotation.Nonempty;
+import com.helger.commons.annotation.ReturnsMutableObject;
+import com.helger.commons.mime.IMimeType;
+import com.helger.commons.string.StringHelper;
 
 /**
  * @author: myildiz
  * @date: 15.02.2018.
  */
-public class MEPayload {
+@Immutable
+public final class MEPayload {
   /**
    * Type of the payload
    */
-  @Nonnull
-  private String contentType;
+  private final IMimeType _mimeType;
 
   /**
-   * Optional name (filen name, content disposition ) in the SWA payload
+   * Optional id for the payload. If left empty, a default id will be used. i.e.
+   * payload_X@toop.eu
    */
-  @Nullable
-  private String name;
-
-  /**
-   * Optional id for the payload. If left empty, a default id will be used. i.e. payload_X@toop.eu
-   */
-  @Nullable
-  private String payloadId;
-
-  /**
-   * Mimetype for the attachment object. If left emtpy the default value of <code>contentType</code> will be used
-   */
-  private String mimeType;
-
-  /**
-   * optional charset for text type payloads
-   */
-  @Nullable
-  private String characterSet;
-
+  private final String _payloadId;
 
   /**
    * The actual payload content
    */
+  private final byte[] _data;
+
   @Nonnull
-  private byte[] data;
-
-  public String getContentType() {
-    return contentType;
+  @Nonempty
+  public static String createRandomPayloadID () {
+    return UUID.randomUUID ().toString () + "@mp.toop";
   }
 
-  public void setContentType(String contentType) {
-    this.contentType = contentType;
+  public MEPayload (@Nonnull final IMimeType aMimeType, @Nullable final String sPayloadID,
+                    @Nonnull final byte[] aData) {
+    ValueEnforcer.notNull (aMimeType, "MimeType");
+    ValueEnforcer.notNull (aData, "Data");
+
+    _mimeType = aMimeType;
+    // Ensure a payload is present
+    _payloadId = StringHelper.hasText (sPayloadID) ? sPayloadID : createRandomPayloadID ();
+    _data = aData;
   }
 
-  public String getName() {
-    return name;
+  @Nonnull
+  public IMimeType getMimeType () {
+    return _mimeType;
   }
 
-  public void setName(String name) {
-    this.name = name;
+  @Nonnull
+  public String getMimeTypeString () {
+    return _mimeType.getAsString ();
   }
 
-  public byte[] getData() {
-    return data;
+  @Nonnull
+  public String getPayloadId () {
+    return _payloadId;
   }
 
-  public void setData(byte[] data) {
-    /*
-     * TODO: a deep copy might be necessary
-     */
-    this.data = data;
-  }
-
-  public String getPayloadId() {
-    return payloadId;
-  }
-
-  public void setPayloadId(String payloadId) {
-    this.payloadId = payloadId;
-  }
-
-  public String getMimeType() {
-    return mimeType;
-  }
-
-  public void setMimeType(String mimeType) {
-    this.mimeType = mimeType;
-  }
-
-  public String getCharacterSet() {
-    return characterSet;
-  }
-
-  public void setCharacterSet(String characterSet) {
-    this.characterSet = characterSet;
+  @Nonnull
+  @ReturnsMutableObject
+  public byte[] getData () {
+    return _data;
   }
 
   @Override
-  public String toString() {
-    int len = 0;
-    if (data != null)
-      len = data.length;
-
-    return "Payload [" + payloadId + ", " + mimeType + "], length: " + len;
+  public String toString () {
+    return "Payload [" + _payloadId + ", " + _mimeType.getAsString () + "], length: " + _data.length;
   }
-
 }

@@ -1,6 +1,5 @@
 package eu.toop.mp.servlet;
 
-import java.io.File;
 import java.io.IOException;
 
 import javax.servlet.ServletException;
@@ -12,9 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.helger.asic.SignatureHelper;
 import com.helger.commons.datetime.PDTFactory;
-import com.helger.commons.io.file.FileHelper;
 import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 import com.helger.servlet.mock.MockHttpServletRequest;
 import com.helger.servlet.response.UnifiedResponse;
@@ -23,6 +20,7 @@ import eu.toop.commons.exchange.IMSDataRequest;
 import eu.toop.commons.exchange.message.ToopMessageBuilder;
 import eu.toop.commons.exchange.message.ToopRequestMessage;
 import eu.toop.commons.exchange.mock.MSDataRequest;
+import eu.toop.mp.processor.MPConfig;
 import eu.toop.mp.processor.MessageProcessorDC;
 
 /**
@@ -51,8 +49,6 @@ public class DCInputServlet extends HttpServlet {
     if (aHttpServletRequest.getParameter ("demo") != null) {
       // Put a fake DC request in the queue
       final MockHttpServletRequest aMockRequest = new MockHttpServletRequest ();
-      final SignatureHelper aSH = new SignatureHelper (FileHelper.getInputStream (new File ("src/main/resources/demo-keystore.jks")),
-                                                       "password", null, "password");
 
       try (final NonBlockingByteArrayOutputStream archiveOutput = new NonBlockingByteArrayOutputStream ()) {
         // Create dummy request
@@ -61,7 +57,7 @@ public class DCInputServlet extends HttpServlet {
                                                                     "test::anyProcID", false,
                                                                     "msg-id-" + PDTFactory.getCurrentLocalDateTime ()
                                                                                           .toString ()),
-                                                 archiveOutput, aSH);
+                                                 archiveOutput, MPConfig.getSignatureHelper ());
         // Get ASiC bytes
         aMockRequest.setContent (archiveOutput.toByteArray ());
       }

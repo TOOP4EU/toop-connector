@@ -24,8 +24,9 @@ public class MPWebAppListener extends WebScopeListener {
   @Override
   public void contextInitialized (@Nonnull final ServletContextEvent aEvent) {
     super.contextInitialized (aEvent);
-    GlobalIDFactory.setPersistentStringIDFactory (new StringIDFromGlobalLongIDFactory ("toop-mp-"));
     s_aLogger.info ("MP WebApp startup");
+
+    GlobalIDFactory.setPersistentStringIDFactory (new StringIDFromGlobalLongIDFactory ("toop-mp-"));
   }
 
   @Override

@@ -3,10 +3,9 @@ package eu.toop.mp.me;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 import javax.annotation.Nonnull;
@@ -28,11 +27,16 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import com.helger.commons.ValueEnforcer;
+import com.helger.commons.charset.CharsetHelper;
 import com.helger.commons.io.stream.StreamHelper;
+import com.helger.commons.mime.CMimeType;
+import com.helger.commons.mime.MimeType;
+import com.helger.commons.mime.MimeTypeParser;
 
-public class EBMSUtils {
-
+public final class EBMSUtils {
   private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EBMSUtils.class);
+
+  private EBMSUtils() {}
 
   /**
    * See
@@ -73,7 +77,7 @@ public class EBMSUtils {
 
     String xml = StreamHelper.getAllBytesAsString(EBMSUtils.class.getResourceAsStream("/fault-template.xml"), StandardCharsets.UTF_8);
 
-    Element element;
+    Node element;
     try {
       element = SoapXPathUtil.findSingleNode(soapMessage.getSOAPHeader(), "//:MessageInfo/:MessageId");
     } catch (final SOAPException e) {
@@ -142,6 +146,7 @@ public class EBMSUtils {
    */
   public static SOAPMessage convert2MEOutboundAS4Message(final SubmissionData metadata, final MEMessage meMessage) {
     try {
+      if (LOG.isDebugEnabled ())
       LOG.debug("Convert submission data to SOAP Message");
       String xml = StreamHelper.getAllBytesAsString(EBMSUtils.class.getResourceAsStream("/as4template.xml"), StandardCharsets.UTF_8);
 
@@ -187,9 +192,9 @@ public class EBMSUtils {
       meMessage.getPayloads().forEach(payload -> {
         final AttachmentPart attachmentPart = message.createAttachmentPart();
         attachmentPart.setContentId('<' + payload.getPayloadId() + '>');
-        final byte[] data = payload.getData();
         try {
-          attachmentPart.setRawContentBytes(data, 0, data.length, payload.getMimeType());
+          final byte[] data = payload.getData();
+          attachmentPart.setRawContentBytes(data, 0, data.length, payload.getMimeTypeString ());
         } catch (final SOAPException e) {
           throw new RuntimeException(e);
         }
@@ -199,9 +204,8 @@ public class EBMSUtils {
       if (message.saveRequired())
         message.saveChanges();
 
-      if (LOG.isTraceEnabled()) {
+      if (LOG.isTraceEnabled())
         LOG.trace(SoapUtil.describe(message));
-      }
       return message;
     } catch (final RuntimeException ex) {
       //throw RTE's directly
@@ -262,7 +266,7 @@ public class EBMSUtils {
           .append("<ns2:PartInfo href=\"cid:")
           .append(mEPayload.getPayloadId())
           .append("\">\n        <ns2:PartProperties>\n          <ns2:Property name=\"MimeType\">")
-          .append(mEPayload.getMimeType())
+          .append(mEPayload.getMimeTypeString())
           .append("</ns2:Property>")
           .append("\n        </ns2:PartProperties>\n")
           .append("      </ns2:PartInfo>");
@@ -280,57 +284,63 @@ public class EBMSUtils {
   public static MEMessage soap2MEMessage(@Nonnull final SOAPMessage message) throws Exception {
     ValueEnforcer.notNull(message, "SOAPMessage");
 
-    LOG.trace("Convert message to submission data");
+    if (LOG.isDebugEnabled ())
+      LOG.debug("Convert message to submission data");
 
-    final MEMessage meMessage = MEMessageFactory.createMEMessage();
-    if (message.countAttachments() == 0)
-      return meMessage;
+    final MEMessage meMessage = new MEMessage();
+    if (message.countAttachments() > 0) {
+      // Read all attachments
+      message.getAttachments().forEachRemaining(attObj -> {
+        final AttachmentPart att = (AttachmentPart) attObj;
+        //remove surplus characters
+        final String href = att.getContentId().replace("<|>", "");
+        //throws exception if part info does not exist
+        Node partInfo;
+        try {
+          partInfo = SoapXPathUtil.findSingleNode(message.getSOAPHeader(), "//:PayloadInfo/:PartInfo[@href='cid:" + href + "']");
+        } catch (final Exception ex) {
+          throw new RuntimeException("ContentId: " + href + " was not found in PartInfo");
+        }
 
-    final Element properties = SoapXPathUtil.findSingleNode(message.getSOAPHeader(), "//:MessageProperties");
-    final List<MEPayload> payloads = new ArrayList<>(message.countAttachments());
+        final MimeType contentType = MimeTypeParser.parseMimeType (att.getContentType());
+        MimeType mimeType = null;
 
-    message.getAttachments().forEachRemaining(attObj -> {
-      final AttachmentPart att = (AttachmentPart) attObj;
-      //remove surplus characters
-      final String href = att.getContentId().replaceAll("<|>", "");
-      //throws exception if part info does not exist
-      Node partInfo;
-      try {
-        partInfo = SoapXPathUtil.findSingleNode(message.getSOAPHeader(), "//:PayloadInfo/:PartInfo[@href='cid:" + href + "']");
-      } catch (final Exception ex) {
-        throw new RuntimeException("ContentId: " + href + " was not found in PartInfo");
-      }
+        try {
+          final Node singleNode = SoapXPathUtil.findSingleNode(partInfo, ".//:PartProperties/:Property[@name='MimeType']/text()");
+          String sMimeType = singleNode.getNodeValue();
+          if (sMimeType.startsWith("cid:"))
+            sMimeType = sMimeType.substring(4);
 
-      final String contentType = att.getContentType();
-      String mimeType = "";
+          mimeType = MimeTypeParser.parseMimeType (sMimeType);
+        } catch (final Throwable throwable) {
+          //if there is a problem wrt the processing of the mimetype, simply grab the content type
+          //FIXME: Do not swallow the error, there might a problem with the mimtype
+          mimeType = contentType;
+        }
 
-      try {
-        final Node singleNode = SoapXPathUtil.findSingleNode(partInfo, ".//:PartProperties/:Property[@name='MimeType']/text()");
-        mimeType = singleNode.getNodeValue();
-        if (mimeType.startsWith("cid"))
-          mimeType = mimeType.substring(4);
-      } catch (final Throwable throwable) {
-        //if there is a problem wrt the processing of the mimetype, simply grab the content type
-        //FIXME: Do not swallow the error, there might a problem with the mimtype
-        mimeType = contentType;
-      }
+        final Node charSetNode = SoapXPathUtil.findSingleNode(partInfo, ".//:PartProperties/:Property[@name='CharacterSet']/text()");
+        final Charset aCharset = CharsetHelper.getCharsetFromNameOrNull (charSetNode.getNodeValue());
+        if (aCharset != null) {
+          // Add charset to MIME type
+          mimeType.addParameter (CMimeType.PARAMETER_NAME_CHARSET, aCharset.name ());
+        }
 
-      final Node charSetNode = SoapXPathUtil.findSingleNode(partInfo, ".//:PartProperties/:Property[@name='CharacterSet']/text()");
+        byte[] rawContentBytes;
+        try {
+          rawContentBytes = att.getRawContentBytes();
+        } catch (final SOAPException e) {
+          throw new RuntimeException(e.getMessage(), e);
+        }
 
-      byte[] rawContentBytes;
-      try {
-        rawContentBytes = att.getRawContentBytes();
-      } catch (final SOAPException e) {
-        throw new RuntimeException(e.getMessage(), e);
-      }
+        final MEPayload payload = new MEPayload (mimeType, href, rawContentBytes);
+        if (LOG.isDebugEnabled ()) {
+          LOG.debug("\tpayload.payloadId: " + payload.getPayloadId());
+          LOG.debug("\tpayload.mimeType: " + payload.getMimeTypeString());
+        }
 
-      final MEPayload payload = MEPayloadFactory.createPayload(href, contentType, mimeType, charSetNode.getNodeValue(), rawContentBytes);
-      LOG.debug("\tpayload.payloadId: " + payload.getPayloadId());
-      LOG.debug("\tpayload.mimeType: " + payload.getMimeType());
-
-      payloads.add(payload);
-    });
-    meMessage.setPayloads(payloads);
+        meMessage.getPayloads ().add(payload);
+      });
+    }
     return meMessage;
   }
 
@@ -349,7 +359,6 @@ public class EBMSUtils {
     submissionData.messageId = genereateEbmsMessageId(MessageExchangeEndpointConfig.getMEMName());
     submissionData.action = gatewayRoutingMetadata.getDocumentTypeId();
     submissionData.service = gatewayRoutingMetadata.getProcessId();
-
 
     final String dn = certificate.getSubjectX500Principal().getName();
     LdapName ldapDN;
