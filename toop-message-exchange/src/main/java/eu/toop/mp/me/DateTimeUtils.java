@@ -1,8 +1,8 @@
 package eu.toop.mp.me;
 
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+
+import com.helger.commons.datetime.PDTFactory;
 
 /**
  * Utilities related to date-time formatting, parsing etc..
@@ -13,14 +13,12 @@ import java.time.format.DateTimeFormatter;
 public class DateTimeUtils {
   /**
    * Create the current date time string in format
+   * <cod>uuuu-MM-dd'T'HH:mm:ss.SSSX</code> using UTC format
    *
-   * uuuu-MM-dd'T'HH:mm:ss.SSSX
-   *
-   *
-   * @return
+   * @return Formatted date time
    */
-  public static String getCurrentTimestamp() {
-    ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
-    return now.format(DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH:mm:ss.SSSX"));
+  public static String getCurrentTimestamp () {
+    // Same as the default W3C format but with milliseconds included
+    return PDTFactory.getCurrentZonedDateTimeUTC ().format (DateTimeFormatter.ISO_OFFSET_DATE_TIME);
   }
 }

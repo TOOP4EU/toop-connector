@@ -61,7 +61,7 @@ public final class EBMSUtils {
       throw ex;
     } catch (final Exception ex) {
       //force exceptions to runtime
-      throw new RuntimeException(ex.getMessage(), ex);
+      throw new IllegalStateException(ex.getMessage(), ex);
     }
   }
 
@@ -81,7 +81,7 @@ public final class EBMSUtils {
     try {
       element = SoapXPathUtil.findSingleNode(soapMessage.getSOAPHeader(), "//:MessageInfo/:MessageId");
     } catch (final SOAPException e) {
-      throw new RuntimeException(e.getMessage(), e);
+      throw new IllegalStateException(e.getMessage(), e);
     }
 
     final String refToMessageInError = element.getTextContent();
@@ -196,7 +196,7 @@ public final class EBMSUtils {
           final byte[] data = payload.getData();
           attachmentPart.setRawContentBytes(data, 0, data.length, payload.getMimeTypeString ());
         } catch (final SOAPException e) {
-          throw new RuntimeException(e);
+          throw new IllegalStateException(e);
         }
         message.addAttachmentPart(attachmentPart);
       });
@@ -212,7 +212,7 @@ public final class EBMSUtils {
       throw ex;
     } catch (final Exception ex) {
       //force exceptions to runtime
-      throw new RuntimeException(ex.getMessage(), ex);
+      throw new IllegalStateException(ex.getMessage(), ex);
     }
   }
 
@@ -279,7 +279,7 @@ public final class EBMSUtils {
    *
    * @param message the soap message to be converted to a MEMessage. Cannot be null
    * @return the MEMessage object created from the supplied SOAPMessage
-   * @throws Exception
+   * @throws Exception in case of error
    */
   public static MEMessage soap2MEMessage(@Nonnull final SOAPMessage message) throws Exception {
     ValueEnforcer.notNull(message, "SOAPMessage");
@@ -293,18 +293,16 @@ public final class EBMSUtils {
       message.getAttachments().forEachRemaining(attObj -> {
         final AttachmentPart att = (AttachmentPart) attObj;
         //remove surplus characters
-        final String href = att.getContentId().replace("<|>", "");
-        //throws exception if part info does not exist
+        final String href = att.getContentId().replaceAll("<|>", "");
         Node partInfo;
         try {
+          //throws exception if part info does not exist
           partInfo = SoapXPathUtil.findSingleNode(message.getSOAPHeader(), "//:PayloadInfo/:PartInfo[@href='cid:" + href + "']");
         } catch (final Exception ex) {
-          throw new RuntimeException("ContentId: " + href + " was not found in PartInfo");
+          throw new IllegalStateException("ContentId: " + href + " was not found in PartInfo");
         }
 
-        final MimeType contentType = MimeTypeParser.parseMimeType (att.getContentType());
-        MimeType mimeType = null;
-
+        MimeType mimeType;
         try {
           final Node singleNode = SoapXPathUtil.findSingleNode(partInfo, ".//:PartProperties/:Property[@name='MimeType']/text()");
           String sMimeType = singleNode.getNodeValue();
@@ -312,10 +310,10 @@ public final class EBMSUtils {
             sMimeType = sMimeType.substring(4);
 
           mimeType = MimeTypeParser.parseMimeType (sMimeType);
-        } catch (final Throwable throwable) {
+        } catch (final Exception throwable) {
           //if there is a problem wrt the processing of the mimetype, simply grab the content type
           //FIXME: Do not swallow the error, there might a problem with the mimtype
-          mimeType = contentType;
+          mimeType = MimeTypeParser.parseMimeType (att.getContentType());
         }
 
         final Node charSetNode = SoapXPathUtil.findSingleNode(partInfo, ".//:PartProperties/:Property[@name='CharacterSet']/text()");
@@ -329,7 +327,7 @@ public final class EBMSUtils {
         try {
           rawContentBytes = att.getRawContentBytes();
         } catch (final SOAPException e) {
-          throw new RuntimeException(e.getMessage(), e);
+          throw new IllegalStateException(e);
         }
 
         final MEPayload payload = new MEPayload (mimeType, href, rawContentBytes);
@@ -360,13 +358,13 @@ public final class EBMSUtils {
     submissionData.action = gatewayRoutingMetadata.getDocumentTypeId();
     submissionData.service = gatewayRoutingMetadata.getProcessId();
 
-    final String dn = certificate.getSubjectX500Principal().getName();
     LdapName ldapDN;
     try {
-      ldapDN = new LdapName(dn);
+      ldapDN = new LdapName(certificate.getSubjectX500Principal().getName());
     } catch (final InvalidNameException e) {
       throw new IllegalArgumentException("Invalid certificate name", e);
     }
+    // XXX I'm not sure that is what we want
     submissionData.to = ldapDN.getRdn(0).getValue().toString();
 
     //TODO: infer it from the transaction id

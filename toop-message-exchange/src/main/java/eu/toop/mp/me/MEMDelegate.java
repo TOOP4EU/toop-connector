@@ -70,7 +70,7 @@ public class MEMDelegate {
    *
    * @param message message to be dispatched
    */
-  public void dispatchMessage(final SOAPMessage message) {
+  public void dispatchInboundMessage(@Nonnull final SOAPMessage message) {
     for (final IMessageHandler messageHandler : messageHandlers) {
       try {
         messageHandler.handleMessage(SoapUtil.soap2MEMessage(message));

@@ -34,7 +34,7 @@ public class TestSendReceive {
   @BeforeAll
   public static void prepare () throws Exception {
     final int gwPort = 10001;
-    final MocAS4 mocAS4 = new MocAS4 (gwPort);
+    final MockAS4 mocAS4 = new MockAS4 (gwPort);
     mocAS4.start ();
 
     // set the url of the gateway to the moc
@@ -43,10 +43,8 @@ public class TestSendReceive {
 
   @Test
   public void testSendReceive () throws Exception {
-    final GatewayRoutingMetadata metadata = new GatewayRoutingMetadata ();
-    metadata.setDocumentTypeId ("top-sercret-pdf-documents-only");
-    metadata.setProcessId ("dummy-process");
-    metadata.setEndpoint (sampleEndpoint ());
+    final GatewayRoutingMetadata metadata = new GatewayRoutingMetadata ("top-sercret-pdf-documents-only",
+                                                                        "dummy-process", sampleEndpoint ());
 
     final String payloadId = "xmlpayload@dp";
     final IMimeType contentType = CMimeType.APPLICATION_XML;

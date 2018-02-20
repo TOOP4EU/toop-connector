@@ -40,7 +40,7 @@ public class AS4InterfaceServlet extends HttpServlet {
     final MimeHeaders mimeHeaders = _readMimeHeaders (req);
     try {
       final SOAPMessage message = SoapUtil.createMessage (mimeHeaders, req.getInputStream ());
-      MEMDelegate.get ().dispatchMessage (message);
+      MEMDelegate.get ().dispatchInboundMessage (message);
       final byte[] successReceipt = EBMSUtils.createSuccessReceipt (message);
 
       final OutputStream aOS = resp.getOutputStream ();

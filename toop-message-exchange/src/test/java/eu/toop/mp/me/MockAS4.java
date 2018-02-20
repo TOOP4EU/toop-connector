@@ -4,6 +4,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PushbackInputStream;
+import java.io.StringWriter;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -13,6 +14,11 @@ import javax.xml.soap.MimeHeader;
 import javax.xml.soap.MimeHeaders;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 
@@ -20,11 +26,11 @@ import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
  * @author: myildiz
  * @date: 16.02.2018.
  */
-public class MocAS4 {
+public class MockAS4 {
   private final ServerSocket serverSocket;
   private final int port;
 
-  public MocAS4 (final int port) throws IOException {
+  public MockAS4 (final int port) throws IOException {
     this.port = port;
     serverSocket = new ServerSocket ();
   }
@@ -73,7 +79,7 @@ public class MocAS4 {
 
     System.out.println ("Read the soap message");
     final SOAPMessage message = SoapUtil.createMessage (headers, pbis);
-    System.out.println (SoapUtil.prettyPrint (message.getSOAPPart ()));
+    System.out.println (prettyPrint (message.getSOAPPart ()));
     System.out.println ("Write the response");
     final byte[] successReceipt = EBMSUtils.createSuccessReceipt (message);
 
@@ -109,6 +115,30 @@ public class MocAS4 {
         next.write ((byte) read);
       }
       throw new EOFException ();
+    }
+  }
+
+  /**
+   * Print an org.w3c.dom.Node as XML
+   *
+   * @param node
+   * @return
+   */
+  public static String prettyPrint (final org.w3c.dom.Node node) {
+    Transformer transformer = null;
+    try {
+      transformer = TransformerFactory.newInstance ().newTransformer ();
+      transformer.setOutputProperty (OutputKeys.INDENT, "yes");
+      transformer.setOutputProperty (OutputKeys.DOCTYPE_PUBLIC, "yes");
+      transformer.setOutputProperty ("{http://xml.apache.org/xslt}indent-amount", "2");
+      final StreamResult result = new StreamResult (new StringWriter ());
+      final DOMSource source = new DOMSource (node);
+      transformer.transform (source, result);
+      final String xmlString = result.getWriter ().toString ();
+      return xmlString;
+    } catch (final Exception e) {
+      e.printStackTrace ();
+      return "";
     }
   }
 }
