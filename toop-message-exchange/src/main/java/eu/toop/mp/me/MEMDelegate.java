@@ -1,6 +1,7 @@
 package eu.toop.mp.me;
 
 import javax.annotation.Nonnull;
+import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import java.util.ArrayList;
 

@@ -73,6 +73,14 @@
       <groupId>com.helger</groupId>
       <artifactId>peppol-commons</artifactId>
     </dependency>
+
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-all</artifactId>
+      <version>4.1.21.Final</version>
+      <scope>test</scope>
+    </dependency>
+
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>

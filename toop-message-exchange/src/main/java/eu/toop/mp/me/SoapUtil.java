@@ -144,7 +144,6 @@ public class SoapUtil {
 
         String part = new String(partIdentifier, 2, index - 2).trim();
 
-        System.out.println(part);
         headers = new MimeHeaders();
         headers.addHeader("Content-Type", "multipart/related; boundary=\"" + part + "\"; type=\"application/soap+xml\"");
         return messageFactory.createMessage(headers, pushbackInputStream);

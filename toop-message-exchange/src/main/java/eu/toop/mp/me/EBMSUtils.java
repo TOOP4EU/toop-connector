@@ -171,8 +171,6 @@ public class EBMSUtils {
           .replace(keyMessageProps, generateMessageProperties(metadata))
           .replace(keyPartInfo, generatePartInfo(meMessage));
 
-      System.out.println(xml);
-
       DocumentBuilderFactory instance = DocumentBuilderFactory.newInstance();
       instance.setNamespaceAware(true);
       Document document = instance.newDocumentBuilder().parse(new ByteArrayInputStream(xml.getBytes(UTF_8)));

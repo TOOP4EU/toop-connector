@@ -2,13 +2,14 @@ package eu.toop.mp.me;
 
 import com.helger.peppol.identifier.factory.SimpleIdentifierFactory;
 import com.helger.peppol.identifier.generic.participant.SimpleParticipantIdentifier;
+import eu.toop.mp.me.mocAS4.MocAS4;
 import eu.toop.mp.r2d2client.IR2D2Endpoint;
 import eu.toop.mp.r2d2client.R2D2Endpoint;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.net.URL;
-import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
@@ -19,17 +20,25 @@ import java.security.cert.X509Certificate;
  * @date: 16.02.2018.
  */
 public class TestSendReceive {
+
+  private static MocAS4 mocAS4;
+
   /**
    * Create a moc server on localhost that reads and sends back a MEMessage.
    */
   @BeforeAll
   public static void prepare() throws Exception {
     int gwPort = 10001;
-    MocAS4 mocAS4 = new MocAS4(gwPort);
+    mocAS4 = new MocAS4(gwPort);
     mocAS4.start();
 
     //set the url of the gateway to the moc
     MessageExchangeEndpointConfig.GW_URL = new URL("http://localhost:" + gwPort);
+  }
+
+  @AfterAll
+  public static void tearDown() {
+    mocAS4.finish();
   }
 
   @Test
