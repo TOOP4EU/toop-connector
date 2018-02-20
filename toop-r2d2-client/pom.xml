@@ -64,6 +64,10 @@
       <groupId>com.helger</groupId>
       <artifactId>peppol-smp-client</artifactId>
     </dependency>
+    <dependency>
+      <groupId>eu.toop</groupId>
+      <artifactId>toop-mp-api</artifactId>
+    </dependency>
   
     <!-- Test only -->
     <dependency>

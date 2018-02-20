@@ -51,14 +51,9 @@
       <id>philip</id>
       <name>Philip Helger</name>
       <email>ph(at)helger.com</email>
-      <url>http://www.helger.com</url>
     </developer>
   </developers>
   <dependencies>
-    <dependency>
-      <groupId>eu.toop</groupId>
-      <artifactId>toop-r2d2-client</artifactId>
-    </dependency>
     <dependency>
       <groupId>com.helger</groupId>
       <artifactId>ph-commons</artifactId>
@@ -70,6 +65,14 @@
     <dependency>
       <groupId>com.helger</groupId>
       <artifactId>peppol-commons</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>eu.toop</groupId>
+      <artifactId>toop-mp-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>eu.toop</groupId>
+      <artifactId>toop-r2d2-client</artifactId>
     </dependency>
     <dependency>
       <groupId>javax.servlet</groupId>

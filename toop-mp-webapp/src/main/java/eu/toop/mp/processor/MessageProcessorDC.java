@@ -29,13 +29,13 @@ import eu.toop.commons.exchange.IMSDataRequest;
 import eu.toop.commons.exchange.IToopDataRequest;
 import eu.toop.commons.exchange.message.ToopMessageBuilder;
 import eu.toop.commons.exchange.mock.ToopDataRequest;
+import eu.toop.mp.api.R2D2Settings;
 import eu.toop.mp.me.GatewayRoutingMetadata;
 import eu.toop.mp.me.MEMDelegate;
 import eu.toop.mp.me.MEMessage;
 import eu.toop.mp.me.MEPayload;
 import eu.toop.mp.r2d2client.IR2D2Endpoint;
 import eu.toop.mp.r2d2client.R2D2Client;
-import eu.toop.mp.r2d2client.R2D2Settings;
 
 /**
  * The global message processor that handles DC requests. This is only the queue

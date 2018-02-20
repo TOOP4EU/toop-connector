@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package eu.toop.mp.r2d2client;
+package eu.toop.mp.api;
 
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;

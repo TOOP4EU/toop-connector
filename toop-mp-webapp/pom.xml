@@ -70,11 +70,15 @@
     </dependency>
     <dependency>
       <groupId>eu.toop</groupId>
-      <artifactId>toop-r2d2-client</artifactId>
+      <artifactId>toop-mp-api</artifactId>
     </dependency>
     <dependency>
       <groupId>eu.toop</groupId>
       <artifactId>toop-smm-client</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>eu.toop</groupId>
+      <artifactId>toop-r2d2-client</artifactId>
     </dependency>
     <dependency>
       <groupId>eu.toop</groupId>

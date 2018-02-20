@@ -54,6 +54,8 @@ import com.helger.peppol.identifier.generic.participant.IParticipantIdentifier;
 import com.helger.peppol.identifier.generic.process.IProcessIdentifier;
 import com.helger.peppol.smpclient.exception.SMPClientException;
 
+import eu.toop.mp.api.R2D2Settings;
+
 /**
  * The default implementation of {@link IR2D2Client}. It performs the query
  * every time and does not cache results!

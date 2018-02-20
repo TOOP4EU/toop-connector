@@ -23,11 +23,11 @@
     <artifactId>toop-mp-parent-pom</artifactId>
     <version>1.0.0-SNAPSHOT</version>
   </parent>
-  <artifactId>toop-dp-adapter</artifactId>
+  <artifactId>toop-mp-api</artifactId>
   <packaging>bundle</packaging>
-  <name>toop-dp-adapter</name>
-  <description>Contains the TOOP shared Data Producer adapter components</description>
-  <url>https://github.com/toop4eu/toop-message-processor/toop-dp-adapter</url>
+  <name>toop-mp-api</name>
+  <description>Contains the TOOP Data Consumer adapter components</description>
+  <url>https://github.com/toop4eu/toop-message-processor/toop-mp-api</url>
   <inceptionYear>2018</inceptionYear>
   <licenses>
     <license>
@@ -49,6 +49,10 @@
   </developers>
   <dependencies>
     <dependency>
+      <groupId>com.helger</groupId>
+      <artifactId>peppol-commons</artifactId>
+    </dependency>
+    <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
       <scope>provided</scope>
@@ -67,8 +71,8 @@
         <artifactId>maven-bundle-plugin</artifactId>
         <configuration>
           <instructions>
-            <Automatic-Module-Name>eu.toop.mp.dpadapter</Automatic-Module-Name>
-            <Export-Package>eu.toop.mp.dpadapter.*</Export-Package>
+            <Automatic-Module-Name>eu.toop.mp.api</Automatic-Module-Name>
+            <Export-Package>eu.toop.mp.api.*</Export-Package>
             <Import-Package>!javax.annotation.*,*</Import-Package>
           </instructions>
         </configuration>

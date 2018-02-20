@@ -5,6 +5,8 @@ import java.nio.charset.StandardCharsets;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
+import javax.annotation.Nonnull;
+
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -13,10 +15,10 @@ import org.slf4j.LoggerFactory;
 
 import com.helger.commons.mime.CMimeType;
 import com.helger.commons.mime.IMimeType;
-import com.helger.peppol.identifier.factory.SimpleIdentifierFactory;
-import com.helger.peppol.identifier.generic.participant.SimpleParticipantIdentifier;
+import com.helger.peppol.identifier.generic.participant.IParticipantIdentifier;
 import com.helger.scope.mock.ScopeAwareTestSetup;
 
+import eu.toop.mp.api.R2D2Settings;
 import eu.toop.mp.r2d2client.IR2D2Endpoint;
 import eu.toop.mp.r2d2client.R2D2Endpoint;
 
@@ -55,7 +57,7 @@ public class TestSendReceive {
   @Test
   public void testSendReceive () throws Exception {
     final GatewayRoutingMetadata metadata = new GatewayRoutingMetadata ("top-sercret-pdf-documents-only",
-                                                                        "dummy-process", sampleEndpoint ());
+                                                                        "dummy-process", _sampleEndpoint ());
 
     final String payloadId = "xmlpayload@dp";
     final IMimeType contentType = CMimeType.APPLICATION_XML;
@@ -73,8 +75,9 @@ public class TestSendReceive {
     // TODO: receive side is not implemented yet
   }
 
-  private IR2D2Endpoint sampleEndpoint () throws Exception {
-    final SimpleParticipantIdentifier identifier = SimpleIdentifierFactory.INSTANCE.createParticipantIdentifier ("var1",
+  @Nonnull
+  private IR2D2Endpoint _sampleEndpoint () throws Exception {
+    final IParticipantIdentifier identifier = R2D2Settings.getIdentifierFactory ().createParticipantIdentifier ("var1",
                                                                                                                  "var2");
 
     final X509Certificate x509 = (X509Certificate) CertificateFactory.getInstance ("X509")
