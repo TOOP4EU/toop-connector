@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import com.helger.commons.annotation.Nonempty;
 import com.helger.commons.concurrent.SimpleReadWriteLock;
+import com.helger.commons.debug.GlobalDebug;
 import com.helger.commons.state.ESuccess;
 import com.helger.commons.url.URLHelper;
 import com.helger.peppol.sml.ESML;
@@ -107,6 +108,14 @@ public final class MPConfig {
   @Nonnull
   public static ConfigFile getConfigFile () {
     return s_aRWLock.readLocked ( () -> s_aConfigFile);
+  }
+
+  public static boolean isGlobalDebug () {
+    return getConfigFile ().getAsBoolean ("global.debug", GlobalDebug.isDebugMode ());
+  }
+
+  public static boolean isGlobalProduction () {
+    return getConfigFile ().getAsBoolean ("global.production", GlobalDebug.isProductionMode ());
   }
 
   /**

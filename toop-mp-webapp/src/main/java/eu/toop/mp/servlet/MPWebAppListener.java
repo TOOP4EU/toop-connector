@@ -22,9 +22,12 @@ import javax.servlet.annotation.WebListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.helger.commons.debug.GlobalDebug;
 import com.helger.commons.id.factory.GlobalIDFactory;
 import com.helger.commons.id.factory.StringIDFromGlobalLongIDFactory;
 import com.helger.web.servlets.scope.WebScopeListener;
+
+import eu.toop.mp.api.MPConfig;
 
 /**
  * Global startup/shutdown listener for the whole web application. Extends from
@@ -42,6 +45,8 @@ public class MPWebAppListener extends WebScopeListener {
     s_aLogger.info ("MP WebApp startup");
 
     GlobalIDFactory.setPersistentStringIDFactory (new StringIDFromGlobalLongIDFactory ("toop-mp-"));
+    GlobalDebug.setDebugModeDirect (MPConfig.isGlobalDebug ());
+    GlobalDebug.setProductionModeDirect (MPConfig.isGlobalProduction ());
   }
 
   @Override
