@@ -29,13 +29,15 @@ import eu.toop.mp.processor.MessageProcessorDC;
  * This method is called by the <code>toop-interface</code> project in the
  * direction DC to DP.<br>
  * The input is an ASiC archive that contains the fields for a
- * {@link ToopRequestMessage} where only {@link IMSDataRequest} is used.
+ * {@link ToopRequestMessage} where only {@link IMSDataRequest} is used. If
+ * extracted successfully it is put in {@link MessageProcessorDC} for further
+ * processing.
  *
  * @author Philip Helger
  */
-@WebServlet("/dcinput")
+@WebServlet ("/dcinput")
 public class DCInputServlet extends HttpServlet {
-  private static final Logger s_aLogger = LoggerFactory.getLogger(DCInputServlet.class);
+  private static final Logger s_aLogger = LoggerFactory.getLogger (DCInputServlet.class);
 
   /**
    * This is a demo method to easily send an MSDataRequest to itself. Invoke with
@@ -43,60 +45,70 @@ public class DCInputServlet extends HttpServlet {
    * in production!
    */
   @Override
-  protected void doGet(final HttpServletRequest aHttpServletRequest, final HttpServletResponse aHttpServletResponse)
-      throws ServletException, IOException {
+  protected void doGet (final HttpServletRequest aHttpServletRequest,
+                        final HttpServletResponse aHttpServletResponse) throws ServletException, IOException {
     // XXX DEMO code!
-    // Put a fake DC request in the queue
-    if (aHttpServletRequest.getParameter("demo") != null) {
-      final MockHttpServletRequest aMockRequest = new MockHttpServletRequest();
-      final SignatureHelper aSH = new SignatureHelper(
-          FileHelper.getInputStream(new File("src/main/resources/demo-keystore.jks")), "password", null, "password");
+    if (aHttpServletRequest.getParameter ("demo") != null) {
+      // Put a fake DC request in the queue
+      final MockHttpServletRequest aMockRequest = new MockHttpServletRequest ();
+      final SignatureHelper aSH = new SignatureHelper (FileHelper.getInputStream (new File ("src/main/resources/demo-keystore.jks")),
+                                                       "password", null, "password");
 
-      try (final NonBlockingByteArrayOutputStream archiveOutput = new NonBlockingByteArrayOutputStream()) {
+      try (final NonBlockingByteArrayOutputStream archiveOutput = new NonBlockingByteArrayOutputStream ()) {
         // Create dummy request
-        ToopMessageBuilder.createRequestMessage(new MSDataRequest("DE", "foobar::urn:abc:whatsoever-document-type-ID",
-            "test::anyProcID", false, "msg-id-" + PDTFactory.getCurrentLocalDateTime().toString()), archiveOutput, aSH);
+        // TODO use correct document type ID/process ID
+        ToopMessageBuilder.createRequestMessage (new MSDataRequest ("DE", "foobar::urn:abc:whatsoever-document-type-ID",
+                                                                    "test::anyProcID", false,
+                                                                    "msg-id-" + PDTFactory.getCurrentLocalDateTime ()
+                                                                                          .toString ()),
+                                                 archiveOutput, aSH);
         // Get ASiC bytes
-        aMockRequest.setContent(archiveOutput.toByteArray());
+        aMockRequest.setContent (archiveOutput.toByteArray ());
       }
 
       // Post dummy request
-      doPost(aMockRequest, aHttpServletResponse);
+      doPost (aMockRequest, aHttpServletResponse);
+
+      if (aHttpServletResponse.getStatus () == HttpServletResponse.SC_NO_CONTENT) {
+        aHttpServletResponse.getWriter ()
+                            .println ("<html><body><h1>Demo request processed successfully!</h1></body></html>");
+        aHttpServletResponse.getWriter ().flush ();
+      }
     } else {
-      // Response with HTTP 405
-      super.doGet(aHttpServletRequest, aHttpServletResponse);
+      // Response with HTTP 405 (Method not supported)
+      super.doGet (aHttpServletRequest, aHttpServletResponse);
     }
   }
 
   @Override
-  protected void doPost(final HttpServletRequest aHttpServletRequest, final HttpServletResponse aHttpServletResponse)
-      throws ServletException, IOException {
-    final UnifiedResponse aUR = UnifiedResponse.createSimple(aHttpServletRequest);
+  protected void doPost (final HttpServletRequest aHttpServletRequest,
+                         final HttpServletResponse aHttpServletResponse) throws ServletException, IOException {
+    final UnifiedResponse aUR = UnifiedResponse.createSimple (aHttpServletRequest);
 
     // Parse POST data
-    final ToopRequestMessage aMsg = ToopMessageBuilder.parseRequestMessage(aHttpServletRequest.getInputStream(),
-        MSDataRequest.getDeserializerFunction());
+    final ToopRequestMessage aMsg = ToopMessageBuilder.parseRequestMessage (aHttpServletRequest.getInputStream (),
+                                                                            MSDataRequest.getDeserializerFunction ());
 
     if (aMsg == null) {
       // The message content is invalid
-      s_aLogger.error("The request does not contain an ASiC archive!");
-      aUR.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+      s_aLogger.error ("The request does not contain an ASiC archive!");
+      aUR.setStatus (HttpServletResponse.SC_BAD_REQUEST);
     } else {
-      final IMSDataRequest aMSRequest = aMsg.getMSDataRequest();
+      final IMSDataRequest aMSRequest = aMsg.getMSDataRequest ();
       if (aMSRequest == null) {
         // The message content is invalid
-        s_aLogger.error("The ASiC archive does not contain an MSDataRequest!");
-        aUR.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        s_aLogger.error ("The ASiC archive does not contain an MSDataRequest!");
+        aUR.setStatus (HttpServletResponse.SC_BAD_REQUEST);
       } else {
         // Enqueue to processor and we're good
-        MessageProcessorDC.getInstance().enqueue(aMSRequest);
+        MessageProcessorDC.getInstance ().enqueue (aMSRequest);
 
         // Done - no content
-        aUR.setStatus(HttpServletResponse.SC_NO_CONTENT);
+        aUR.setStatus (HttpServletResponse.SC_NO_CONTENT);
       }
     }
 
     // Done
-    aUR.applyToResponse(aHttpServletResponse);
+    aUR.applyToResponse (aHttpServletResponse);
   }
 }

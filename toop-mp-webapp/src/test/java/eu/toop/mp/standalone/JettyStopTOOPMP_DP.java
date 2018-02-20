@@ -20,7 +20,7 @@ import java.io.IOException;
 import com.helger.photon.jetty.JettyStopper;
 
 public final class JettyStopTOOPMP_DP {
-  public static void main(final String[] args) throws IOException {
-    new JettyStopper().setStopPort(8093).run();
+  public static void main (final String[] args) throws IOException {
+    new JettyStopper ().setStopPort (8093).run ();
   }
 }

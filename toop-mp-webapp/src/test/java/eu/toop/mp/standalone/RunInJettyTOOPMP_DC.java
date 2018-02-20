@@ -27,8 +27,8 @@ import com.helger.photon.jetty.JettyStarter;
  */
 @Immutable
 public final class RunInJettyTOOPMP_DC {
-  public static void main(final String[] args) throws Exception {
-    final JettyStarter js = new JettyStarter(RunInJettyTOOPMP_DC.class).setPort(8090).setStopPort(8092);
-    js.run();
+  public static void main (final String[] args) throws Exception {
+    final JettyStarter js = new JettyStarter (RunInJettyTOOPMP_DC.class).setPort (8090).setStopPort (8092);
+    js.run ();
   }
 }

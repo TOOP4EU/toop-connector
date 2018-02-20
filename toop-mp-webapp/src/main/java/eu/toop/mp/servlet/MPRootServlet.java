@@ -31,17 +31,17 @@ import com.helger.commons.string.StringHelper;
  *
  * @author Philip Helger
  */
-@WebServlet("")
+@WebServlet ("")
 public class MPRootServlet extends HttpServlet {
   @Override
-  protected void doGet(final HttpServletRequest req, final HttpServletResponse resp)
-      throws ServletException, IOException {
-    String sRedirectURL = req.getContextPath() + "/index.html";
+  protected void doGet (final HttpServletRequest req,
+                        final HttpServletResponse resp) throws ServletException, IOException {
+    String sRedirectURL = req.getContextPath () + "/index.html";
 
-    final String sQueryString = req.getQueryString();
-    if (StringHelper.hasText(sQueryString))
+    final String sQueryString = req.getQueryString ();
+    if (StringHelper.hasText (sQueryString))
       sRedirectURL += "?" + sQueryString;
 
-    resp.sendRedirect(sRedirectURL);
+    resp.sendRedirect (sRedirectURL);
   }
 }
