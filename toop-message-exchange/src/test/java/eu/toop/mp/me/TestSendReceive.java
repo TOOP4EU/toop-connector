@@ -18,7 +18,7 @@ import com.helger.commons.mime.IMimeType;
 import com.helger.peppol.identifier.generic.participant.IParticipantIdentifier;
 import com.helger.scope.mock.ScopeAwareTestSetup;
 
-import eu.toop.mp.api.R2D2Settings;
+import eu.toop.mp.api.MPSettings;
 import eu.toop.mp.r2d2client.IR2D2Endpoint;
 import eu.toop.mp.r2d2client.R2D2Endpoint;
 
@@ -77,7 +77,7 @@ public class TestSendReceive {
 
   @Nonnull
   private IR2D2Endpoint _sampleEndpoint () throws Exception {
-    final IParticipantIdentifier identifier = R2D2Settings.getIdentifierFactory ().createParticipantIdentifier ("var1",
+    final IParticipantIdentifier identifier = MPSettings.getIdentifierFactory ().createParticipantIdentifier ("var1",
                                                                                                                  "var2");
 
     final X509Certificate x509 = (X509Certificate) CertificateFactory.getInstance ("X509")

@@ -28,7 +28,7 @@ import com.helger.commons.exception.InitializationException;
 import com.helger.peppol.identifier.generic.participant.IParticipantIdentifier;
 import com.helger.security.certificate.CertificateHelper;
 
-import eu.toop.mp.api.R2D2Settings;
+import eu.toop.mp.api.MPSettings;
 
 /**
  * Test class for class {@link R2D2Endpoint}.
@@ -68,7 +68,7 @@ public final class R2D2EndpointTest {
 
   @Test
   public void testGetter () {
-    final IParticipantIdentifier aPI = R2D2Settings.getIdentifierFactory ()
+    final IParticipantIdentifier aPI = MPSettings.getIdentifierFactory ()
                                                    .createParticipantIdentifierWithDefaultScheme ("1234:test");
     final String sTransportProtocol = "AS4";
     final String sEndpointURL = "http://example.org/as4";
@@ -81,9 +81,9 @@ public final class R2D2EndpointTest {
 
   @Test
   public void testEquals () {
-    final IParticipantIdentifier aPI = R2D2Settings.getIdentifierFactory ()
+    final IParticipantIdentifier aPI = MPSettings.getIdentifierFactory ()
                                                    .createParticipantIdentifierWithDefaultScheme ("1234:test");
-    final IParticipantIdentifier aPI2 = R2D2Settings.getIdentifierFactory ()
+    final IParticipantIdentifier aPI2 = MPSettings.getIdentifierFactory ()
                                                     .createParticipantIdentifierWithDefaultScheme ("1234:test2");
     final String sTransportProtocol = "AS4";
     final String sTransportProtocol2 = "AS2";

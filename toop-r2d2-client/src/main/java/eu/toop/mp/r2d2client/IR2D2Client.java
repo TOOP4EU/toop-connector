@@ -79,14 +79,11 @@ public interface IR2D2Client {
    *          The document type ID to be queried. May not be <code>null</code>.
    * @param aProcessID
    *          The process ID to be queried. May not be <code>null</code>.
-   * @param bProductionSystem
-   *          <code>true</code> to query the production system (using SML) or
-   *          <code>false</code> to query the test system (using SMK).
    * @return A non-<code>null</code> but maybe empty list of all matching
    *         endpoints.
    */
   @Nonnull
   List<IR2D2Endpoint> getEndpoints (@Nonnull IParticipantIdentifier aRecipientID,
                                     @Nonnull IDocumentTypeIdentifier aDocumentTypeID,
-                                    @Nonnull IProcessIdentifier aProcessID, boolean bProductionSystem);
+                                    @Nonnull IProcessIdentifier aProcessID);
 }

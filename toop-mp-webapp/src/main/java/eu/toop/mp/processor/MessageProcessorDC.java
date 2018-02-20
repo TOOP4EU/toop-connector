@@ -29,7 +29,7 @@ import eu.toop.commons.exchange.IMSDataRequest;
 import eu.toop.commons.exchange.IToopDataRequest;
 import eu.toop.commons.exchange.message.ToopMessageBuilder;
 import eu.toop.commons.exchange.mock.ToopDataRequest;
-import eu.toop.mp.api.R2D2Settings;
+import eu.toop.mp.api.MPSettings;
 import eu.toop.mp.me.GatewayRoutingMetadata;
 import eu.toop.mp.me.MEMDelegate;
 import eu.toop.mp.me.MEMessage;
@@ -69,9 +69,9 @@ public class MessageProcessorDC extends AbstractGlobalWebSingleton {
       // 2. invoke R2D2 client
       ICommonsList<IR2D2Endpoint> aEndpoints;
       {
-        final IDocumentTypeIdentifier aDocTypeID = R2D2Settings.getIdentifierFactory ()
+        final IDocumentTypeIdentifier aDocTypeID = MPSettings.getIdentifierFactory ()
                                                                .parseDocumentTypeIdentifier (aCurrentObject.getDocumentTypeID ());
-        final IProcessIdentifier aProcessID = R2D2Settings.getIdentifierFactory ()
+        final IProcessIdentifier aProcessID = MPSettings.getIdentifierFactory ()
                                                           .parseProcessIdentifier (aCurrentObject.getProcessID ());
         aEndpoints = new R2D2Client ().getEndpoints (aCurrentObject.getDestinationCountryCode (), aDocTypeID,
                                                      aProcessID, aCurrentObject.isProduction ());
