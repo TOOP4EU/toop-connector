@@ -85,11 +85,11 @@ public class MessageProcessorDC extends AbstractGlobalWebSingleton {
       ICommonsList<IR2D2Endpoint> aEndpoints;
       {
         final IDocumentTypeIdentifier aDocTypeID = MPSettings.getIdentifierFactory ()
-                                                               .parseDocumentTypeIdentifier (aCurrentObject.getDocumentTypeID ());
+                                                             .parseDocumentTypeIdentifier (aCurrentObject.getDocumentTypeID ());
         final IProcessIdentifier aProcessID = MPSettings.getIdentifierFactory ()
-                                                          .parseProcessIdentifier (aCurrentObject.getProcessID ());
+                                                        .parseProcessIdentifier (aCurrentObject.getProcessID ());
         aEndpoints = new R2D2Client ().getEndpoints (aCurrentObject.getDestinationCountryCode (), aDocTypeID,
-                                                     aProcessID, aCurrentObject.isProduction ());
+                                                     aProcessID);
         s_aLogger.info (sLogPrefix + "R2D2 found the following endpoints[" + aEndpoints.size () + "]: " + aEndpoints);
       }
 

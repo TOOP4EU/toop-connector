@@ -28,9 +28,12 @@ import org.slf4j.LoggerFactory;
 
 import com.helger.commons.datetime.PDTFactory;
 import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
+import com.helger.commons.mime.CMimeType;
 import com.helger.servlet.mock.MockHttpServletRequest;
 import com.helger.servlet.response.UnifiedResponse;
 
+import eu.toop.commons.doctype.EToopDocumentType;
+import eu.toop.commons.doctype.EToopProcess;
 import eu.toop.commons.exchange.IMSDataRequest;
 import eu.toop.commons.exchange.message.ToopMessageBuilder;
 import eu.toop.commons.exchange.message.ToopRequestMessage;
@@ -68,8 +71,8 @@ public class DCInputServlet extends HttpServlet {
       try (final NonBlockingByteArrayOutputStream archiveOutput = new NonBlockingByteArrayOutputStream ()) {
         // Create dummy request
         // TODO use correct document type ID/process ID
-        ToopMessageBuilder.createRequestMessage (new MSDataRequest ("DE", "foobar::urn:abc:whatsoever-document-type-ID",
-                                                                    "test::anyProcID", false,
+        ToopMessageBuilder.createRequestMessage (new MSDataRequest ("DE", EToopDocumentType.DOCTYPE1.getURIEncoded (),
+                                                                    EToopProcess.PROC.getURIEncoded (),
                                                                     "msg-id-" + PDTFactory.getCurrentLocalDateTime ()
                                                                                           .toString ()),
                                                  archiveOutput, MPConfig.getSignatureHelper ());
@@ -81,6 +84,8 @@ public class DCInputServlet extends HttpServlet {
       doPost (aMockRequest, aHttpServletResponse);
 
       if (aHttpServletResponse.getStatus () == HttpServletResponse.SC_NO_CONTENT) {
+        aHttpServletResponse.setStatus (HttpServletResponse.SC_OK);
+        aHttpServletResponse.setContentType (CMimeType.TEXT_HTML.getAsString ());
         aHttpServletResponse.getWriter ()
                             .println ("<html><body><h1>Demo request processed successfully!</h1></body></html>");
         aHttpServletResponse.getWriter ().flush ();
@@ -97,8 +102,10 @@ public class DCInputServlet extends HttpServlet {
     final UnifiedResponse aUR = UnifiedResponse.createSimple (aHttpServletRequest);
 
     // Parse POST data
+    // No ToopDataRequest contained here
     final ToopRequestMessage aMsg = ToopMessageBuilder.parseRequestMessage (aHttpServletRequest.getInputStream (),
-                                                                            MSDataRequest.getDeserializerFunction ());
+                                                                            MSDataRequest.getDeserializerFunction (),
+                                                                            null);
 
     if (aMsg == null) {
       // The message content is invalid
