@@ -95,7 +95,7 @@ public class MessageProcessorDC extends AbstractGlobalWebSingleton {
         for (final IR2D2Endpoint aEP : aEndpoints) {
           final GatewayRoutingMetadata metadata = new GatewayRoutingMetadata (aCurrentObject.getDocumentTypeID (),
                                                                               aCurrentObject.getProcessID (), aEP);
-          MEMDelegate.get ().sendMessage (metadata, meMessage);
+          MEMDelegate.getInstance ().sendMessage (metadata, meMessage);
         }
       }
     }

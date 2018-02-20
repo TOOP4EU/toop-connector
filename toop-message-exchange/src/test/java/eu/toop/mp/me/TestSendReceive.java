@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -14,6 +15,7 @@ import com.helger.commons.mime.CMimeType;
 import com.helger.commons.mime.IMimeType;
 import com.helger.peppol.identifier.factory.SimpleIdentifierFactory;
 import com.helger.peppol.identifier.generic.participant.SimpleParticipantIdentifier;
+import com.helger.scope.mock.ScopeAwareTestSetup;
 
 import eu.toop.mp.r2d2client.IR2D2Endpoint;
 import eu.toop.mp.r2d2client.R2D2Endpoint;
@@ -29,16 +31,25 @@ public class TestSendReceive {
   private static final Logger LOG = LoggerFactory.getLogger (TestSendReceive.class);
 
   /**
-   * Create a moc server on localhost that reads and sends back a MEMessage.
+   * Create a mock server on localhost that reads and sends back a MEMessage.
+   * @throws Exception on error
    */
   @BeforeAll
   public static void prepare () throws Exception {
     final int gwPort = 10001;
-    final MockAS4 mocAS4 = new MockAS4 (gwPort);
-    mocAS4.start ();
+    final MockAS4 mockAS4 = new MockAS4 (gwPort);
+    mockAS4.start ();
 
     // set the url of the gateway to the moc
     MessageExchangeEndpointConfig.GW_URL = new URL ("http://localhost:" + gwPort);
+
+    ScopeAwareTestSetup.setupScopeTests ();
+  }
+
+  @AfterAll
+  public static void shutdown ()
+  {
+    ScopeAwareTestSetup.shutdownScopeTests ();
   }
 
   @Test
@@ -53,11 +64,11 @@ public class TestSendReceive {
     final MEPayload payload = new MEPayload (contentType, payloadId, payloadData);
     final MEMessage meMessage = new MEMessage (payload);
 
-    MEMDelegate.get ().sendMessage (metadata, meMessage);
+    MEMDelegate.getInstance ().sendMessage (metadata, meMessage);
 
     final IMessageHandler handler = meMessage1 -> LOG.info ("hooray! I Got a message");
 
-    MEMDelegate.get ().registerMessageHandler (handler);
+    MEMDelegate.getInstance ().registerMessageHandler (handler);
 
     // TODO: receive side is not implemented yet
   }

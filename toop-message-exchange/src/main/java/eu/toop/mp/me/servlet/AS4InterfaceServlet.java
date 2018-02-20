@@ -5,6 +5,7 @@ import java.io.OutputStream;
 import java.util.Enumeration;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -23,6 +24,7 @@ import eu.toop.mp.me.SoapUtil;
  * @author: myildiz
  * @date: 15.02.2018.
  */
+@WebServlet ("/as4Interface")
 public class AS4InterfaceServlet extends HttpServlet {
   private static final Logger LOG = LoggerFactory.getLogger (AS4InterfaceServlet.class);
 
@@ -40,7 +42,7 @@ public class AS4InterfaceServlet extends HttpServlet {
     final MimeHeaders mimeHeaders = _readMimeHeaders (req);
     try {
       final SOAPMessage message = SoapUtil.createMessage (mimeHeaders, req.getInputStream ());
-      MEMDelegate.get ().dispatchInboundMessage (message);
+      MEMDelegate.getInstance ().dispatchInboundMessage (message);
       final byte[] successReceipt = EBMSUtils.createSuccessReceipt (message);
 
       final OutputStream aOS = resp.getOutputStream ();
