@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import com.helger.commons.annotation.Nonempty;
 import com.helger.commons.concurrent.SimpleReadWriteLock;
+import com.helger.commons.debug.GlobalDebug;
 import com.helger.commons.state.ESuccess;
 import com.helger.commons.url.URLHelper;
 import com.helger.peppol.sml.ESML;
@@ -109,6 +110,14 @@ public final class MPConfig {
     return s_aRWLock.readLocked ( () -> s_aConfigFile);
   }
 
+  public static boolean isGlobalDebug () {
+    return getConfigFile ().getAsBoolean ("global.debug", GlobalDebug.isDebugMode ());
+  }
+
+  public static boolean isGlobalProduction () {
+    return getConfigFile ().getAsBoolean ("global.production", GlobalDebug.isProductionMode ());
+  }
+
   /**
    * @return The PEPPOL Directory base URL for R2D2.Should never end with a slash.
    *         Example: {@link #DEFAULT_DIRECTORY_BASE_URL}.
@@ -166,5 +175,82 @@ public final class MPConfig {
     // E.g. http://smp.central.toop
     final String sURI = getConfigFile ().getAsString ("mp.r2d2.smp.url", DEFAULT_SMP_URI);
     return URLHelper.getAsURI (sURI);
+  }
+
+  /**
+   * Get the overall protocol to be used. Depending on that output different other
+   * properties might be queried.
+   *
+   * @return The overall protocol to use. Never <code>null</code>.
+   */
+  @Nonnull
+  public static EMPProtocol getMEMProtocol () {
+    final String sID = getConfigFile ().getAsString ("mp.mem.protocol", EMPProtocol.DEFAULT.getID ());
+    final EMPProtocol eProtocol = EMPProtocol.getFromIDOrNull (sID);
+    if (eProtocol == null)
+      throw new IllegalStateException ("Failed to resolve protocol with ID '" + sID + "'");
+    return eProtocol;
+  }
+
+  /**
+   *
+   * @return The basic AS4 interface that must be fulfilled. Never
+   *         <code>null</code>.
+   */
+  @Nonnull
+  public static EMPAS4Interface getMEMAS4Interface () {
+    final String sID = getConfigFile ().getAsString ("mp.mem.as4.interface", EMPAS4Interface.DEFAULT.getID ());
+    final EMPAS4Interface eProtocol = EMPAS4Interface.getFromIDOrNull (sID);
+    if (eProtocol == null)
+      throw new IllegalStateException ("Failed to resolve AS4 interface with ID '" + sID + "'");
+    return eProtocol;
+  }
+
+  // GW_URL
+  @Nullable
+  public static String getMEMAS4Endpoint () {
+    return getConfigFile ().getAsString ("mp.mem.as4.endpoint");
+  }
+
+  // ME_NAME
+  @Nullable
+  public static String getMEMAS4IDSuffix () {
+    return getConfigFile ().getAsString ("mp.mem.as4.idsuffix");
+  }
+
+  // ME_PARTY_ID
+  @Nullable
+  public static String getMEMAS4FromPartyID () {
+    return getConfigFile ().getAsString ("mp.mem.as4.from.partyid");
+  }
+
+  // ME_PARTY_ROLE
+  @Nullable
+  public static String getMEMAS4FromRole () {
+    return getConfigFile ().getAsString ("mp.mem.as4.from.role");
+  }
+
+  // GW_PARTY_ID
+  @Nullable
+  public static String getMEMAS4ToPartyID () {
+    return getConfigFile ().getAsString ("mp.mem.as4.to.partyid");
+  }
+
+  // GW_PARTY_ROLE
+  @Nullable
+  public static String getMEMAS4ToRole () {
+    return getConfigFile ().getAsString ("mp.mem.as4.to.role");
+  }
+
+  // SUBMIT_ACTION
+  @Nullable
+  public static String getMEMAS4Action () {
+    return getConfigFile ().getAsString ("mp.mem.as4.action");
+  }
+
+  // SUBMIT_SERVICE
+  @Nullable
+  public static String getMEMAS4Service () {
+    return getConfigFile ().getAsString ("mp.mem.as4.service");
   }
 }

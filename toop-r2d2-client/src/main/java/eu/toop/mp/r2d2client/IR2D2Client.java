@@ -51,17 +51,13 @@ public interface IR2D2Client {
    *          The document type ID to be queried. May not be <code>null</code>.
    * @param aProcessID
    *          The process ID to be queried. May not be <code>null</code>.
-   * @param bProductionSystem
-   *          <code>true</code> to query the production system (using production
-   *          PEPPOL Directory and SML) or <code>false</code> to query the test
-   *          system (using test PEPPOL Directory and SMK).
    * @return A non-<code>null</code> but maybe empty list of all matching
    *         endpoints.
    */
   @Nonnull
   List<IR2D2Endpoint> getEndpoints (@Nonnull @Nonempty String sCountryCode,
                                     @Nonnull IDocumentTypeIdentifier aDocumentTypeID,
-                                    @Nonnull IProcessIdentifier aProcessID, boolean bProductionSystem);
+                                    @Nonnull IProcessIdentifier aProcessID);
 
   /**
    * Get a list of all endpoints that match the specified requirements. This is

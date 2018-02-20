@@ -1,3 +1,18 @@
+/**
+ * Copyright (C) 2018 toop.eu
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package eu.toop.mp.processor;
 
 import java.util.UUID;
@@ -70,11 +85,11 @@ public class MessageProcessorDC extends AbstractGlobalWebSingleton {
       ICommonsList<IR2D2Endpoint> aEndpoints;
       {
         final IDocumentTypeIdentifier aDocTypeID = MPSettings.getIdentifierFactory ()
-                                                               .parseDocumentTypeIdentifier (aCurrentObject.getDocumentTypeID ());
+                                                             .parseDocumentTypeIdentifier (aCurrentObject.getDocumentTypeID ());
         final IProcessIdentifier aProcessID = MPSettings.getIdentifierFactory ()
-                                                          .parseProcessIdentifier (aCurrentObject.getProcessID ());
+                                                        .parseProcessIdentifier (aCurrentObject.getProcessID ());
         aEndpoints = new R2D2Client ().getEndpoints (aCurrentObject.getDestinationCountryCode (), aDocTypeID,
-                                                     aProcessID, aCurrentObject.isProduction ());
+                                                     aProcessID);
         s_aLogger.info (sLogPrefix + "R2D2 found the following endpoints[" + aEndpoints.size () + "]: " + aEndpoints);
       }
 

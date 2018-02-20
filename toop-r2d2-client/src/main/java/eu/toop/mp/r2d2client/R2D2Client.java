@@ -88,9 +88,6 @@ public class R2D2Client implements IR2D2Client {
    *          <code>null</code>.
    * @param aDocumentTypeID
    *          Document type ID to query. May not be <code>null</code>.
-   * @param bProductionSystem
-   *          <code>true</code> to query production PEPPOL Directory or
-   *          <code>false</code> to query test PEPPOL Directory
    * @return A non-<code>null</code> but maybe empty set of Participant IDs.
    */
   @Nonnull
@@ -172,8 +169,7 @@ public class R2D2Client implements IR2D2Client {
   @ReturnsMutableCopy
   public ICommonsList<IR2D2Endpoint> getEndpoints (@Nonnull @Nonempty final String sCountryCode,
                                                    @Nonnull final IDocumentTypeIdentifier aDocumentTypeID,
-                                                   @Nonnull final IProcessIdentifier aProcessID,
-                                                   final boolean bProductionSystem) {
+                                                   @Nonnull final IProcessIdentifier aProcessID) {
     ValueEnforcer.notEmpty (sCountryCode, "CountryCode");
     ValueEnforcer.isTrue (sCountryCode.length () == 2, "CountryCode must have length 2");
     ValueEnforcer.notNull (aDocumentTypeID, "DocumentTypeID");
