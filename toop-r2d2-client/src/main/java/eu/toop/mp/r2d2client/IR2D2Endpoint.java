@@ -31,8 +31,7 @@ import com.helger.peppol.identifier.generic.participant.IParticipantIdentifier;
  * @author Philip Helger
  */
 @MustImplementEqualsAndHashcode
-public interface IR2D2Endpoint extends Serializable
-{
+public interface IR2D2Endpoint extends Serializable {
   /**
    * @return The participant or service group as specified in the constructor.
    *         Never <code>null</code>.
@@ -49,8 +48,8 @@ public interface IR2D2Endpoint extends Serializable
   String getTransportProtocol ();
 
   /**
-   * @return The endpoint URL from the constructor. Neither <code>null</code>
-   *         nor empty.
+   * @return The endpoint URL from the constructor. Neither <code>null</code> nor
+   *         empty.
    */
   @Nonnull
   @Nonempty

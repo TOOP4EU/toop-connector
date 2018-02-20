@@ -1,81 +1,62 @@
 package eu.toop.mp.me;
 
-import org.w3c.dom.NodeList;
+import java.util.ArrayList;
+import java.util.List;
 
-import javax.xml.namespace.NamespaceContext;
+import javax.annotation.Nonnull;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import com.helger.xml.namespace.MapBasedNamespaceContext;
 
 /**
  * @author: myildiz
  * @date: 15.02.2018.
  */
 public class SoapXPathUtil {
-  private static XPath xPath = createAS4AwareXpath();
+  private static final XPath XPATH;
 
-  public static XPath createAS4AwareXpath() {
-    XPath xPath = XPathFactory.newInstance().newXPath();
-    xPath.setNamespaceContext(new SoapNamespaceContext());
-    return xPath;
+  static {
+    XPATH = XPathFactory.newInstance ().newXPath ();
+    final MapBasedNamespaceContext aNamespaceCtx = new MapBasedNamespaceContext ();
+    // TODO add if needed
+    XPATH.setNamespaceContext (aNamespaceCtx);
   }
 
-  public static <T> T findSingleNode(org.w3c.dom.Node node, String xpath) {
+  @Nonnull
+  public static <T> T findSingleNode (@Nonnull final Node node,
+                                     @Nonnull final String xpath) throws IllegalStateException {
     try {
-      Object o = xPath.evaluate(xpath, node, XPathConstants.NODE);
+      final Object o = XPATH.evaluate (xpath, node, XPathConstants.NODE);
       if (o == null)
-        throw new RuntimeException("No match for [" + xpath + "]");
+        throw new IllegalStateException ("No match for [" + xpath + "]");
 
       return (T) o;
-    } catch (XPathExpressionException e) {
-      throw new RuntimeException(e);
+    } catch (final XPathExpressionException e) {
+      throw new IllegalStateException (e);
     }
   }
 
-  public static <T> List<T> listNodes(org.w3c.dom.Node node, String xpath) {
+  @Nonnull
+  public static List<Node> listNodes (@Nonnull final Node node,
+                                      @Nonnull final String xpath) throws IllegalStateException {
     try {
-      Object o = xPath.evaluate(xpath, node, XPathConstants.NODESET);
+      final NodeList o = (NodeList) XPATH.evaluate (xpath, node, XPathConstants.NODESET);
       if (o == null)
-        throw new RuntimeException("No match for [" + xpath + "]");
+        throw new IllegalStateException ("No match for [" + xpath + "]");
 
-      NodeList list = (NodeList) o;
-
-      List<T> els = new ArrayList<>();
-      for (int i = 0; i < list.getLength(); ++i) {
-        els.add((T) ((NodeList) o).item(i));
+      final List<Node> els = new ArrayList<> ();
+      for (int i = 0; i < o.getLength (); ++i) {
+        els.add (o.item (i));
       }
       return els;
-    } catch (XPathExpressionException e) {
-      throw new RuntimeException(e);
+    } catch (final XPathExpressionException e) {
+      throw new IllegalStateException (e);
     }
   }
-
-
-  static class SoapNamespaceContext implements NamespaceContext {
-    private HashMap<String, String> maps = new HashMap<>();
-
-    protected SoapNamespaceContext() {
-    }
-
-    @Override
-    public String getNamespaceURI(String prefix) {
-      return "*";
-    }
-
-    @Override
-    public String getPrefix(String namespace) {
-      return maps.get("namespace");
-    }
-
-    @Override
-    public Iterator getPrefixes(String namespace) {
-      return null;
-    }
-  }
-
 }

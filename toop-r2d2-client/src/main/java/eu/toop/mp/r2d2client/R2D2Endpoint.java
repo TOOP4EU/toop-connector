@@ -35,8 +35,7 @@ import com.helger.peppol.identifier.generic.participant.IParticipantIdentifier;
  */
 @Immutable
 @MustImplementEqualsAndHashcode
-public class R2D2Endpoint implements IR2D2Endpoint
-{
+public class R2D2Endpoint implements IR2D2Endpoint {
   private final IParticipantIdentifier m_aParticipantID;
   private final String m_sTransportProtocol;
   private final String m_sEndpointURL;
@@ -46,22 +45,20 @@ public class R2D2Endpoint implements IR2D2Endpoint
    * Constructor
    *
    * @param aParticipantID
-   *        The participant ID to which this endpoint belongs.
+   *          The participant ID to which this endpoint belongs.
    * @param sTransportProtocol
-   *        The transport protocol from the SMP endpoint. May neither be
-   *        <code>null</code> nor empty.
+   *          The transport protocol from the SMP endpoint. May neither be
+   *          <code>null</code> nor empty.
    * @param sEndpointURL
-   *        The endpoint URL from the SMP endpoint. May neither be
-   *        <code>null</code> nor empty.
+   *          The endpoint URL from the SMP endpoint. May neither be
+   *          <code>null</code> nor empty.
    * @param aCert
-   *        The encoded certificate from the SMP endpoint. May not be
-   *        <code>null</code>.
+   *          The encoded certificate from the SMP endpoint. May not be
+   *          <code>null</code>.
    */
   public R2D2Endpoint (@Nonnull final IParticipantIdentifier aParticipantID,
-                       @Nonnull @Nonempty final String sTransportProtocol,
-                       @Nonnull @Nonempty final String sEndpointURL,
-                       @Nonnull final X509Certificate aCert)
-  {
+                       @Nonnull @Nonempty final String sTransportProtocol, @Nonnull @Nonempty final String sEndpointURL,
+                       @Nonnull final X509Certificate aCert) {
     ValueEnforcer.notNull (aParticipantID, "ParticipantID");
     ValueEnforcer.notEmpty (sTransportProtocol, "TransportProtocol");
     ValueEnforcer.notEmpty (sEndpointURL, "EndpointURL");
@@ -73,62 +70,48 @@ public class R2D2Endpoint implements IR2D2Endpoint
   }
 
   @Nonnull
-  public IParticipantIdentifier getParticipantID ()
-  {
+  public IParticipantIdentifier getParticipantID () {
     return m_aParticipantID;
   }
 
   @Nonnull
   @Nonempty
-  public String getTransportProtocol ()
-  {
+  public String getTransportProtocol () {
     return m_sTransportProtocol;
   }
 
   @Nonnull
   @Nonempty
-  public String getEndpointURL ()
-  {
+  public String getEndpointURL () {
     return m_sEndpointURL;
   }
 
   @Nonnull
-  public X509Certificate getCertificate ()
-  {
+  public X509Certificate getCertificate () {
     return m_aCert;
   }
 
   @Override
-  public boolean equals (final Object o)
-  {
+  public boolean equals (final Object o) {
     if (o == this)
       return true;
     if (o == null || !getClass ().equals (o.getClass ()))
       return false;
     final R2D2Endpoint rhs = (R2D2Endpoint) o;
-    return m_aParticipantID.equals (rhs.m_aParticipantID) &&
-           m_sTransportProtocol.equals (rhs.m_sTransportProtocol) &&
-           m_sEndpointURL.equals (rhs.m_sEndpointURL) &&
-           m_aCert.equals (rhs.m_aCert);
+    return m_aParticipantID.equals (rhs.m_aParticipantID) && m_sTransportProtocol.equals (rhs.m_sTransportProtocol)
+           && m_sEndpointURL.equals (rhs.m_sEndpointURL) && m_aCert.equals (rhs.m_aCert);
   }
 
   @Override
-  public int hashCode ()
-  {
-    return new HashCodeGenerator (this).append (m_aParticipantID)
-                                       .append (m_sTransportProtocol)
-                                       .append (m_sEndpointURL)
-                                       .append (m_aCert)
-                                       .getHashCode ();
+  public int hashCode () {
+    return new HashCodeGenerator (this).append (m_aParticipantID).append (m_sTransportProtocol).append (m_sEndpointURL)
+                                       .append (m_aCert).getHashCode ();
   }
 
   @Override
-  public String toString ()
-  {
+  public String toString () {
     return new ToStringGenerator (this).append ("ParticipantID", m_aParticipantID)
                                        .append ("TransportProtocol", m_sTransportProtocol)
-                                       .append ("EndpointURL", m_sEndpointURL)
-                                       .append ("Cert", m_aCert)
-                                       .getToString ();
+                                       .append ("EndpointURL", m_sEndpointURL).append ("Cert", m_aCert).getToString ();
   }
 }

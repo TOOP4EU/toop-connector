@@ -16,19 +16,18 @@
     limitations under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>eu.toop</groupId>
     <artifactId>toop-mp-parent-pom</artifactId>
     <version>1.0.0-SNAPSHOT</version>
   </parent>
-  <artifactId>toop-message-exchange</artifactId>
+  <artifactId>toop-mp-api</artifactId>
   <packaging>bundle</packaging>
-  <name>toop-message-exchange</name>
-  <description>Contains the TOOP message exchange</description>
-  <url>https://github.com/toop4eu/toop-message-processor/toop-message-exchange</url>
+  <name>toop-mp-api</name>
+  <description>Contains the TOOP Data Consumer adapter components</description>
+  <url>https://github.com/toop4eu/toop-message-processor/toop-mp-api</url>
   <inceptionYear>2018</inceptionYear>
   <licenses>
     <license>
@@ -43,11 +42,6 @@
   </organization>
   <developers>
     <developer>
-      <id>myildiz83</id>
-      <name>Muhammet YILDIZ</name>
-      <email>myildiz83(at)gmail.com</email>
-    </developer>
-    <developer>
       <id>philip</id>
       <name>Philip Helger</name>
       <email>ph(at)helger.com</email>
@@ -56,38 +50,13 @@
   <dependencies>
     <dependency>
       <groupId>com.helger</groupId>
-      <artifactId>ph-commons</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.helger</groupId>
-      <artifactId>ph-scopes</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.helger</groupId>
       <artifactId>peppol-commons</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>io.netty</groupId>
-      <artifactId>netty-all</artifactId>
-      <version>4.1.21.Final</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>eu.toop</groupId>
-      <artifactId>toop-mp-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>eu.toop</groupId>
-      <artifactId>toop-r2d2-client</artifactId>
     </dependency>
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
       <scope>provided</scope>
     </dependency>
-    
     <!-- Test only -->
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -102,8 +71,8 @@
         <artifactId>maven-bundle-plugin</artifactId>
         <configuration>
           <instructions>
-            <Automatic-Module-Name>eu.toop.mp.me</Automatic-Module-Name>
-            <Export-Package>eu.toop.mp.me.*</Export-Package>
+            <Automatic-Module-Name>eu.toop.mp.api</Automatic-Module-Name>
+            <Export-Package>eu.toop.mp.api.*</Export-Package>
             <Import-Package>!javax.annotation.*,*</Import-Package>
           </instructions>
         </configuration>

@@ -1,5 +1,7 @@
 package eu.toop.mp.me;
 
+import javax.annotation.Nonnull;
+
 /**
  * @author: myildiz
  * @date: 15.02.2018.
@@ -7,7 +9,8 @@ package eu.toop.mp.me;
 public interface IMessageHandler {
   /**
    * implement this method to receive messages when an inbound message arrives to the AS4 endpoint
-   * @param meMessage the object that contains the payloads and their metadata
+   * @param meMessage the object that contains the payloads and their metadata´
+   * @throws Exception in case of error
    */
-  void handleMessage(MEMessage meMessage);
+  void handleMessage(@Nonnull MEMessage meMessage) throws Exception;
 }

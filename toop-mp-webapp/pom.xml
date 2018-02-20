@@ -16,7 +16,8 @@
     limitations under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>eu.toop</groupId>
@@ -47,7 +48,6 @@
       <id>philip</id>
       <name>Philip Helger</name>
       <email>ph(at)helger.com</email>
-      <url>http://www.helger.com</url>
     </developer>
     <developer>
       <id>jerry</id>
@@ -57,8 +57,20 @@
 
   <dependencies>
     <dependency>
+      <groupId>com.helger</groupId>
+      <artifactId>ph-servlet</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.helger</groupId>
+      <artifactId>ph-web</artifactId>
+    </dependency>
+    <dependency>
       <groupId>eu.toop</groupId>
-      <artifactId>toop-r2d2-client</artifactId>
+      <artifactId>toop-commons</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>eu.toop</groupId>
+      <artifactId>toop-mp-api</artifactId>
     </dependency>
     <dependency>
       <groupId>eu.toop</groupId>
@@ -66,11 +78,7 @@
     </dependency>
     <dependency>
       <groupId>eu.toop</groupId>
-      <artifactId>toop-dc-adapter</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>eu.toop</groupId>
-      <artifactId>toop-dp-adapter</artifactId>
+      <artifactId>toop-r2d2-client</artifactId>
     </dependency>
     <dependency>
       <groupId>eu.toop</groupId>
@@ -94,18 +102,13 @@
       <groupId>org.slf4j</groupId>
       <artifactId>jul-to-slf4j</artifactId>
     </dependency>
-  
+
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
       <scope>provided</scope>
     </dependency>
 
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
-      <scope>test</scope>
-    </dependency>
     <dependency>
       <groupId>com.helger</groupId>
       <artifactId>ph-oton-jetty</artifactId>
@@ -128,15 +131,15 @@
         <targetPath>${project.build.directory}/test-classes</targetPath>
       </resource>
     </resources>
-      <plugins>
-          <plugin>
-              <groupId>org.eclipse.jetty</groupId>
-              <artifactId>jetty-maven-plugin</artifactId>
-              <version>9.4.8.v20171121</version>
-              <configuration>
-                  <scanIntervalSeconds>3</scanIntervalSeconds>
-              </configuration>
-          </plugin>
-      </plugins>
+    <plugins>
+      <plugin>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-maven-plugin</artifactId>
+        <version>9.4.8.v20171121</version>
+        <configuration>
+          <scanIntervalSeconds>3</scanIntervalSeconds>
+        </configuration>
+      </plugin>
+    </plugins>
   </build>
 </project>

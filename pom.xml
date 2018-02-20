@@ -21,7 +21,7 @@
   <parent>
     <groupId>eu.toop</groupId>
     <artifactId>parent-pom</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
   </parent>
   <groupId>eu.toop</groupId>
   <artifactId>toop-mp-parent-pom</artifactId>
@@ -75,7 +75,7 @@
       <!-- The sub-projects of this project have a constant version -->
       <dependency>
         <groupId>eu.toop</groupId>
-        <artifactId>toop-r2d2-client</artifactId>
+        <artifactId>toop-mp-api</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -85,12 +85,7 @@
       </dependency>
       <dependency>
         <groupId>eu.toop</groupId>
-        <artifactId>toop-dc-adapter</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>eu.toop</groupId>
-        <artifactId>toop-dp-adapter</artifactId>
+        <artifactId>toop-r2d2-client</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -103,10 +98,9 @@
   
   <!-- Sub-projects - must match child directory names; order is important! -->
   <modules>
-    <module>toop-r2d2-client</module>
+    <module>toop-mp-api</module>
     <module>toop-smm-client</module>
-    <module>toop-dc-adapter</module>
-    <module>toop-dp-adapter</module>
+    <module>toop-r2d2-client</module>
     <module>toop-message-exchange</module>
     <module>toop-mp-webapp</module>
   </modules>

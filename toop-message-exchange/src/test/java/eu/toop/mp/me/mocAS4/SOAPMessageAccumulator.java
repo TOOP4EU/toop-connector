@@ -2,11 +2,13 @@ package eu.toop.mp.me.mocAS4;
 
 import eu.toop.mp.me.SoapUtil;
 
-import javax.xml.soap.MimeHeader;
 import javax.xml.soap.MimeHeaders;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;

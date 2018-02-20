@@ -45,7 +45,6 @@
       <id>philip</id>
       <name>Philip Helger</name>
       <email>ph(at)helger.com</email>
-      <url>http://www.helger.com</url>
     </developer>
   </developers>
   <dependencies>
@@ -65,7 +64,12 @@
       <groupId>com.helger</groupId>
       <artifactId>peppol-smp-client</artifactId>
     </dependency>
+    <dependency>
+      <groupId>eu.toop</groupId>
+      <artifactId>toop-mp-api</artifactId>
+    </dependency>
   
+    <!-- Test only -->
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>

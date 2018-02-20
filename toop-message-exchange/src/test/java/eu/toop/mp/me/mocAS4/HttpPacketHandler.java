@@ -89,20 +89,16 @@ public class HttpPacketHandler extends ChannelInboundHandlerAdapter {
 
   private MimeHeaders getMimeHeaders(HttpHeaders headers) {
     //leave the rest to soap factory
-    MimeHeaders mimeHeaders = new MimeHeaders();
+    final MimeHeaders mimeHeaders = new MimeHeaders();
 
     Iterator<Map.Entry<String, String>> allHeaders = headers.iteratorAsString();
     while (allHeaders.hasNext()) {
-
       Map.Entry<String, String> next = allHeaders.next();
-
-      System.out.println("HEADER: " + next);
       mimeHeaders.addHeader(next.getKey(), next.getValue());
     }
 
     mimeHeaders.getAllHeaders().forEachRemaining(header -> {
       MimeHeader mh = (MimeHeader) header;
-      System.out.println(mh.getName() + ": " + mh.getValue());
     });
     return mimeHeaders;
   }

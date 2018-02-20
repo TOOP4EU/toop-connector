@@ -3,25 +3,23 @@ This module is a bridge between the Message processor and AS4 gateways. It provi
 * `sendMessage()`
 * receiveMessage by implementing the `IMessageHandler.handleMessage(MEMessage meMessage);`
 
-In order to access these interfaces please used the <code>eu.toop.mp.me.MEMDelegate</code> class.
+In order to access these interfaces please used the `eu.toop.mp.me.MEMDelegate` class.
 
 ## Sending a message
 
 In order to send a message to the gateway please use 
 ```java
-GatewayRoutingMetadata metadata = new GatewayRoutingMetadata();
-metadata.setDocumentTypeId("top-sercret-pdf-documents-only");
-metadata.setProcessId("dummy-process");
-metadata.setEndpoint(sampleEndpoint());
+final GatewayRoutingMetadata metadata = new GatewayRoutingMetadata ("top-sercret-pdf-documents-only",
+                                                                    "dummy-process", sampleEndpoint ());
 
-String payloadId = "xmlpayload@dp";
-String contentType = "application/xml";
-byte[] payloadData = "<sample>xml</sample>".getBytes();
+final String payloadId = "xmlpayload@dp";
+final IMimeType contentType = CMimeType.APPLICATION_XML;
+final byte[] payloadData = "<sample>xml</sample>".getBytes (StandardCharsets.ISO_8859_1);
 
-MEPayload payload = MEPayloadFactory.createPayload(payloadId, contentType, payloadData);
-MEMessage meMessage = MEMessageFactory.createMEMessage(payload);
+final MEPayload payload = new MEPayload (contentType, payloadId, payloadData);
+final MEMessage meMessage = new MEMessage (payload);
 
-MEMDelegate.get().sendMessage(metadata, meMessage);
+MEMDelegate.getInstance ().sendMessage (metadata, meMessage);
 ```
 
 This message will create this AS4 message:

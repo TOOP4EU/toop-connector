@@ -1,48 +1,60 @@
 package eu.toop.mp.me;
 
+import java.io.Serializable;
+
+import javax.annotation.Nonnull;
+import javax.annotation.concurrent.Immutable;
+
+import com.helger.commons.ValueEnforcer;
+import com.helger.commons.annotation.Nonempty;
+
 import eu.toop.mp.r2d2client.IR2D2Endpoint;
 
 /**
  * @author: myildiz
  * @date: 15.02.2018.
  */
-public class GatewayRoutingMetadata {
+@Immutable
+public class GatewayRoutingMetadata implements Serializable {
   /**
    * document type ID
    */
-  private String documentTypeId;
+  private final String _documentTypeId;
 
   /**
    * Process ID
    */
-  private String processId;
+  private final String _processId;
 
   /**
    * The target endpoint
    */
-  private IR2D2Endpoint endpoint;
+  private final IR2D2Endpoint _endpoint;
 
-  public String getDocumentTypeId() {
-    return documentTypeId;
+  public GatewayRoutingMetadata (@Nonnull @Nonempty final String sDocumentTypeID,
+                                 @Nonnull @Nonempty final String sProcessID, @Nonnull final IR2D2Endpoint aEndpoint) {
+    ValueEnforcer.notEmpty (sDocumentTypeID, "DocumentTypeID");
+    ValueEnforcer.notEmpty (sProcessID, "ProcessID");
+    ValueEnforcer.notNull (aEndpoint, "Endpoint");
+    _documentTypeId = sDocumentTypeID;
+    _processId = sProcessID;
+    _endpoint = aEndpoint;
   }
 
-  public String getProcessId() {
-    return processId;
+  @Nonnull
+  @Nonempty
+  public String getDocumentTypeId () {
+    return _documentTypeId;
   }
 
-  public IR2D2Endpoint getEndpoint() {
-    return endpoint;
+  @Nonnull
+  @Nonempty
+  public String getProcessId () {
+    return _processId;
   }
 
-  public void setDocumentTypeId(final String documentTypeId) {
-    this.documentTypeId = documentTypeId;
-  }
-
-  public void setProcessId(final String processId) {
-    this.processId = processId;
-  }
-
-  public void setEndpoint(final IR2D2Endpoint endpoint) {
-    this.endpoint = endpoint;
+  @Nonnull
+  public IR2D2Endpoint getEndpoint () {
+    return _endpoint;
   }
 }

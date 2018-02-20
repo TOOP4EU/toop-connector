@@ -54,6 +54,9 @@ import com.helger.peppol.identifier.generic.participant.IParticipantIdentifier;
 import com.helger.peppol.identifier.generic.process.IProcessIdentifier;
 import com.helger.peppol.smpclient.exception.SMPClientException;
 
+import eu.toop.mp.api.MPConfig;
+import eu.toop.mp.api.MPSettings;
+
 /**
  * The default implementation of {@link IR2D2Client}. It performs the query
  * every time and does not cache results!
@@ -61,14 +64,12 @@ import com.helger.peppol.smpclient.exception.SMPClientException;
  * @author Philip Helger, BRZ, AT
  */
 @Immutable
-public class R2D2Client implements IR2D2Client
-{
+public class R2D2Client implements IR2D2Client {
   private static final Logger s_aLogger = LoggerFactory.getLogger (R2D2Client.class);
 
   @Nullable
   private static IJsonObject _fetchJsonObject (@Nonnull final HttpClientManager aMgr,
-                                               @Nonnull final ISimpleURL aURL) throws IOException
-  {
+                                               @Nonnull final ISimpleURL aURL) throws IOException {
     final HttpPost aPost = new HttpPost (aURL.getAsURI ());
     final ResponseHandlerJson aRH = new ResponseHandlerJson ();
     final IJson aJson = aMgr.execute (aPost, aRH);
@@ -83,82 +84,67 @@ public class R2D2Client implements IR2D2Client
    * Query PEPPPOL Directory for all matching recipient IDs.
    *
    * @param sCountryCode
-   *        Country code to use. Must be a 2-digit string. May not be
-   *        <code>null</code>.
+   *          Country code to use. Must be a 2-digit string. May not be
+   *          <code>null</code>.
    * @param aDocumentTypeID
-   *        Document type ID to query. May not be <code>null</code>.
+   *          Document type ID to query. May not be <code>null</code>.
    * @param bProductionSystem
-   *        <code>true</code> to query production PEPPOL Directory or
-   *        <code>false</code> to query test PEPPOL Directory
+   *          <code>true</code> to query production PEPPOL Directory or
+   *          <code>false</code> to query test PEPPOL Directory
    * @return A non-<code>null</code> but maybe empty set of Participant IDs.
    */
   @Nonnull
-  private static ICommonsSet <IParticipantIdentifier> _getAllRecipientIDsFromDirectory (@Nonnull @Nonempty final String sCountryCode,
-                                                                                        @Nonnull final IDocumentTypeIdentifier aDocumentTypeID,
-                                                                                        final boolean bProductionSystem)
-  {
-    final ICommonsSet <IParticipantIdentifier> ret = new CommonsHashSet <> ();
+  private static ICommonsSet<IParticipantIdentifier> _getAllRecipientIDsFromDirectory (@Nonnull @Nonempty final String sCountryCode,
+                                                                                       @Nonnull final IDocumentTypeIdentifier aDocumentTypeID) {
+    final ICommonsSet<IParticipantIdentifier> ret = new CommonsHashSet<> ();
 
     final HttpClientFactory aHCFactory = new HttpClientFactory ();
     // For proxy etc
     aHCFactory.setUseSystemProperties (true);
 
-    try (final HttpClientManager aMgr = new HttpClientManager (aHCFactory))
-    {
+    try (final HttpClientManager aMgr = new HttpClientManager (aHCFactory)) {
       // Build base URL and fetch x records per HTTP request
       final int nMaxResultsPerPage = 100;
-      final SimpleURL aBaseURL = new SimpleURL (R2D2Settings.getPEPPOLDirectoryURL (bProductionSystem) +
-                                                "/search/1.0/json").add ("doctype", aDocumentTypeID.getURIEncoded ())
-                                                                   .add ("country", sCountryCode)
-                                                                   .add ("rpc", nMaxResultsPerPage);
+      final SimpleURL aBaseURL = new SimpleURL (MPConfig.getR2D2DirectoryBaseUrl ()
+                                                + "/search/1.0/json").add ("doctype", aDocumentTypeID.getURIEncoded ())
+                                                                     .add ("country", sCountryCode)
+                                                                     .add ("rpc", nMaxResultsPerPage);
 
       // Fetch first object
       IJsonObject aResult = _fetchJsonObject (aMgr, aBaseURL);
-      if (aResult != null)
-      {
+      if (aResult != null) {
         // Start querying results
         int nResultPageIndex = 0;
         int nLoops = 0;
-        while (true)
-        {
+        while (true) {
           int nMatchCount = 0;
           final IJsonArray aMatches = aResult.getAsArray ("matches");
-          if (aMatches != null)
-          {
-            for (final IJson aMatch : aMatches)
-            {
+          if (aMatches != null) {
+            for (final IJson aMatch : aMatches) {
               ++nMatchCount;
               final IJsonObject aID = aMatch.getAsObject ().getAsObject ("participantID");
-              if (aID != null)
-              {
+              if (aID != null) {
                 final String sScheme = aID.getAsString ("scheme");
                 final String sValue = aID.getAsString ("value");
-                final IParticipantIdentifier aPI = R2D2Settings.getIdentifierFactory ()
-                                                               .createParticipantIdentifier (sScheme, sValue);
+                final IParticipantIdentifier aPI = MPSettings.getIdentifierFactory ()
+                                                             .createParticipantIdentifier (sScheme, sValue);
                 if (aPI != null)
                   ret.add (aPI);
                 else
-                  s_aLogger.warn ("Failed to create participant identifier from '" +
-                                  sScheme +
-                                  "' and '" +
-                                  sValue +
-                                  "'");
-              }
-              else
+                  s_aLogger.warn ("Failed to create participant identifier from '" + sScheme + "' and '" + sValue
+                                  + "'");
+              } else
                 s_aLogger.warn ("Match does not contain participant ID");
             }
-          }
-          else
+          } else
             s_aLogger.warn ("JSON response contains no 'matches'");
 
-          if (nMatchCount < nMaxResultsPerPage)
-          {
+          if (nMatchCount < nMaxResultsPerPage) {
             // Got less results than expected - end of list
             break;
           }
 
-          if (++nLoops > 100)
-          {
+          if (++nLoops > 100) {
             // Avoid endless loop
             s_aLogger.error ("Endless loop in PD fetching?");
             break;
@@ -167,23 +153,16 @@ public class R2D2Client implements IR2D2Client
           // Query next page
           nResultPageIndex++;
           aResult = _fetchJsonObject (aMgr, aBaseURL.getClone ().add ("rpi", nResultPageIndex));
-          if (aResult == null)
-          {
+          if (aResult == null) {
             // Unexpected error - stop querying
             // Error was already logged
             break;
           }
         }
       }
-    }
-    catch (final IOException ex)
-    {
-      s_aLogger.warn ("Error querying PEPPOL Directory for matches (" +
-                      sCountryCode +
-                      ", " +
-                      aDocumentTypeID.getURIEncoded () +
-                      ")",
-                      ex);
+    } catch (final IOException ex) {
+      s_aLogger.warn ("Error querying PEPPOL Directory for matches (" + sCountryCode + ", "
+                      + aDocumentTypeID.getURIEncoded () + ")", ex);
     }
 
     return ret;
@@ -191,28 +170,24 @@ public class R2D2Client implements IR2D2Client
 
   @Nonnull
   @ReturnsMutableCopy
-  public ICommonsList <IR2D2Endpoint> getEndpoints (@Nonnull @Nonempty final String sCountryCode,
-                                                    @Nonnull final IDocumentTypeIdentifier aDocumentTypeID,
-                                                    @Nonnull final IProcessIdentifier aProcessID,
-                                                    final boolean bProductionSystem)
-  {
+  public ICommonsList<IR2D2Endpoint> getEndpoints (@Nonnull @Nonempty final String sCountryCode,
+                                                   @Nonnull final IDocumentTypeIdentifier aDocumentTypeID,
+                                                   @Nonnull final IProcessIdentifier aProcessID,
+                                                   final boolean bProductionSystem) {
     ValueEnforcer.notEmpty (sCountryCode, "CountryCode");
     ValueEnforcer.isTrue (sCountryCode.length () == 2, "CountryCode must have length 2");
     ValueEnforcer.notNull (aDocumentTypeID, "DocumentTypeID");
     ValueEnforcer.notNull (aProcessID, "ProcessID");
 
-    final ICommonsList <IR2D2Endpoint> ret = new CommonsArrayList <> ();
+    final ICommonsList<IR2D2Endpoint> ret = new CommonsArrayList<> ();
 
     // Query PEPPOL Directory
-    final ICommonsSet <IParticipantIdentifier> aPIs = _getAllRecipientIDsFromDirectory (sCountryCode,
-                                                                                        aDocumentTypeID,
-                                                                                        bProductionSystem);
+    final ICommonsSet<IParticipantIdentifier> aPIs = _getAllRecipientIDsFromDirectory (sCountryCode, aDocumentTypeID);
 
     // For all matching IDs (if any)
-    for (final IParticipantIdentifier aPI : aPIs)
-    {
+    for (final IParticipantIdentifier aPI : aPIs) {
       // Single SMP query
-      final ICommonsList <IR2D2Endpoint> aLocal = getEndpoints (aPI, aDocumentTypeID, aProcessID, bProductionSystem);
+      final ICommonsList<IR2D2Endpoint> aLocal = getEndpoints (aPI, aDocumentTypeID, aProcessID);
       ret.addAll (aLocal);
     }
     return ret;
@@ -220,60 +195,48 @@ public class R2D2Client implements IR2D2Client
 
   @Nonnull
   @ReturnsMutableCopy
-  public ICommonsList <IR2D2Endpoint> getEndpoints (@Nonnull final IParticipantIdentifier aRecipientID,
-                                                    @Nonnull final IDocumentTypeIdentifier aDocumentTypeID,
-                                                    @Nonnull final IProcessIdentifier aProcessID,
-                                                    final boolean bProductionSystem)
-  {
+  public ICommonsList<IR2D2Endpoint> getEndpoints (@Nonnull final IParticipantIdentifier aRecipientID,
+                                                   @Nonnull final IDocumentTypeIdentifier aDocumentTypeID,
+                                                   @Nonnull final IProcessIdentifier aProcessID) {
     ValueEnforcer.notNull (aRecipientID, "Recipient");
     ValueEnforcer.notNull (aDocumentTypeID, "DocumentTypeID");
     ValueEnforcer.notNull (aProcessID, "ProcessID");
 
-    final ICommonsList <IR2D2Endpoint> ret = new CommonsArrayList <> ();
-    final BDXRClient aSMPClient = new BDXRClient (R2D2Settings.getSMPUrlProvider (),
-                                                  aRecipientID,
-                                                  R2D2Settings.getSML (bProductionSystem));
-    try
-    {
+    final ICommonsList<IR2D2Endpoint> ret = new CommonsArrayList<> ();
+    BDXRClient aSMPClient;
+    if (MPConfig.isR2D2UseDNS ()) {
+      // Use dynamic lookup via DNS
+      aSMPClient = new BDXRClient (MPSettings.getSMPUrlProvider (), aRecipientID, MPConfig.getR2D2SML ());
+    } else {
+      // Use a constant SMP URL
+      aSMPClient = new BDXRClient (MPConfig.getR2D2SMPUrl ());
+    }
+    try {
       // Query SMP
       final SignedServiceMetadataType aSG = aSMPClient.getServiceRegistration (aRecipientID, aDocumentTypeID);
       final ServiceInformationType aSI = aSG.getServiceMetadata ().getServiceInformation ();
-      if (aSI != null)
-      {
+      if (aSI != null) {
         // Find the first process that matches (should be only one!)
         final ProcessType aProcess = CollectionHelper.findFirst (aSI.getProcessList ().getProcess (),
                                                                  x -> x.getProcessIdentifier ()
                                                                        .hasSameContent (aProcessID));
-        if (aProcess != null)
-        {
+        if (aProcess != null) {
           // Add all endpoints to the result list
-          for (final EndpointType aEP : aProcess.getServiceEndpointList ().getEndpoint ())
-          {
+          for (final EndpointType aEP : aProcess.getServiceEndpointList ().getEndpoint ()) {
             // Convert String to X509Certificate
             final X509Certificate aCert = BDXRClientReadOnly.getEndpointCertificate (aEP);
 
             // Convert to our data structure
-            final R2D2Endpoint aDestEP = new R2D2Endpoint (aRecipientID,
-                                                           aEP.getTransportProfile (),
-                                                           aEP.getEndpointURI (),
-                                                           aCert);
+            final R2D2Endpoint aDestEP = new R2D2Endpoint (aRecipientID, aEP.getTransportProfile (),
+                                                           aEP.getEndpointURI (), aCert);
             ret.add (aDestEP);
           }
         }
       }
       // else redirect
-    }
-    catch (final CertificateException | SMPClientException ex)
-    {
-      s_aLogger.error ("Error fetching SMP endpoint " +
-                       aRecipientID.getURIEncoded () +
-                       "/" +
-                       aDocumentTypeID.getURIEncoded () +
-                       "/" +
-                       aProcessID.getURIEncoded () +
-                       "/" +
-                       bProductionSystem,
-                       ex);
+    } catch (final CertificateException | SMPClientException ex) {
+      s_aLogger.error ("Error fetching SMP endpoint " + aRecipientID.getURIEncoded () + "/"
+                       + aDocumentTypeID.getURIEncoded () + "/" + aProcessID.getURIEncoded (), ex);
     }
     return ret;
   }
