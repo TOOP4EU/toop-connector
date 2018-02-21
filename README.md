@@ -6,7 +6,7 @@ The joint message process for both sides of the process
 **Done**
 * Handle the way on DC side from DC backend to AS4 (1/4)
   * Input from DC is received via Servlet `/dcinput` (from Demo UI - `HttpClientInvoker`)
-  * ASiC container is unwrapped and the `IMSDataRequest` object is extracted and processed asynchronously in class `MessageProcessorDC`
+  * ASiC container is unwrapped and the `IMSDataRequest` object is extracted and processed asynchronously in class `MessageProcessorDCOutgoing`
     * A new message ID (String) is created
     * The call to the SMM client is missing there currently stubbed
     * The call to R2D2 client happens but has no result because we don't have a directory yet

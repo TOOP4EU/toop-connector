@@ -38,15 +38,15 @@ import eu.toop.commons.exchange.IMSDataRequest;
 import eu.toop.commons.exchange.message.ToopMessageBuilder;
 import eu.toop.commons.exchange.message.ToopRequestMessage;
 import eu.toop.commons.exchange.mock.MSDataRequest;
-import eu.toop.mp.processor.MPConfig;
-import eu.toop.mp.processor.MessageProcessorDC;
+import eu.toop.mp.processor.MPWebAppConfig;
+import eu.toop.mp.processor.MessageProcessorDCOutgoing;
 
 /**
  * This method is called by the <code>toop-interface</code> project in the
  * direction DC to DP.<br>
  * The input is an ASiC archive that contains the fields for a
  * {@link ToopRequestMessage} where only {@link IMSDataRequest} is used. If
- * extracted successfully it is put in {@link MessageProcessorDC} for further
+ * extracted successfully it is put in {@link MessageProcessorDCOutgoing} for further
  * processing.
  *
  * @author Philip Helger
@@ -75,7 +75,7 @@ public class DCInputServlet extends HttpServlet {
                                                                     EToopProcess.PROC.getURIEncoded (),
                                                                     "msg-id-" + PDTFactory.getCurrentLocalDateTime ()
                                                                                           .toString ()),
-                                                 archiveOutput, MPConfig.getSignatureHelper ());
+                                                 archiveOutput, MPWebAppConfig.getSignatureHelper ());
         // Get ASiC bytes
         aMockRequest.setContent (archiveOutput.toByteArray ());
       }
@@ -119,7 +119,7 @@ public class DCInputServlet extends HttpServlet {
         aUR.setStatus (HttpServletResponse.SC_BAD_REQUEST);
       } else {
         // Enqueue to processor and we're good
-        MessageProcessorDC.getInstance ().enqueue (aMSRequest);
+        MessageProcessorDCOutgoing.getInstance ().enqueue (aMSRequest);
 
         // Done - no content
         aUR.setStatus (HttpServletResponse.SC_NO_CONTENT);
