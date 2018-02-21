@@ -27,7 +27,17 @@ import com.helger.commons.id.factory.GlobalIDFactory;
 import com.helger.commons.id.factory.StringIDFromGlobalLongIDFactory;
 import com.helger.web.servlets.scope.WebScopeListener;
 
+import eu.toop.commons.exchange.message.ToopMessageBuilder;
+import eu.toop.commons.exchange.message.ToopResponseMessage;
+import eu.toop.commons.exchange.mock.MSDataRequest;
+import eu.toop.commons.exchange.mock.MSDataResponse;
+import eu.toop.commons.exchange.mock.ToopDataRequest;
+import eu.toop.commons.exchange.mock.ToopDataResponse;
 import eu.toop.mp.api.MPConfig;
+import eu.toop.mp.me.MEMDelegate;
+import eu.toop.mp.me.MEPayload;
+import eu.toop.mp.processor.MessageProcessorDCIncoming;
+import eu.toop.mp.processor.MessageProcessorDPIncoming;
 
 /**
  * Global startup/shutdown listener for the whole web application. Extends from
@@ -47,6 +57,31 @@ public class MPWebAppListener extends WebScopeListener {
     GlobalIDFactory.setPersistentStringIDFactory (new StringIDFromGlobalLongIDFactory ("toop-mp-"));
     GlobalDebug.setDebugModeDirect (MPConfig.isGlobalDebug ());
     GlobalDebug.setProductionModeDirect (MPConfig.isGlobalProduction ());
+
+    // Register the handler need
+    MEMDelegate.getInstance ().registerMessageHandler (aMEMessage -> {
+      // Always use response, because it is the super set of request and response
+      final MEPayload aPayload = aMEMessage.head ();
+      if (aPayload != null) {
+        // Extract from ASiC
+        final ToopResponseMessage aResponseMsg = ToopMessageBuilder.parseResponseMessage (aPayload.getDataInputStream (),
+                                                                                          MSDataRequest.getDeserializerFunction (),
+                                                                                          ToopDataRequest.getDeserializerFunction (),
+                                                                                          MSDataResponse.getDeserializerFunction (),
+                                                                                          ToopDataResponse.getDeserializerFunction ());
+
+        // Check response before request, because response also contains request!
+        if (aResponseMsg.getToopDataResponse () != null) {
+          // This is the way from DP back to DC; we're in DC incoming mode
+          MessageProcessorDCIncoming.getInstance ().enqueue (aResponseMsg);
+        } else if (aResponseMsg.getToopDataRequest () != null) {
+          // This is the way from DC to DP; we're in DP incoming mode
+          MessageProcessorDPIncoming.getInstance ().enqueue (aResponseMsg);
+        } else
+          s_aLogger.error ("Unsuspported ToopResponseMessage: " + aResponseMsg);
+      } else
+        s_aLogger.warn ("MEMessage contains no payload: " + aMEMessage);
+    });
   }
 
   @Override

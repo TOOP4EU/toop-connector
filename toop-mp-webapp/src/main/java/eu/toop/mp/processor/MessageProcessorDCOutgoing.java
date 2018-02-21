@@ -54,9 +54,9 @@ import eu.toop.mp.r2d2client.IR2D2Endpoint;
 import eu.toop.mp.r2d2client.R2D2Client;
 
 /**
- * The global message processor that handles DC to DP (=outgoing) requests. This
- * is only the queue and it spawns external threads for processing the incoming
- * data.
+ * The global message processor that handles DC to DP (=DC outgoing) requests
+ * (step 1/4). This is only the queue and it spawns external threads for
+ * processing the incoming data.
  *
  * @author Philip Helger
  */

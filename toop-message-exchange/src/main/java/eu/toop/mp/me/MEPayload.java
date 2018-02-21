@@ -15,6 +15,7 @@
  */
 package eu.toop.mp.me;
 
+import java.io.InputStream;
 import java.util.UUID;
 
 import javax.annotation.Nonnull;
@@ -24,6 +25,7 @@ import javax.annotation.concurrent.Immutable;
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.Nonempty;
 import com.helger.commons.annotation.ReturnsMutableObject;
+import com.helger.commons.io.stream.NonBlockingByteArrayInputStream;
 import com.helger.commons.mime.IMimeType;
 import com.helger.commons.string.StringHelper;
 
@@ -85,6 +87,11 @@ public final class MEPayload {
   @ReturnsMutableObject
   public byte[] getData () {
     return data;
+  }
+
+  @Nonnull
+  public InputStream getDataInputStream () {
+    return new NonBlockingByteArrayInputStream (data);
   }
 
   @Override
