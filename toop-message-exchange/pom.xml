@@ -66,14 +66,10 @@
       <groupId>com.helger</groupId>
       <artifactId>peppol-commons</artifactId>
     </dependency>
-
     <dependency>
-      <groupId>io.netty</groupId>
-      <artifactId>netty-all</artifactId>
-      <version>4.1.21.Final</version>
-      <scope>test</scope>
+      <groupId>eu.toop</groupId>
+      <artifactId>toop-commons</artifactId>
     </dependency>
-
     <dependency>
       <groupId>eu.toop</groupId>
       <artifactId>toop-mp-api</artifactId>
@@ -92,6 +88,12 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-all</artifactId>
+      <version>4.1.21.Final</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

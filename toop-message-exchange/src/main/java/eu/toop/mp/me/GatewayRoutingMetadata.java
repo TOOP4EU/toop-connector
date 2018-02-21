@@ -32,6 +32,11 @@ import eu.toop.mp.r2d2client.IR2D2Endpoint;
 @Immutable
 public class GatewayRoutingMetadata implements Serializable {
   /**
+   * C1 participant ID
+   */
+  private final String senderParticipantId;
+
+  /**
    * document type ID
    */
   private final String documentTypeId;
@@ -46,14 +51,24 @@ public class GatewayRoutingMetadata implements Serializable {
    */
   private final IR2D2Endpoint endpoint;
 
-  public GatewayRoutingMetadata (@Nonnull @Nonempty final String sDocumentTypeID,
-                                 @Nonnull @Nonempty final String sProcessID, @Nonnull final IR2D2Endpoint aEndpoint) {
-    ValueEnforcer.notEmpty (sDocumentTypeID, "DocumentTypeID");
-    ValueEnforcer.notEmpty (sProcessID, "ProcessID");
+
+  public GatewayRoutingMetadata (@Nonnull @Nonempty final String sSenderParticipantId,
+                                 @Nonnull @Nonempty final String sDocumentTypeId,
+                                 @Nonnull @Nonempty final String sProcessId, @Nonnull final IR2D2Endpoint aEndpoint) {
+    ValueEnforcer.notEmpty (sSenderParticipantId, "SenderParticipantID");
+    ValueEnforcer.notEmpty (sDocumentTypeId, "DocumentTypeID");
+     ValueEnforcer.notEmpty (sProcessId, "ProcessID");
     ValueEnforcer.notNull (aEndpoint, "Endpoint");
-    documentTypeId = sDocumentTypeID;
-    processId = sProcessID;
+    senderParticipantId = sSenderParticipantId;
+    documentTypeId = sDocumentTypeId;
+    processId = sProcessId;
     endpoint = aEndpoint;
+  }
+
+  @Nonnull
+  @Nonempty
+  public String getSenderParticipantId () {
+    return senderParticipantId;
   }
 
   @Nonnull

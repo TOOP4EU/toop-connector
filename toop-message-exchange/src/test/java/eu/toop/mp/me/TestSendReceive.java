@@ -32,6 +32,8 @@ import com.helger.commons.mime.IMimeType;
 import com.helger.peppol.identifier.generic.participant.IParticipantIdentifier;
 import com.helger.scope.mock.ScopeAwareTestSetup;
 
+import eu.toop.commons.doctype.EToopDocumentType;
+import eu.toop.commons.doctype.EToopProcess;
 import eu.toop.mp.api.MPSettings;
 import eu.toop.mp.me.mocAS4.MockAS4;
 import eu.toop.mp.r2d2client.IR2D2Endpoint;
@@ -72,8 +74,8 @@ public class TestSendReceive {
 
   @Test
   public void testSendReceive() throws Exception {
-    final GatewayRoutingMetadata metadata = new GatewayRoutingMetadata("top-sercret-pdf-documents-only",
-        "dummy-process", createSampleEndpoint());
+    final GatewayRoutingMetadata metadata = new GatewayRoutingMetadata("iso6523-actorid-upis::0088:123456", EToopDocumentType.DOCTYPE1.getURIEncoded (),
+                                                                       EToopProcess.PROC.getURIEncoded (), createSampleEndpoint());
 
     final String payloadId = "xmlpayload@dp";
     final IMimeType contentType = CMimeType.APPLICATION_XML;

@@ -114,6 +114,8 @@ public final class MessageProcessorDPOutgoing extends AbstractGlobalWebSingleton
         // TODO filter endpoint for supported transport protocols
         for (final IR2D2Endpoint aEP : aEndpoints) {
           final GatewayRoutingMetadata metadata = new GatewayRoutingMetadata (aCurrentObject.getMSDataRequest ()
+                                                                                            .getSenderParticipantID (),
+                                                                              aCurrentObject.getMSDataRequest ()
                                                                                             .getDocumentTypeID (),
                                                                               aCurrentObject.getMSDataRequest ()
                                                                                             .getProcessID (),
