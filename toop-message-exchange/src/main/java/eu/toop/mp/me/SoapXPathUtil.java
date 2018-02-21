@@ -44,14 +44,14 @@ public class SoapXPathUtil {
   }
 
   @Nonnull
-  public static <T> T findSingleNode (@Nonnull final Node node,
+  public static Node findSingleNode (@Nonnull final Node node,
                                      @Nonnull final String xpath) throws IllegalStateException {
     try {
-      final Object o = XPATH.evaluate (xpath, node, XPathConstants.NODE);
+      final Node o = (Node) XPATH.evaluate (xpath, node, XPathConstants.NODE);
       if (o == null)
         throw new IllegalStateException ("No match for [" + xpath + "]");
 
-      return (T) o;
+      return o;
     } catch (final XPathExpressionException e) {
       throw new IllegalStateException (e);
     }

@@ -24,21 +24,19 @@ import com.helger.asic.SignatureHelper;
 import com.helger.commons.io.file.FileHelper;
 
 /**
- * Message Processor configuration
+ * Message Processor WebApp configuration
  *
  * @author Philip Helger
- *
  */
 @Immutable
-public final class MPConfig {
+public final class MPWebAppConfig {
   private static final SignatureHelper SH = new SignatureHelper (FileHelper.getInputStream (new File ("src/main/resources/demo-keystore.jks")),
                                                                  "password", null, "password");
 
-  private MPConfig () {
+  private MPWebAppConfig () {
   }
 
   /**
-   *
    * @return The {@link SignatureHelper} singleton.
    */
   @Nonnull

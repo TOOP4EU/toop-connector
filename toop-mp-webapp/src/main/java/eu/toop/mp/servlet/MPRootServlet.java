@@ -26,7 +26,8 @@ import javax.servlet.http.HttpServletResponse;
 import com.helger.commons.string.StringHelper;
 
 /**
- * Servlet for handling the initial calls without any path
+ * Servlet for handling the initial calls without any path. This servlet
+ * redirects to "/index.html".
  *
  * @author Philip Helger
  */

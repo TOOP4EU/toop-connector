@@ -26,7 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.helger.commons.datetime.PDTFactory;
+import com.helger.commons.collection.impl.CommonsArrayList;
 import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 import com.helger.commons.mime.CMimeType;
 import com.helger.servlet.mock.MockHttpServletRequest;
@@ -35,19 +35,21 @@ import com.helger.servlet.response.UnifiedResponse;
 import eu.toop.commons.doctype.EToopDocumentType;
 import eu.toop.commons.doctype.EToopProcess;
 import eu.toop.commons.exchange.IMSDataRequest;
+import eu.toop.commons.exchange.RequestValue;
 import eu.toop.commons.exchange.message.ToopMessageBuilder;
 import eu.toop.commons.exchange.message.ToopRequestMessage;
 import eu.toop.commons.exchange.mock.MSDataRequest;
-import eu.toop.mp.processor.MPConfig;
-import eu.toop.mp.processor.MessageProcessorDC;
+import eu.toop.mp.api.MPSettings;
+import eu.toop.mp.processor.MPWebAppConfig;
+import eu.toop.mp.processor.MessageProcessorDCOutgoing;
 
 /**
  * This method is called by the <code>toop-interface</code> project in the
  * direction DC to DP.<br>
  * The input is an ASiC archive that contains the fields for a
  * {@link ToopRequestMessage} where only {@link IMSDataRequest} is used. If
- * extracted successfully it is put in {@link MessageProcessorDC} for further
- * processing.
+ * extracted successfully it is put in {@link MessageProcessorDCOutgoing} for
+ * further processing.
  *
  * @author Philip Helger
  */
@@ -71,11 +73,15 @@ public class DCInputServlet extends HttpServlet {
       try (final NonBlockingByteArrayOutputStream archiveOutput = new NonBlockingByteArrayOutputStream ()) {
         // Create dummy request
         // TODO use correct document type ID/process ID
-        ToopMessageBuilder.createRequestMessage (new MSDataRequest ("DE", EToopDocumentType.DOCTYPE1.getURIEncoded (),
+        ToopMessageBuilder.createRequestMessage (new MSDataRequest (MPSettings.getIdentifierFactory ()
+                                                                              .createParticipantIdentifier ("toop-actorid-upis",
+                                                                                                            "dcinput")
+                                                                              .getURIEncoded (),
+                                                                    "DE", EToopDocumentType.DOCTYPE1.getURIEncoded (),
                                                                     EToopProcess.PROC.getURIEncoded (),
-                                                                    "msg-id-" + PDTFactory.getCurrentLocalDateTime ()
-                                                                                          .toString ()),
-                                                 archiveOutput, MPConfig.getSignatureHelper ());
+                                                                    new CommonsArrayList<> (new RequestValue ("company",
+                                                                                                              "demo"))),
+                                                 archiveOutput, MPWebAppConfig.getSignatureHelper ());
         // Get ASiC bytes
         aMockRequest.setContent (archiveOutput.toByteArray ());
       }
@@ -84,6 +90,7 @@ public class DCInputServlet extends HttpServlet {
       doPost (aMockRequest, aHttpServletResponse);
 
       if (aHttpServletResponse.getStatus () == HttpServletResponse.SC_NO_CONTENT) {
+        // So that something is visible
         aHttpServletResponse.setStatus (HttpServletResponse.SC_OK);
         aHttpServletResponse.setContentType (CMimeType.TEXT_HTML.getAsString ());
         aHttpServletResponse.getWriter ()
@@ -102,7 +109,7 @@ public class DCInputServlet extends HttpServlet {
     final UnifiedResponse aUR = UnifiedResponse.createSimple (aHttpServletRequest);
 
     // Parse POST data
-    // No ToopDataRequest contained here
+    // No IToopDataRequest contained here
     final ToopRequestMessage aMsg = ToopMessageBuilder.parseRequestMessage (aHttpServletRequest.getInputStream (),
                                                                             MSDataRequest.getDeserializerFunction (),
                                                                             null);
@@ -119,7 +126,7 @@ public class DCInputServlet extends HttpServlet {
         aUR.setStatus (HttpServletResponse.SC_BAD_REQUEST);
       } else {
         // Enqueue to processor and we're good
-        MessageProcessorDC.getInstance ().enqueue (aMSRequest);
+        MessageProcessorDCOutgoing.getInstance ().enqueue (aMSRequest);
 
         // Done - no content
         aUR.setStatus (HttpServletResponse.SC_NO_CONTENT);
