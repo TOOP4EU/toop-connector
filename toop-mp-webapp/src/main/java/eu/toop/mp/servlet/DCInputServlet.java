@@ -39,6 +39,7 @@ import eu.toop.commons.exchange.RequestValue;
 import eu.toop.commons.exchange.message.ToopMessageBuilder;
 import eu.toop.commons.exchange.message.ToopRequestMessage;
 import eu.toop.commons.exchange.mock.MSDataRequest;
+import eu.toop.mp.api.MPSettings;
 import eu.toop.mp.processor.MPWebAppConfig;
 import eu.toop.mp.processor.MessageProcessorDCOutgoing;
 
@@ -72,7 +73,11 @@ public class DCInputServlet extends HttpServlet {
       try (final NonBlockingByteArrayOutputStream archiveOutput = new NonBlockingByteArrayOutputStream ()) {
         // Create dummy request
         // TODO use correct document type ID/process ID
-        ToopMessageBuilder.createRequestMessage (new MSDataRequest ("DE", EToopDocumentType.DOCTYPE1.getURIEncoded (),
+        ToopMessageBuilder.createRequestMessage (new MSDataRequest (MPSettings.getIdentifierFactory ()
+                                                                              .createParticipantIdentifier ("toop-actorid-upis",
+                                                                                                            "dcinput")
+                                                                              .getURIEncoded (),
+                                                                    "DE", EToopDocumentType.DOCTYPE1.getURIEncoded (),
                                                                     EToopProcess.PROC.getURIEncoded (),
                                                                     new CommonsArrayList<> (new RequestValue ("company",
                                                                                                               "demo"))),
@@ -85,6 +90,7 @@ public class DCInputServlet extends HttpServlet {
       doPost (aMockRequest, aHttpServletResponse);
 
       if (aHttpServletResponse.getStatus () == HttpServletResponse.SC_NO_CONTENT) {
+        // So that something is visible
         aHttpServletResponse.setStatus (HttpServletResponse.SC_OK);
         aHttpServletResponse.setContentType (CMimeType.TEXT_HTML.getAsString ());
         aHttpServletResponse.getWriter ()

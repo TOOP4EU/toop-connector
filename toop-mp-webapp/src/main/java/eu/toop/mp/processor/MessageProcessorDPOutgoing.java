@@ -35,6 +35,7 @@ import com.helger.commons.concurrent.collector.IConcurrentPerformer;
 import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 import com.helger.commons.state.ESuccess;
 import com.helger.peppol.identifier.generic.doctype.IDocumentTypeIdentifier;
+import com.helger.peppol.identifier.generic.participant.IParticipantIdentifier;
 import com.helger.peppol.identifier.generic.process.IProcessIdentifier;
 import com.helger.scope.IScope;
 import com.helger.web.scope.singleton.AbstractGlobalWebSingleton;
@@ -78,17 +79,19 @@ public final class MessageProcessorDPOutgoing extends AbstractGlobalWebSingleton
         aToopDataResponse = new ToopDataResponse (sRequestID);
       }
 
-      // 2. invoke R2D2 client
+      // 2. invoke R2D2 client with a single endpoint
       ICommonsList<IR2D2Endpoint> aEndpoints;
       {
+        final IParticipantIdentifier aPID = MPSettings.getIdentifierFactory ()
+                                                      .parseParticipantIdentifier (aCurrentObject.getMSDataRequest ()
+                                                                                                 .getSenderParticipantID ());
         final IDocumentTypeIdentifier aDocTypeID = MPSettings.getIdentifierFactory ()
                                                              .parseDocumentTypeIdentifier (aCurrentObject.getMSDataRequest ()
                                                                                                          .getDocumentTypeID ());
         final IProcessIdentifier aProcessID = MPSettings.getIdentifierFactory ()
                                                         .parseProcessIdentifier (aCurrentObject.getMSDataRequest ()
                                                                                                .getProcessID ());
-        aEndpoints = new R2D2Client ().getEndpoints (aCurrentObject.getMSDataRequest ().getDestinationCountryCode (),
-                                                     aDocTypeID, aProcessID);
+        aEndpoints = new R2D2Client ().getEndpoints (aPID, aDocTypeID, aProcessID);
         s_aLogger.info (sLogPrefix + "R2D2 found the following endpoints[" + aEndpoints.size () + "]: " + aEndpoints);
       }
 
@@ -108,6 +111,7 @@ public final class MessageProcessorDPOutgoing extends AbstractGlobalWebSingleton
           meMessage = new MEMessage (aPayload);
         }
 
+        // TODO filter endpoint for supported transport protocols
         for (final IR2D2Endpoint aEP : aEndpoints) {
           final GatewayRoutingMetadata metadata = new GatewayRoutingMetadata (aCurrentObject.getMSDataRequest ()
                                                                                             .getDocumentTypeID (),
