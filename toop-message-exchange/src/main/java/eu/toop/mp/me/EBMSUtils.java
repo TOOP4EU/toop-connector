@@ -48,6 +48,8 @@ import com.helger.commons.mime.MimeTypeParser;
 import com.helger.xml.serialize.read.DOMReader;
 import com.helger.xml.transform.TransformSourceFactory;
 
+import eu.toop.mp.api.MPConfig;
+
 public final class EBMSUtils {
   private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EBMSUtils.class);
 
@@ -67,7 +69,7 @@ public final class EBMSUtils {
     try {
       final StreamSource stylesource = TransformSourceFactory.create(new ClassPathResource("/receipt-generator.xslt"));
       final Transformer transformer = TransformerFactory.newInstance().newTransformer(stylesource);
-      transformer.setParameter("messageid", genereateEbmsMessageId(MessageExchangeEndpointConfig.getMEMName()));
+      transformer.setParameter("messageid", genereateEbmsMessageId(MPConfig.getMEMAS4IDSuffix()));
       transformer.setParameter("timestamp", DateTimeUtils.getCurrentTimestamp());
       try (final NonBlockingByteArrayOutputStream baos = new NonBlockingByteArrayOutputStream()) {
         transformer.transform(new DOMSource(message.getSOAPPart()), new StreamResult(baos));
@@ -108,7 +110,7 @@ public final class EBMSUtils {
     if (fm == null)
       fm = "Unknown Error";
 
-    final String ebmsMessageId = genereateEbmsMessageId(MessageExchangeEndpointConfig.getMEMName());
+    final String ebmsMessageId = genereateEbmsMessageId(MPConfig.getMEMAS4IDSuffix ());
     final String category = "CONTENT";
     final String errorCode = "EBMS:0004";
     final String origin = "ebms";
@@ -187,14 +189,14 @@ public final class EBMSUtils {
       //@formatter:off
       xml = xml
           .replace(keyTimeStamp, DateTimeUtils.getCurrentTimestamp())
-          .replace(keyMessageId, genereateEbmsMessageId(MessageExchangeEndpointConfig.ME_NAME))
+          .replace(keyMessageId, genereateEbmsMessageId(MPConfig.getMEMAS4IDSuffix ()))
           .replace(keyConversationId, conversationId)
-          .replace(keyFrom, MessageExchangeEndpointConfig.ME_PARTY_ID)
-          .replace(keyFromPartyRole, MessageExchangeEndpointConfig.ME_PARTY_ROLE)
-          .replace(keyTo, MessageExchangeEndpointConfig.GW_PARTY_ID)
-          .replace(keyToPartyRole, MessageExchangeEndpointConfig.GW_PARTY_ROLE)
-          .replace(keyAction, MessageExchangeEndpointConfig.SUBMIT_ACTION)
-          .replace(keyService, MessageExchangeEndpointConfig.SUBMIT_SERVICE)
+          .replace(keyFrom, MPConfig.getMEMAS4FromPartyID ())
+          .replace(keyFromPartyRole, MPConfig.getMEMAS4FromRole ())
+          .replace(keyTo, MPConfig.getMEMAS4ToPartyID ())
+          .replace(keyToPartyRole, MPConfig.getMEMAS4ToRole ())
+          .replace(keyAction, MPConfig.getMEMAS4Action ())
+          .replace(keyService, MPConfig.getMEMAS4Service ())
           .replace(keyMessageProps, generateMessageProperties(metadata))
           .replace(keyPartInfo, generatePartInfo(meMessage));
       //@formatter:off
@@ -301,7 +303,7 @@ public final class EBMSUtils {
     propertiesBuilder.append("      <ns2:Property name=\"ToPartyId\">").append(submissionData.to).append("</ns2:Property>\n");
     propertiesBuilder.append("      <ns2:Property name=\"ToPartyRole\">").append(submissionData.toPartyRole).append("</ns2:Property>\n");
     //the GW is the sender of the C2 ---> C3 Message
-    propertiesBuilder.append("      <ns2:Property name=\"FromPartyId\">").append(MessageExchangeEndpointConfig.GW_PARTY_ID).append("</ns2:Property>\n");
+    propertiesBuilder.append("      <ns2:Property name=\"FromPartyId\">").append(MPConfig.getMEMAS4ToPartyID ()).append("</ns2:Property>\n");
     propertiesBuilder.append("      <ns2:Property name=\"FromPartyRole\">").append(submissionData.fromPartyRole).append("</ns2:Property>\n");
     propertiesBuilder.append("      <ns2:Property name=\"originalSender\">").append(submissionData.originalSender).append("</ns2:Property>\n");
     propertiesBuilder.append("      <ns2:Property name=\"finalRecipient\">").append(submissionData.finalRecipient).append("</ns2:Property>");
@@ -417,7 +419,7 @@ public final class EBMSUtils {
     // we need the certificate to obtain the to party id
     ValueEnforcer.notNull(certificate, "Endpoint Certificate");
     final SubmissionData submissionData = new SubmissionData();
-    submissionData.messageId = genereateEbmsMessageId(MessageExchangeEndpointConfig.getMEMName());
+    submissionData.messageId = genereateEbmsMessageId(MPConfig.getMEMAS4IDSuffix());
     submissionData.action = gatewayRoutingMetadata.getDocumentTypeId();
     submissionData.service = gatewayRoutingMetadata.getProcessId();
 

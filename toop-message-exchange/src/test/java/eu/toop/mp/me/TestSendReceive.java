@@ -15,25 +15,27 @@
  */
 package eu.toop.mp.me;
 
-import com.helger.commons.mime.CMimeType;
-import com.helger.commons.mime.IMimeType;
-import com.helger.peppol.identifier.generic.participant.IParticipantIdentifier;
-import com.helger.scope.mock.ScopeAwareTestSetup;
-import eu.toop.mp.api.MPSettings;
-import eu.toop.mp.me.mocAS4.MockAS4;
-import eu.toop.mp.r2d2client.IR2D2Endpoint;
-import eu.toop.mp.r2d2client.R2D2Endpoint;
+import java.nio.charset.StandardCharsets;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+
+import javax.annotation.Nonnull;
+
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
+import com.helger.commons.mime.CMimeType;
+import com.helger.commons.mime.IMimeType;
+import com.helger.peppol.identifier.generic.participant.IParticipantIdentifier;
+import com.helger.scope.mock.ScopeAwareTestSetup;
+
+import eu.toop.mp.api.MPSettings;
+import eu.toop.mp.me.mocAS4.MockAS4;
+import eu.toop.mp.r2d2client.IR2D2Endpoint;
+import eu.toop.mp.r2d2client.R2D2Endpoint;
 
 /**
  * This test suite tests the whole sending/receiving of a simple MEMessage by
@@ -53,20 +55,19 @@ public class TestSendReceive {
    */
   @BeforeAll
   public static void prepare() throws Exception {
+    // Port must match the message-processor.properties
     final int gwPort = 10001;
     mockAS4 = new MockAS4(gwPort);
     mockAS4.start();
-
-    // set the url of the gateway to the moc
-    MessageExchangeEndpointConfig.GW_URL = new URL("http://localhost:" + gwPort);
 
     ScopeAwareTestSetup.setupScopeTests();
   }
 
   @AfterAll
   public static void shutdown() {
-    mockAS4.finish();
     ScopeAwareTestSetup.shutdownScopeTests();
+
+    mockAS4.finish();
   }
 
   @Test
