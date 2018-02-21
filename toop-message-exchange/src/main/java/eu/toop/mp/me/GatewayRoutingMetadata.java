@@ -34,42 +34,42 @@ public class GatewayRoutingMetadata implements Serializable {
   /**
    * document type ID
    */
-  private final String _documentTypeId;
+  private final String documentTypeId;
 
   /**
    * Process ID
    */
-  private final String _processId;
+  private final String processId;
 
   /**
    * The target endpoint
    */
-  private final IR2D2Endpoint _endpoint;
+  private final IR2D2Endpoint endpoint;
 
   public GatewayRoutingMetadata (@Nonnull @Nonempty final String sDocumentTypeID,
                                  @Nonnull @Nonempty final String sProcessID, @Nonnull final IR2D2Endpoint aEndpoint) {
     ValueEnforcer.notEmpty (sDocumentTypeID, "DocumentTypeID");
     ValueEnforcer.notEmpty (sProcessID, "ProcessID");
     ValueEnforcer.notNull (aEndpoint, "Endpoint");
-    _documentTypeId = sDocumentTypeID;
-    _processId = sProcessID;
-    _endpoint = aEndpoint;
+    documentTypeId = sDocumentTypeID;
+    processId = sProcessID;
+    endpoint = aEndpoint;
   }
 
   @Nonnull
   @Nonempty
   public String getDocumentTypeId () {
-    return _documentTypeId;
+    return documentTypeId;
   }
 
   @Nonnull
   @Nonempty
   public String getProcessId () {
-    return _processId;
+    return processId;
   }
 
   @Nonnull
   public IR2D2Endpoint getEndpoint () {
-    return _endpoint;
+    return endpoint;
   }
 }

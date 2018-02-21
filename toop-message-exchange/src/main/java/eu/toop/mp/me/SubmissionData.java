@@ -17,7 +17,6 @@ package eu.toop.mp.me;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Properties;
 
 /**
  * @author: myildiz
@@ -82,5 +81,4 @@ public class SubmissionData {
    */
   @Nonnull
   public String action;
-
 }

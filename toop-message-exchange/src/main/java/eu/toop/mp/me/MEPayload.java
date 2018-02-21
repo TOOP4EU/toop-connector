@@ -36,18 +36,18 @@ public final class MEPayload {
   /**
    * Type of the payload
    */
-  private final IMimeType _mimeType;
+  private final IMimeType mimeType;
 
   /**
    * Optional id for the payload. If left empty, a default id will be used. i.e.
    * payload_X@toop.eu
    */
-  private final String _payloadId;
+  private final String payloadId;
 
   /**
    * The actual payload content
    */
-  private final byte[] _data;
+  private final byte[] data;
 
   @Nonnull
   @Nonempty
@@ -60,35 +60,35 @@ public final class MEPayload {
     ValueEnforcer.notNull (aMimeType, "MimeType");
     ValueEnforcer.notNull (aData, "Data");
 
-    _mimeType = aMimeType;
+    mimeType = aMimeType;
     // Ensure a payload is present
-    _payloadId = StringHelper.hasText (sPayloadID) ? sPayloadID : createRandomPayloadID ();
-    _data = aData;
+    payloadId = StringHelper.hasText (sPayloadID) ? sPayloadID : createRandomPayloadID ();
+    data = aData;
   }
 
   @Nonnull
   public IMimeType getMimeType () {
-    return _mimeType;
+    return mimeType;
   }
 
   @Nonnull
   public String getMimeTypeString () {
-    return _mimeType.getAsString ();
+    return mimeType.getAsString ();
   }
 
   @Nonnull
   public String getPayloadId () {
-    return _payloadId;
+    return payloadId;
   }
 
   @Nonnull
   @ReturnsMutableObject
   public byte[] getData () {
-    return _data;
+    return data;
   }
 
   @Override
   public String toString () {
-    return "Payload [" + _payloadId + ", " + _mimeType.getAsString () + "], length: " + _data.length;
+    return "Payload [" + payloadId + ", " + mimeType.getAsString () + "], length: " + data.length;
   }
 }

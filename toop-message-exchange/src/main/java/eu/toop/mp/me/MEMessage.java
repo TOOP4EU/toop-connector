@@ -28,14 +28,14 @@ import com.helger.commons.annotation.ReturnsMutableObject;
  * @date: 12.02.2018.
  */
 public class MEMessage {
-  private final List<MEPayload> _payloads = new ArrayList<> ();
+  private final List<MEPayload> payloads = new ArrayList<> ();
 
   public MEMessage () {
   }
 
   public MEMessage (@Nonnull final MEPayload aPayload) {
     ValueEnforcer.notNull (aPayload, "Payload");
-    _payloads.add (aPayload);
+    payloads.add (aPayload);
   }
 
   /**
@@ -47,14 +47,14 @@ public class MEMessage {
    */
   @Nonnull
   public MEPayload head () {
-    if (_payloads.isEmpty ())
+    if (payloads.isEmpty ())
       throw new IllegalStateException ("There is no payload");
-    return _payloads.get (0);
+    return payloads.get (0);
   }
 
   @Nonnull
   @ReturnsMutableObject
   public List<MEPayload> getPayloads () {
-    return _payloads;
+    return payloads;
   }
 }

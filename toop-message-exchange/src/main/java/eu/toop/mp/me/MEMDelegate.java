@@ -34,7 +34,7 @@ import com.helger.scope.singleton.AbstractGlobalSingleton;
  */
 @NotThreadSafe
 public class MEMDelegate extends AbstractGlobalSingleton {
-  private final List<IMessageHandler> _messageHandlers = new ArrayList<> ();
+  private final List<IMessageHandler> messageHandlers = new ArrayList<> ();
 
   @Deprecated
   @UsedViaReflection
@@ -72,7 +72,7 @@ public class MEMDelegate extends AbstractGlobalSingleton {
    */
   public void registerMessageHandler (@Nonnull final IMessageHandler aMessageHandler) {
     ValueEnforcer.notNull (aMessageHandler, "MessageHandler");
-    _messageHandlers.add (aMessageHandler);
+    messageHandlers.add (aMessageHandler);
   }
 
   /**
@@ -83,7 +83,7 @@ public class MEMDelegate extends AbstractGlobalSingleton {
    */
   public void deregisterMessageHandler (@Nonnull final IMessageHandler aMessageHandler) {
     ValueEnforcer.notNull (aMessageHandler, "MessageHandler");
-    _messageHandlers.remove (aMessageHandler);
+    messageHandlers.remove (aMessageHandler);
   }
 
   /**
@@ -93,7 +93,7 @@ public class MEMDelegate extends AbstractGlobalSingleton {
    *          message to be dispatched
    */
   public void dispatchInboundMessage (@Nonnull final SOAPMessage message) {
-    for (final IMessageHandler messageHandler : _messageHandlers) {
+    for (final IMessageHandler messageHandler : messageHandlers) {
       try {
         messageHandler.handleMessage (SoapUtil.soap2MEMessage (message));
       } catch (final Exception e) {
