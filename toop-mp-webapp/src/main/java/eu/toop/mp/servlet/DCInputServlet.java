@@ -26,7 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.helger.commons.datetime.PDTFactory;
+import com.helger.commons.collection.impl.CommonsArrayList;
 import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 import com.helger.commons.mime.CMimeType;
 import com.helger.servlet.mock.MockHttpServletRequest;
@@ -35,6 +35,7 @@ import com.helger.servlet.response.UnifiedResponse;
 import eu.toop.commons.doctype.EToopDocumentType;
 import eu.toop.commons.doctype.EToopProcess;
 import eu.toop.commons.exchange.IMSDataRequest;
+import eu.toop.commons.exchange.RequestValue;
 import eu.toop.commons.exchange.message.ToopMessageBuilder;
 import eu.toop.commons.exchange.message.ToopRequestMessage;
 import eu.toop.commons.exchange.mock.MSDataRequest;
@@ -46,8 +47,8 @@ import eu.toop.mp.processor.MessageProcessorDCOutgoing;
  * direction DC to DP.<br>
  * The input is an ASiC archive that contains the fields for a
  * {@link ToopRequestMessage} where only {@link IMSDataRequest} is used. If
- * extracted successfully it is put in {@link MessageProcessorDCOutgoing} for further
- * processing.
+ * extracted successfully it is put in {@link MessageProcessorDCOutgoing} for
+ * further processing.
  *
  * @author Philip Helger
  */
@@ -73,8 +74,8 @@ public class DCInputServlet extends HttpServlet {
         // TODO use correct document type ID/process ID
         ToopMessageBuilder.createRequestMessage (new MSDataRequest ("DE", EToopDocumentType.DOCTYPE1.getURIEncoded (),
                                                                     EToopProcess.PROC.getURIEncoded (),
-                                                                    "msg-id-" + PDTFactory.getCurrentLocalDateTime ()
-                                                                                          .toString ()),
+                                                                    new CommonsArrayList<> (new RequestValue ("company",
+                                                                                                              "demo"))),
                                                  archiveOutput, MPWebAppConfig.getSignatureHelper ());
         // Get ASiC bytes
         aMockRequest.setContent (archiveOutput.toByteArray ());
@@ -102,7 +103,7 @@ public class DCInputServlet extends HttpServlet {
     final UnifiedResponse aUR = UnifiedResponse.createSimple (aHttpServletRequest);
 
     // Parse POST data
-    // No ToopDataRequest contained here
+    // No IToopDataRequest contained here
     final ToopRequestMessage aMsg = ToopMessageBuilder.parseRequestMessage (aHttpServletRequest.getInputStream (),
                                                                             MSDataRequest.getDeserializerFunction (),
                                                                             null);
