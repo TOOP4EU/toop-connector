@@ -45,6 +45,7 @@ import eu.toop.commons.exchange.IMSDataRequest;
 import eu.toop.commons.exchange.IToopDataRequest;
 import eu.toop.commons.exchange.message.ToopMessageBuilder;
 import eu.toop.commons.exchange.mock.ToopDataRequest;
+import eu.toop.mp.api.MPConfig;
 import eu.toop.mp.api.MPSettings;
 import eu.toop.mp.me.GatewayRoutingMetadata;
 import eu.toop.mp.me.MEMDelegate;
@@ -84,15 +85,22 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
       }
 
       // 2. invoke R2D2 client
-      ICommonsList<IR2D2Endpoint> aEndpoints;
+      final ICommonsList<IR2D2Endpoint> aEndpoints;
       {
         final IDocumentTypeIdentifier aDocTypeID = MPSettings.getIdentifierFactory ()
                                                              .parseDocumentTypeIdentifier (aCurrentObject.getDocumentTypeID ());
         final IProcessIdentifier aProcessID = MPSettings.getIdentifierFactory ()
                                                         .parseProcessIdentifier (aCurrentObject.getProcessID ());
-        aEndpoints = new R2D2Client ().getEndpoints (aCurrentObject.getDestinationCountryCode (), aDocTypeID,
-                                                     aProcessID);
-        s_aLogger.info (sLogPrefix + "R2D2 found the following endpoints[" + aEndpoints.size () + "]: " + aEndpoints);
+        final ICommonsList<IR2D2Endpoint> aTotalEndpoints = new R2D2Client ().getEndpoints (aCurrentObject.getDestinationCountryCode (),
+                                                                                            aDocTypeID, aProcessID);
+
+        // Filter all endpoints with the corresponding transport profile
+        final String sTransportProfileID = MPConfig.getMEMProtocol ().getTransportProfileID ();
+        aEndpoints = aTotalEndpoints.getAll (x -> x.getTransportProtocol ().equals (sTransportProfileID));
+
+        s_aLogger.info (sLogPrefix + "R2D2 found the following endpoints[" + aEndpoints.size () + "/"
+                        + aTotalEndpoints.size () + "]: " + aEndpoints);
+
       }
 
       // 3. start message exchange to DC
@@ -109,7 +117,7 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
           meMessage = new MEMessage (aPayload);
         }
 
-        // TODO filter endpoint for supported transport protocols
+        // For all matching endpoints
         for (final IR2D2Endpoint aEP : aEndpoints) {
           final GatewayRoutingMetadata metadata = new GatewayRoutingMetadata (aCurrentObject.getSenderParticipantID (),
                                                                               aCurrentObject.getDocumentTypeID (),
