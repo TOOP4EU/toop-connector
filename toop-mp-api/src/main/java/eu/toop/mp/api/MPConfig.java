@@ -262,8 +262,9 @@ public final class MPConfig {
   }
 
   // SUBMIT_SERVICE
-  @Nullable
+  @Nonnull
+  @Nonempty
   public static String getMEMAS4Service () {
-    return getConfigFile ().getAsString ("mp.mem.as4.service");
+    return getConfigFile ().getAsString ("mp.mem.as4.service", "http://www.toop.eu/as4/backend");
   }
 }
