@@ -1,6 +1,9 @@
 package eu.toop.mp.smmclient;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -13,13 +16,8 @@ import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.MustImplementEqualsAndHashcode;
 import com.helger.commons.annotation.Nonempty;
 import com.helger.commons.annotation.ReturnsMutableCopy;
-import com.helger.commons.collection.impl.CommonsArrayList;
-import com.helger.commons.collection.impl.CommonsHashMap;
-import com.helger.commons.collection.impl.ICommonsList;
-import com.helger.commons.collection.impl.ICommonsMap;
 import com.helger.commons.hashcode.HashCodeGenerator;
 import com.helger.commons.string.StringHelper;
-import com.helger.commons.url.SimpleURL;
 import com.helger.httpclient.HttpClientFactory;
 import com.helger.httpclient.HttpClientManager;
 import com.helger.httpclient.response.ResponseHandlerJson;
@@ -29,13 +27,13 @@ import com.helger.json.IJsonObject;
 import eu.toop.mp.api.MPConfig;
 
 public class SuggestedDataModel {
-  private final ICommonsMap<String, ICommonsList<String>> m_aMap = new CommonsHashMap<> ();
+  private final Map<String, List<String>> m_aMap = new HashMap<> ();
 
   public void addConceptToBeMapped (@Nonnull @Nonempty final String sConceptScheme,
                                     @Nonnull @Nonempty final String sConceptValue) {
     ValueEnforcer.notEmpty (sConceptScheme, "Scheme");
     ValueEnforcer.notEmpty (sConceptValue, "Value");
-    m_aMap.computeIfAbsent (sConceptScheme, k -> new CommonsArrayList<> ()).add (sConceptValue);
+    m_aMap.computeIfAbsent (sConceptScheme, k -> new ArrayList<> ()).add (sConceptValue);
   }
 
   private static <T> void _httpClientGet (@Nonnull final String sDestinationURL,
@@ -51,6 +49,8 @@ public class SuggestedDataModel {
 
     try (final HttpClientManager aMgr = new HttpClientManager (aHCFactory)) {
       final HttpGet aGet = new HttpGet (sDestinationURL);
+      aGet.addHeader ("Accept", "application/json,*;q=0");
+
       final T aResponse = aMgr.execute (aGet, aResponseHandler);
       aResultHandler.accept (aResponse);
     }
@@ -103,20 +103,20 @@ public class SuggestedDataModel {
    */
   @Nonnull
   @ReturnsMutableCopy
-  public ICommonsMap<RequestValue, String> performMapping () throws IOException {
+  public Map<RequestValue, String> performMapping () throws IOException {
     // Find base URL
     String sBaseURL = MPConfig.getSMMGRLCURL ();
     if (StringHelper.hasNoText (sBaseURL))
       throw new IllegalArgumentException ("SMM GRLC URL is missing!");
     if (!sBaseURL.endsWith ("/"))
       sBaseURL += "/";
-    final String sDestinationURL = sBaseURL + "api/JackJackie/toop-sparql/get-all-triples";
+    final String sDestinationURL = sBaseURL + "api/JackJackie/toop-sparql/get-mapped-toop-concept";
 
     // Avoid creating them for every loop instance
     final ResponseHandlerJson aJsonHandler = new ResponseHandlerJson ();
-    final ICommonsMap<RequestValue, String> ret = new CommonsHashMap<> ();
+    final Map<RequestValue, String> ret = new HashMap<> ();
 
-    for (final Map.Entry<String, ICommonsList<String>> aEntry : m_aMap.entrySet ()) {
+    for (final Map.Entry<String, List<String>> aEntry : m_aMap.entrySet ()) {
       final String sSourceScheme = aEntry.getKey ();
       for (final String sSourceValue : aEntry.getValue ()) {
         if ("toop".equals (sSourceScheme)) {
@@ -124,19 +124,16 @@ public class SuggestedDataModel {
           ret.put (new RequestValue (sSourceScheme, sSourceValue), sSourceValue);
         } else {
           // Execute HTTP request
-          _httpClientGet (new SimpleURL (sDestinationURL).add ("concept", sSourceValue)
-                                                         .getAsStringWithEncodedParameters (),
-                          aJsonHandler, aJson -> {
-                            if (aJson.isObject ()) {
-                              final IJsonObject aResults = aJson.getAsObject ().getAsObject ("results");
-                              if (aResults != null)
-                                for (final IJson aBinding : aResults.getAsArray ("bindings")) {
-                                  final String sToopConcept = aBinding.getAsObject ().getAsObject ("s")
-                                                                      .getAsString ("value");
-                                  ret.put (new RequestValue (sSourceScheme, sSourceValue), sToopConcept);
-                                }
-                            }
-                          });
+          _httpClientGet (sDestinationURL + "?concept=" + sSourceValue, aJsonHandler, aJson -> {
+            if (aJson.isObject ()) {
+              final IJsonObject aResults = aJson.getAsObject ().getAsObject ("results");
+              if (aResults != null)
+                for (final IJson aBinding : aResults.getAsArray ("bindings")) {
+                  final String sToopConcept = aBinding.getAsObject ().getAsObject ("s").getAsString ("value");
+                  ret.put (new RequestValue (sSourceScheme, sSourceValue), sToopConcept);
+                }
+            }
+          });
         }
       }
     }
