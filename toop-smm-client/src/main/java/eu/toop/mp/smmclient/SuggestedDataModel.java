@@ -19,6 +19,7 @@ import com.helger.commons.collection.impl.ICommonsList;
 import com.helger.commons.collection.impl.ICommonsMap;
 import com.helger.commons.hashcode.HashCodeGenerator;
 import com.helger.commons.string.StringHelper;
+import com.helger.commons.url.SimpleURL;
 import com.helger.httpclient.HttpClientFactory;
 import com.helger.httpclient.HttpClientManager;
 import com.helger.httpclient.response.ResponseHandlerJson;
@@ -123,16 +124,19 @@ public class SuggestedDataModel {
           ret.put (new RequestValue (sSourceScheme, sSourceValue), sSourceValue);
         } else {
           // Execute HTTP request
-          _httpClientGet (sDestinationURL, aJsonHandler, aJson -> {
-            if (aJson.isObject ()) {
-              final IJsonObject aResults = aJson.getAsObject ().getAsObject ("results");
-              if (aResults != null)
-                for (final IJson aBinding : aResults.getAsArray ("bindings")) {
-                  final String sToopConcept = aBinding.getAsObject ().getAsObject ("s").getAsString ("value");
-                  ret.put (new RequestValue (sSourceScheme, sSourceValue), sToopConcept);
-                }
-            }
-          });
+          _httpClientGet (new SimpleURL (sDestinationURL).add ("concept", sSourceValue)
+                                                         .getAsStringWithEncodedParameters (),
+                          aJsonHandler, aJson -> {
+                            if (aJson.isObject ()) {
+                              final IJsonObject aResults = aJson.getAsObject ().getAsObject ("results");
+                              if (aResults != null)
+                                for (final IJson aBinding : aResults.getAsArray ("bindings")) {
+                                  final String sToopConcept = aBinding.getAsObject ().getAsObject ("s")
+                                                                      .getAsString ("value");
+                                  ret.put (new RequestValue (sSourceScheme, sSourceValue), sToopConcept);
+                                }
+                            }
+                          });
         }
       }
     }
