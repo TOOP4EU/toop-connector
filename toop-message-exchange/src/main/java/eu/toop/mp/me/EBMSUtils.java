@@ -24,6 +24,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.naming.InvalidNameException;
 import javax.naming.ldap.LdapName;
+import javax.xml.XMLConstants;
 import javax.xml.soap.AttachmentPart;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
@@ -45,15 +46,23 @@ import com.helger.commons.io.stream.StreamHelper;
 import com.helger.commons.mime.CMimeType;
 import com.helger.commons.mime.MimeType;
 import com.helger.commons.mime.MimeTypeParser;
+import com.helger.xml.microdom.IMicroDocument;
+import com.helger.xml.microdom.IMicroElement;
+import com.helger.xml.microdom.MicroDocument;
+import com.helger.xml.microdom.serialize.MicroWriter;
+import com.helger.xml.namespace.MapBasedNamespaceContext;
 import com.helger.xml.serialize.read.DOMReader;
+import com.helger.xml.serialize.write.XMLWriterSettings;
 import com.helger.xml.transform.TransformSourceFactory;
 
 import eu.toop.mp.api.MPConfig;
 
 public final class EBMSUtils {
-  private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EBMSUtils.class);
+  private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger (EBMSUtils.class);
+  public static final String NS_SOAPENV = "http://www.w3.org/2003/05/soap-envelope";
+  public static final String NS_EBMS = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/";
 
-  private EBMSUtils() {
+  private EBMSUtils () {
   }
 
   /**
@@ -63,99 +72,100 @@ public final class EBMSUtils {
    * @param message
    * @return
    */
-  public static byte[] createSuccessReceipt(final SOAPMessage message) {
-    ValueEnforcer.notNull(message, "SOAPMessage");
+  public static byte[] createSuccessReceipt (final SOAPMessage message) {
+    ValueEnforcer.notNull (message, "SOAPMessage");
 
     try {
-      final StreamSource stylesource = TransformSourceFactory.create(new ClassPathResource("/receipt-generator.xslt"));
-      final Transformer transformer = TransformerFactory.newInstance().newTransformer(stylesource);
-      transformer.setParameter("messageid", genereateEbmsMessageId(MPConfig.getMEMAS4IDSuffix()));
-      transformer.setParameter("timestamp", DateTimeUtils.getCurrentTimestamp());
-      try (final NonBlockingByteArrayOutputStream baos = new NonBlockingByteArrayOutputStream()) {
-        transformer.transform(new DOMSource(message.getSOAPPart()), new StreamResult(baos));
-        return baos.toByteArray();
+      final StreamSource stylesource = TransformSourceFactory.create (new ClassPathResource ("/receipt-generator.xslt"));
+      final Transformer transformer = TransformerFactory.newInstance ().newTransformer (stylesource);
+      transformer.setParameter ("messageid", genereateEbmsMessageId (MPConfig.getMEMAS4IDSuffix ()));
+      transformer.setParameter ("timestamp", DateTimeUtils.getCurrentTimestamp ());
+      try (final NonBlockingByteArrayOutputStream baos = new NonBlockingByteArrayOutputStream ()) {
+        transformer.transform (new DOMSource (message.getSOAPPart ()), new StreamResult (baos));
+        return baos.toByteArray ();
       }
     } catch (final RuntimeException ex) {
       // throw RTE's directly
       throw ex;
     } catch (final Exception ex) {
       // force exceptions to runtime
-      throw new IllegalStateException(ex.getMessage(), ex);
+      throw new IllegalStateException (ex.getMessage (), ex);
     }
   }
 
   /**
    * Create a fault message based on the error message
    *
-   * @param soapMessage
-   * @param faultMessage
-   * @return
+   * @param soapMessage Source SOAP message
+   * @param faultMessage Fault message. May be <code>null</code>.
+   * @return byte[] with result XML SOAP Fault message
    */
-  public byte[] createFault(@Nonnull final SOAPMessage soapMessage, @Nullable final String faultMessage) {
-    ValueEnforcer.notNull(soapMessage, "SOAPMessage");
+  public static byte[] createFault (@Nonnull final SOAPMessage soapMessage, @Nullable final String faultMessage) {
+    ValueEnforcer.notNull (soapMessage, "SOAPMessage");
 
-    String xml = StreamHelper.getAllBytesAsString(EBMSUtils.class.getResourceAsStream("/fault-template.xml"),
-        StandardCharsets.UTF_8);
-
-    Node element;
+    final String fm = faultMessage != null ? faultMessage : "Unknown Error";
+    String refToMessageInError;
     try {
-      element = SoapXPathUtil.findSingleNode(soapMessage.getSOAPHeader(), "//:MessageInfo/:MessageId");
+      final Node element = SoapXPathUtil.findSingleNode (soapMessage.getSOAPHeader (), "//:MessageInfo/:MessageId");
+      refToMessageInError = element.getTextContent ();
     } catch (final SOAPException e) {
-      throw new IllegalStateException(e.getMessage(), e);
+      throw new IllegalStateException (e.getMessage (), e);
     }
 
-    final String refToMessageInError = element.getTextContent();
+    final IMicroDocument aDoc = new MicroDocument ();
+    final IMicroElement eEnvelope = aDoc.appendElement (NS_SOAPENV, "Envelope");
+    {
+      final IMicroElement eHeader = eEnvelope.appendElement (NS_SOAPENV, "Head");
+      final IMicroElement eMessaging = eHeader.appendElement (NS_EBMS, "Messaging");
+      final IMicroElement eSignalMessage = eMessaging.appendElement (NS_EBMS, "SignalMessage");
+      {
+        final IMicroElement eMessageInfo = eSignalMessage.appendElement (NS_EBMS, "MessageInfo");
+        eMessageInfo.appendElement (NS_EBMS, "Timestamp").appendText (DateTimeUtils.getCurrentTimestamp ());
+        final String ebmsMessageId = genereateEbmsMessageId (MPConfig.getMEMAS4IDSuffix ());
+        eMessageInfo.appendElement (NS_EBMS, "MessageId").appendText (ebmsMessageId);
+      }
+      {
+        final IMicroElement eError = eSignalMessage.appendElement (NS_EBMS, "Error");
+        eError.setAttribute ("category", "CONTENT");
+        eError.setAttribute ("errorCode", "EBMS:0004");
+        eError.setAttribute ("origin", "ebms");
+        eError.setAttribute ("refToMessageInError", refToMessageInError);
+        eError.setAttribute ("severity", "failure");
+        eError.setAttribute ("shortDescription", "Error");
+        eError.appendElement (NS_EBMS, "Description").setAttribute (XMLConstants.XML_NS_URI, "lang", "en")
+              .appendText (fm);
+        eError.appendElement (NS_EBMS, "ErrorDetail").appendText (fm);
+      }
+    }
+    {
+      final IMicroElement eBody = eEnvelope.appendElement (NS_SOAPENV, "Body");
+      final IMicroElement eFault = eBody.appendElement (NS_SOAPENV, "Fault");
+      {
+        final IMicroElement eCode = eFault.appendElement (NS_SOAPENV, "Code");
+        eCode.appendElement (NS_SOAPENV, "Value").appendText ("env:Receiver");
+      }
+      {
+        final IMicroElement eReason = eFault.appendElement (NS_SOAPENV, "Reason");
+        eReason.appendElement (NS_SOAPENV, "Text").setAttribute (XMLConstants.XML_NS_URI, "lang", "en").appendText (fm);
+      }
+    }
 
-    String fm = faultMessage;
-    if (fm == null)
-      fm = "Unknown Error";
+    final MapBasedNamespaceContext aNSCtx = new MapBasedNamespaceContext ();
+    aNSCtx.addMapping ("env", NS_SOAPENV);
+    aNSCtx.addMapping ("eb", NS_EBMS);
 
-    final String ebmsMessageId = genereateEbmsMessageId(MPConfig.getMEMAS4IDSuffix ());
-    final String category = "CONTENT";
-    final String errorCode = "EBMS:0004";
-    final String origin = "ebms";
-    final String severity = "failure";
-    final String shortDescription = "Error";
-    final String description = fm;
-    final String errorDetail = fm;
-    final String reason = fm;
-    final String faultCode = "env:Receiver";
-    final String keyCategory = "${category}";
-    final String keyErrorCode = "${errorCode}";
-    final String keyOrigin = "${origin}";
-    final String keySeverity = "${severity}";
-    final String keyShortDescription = "${shortDescription}";
-    final String keyDescription = "${description}";
-    final String keyErrorDetail = "${errorDetail}";
-    final String keyFaultCode = "${faultCode}";
-    final String keyReason = "${reason}";
-    //@formatter:off
-    xml = xml
-        .replace("${timeStamp}", DateTimeUtils.getCurrentTimestamp())
-        .replace("${refToMessageInError}", refToMessageInError)
-        .replace("${messageId}", ebmsMessageId)
-        .replace(keyCategory, category)
-        .replace(keyErrorCode, errorCode)
-        .replace(keyOrigin, origin)
-        .replace(keySeverity, severity)
-        .replace(keyShortDescription, shortDescription)
-        .replace(keyDescription, description)
-        .replace(keyErrorDetail, errorDetail)
-        .replace(keyFaultCode, faultCode)
-        .replace(keyReason, reason);
-    //@formatter:on
-    return xml.getBytes(StandardCharsets.UTF_8);
+    return MicroWriter.getNodeAsBytes (aDoc, new XMLWriterSettings ().setNamespaceContext (aNSCtx));
   }
 
   /**
    * Generate a random ebms message id with the format
    * <code>&lt;RANDOM UUID&gt;@ext</code>
    *
-   * @param ext
-   * @return
+   * @param ext suffix to use. May not be <code>null</code>.
+   * @return EBMS Message ID. Never <code>null</code> nor empty.
    */
-  public static String genereateEbmsMessageId(final String ext) {
-    return UUID.randomUUID().toString() + "@" + ext;
+  public static String genereateEbmsMessageId (final String ext) {
+    return UUID.randomUUID ().toString () + "@" + ext;
   }
 
   /**
@@ -165,12 +175,12 @@ public final class EBMSUtils {
    * @param meMessage
    * @return
    */
-  public static SOAPMessage convert2MEOutboundAS4Message(final SubmissionData metadata, final MEMessage meMessage) {
+  public static SOAPMessage convert2MEOutboundAS4Message (final SubmissionData metadata, final MEMessage meMessage) {
     try {
-      if (LOG.isDebugEnabled())
-        LOG.debug("Convert submission data to SOAP Message");
-      String xml = StreamHelper.getAllBytesAsString(EBMSUtils.class.getResourceAsStream("/as4template.xml"),
-          StandardCharsets.UTF_8);
+      if (LOG.isDebugEnabled ())
+        LOG.debug ("Convert submission data to SOAP Message");
+      String xml = StreamHelper.getAllBytesAsString (EBMSUtils.class.getResourceAsStream ("/as4template.xml"),
+                                                     StandardCharsets.UTF_8);
 
       final String keyTimeStamp = "${timeStamp}";
       final String keyMessageId = "${ebmsMessageID}";
@@ -186,55 +196,56 @@ public final class EBMSUtils {
 
       final String conversationId = metadata.conversationId;
 
-      //@formatter:off
+      // @formatter:off
+      xml = xml.replace (keyTimeStamp, DateTimeUtils.getCurrentTimestamp ())
+               .replace (keyMessageId, genereateEbmsMessageId (MPConfig.getMEMAS4IDSuffix ()));
+      if (conversationId != null)
+        xml = xml.replace (keyConversationId, conversationId);
       xml = xml
-          .replace(keyTimeStamp, DateTimeUtils.getCurrentTimestamp())
-          .replace(keyMessageId, genereateEbmsMessageId(MPConfig.getMEMAS4IDSuffix ()))
-          .replace(keyConversationId, conversationId)
-          .replace(keyFrom, MPConfig.getMEMAS4FromPartyID ())
-          .replace(keyFromPartyRole, MPConfig.getMEMAS4FromRole ())
-          .replace(keyTo, MPConfig.getMEMAS4ToPartyID ())
-          .replace(keyToPartyRole, MPConfig.getMEMAS4ToRole ())
-          .replace(keyAction, MPConfig.getMEMAS4Action ())
-          .replace(keyService, MPConfig.getMEMAS4Service ())
-          .replace(keyMessageProps, generateMessageProperties(metadata))
-          .replace(keyPartInfo, generatePartInfo(meMessage));
-      //@formatter:off
-      System.out.println(xml);
-      LOG.trace(xml);
+               .replace (keyFrom, MPConfig.getMEMAS4FromPartyID ())
+               .replace (keyFromPartyRole, MPConfig.getMEMAS4FromRole ())
+               .replace (keyTo, MPConfig.getMEMAS4ToPartyID ())
+               .replace (keyToPartyRole, MPConfig.getMEMAS4ToRole ())
+               .replace (keyAction, MPConfig.getMEMAS4Action ())
+               .replace (keyService, MPConfig.getMEMAS4Service ())
+               .replace (keyMessageProps, generateMessageProperties (metadata))
+               .replace (keyPartInfo, generatePartInfo (meMessage));
+      // @formatter:off
+      if (LOG.isDebugEnabled ())
+        LOG.debug (xml);
 
-      final Document document = DOMReader.readXMLDOM(xml);
+      final Document document = DOMReader.readXMLDOM (xml);
 
       // create a soap message based on this XML
-      final SOAPMessage message = SoapUtil.createEmptyMessage();
-      final Element element = document.getDocumentElement();
-      final Node importNode = message.getSOAPHeader().getOwnerDocument().importNode(element, true);
-      message.getSOAPHeader().appendChild(importNode);
+      final SOAPMessage message = SoapUtil.createEmptyMessage ();
+      final Element element = document.getDocumentElement ();
+      final Node importNode = message.getSOAPHeader ().getOwnerDocument ().importNode (element, true);
+      message.getSOAPHeader ().appendChild (importNode);
 
-      meMessage.getPayloads().forEach(payload -> {
-        final AttachmentPart attachmentPart = message.createAttachmentPart();
-        attachmentPart.setContentId('<' + payload.getPayloadId() + '>');
+      meMessage.getPayloads ().forEach (payload -> {
+        final AttachmentPart attachmentPart = message.createAttachmentPart ();
+        attachmentPart.setContentId ('<' + payload.getPayloadId () + '>');
         try {
-          final byte[] data = payload.getData();
-          attachmentPart.setRawContentBytes(data, 0, data.length, payload.getMimeTypeString());
+          final byte[] data = payload.getData ();
+          attachmentPart.setRawContentBytes (data, 0, data.length, payload.getMimeTypeString ());
         } catch (final SOAPException e) {
-          throw new IllegalStateException(e);
+          throw new IllegalStateException (e);
         }
-        message.addAttachmentPart(attachmentPart);
+        message.addAttachmentPart (attachmentPart);
       });
 
-      if (message.saveRequired())
-        message.saveChanges();
+      if (message.saveRequired ())
+        message.saveChanges ();
 
-      if (LOG.isTraceEnabled())
-        LOG.trace(SoapUtil.describe(message));
+      if (LOG.isTraceEnabled ())
+        LOG.trace (SoapUtil.describe (message));
       return message;
     } catch (final RuntimeException ex) {
       // throw RTE's directly
       throw ex;
     } catch (final Exception ex) {
       // force exceptions to runtime
-      throw new IllegalStateException(ex.getMessage(), ex);
+      throw new IllegalStateException (ex.getMessage (), ex);
     }
   }
 
@@ -286,30 +297,38 @@ public final class EBMSUtils {
    * </tr>
    * </table>
    */
-  public static String generateMessageProperties(final SubmissionData submissionData) {
-    final StringBuilder propertiesBuilder = new StringBuilder();
-    propertiesBuilder.append("      <ns2:Property name=\"MessageId\">").
-        append(submissionData.messageId).
-        append("</ns2:Property>\n");
+  public static String generateMessageProperties (final SubmissionData submissionData) {
+    final StringBuilder propertiesBuilder = new StringBuilder ();
+    propertiesBuilder.append ("      <ns2:Property name=\"MessageId\">").append (submissionData.messageId)
+                     .append ("</ns2:Property>\n");
 
-    propertiesBuilder.append("      <ns2:Property name=\"ConversationId\">").append(submissionData.conversationId).append("</ns2:Property>\n");
+    propertiesBuilder.append ("      <ns2:Property name=\"ConversationId\">").append (submissionData.conversationId)
+                     .append ("</ns2:Property>\n");
 
     if (submissionData.refToMessageId != null) {
-      propertiesBuilder.append("      <ns2:Property name=\"RefToMessageId\">").append(submissionData.refToMessageId).append("</ns2:Property>\n");
+      propertiesBuilder.append ("      <ns2:Property name=\"RefToMessageId\">").append (submissionData.refToMessageId)
+                       .append ("</ns2:Property>\n");
     }
 
-    propertiesBuilder.append("      <ns2:Property name=\"Service\">").append(submissionData.service).append("</ns2:Property>\n");
-    propertiesBuilder.append("      <ns2:Property name=\"Action\">").append(submissionData.action).append("</ns2:Property>\n");
-    propertiesBuilder.append("      <ns2:Property name=\"ToPartyId\">").append(submissionData.to).append("</ns2:Property>\n");
-    propertiesBuilder.append("      <ns2:Property name=\"ToPartyRole\">").append(submissionData.toPartyRole).append("</ns2:Property>\n");
-    //the GW is the sender of the C2 ---> C3 Message
-    propertiesBuilder.append("      <ns2:Property name=\"FromPartyId\">").append(MPConfig.getMEMAS4ToPartyID ()).append("</ns2:Property>\n");
-    propertiesBuilder.append("      <ns2:Property name=\"FromPartyRole\">").append(submissionData.fromPartyRole).append("</ns2:Property>\n");
-    propertiesBuilder.append("      <ns2:Property name=\"originalSender\">").append(submissionData.originalSender).append("</ns2:Property>\n");
-    propertiesBuilder.append("      <ns2:Property name=\"finalRecipient\">").append(submissionData.finalRecipient).append("</ns2:Property>");
+    propertiesBuilder.append ("      <ns2:Property name=\"Service\">").append (submissionData.service)
+                     .append ("</ns2:Property>\n");
+    propertiesBuilder.append ("      <ns2:Property name=\"Action\">").append (submissionData.action)
+                     .append ("</ns2:Property>\n");
+    propertiesBuilder.append ("      <ns2:Property name=\"ToPartyId\">").append (submissionData.to)
+                     .append ("</ns2:Property>\n");
+    propertiesBuilder.append ("      <ns2:Property name=\"ToPartyRole\">").append (submissionData.toPartyRole)
+                     .append ("</ns2:Property>\n");
+    // the GW is the sender of the C2 ---> C3 Message
+    propertiesBuilder.append ("      <ns2:Property name=\"FromPartyId\">").append (MPConfig.getMEMAS4ToPartyID ())
+                     .append ("</ns2:Property>\n");
+    propertiesBuilder.append ("      <ns2:Property name=\"FromPartyRole\">").append (submissionData.fromPartyRole)
+                     .append ("</ns2:Property>\n");
+    propertiesBuilder.append ("      <ns2:Property name=\"originalSender\">").append (submissionData.originalSender)
+                     .append ("</ns2:Property>\n");
+    propertiesBuilder.append ("      <ns2:Property name=\"finalRecipient\">").append (submissionData.finalRecipient)
+                     .append ("</ns2:Property>");
 
-
-    return propertiesBuilder.toString();
+    return propertiesBuilder.toString ();
   }
 
   /**
@@ -318,90 +337,88 @@ public final class EBMSUtils {
    * @param meMessage
    * @return
    */
-  public static String generatePartInfo(final MEMessage meMessage) {
-    final StringBuilder partInfoBuilder = new StringBuilder();
+  public static String generatePartInfo (final MEMessage meMessage) {
+    final StringBuilder partInfoBuilder = new StringBuilder ();
 
-    meMessage.getPayloads().forEach(mEPayload -> {
-      partInfoBuilder
-          .append("<ns2:PartInfo href=\"cid:")
-          .append(mEPayload.getPayloadId())
-          .append("\">\n        <ns2:PartProperties>\n          <ns2:Property name=\"MimeType\">")
-          .append(mEPayload.getMimeType())
-          .append("</ns2:Property>")
-          .append("\n        </ns2:PartProperties>\n")
-          .append("      </ns2:PartInfo>");
+    meMessage.getPayloads ().forEach (mEPayload -> {
+      partInfoBuilder.append ("<ns2:PartInfo href=\"cid:").append (mEPayload.getPayloadId ())
+                     .append ("\">\n        <ns2:PartProperties>\n          <ns2:Property name=\"MimeType\">")
+                     .append (mEPayload.getMimeType ()).append ("</ns2:Property>")
+                     .append ("\n        </ns2:PartProperties>\n").append ("      </ns2:PartInfo>");
     });
-    return partInfoBuilder.toString();
+    return partInfoBuilder.toString ();
   }
 
   /**
    * Process the inbound SOAPMessage and convert it to the MEMEssage
    *
-   * @param message the soap message to be converted to a MEMessage. Cannot be null
+   * @param message
+   *          the soap message to be converted to a MEMessage. Cannot be null
    * @return the MEMessage object created from the supplied SOAPMessage
-   * @throws Exception in case of error
+   * @throws Exception
+   *           in case of error
    */
-  public static MEMessage soap2MEMessage(@Nonnull final SOAPMessage message) throws Exception {
-    ValueEnforcer.notNull(message, "SOAPMessage");
+  public static MEMessage soap2MEMessage (@Nonnull final SOAPMessage message) throws Exception {
+    ValueEnforcer.notNull (message, "SOAPMessage");
 
-    if (LOG.isDebugEnabled())
-      LOG.debug("Convert message to submission data");
+    if (LOG.isDebugEnabled ())
+      LOG.debug ("Convert message to submission data");
 
-    final MEMessage meMessage = new MEMessage();
-    if (message.countAttachments() > 0) {
+    final MEMessage meMessage = new MEMessage ();
+    if (message.countAttachments () > 0) {
       // Read all attachments
-      message.getAttachments().forEachRemaining(attObj -> {
+      message.getAttachments ().forEachRemaining (attObj -> {
         final AttachmentPart att = (AttachmentPart) attObj;
         // remove surplus characters
-        final String href = att.getContentId().replaceAll("<|>", "");
+        final String href = att.getContentId ().replaceAll ("<|>", "");
         Node partInfo;
         try {
           // throws exception if part info does not exist
-          partInfo = SoapXPathUtil.findSingleNode(message.getSOAPHeader(),
-              "//:PayloadInfo/:PartInfo[@href='cid:" + href + "']");
+          partInfo = SoapXPathUtil.findSingleNode (message.getSOAPHeader (),
+                                                   "//:PayloadInfo/:PartInfo[@href='cid:" + href + "']");
         } catch (final Exception ex) {
-          throw new IllegalStateException("ContentId: " + href + " was not found in PartInfo");
+          throw new IllegalStateException ("ContentId: " + href + " was not found in PartInfo");
         }
 
         MimeType mimeType;
         try {
-          final Node singleNode = SoapXPathUtil.findSingleNode(partInfo,
-              ".//:PartProperties/:Property[@name='MimeType']/text()");
-          String sMimeType = singleNode.getNodeValue();
-          if (sMimeType.startsWith("cid:"))
-            sMimeType = sMimeType.substring(4);
+          final Node singleNode = SoapXPathUtil.findSingleNode (partInfo,
+                                                                ".//:PartProperties/:Property[@name='MimeType']/text()");
+          String sMimeType = singleNode.getNodeValue ();
+          if (sMimeType.startsWith ("cid:"))
+            sMimeType = sMimeType.substring (4);
 
-          mimeType = MimeTypeParser.parseMimeType(sMimeType);
+          mimeType = MimeTypeParser.parseMimeType (sMimeType);
         } catch (final Exception ex) {
-          LOG.warn("Error parsing MIME type: " + ex.getMessage());
+          LOG.warn ("Error parsing MIME type: " + ex.getMessage ());
           // if there is a problem wrt the processing of the mimetype, simply grab the
           // content type
           // FIXME: Do not swallow the error, there might a problem with the mimtype
-          mimeType = MimeTypeParser.parseMimeType(att.getContentType());
+          mimeType = MimeTypeParser.parseMimeType (att.getContentType ());
         }
 
-        final Node charSetNode = SoapXPathUtil.findSingleNode(partInfo,
-            ".//:PartProperties/:Property[@name='CharacterSet']/text()");
-        final Charset aCharset = CharsetHelper.getCharsetFromNameOrNull(charSetNode.getNodeValue());
+        final Node charSetNode = SoapXPathUtil.findSingleNode (partInfo,
+                                                               ".//:PartProperties/:Property[@name='CharacterSet']/text()");
+        final Charset aCharset = CharsetHelper.getCharsetFromNameOrNull (charSetNode.getNodeValue ());
         if (aCharset != null) {
           // Add charset to MIME type
-          mimeType.addParameter(CMimeType.PARAMETER_NAME_CHARSET, aCharset.name());
+          mimeType.addParameter (CMimeType.PARAMETER_NAME_CHARSET, aCharset.name ());
         }
 
         byte[] rawContentBytes;
         try {
-          rawContentBytes = att.getRawContentBytes();
+          rawContentBytes = att.getRawContentBytes ();
         } catch (final SOAPException e) {
-          throw new IllegalStateException(e);
+          throw new IllegalStateException (e);
         }
 
-        final MEPayload payload = new MEPayload(mimeType, href, rawContentBytes);
-        if (LOG.isDebugEnabled()) {
-          LOG.debug("\tpayload.payloadId: " + payload.getPayloadId());
-          LOG.debug("\tpayload.mimeType: " + payload.getMimeTypeString());
+        final MEPayload payload = new MEPayload (mimeType, href, rawContentBytes);
+        if (LOG.isDebugEnabled ()) {
+          LOG.debug ("\tpayload.payloadId: " + payload.getPayloadId ());
+          LOG.debug ("\tpayload.mimeType: " + payload.getMimeTypeString ());
         }
 
-        meMessage.getPayloads().add(payload);
+        meMessage.getPayloads ().add (payload);
       });
     }
     return meMessage;
@@ -414,23 +431,23 @@ public final class EBMSUtils {
    * @param gatewayRoutingMetadata
    * @return SubmissionData
    */
-  static SubmissionData inferSubmissionData(final GatewayRoutingMetadata gatewayRoutingMetadata) {
-    final X509Certificate certificate = gatewayRoutingMetadata.getEndpoint().getCertificate();
+  static SubmissionData inferSubmissionData (final GatewayRoutingMetadata gatewayRoutingMetadata) {
+    final X509Certificate certificate = gatewayRoutingMetadata.getEndpoint ().getCertificate ();
     // we need the certificate to obtain the to party id
-    ValueEnforcer.notNull(certificate, "Endpoint Certificate");
-    final SubmissionData submissionData = new SubmissionData();
-    submissionData.messageId = genereateEbmsMessageId(MPConfig.getMEMAS4IDSuffix());
-    submissionData.action = gatewayRoutingMetadata.getDocumentTypeId();
-    submissionData.service = gatewayRoutingMetadata.getProcessId();
+    ValueEnforcer.notNull (certificate, "Endpoint Certificate");
+    final SubmissionData submissionData = new SubmissionData ();
+    submissionData.messageId = genereateEbmsMessageId (MPConfig.getMEMAS4IDSuffix ());
+    submissionData.action = gatewayRoutingMetadata.getDocumentTypeId ();
+    submissionData.service = gatewayRoutingMetadata.getProcessId ();
 
     LdapName ldapDN;
     try {
-      ldapDN = new LdapName(certificate.getSubjectX500Principal().getName());
+      ldapDN = new LdapName (certificate.getSubjectX500Principal ().getName ());
     } catch (final InvalidNameException e) {
-      throw new IllegalArgumentException("Invalid certificate name", e);
+      throw new IllegalArgumentException ("Invalid certificate name", e);
     }
     // XXX I'm not sure that is what we want
-    submissionData.to = ldapDN.getRdn(0).getValue().toString();
+    submissionData.to = ldapDN.getRdn (0).getValue ().toString ();
 
     // TODO: infer it from the transaction id
     submissionData.conversationId = "1";
@@ -440,7 +457,7 @@ public final class EBMSUtils {
     submissionData.fromPartyRole = "http://toop.eu/identifiers/roles/dp";
     // FIXME: The original sender must be some real value
     submissionData.originalSender = "originalSender";
-    submissionData.finalRecipient = gatewayRoutingMetadata.getEndpoint().getParticipantID().getURIEncoded();
+    submissionData.finalRecipient = gatewayRoutingMetadata.getEndpoint ().getParticipantID ().getURIEncoded ();
 
     return submissionData;
   }
