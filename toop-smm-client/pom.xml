@@ -60,10 +60,14 @@
 		</developer>
 	</developers>
 	<dependencies>
-		<dependency>
-			<groupId>com.helger</groupId>
-			<artifactId>ph-commons</artifactId>
-		</dependency>
+    <dependency>
+      <groupId>com.helger</groupId>
+      <artifactId>ph-commons</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>eu.toop</groupId>
+      <artifactId>toop-mp-api</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.glassfish.jersey.core</groupId>
       <artifactId>jersey-client</artifactId>

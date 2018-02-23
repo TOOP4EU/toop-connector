@@ -119,6 +119,19 @@ public final class MPConfig {
   }
 
   /**
+   *
+   * @return The SMM query URL to GRLC. Should end with a slash. May be
+   *         <code>null</code> - no default.
+   */
+  @Nullable
+  public static String getSMMGRLCURL () {
+    // E.g.
+    // http://localhost:8001/
+    // https://hamster.tno.nl/plasido-grlc/
+    return getConfigFile ().getAsString ("mp.smm.grlc.url");
+  }
+
+  /**
    * @return The PEPPOL Directory base URL for R2D2.Should never end with a slash.
    *         Example: {@link #DEFAULT_DIRECTORY_BASE_URL}.
    */

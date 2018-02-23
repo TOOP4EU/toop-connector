@@ -25,15 +25,16 @@ import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.helger.commons.string.StringHelper;
+
+import eu.toop.mp.api.MPConfig;
+
 public class SemanticMappingModule implements MappingModule {
 
   /**
    * The Log facility of this class.
    */
   private static final Logger LOG = LoggerFactory.getLogger (SemanticMappingModule.class);
-  private static final String SEMANTIC_MAPPING_SERVICE_URL_ENV_NAME = "hamster.tno.nl";
-  private static final String SEMANTIC_MAPPING_SERVICE_URL = (System.getenv (SEMANTIC_MAPPING_SERVICE_URL_ENV_NAME) != null ? System.getenv (SEMANTIC_MAPPING_SERVICE_URL_ENV_NAME)
-                                                                                                                            : "http://localhost:8001/");
 
   public void addTOOPConcepts (final List<DataElementRequestType> dataElements) {
     LOG.info ("Hi, you have called the addTOOPConcepts class...please stay tuned!");
@@ -68,12 +69,16 @@ public class SemanticMappingModule implements MappingModule {
      */
     final Client client = ClientBuilder.newClient ();
 
-    final WebTarget target = client.target (SEMANTIC_MAPPING_SERVICE_URL)
-                                   .path ("api/JackJackie/toop-sparql/get-all-triples");
+    final String sBaseURL = MPConfig.getSMMGRLCURL ();
+    if (StringHelper.hasNoText (sBaseURL))
+      throw new IllegalArgumentException ("SMM GRLC URL is missing!");
+
+    final WebTarget target = client.target (sBaseURL).path ("api/JackJackie/toop-sparql/get-all-triples");
 
     LOG.info ("Sending request to: {}", target.getUri ());
     final Response r = target.request ().get ();
     LOG.info ("Response: {}", r);
+    // You want this as JSON?
     final String value = r.readEntity (String.class);
     LOG.info ("Retrieved value {} from service.", value);
 
