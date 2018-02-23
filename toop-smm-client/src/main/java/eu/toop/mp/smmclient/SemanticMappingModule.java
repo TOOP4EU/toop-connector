@@ -15,33 +15,34 @@
  */
 package eu.toop.mp.smmclient;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
 import java.util.List;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SemanticMappingModule implements Module {
+public class SemanticMappingModule implements MappingModule {
 
   /**
    * The Log facility of this class.
    */
-  private static final Logger LOG = LoggerFactory.getLogger(SemanticMappingModule.class);
+  private static final Logger LOG = LoggerFactory.getLogger (SemanticMappingModule.class);
+  private static final String SEMANTIC_MAPPING_SERVICE_URL_ENV_NAME = "hamster.tno.nl";
+  private static final String SEMANTIC_MAPPING_SERVICE_URL = (System.getenv (SEMANTIC_MAPPING_SERVICE_URL_ENV_NAME) != null ? System.getenv (SEMANTIC_MAPPING_SERVICE_URL_ENV_NAME)
+                                                                                                                            : "http://localhost:8001/");
 
-  public String addTOOPConcepts(final String messageXml) {
-    return convertConcepts(messageXml, true);
+  public void addTOOPConcepts (final List<DataElementRequestType> dataElements) {
+    LOG.info ("Hi, you have called the addTOOPConcepts class...please stay tuned!");
+    convertConcepts (dataElements, true);
   }
 
-  public String addCountryConcepts(final String messageXml) {
-    return convertConcepts(messageXml, false);
+  public void addCountryConcepts (final List<DataElementRequestType> dataElements) {
+    LOG.info ("Hi, you have called the addCountryConcepts class...please stay tuned!");
+    convertConcepts (dataElements, false);
   }
 
   /**
@@ -57,53 +58,32 @@ public class SemanticMappingModule implements Module {
    *          concepts.
    * @return The converted (complemented) message.
    */
-  public String convertConcepts(final String messageXml, final boolean fromTOOPtoCountry) {
+  public void convertConcepts (final List<DataElementRequestType> dataElements, final boolean fromTOOPtoCountry) {
 
     // for now we use fromTOOPtoCountry only as a test.
+    /*
+     * For now we just change some random field, but when finished it will call the
+     * Semantic Mapping Service here and request the translation of a particular
+     * concept.
+     */
+    final Client client = ClientBuilder.newClient ();
 
-    LOG.trace("Message: {}", messageXml);
+    final WebTarget target = client.target (SEMANTIC_MAPPING_SERVICE_URL)
+                                   .path ("api/JackJackie/toop-sparql/get-all-triples");
 
-    String result = null;
-    try {
-      final JAXBContext context = JAXBContext.newInstance(ObjectFactory.class);
-      final Unmarshaller u = context.createUnmarshaller();
-      final StringReader sr = new StringReader(messageXml);
+    LOG.info ("Sending request to: {}", target.getUri ());
+    final Response r = target.request ().get ();
+    LOG.info ("Response: {}", r);
+    final String value = r.readEntity (String.class);
+    LOG.info ("Retrieved value {} from service.", value);
 
-      @SuppressWarnings("unchecked") // the unchecked cast is unavoidable when working with JAXB.
-      final JAXBElement<DataRequestType> elem = (JAXBElement<DataRequestType>) u.unmarshal(sr);
-      final DataRequestType type = elem.getValue();
-
-      /**
-       * Somehow I do not manage to avoid the JAXBElement here. According to this it
-       * should be possible: https://stackoverflow.com/a/26549272
-       */
-      // DataRequestType type = (DataRequestType) u.unmarshal(sr);
-
-      /*
-       * For now we just change some random field, but when finished it will call the
-       * Semantic Mapping Service here and request the translation of a particular
-       * concept.
-       */
-      final List<DataRequestInfoType> drit = type.getDataConsumerRequest().getDataRequestInfo();
-      if (!drit.isEmpty()) {
-        if (fromTOOPtoCountry) {
-          drit.forEach((i) -> i.setDataConsumerConcept("Modified!"));
-        } else {
-          drit.forEach((i) -> i.setToopConcept("Modified!"));
-        }
+    if (!dataElements.isEmpty ()) {
+      if (fromTOOPtoCountry) {
+        dataElements.forEach ( (i) -> i.setDataConsumerConcept ("Modified!"));
+      } else {
+        dataElements.forEach ( (i) -> i.setToopConcept ("Modified!"));
       }
-
-      final Marshaller m = context.createMarshaller();
-      m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-      try (final StringWriter sw = new StringWriter()) {
-        m.marshal(elem, sw);
-        result = sw.toString();
-      }
-    } catch (final IOException | JAXBException e) {
-      LOG.error("An error occured while JAXB unmarshalling", e);
     }
-
-    return result;
   }
 
 }

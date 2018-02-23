@@ -15,27 +15,28 @@
  */
 package eu.toop.mp.smmclient;
 
-public interface Module {
+import java.util.List;
+
+public interface MappingModule {
 
 	/**
 	 * Complements the country specific entries with their general TOOP
-	 * counterparts.
+	 * counterparts. It will make the changes directly in the POJO, so not result
+	 * has to be returned.
 	 * 
-	 * @param messageXml
-	 *            The XML in which to complement the specific entries.
-	 * @return The given messageXml complemented with TOOP generic concepts.
+	 * @param request
+	 *            The JAXB POJO in which to complement the specific entries.
 	 */
-	public String addTOOPConcepts(String messageXml);
+	public void addTOOPConcepts(List<DataElementRequestType> dataElements);
 
 	/**
 	 * Complements the TOOP generic concepts in the message with Country specific
-	 * concepts.
+	 * concepts. It will make the changes directly in the POJO, so not result has to
+	 * be returned.
 	 * 
 	 * @param messageXml
-	 *            The XML in which to complement the generic TOOP entries.
-	 * @return The given messageXml complemented with the corresponding Country
-	 *         specific entries.
+	 *            The JAXB POJO in which to complement the generic TOOP entries.
 	 */
-	public String addCountryConcepts(String messageXml);
+	public void addCountryConcepts(List<DataElementRequestType> dataElements);
 
 }
