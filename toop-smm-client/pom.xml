@@ -65,6 +65,10 @@
       <artifactId>ph-commons</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.helger</groupId>
+      <artifactId>ph-httpclient</artifactId>
+    </dependency>
+    <dependency>
       <groupId>eu.toop</groupId>
       <artifactId>toop-mp-api</artifactId>
     </dependency>
