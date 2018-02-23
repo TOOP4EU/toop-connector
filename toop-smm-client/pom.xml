@@ -89,15 +89,6 @@
 					</instructions>
 				</configuration>
 			</plugin>
-			<!-- currently the tests require the semantic mapping service to be available, 
-				but this is not always the case. So we skip the tests until we can fix this. -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<skipTests>true</skipTests>
-				</configuration>
-			</plugin>
 			<plugin>
 				<groupId>org.jvnet.jaxb2.maven2</groupId>
 				<artifactId>maven-jaxb2-plugin</artifactId>

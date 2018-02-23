@@ -30,6 +30,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +52,7 @@ class SMMTest {
 		is.close();
 	}
 
+	@Disabled
 	@Test
 	void testAddTOOPConcepts() {
 
@@ -83,6 +85,7 @@ class SMMTest {
 		}
 	}
 
+	@Disabled
 	@Test
 	void testAddCountryConcepts() {
 		JAXBContext context;
