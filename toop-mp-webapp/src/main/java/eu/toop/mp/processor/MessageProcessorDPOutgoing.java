@@ -44,6 +44,7 @@ import eu.toop.commons.exchange.IToopDataResponse;
 import eu.toop.commons.exchange.message.ToopMessageBuilder;
 import eu.toop.commons.exchange.message.ToopResponseMessage;
 import eu.toop.commons.exchange.mock.ToopDataResponse;
+import eu.toop.mp.api.MPConfig;
 import eu.toop.mp.api.MPSettings;
 import eu.toop.mp.me.GatewayRoutingMetadata;
 import eu.toop.mp.me.MEMDelegate;
@@ -91,8 +92,15 @@ public final class MessageProcessorDPOutgoing extends AbstractGlobalWebSingleton
         final IProcessIdentifier aProcessID = MPSettings.getIdentifierFactory ()
                                                         .parseProcessIdentifier (aCurrentObject.getMSDataRequest ()
                                                                                                .getProcessID ());
-        aEndpoints = new R2D2Client ().getEndpoints (aPID, aDocTypeID, aProcessID);
-        s_aLogger.info (sLogPrefix + "R2D2 found the following endpoints[" + aEndpoints.size () + "]: " + aEndpoints);
+        final ICommonsList<IR2D2Endpoint> aTotalEndpoints = new R2D2Client ().getEndpoints (aPID, aDocTypeID,
+                                                                                            aProcessID);
+
+        // Filter all endpoints with the corresponding transport profile
+        final String sTransportProfileID = MPConfig.getMEMProtocol ().getTransportProfileID ();
+        aEndpoints = aTotalEndpoints.getAll (x -> x.getTransportProtocol ().equals (sTransportProfileID));
+
+        s_aLogger.info (sLogPrefix + "R2D2 found the following endpoints[" + aEndpoints.size () + "/"
+                        + aTotalEndpoints.size () + "]: " + aEndpoints);
       }
 
       // 3. start message exchange to DC
@@ -111,7 +119,6 @@ public final class MessageProcessorDPOutgoing extends AbstractGlobalWebSingleton
           meMessage = new MEMessage (aPayload);
         }
 
-        // TODO filter endpoint for supported transport protocols
         for (final IR2D2Endpoint aEP : aEndpoints) {
           final GatewayRoutingMetadata metadata = new GatewayRoutingMetadata (aCurrentObject.getMSDataRequest ()
                                                                                             .getSenderParticipantID (),

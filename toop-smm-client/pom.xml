@@ -16,13 +16,6 @@
     limitations under the License.
 
 -->
-<!-- Copyright (C) 2018 toop.eu Licensed under the Apache License, Version 
-	2.0 (the "License"); you may not use this file except in compliance with 
-	the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 
-	Unless required by applicable law or agreed to in writing, software distributed 
-	under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES 
-	OR CONDITIONS OF ANY KIND, either express or implied. See the License for 
-	the specific language governing permissions and limitations under the License. -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
@@ -66,18 +59,31 @@
 			<url>http://www.tno.nl</url>
 		</developer>
 	</developers>
-  <dependencies>
+	<dependencies>
     <dependency>
       <groupId>com.helger</groupId>
       <artifactId>ph-commons</artifactId>
     </dependency>
-    <!-- Test only -->
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
-      <scope>test</scope>
+      <groupId>com.helger</groupId>
+      <artifactId>ph-httpclient</artifactId>
     </dependency>
-  </dependencies>
+    <dependency>
+      <groupId>eu.toop</groupId>
+      <artifactId>toop-mp-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jersey.core</groupId>
+      <artifactId>jersey-client</artifactId>
+      <version>2.26-b03</version>
+    </dependency>
+		<!-- Test only -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
 	<build>
 		<plugins>
 			<plugin>
@@ -92,31 +98,31 @@
 				</configuration>
 			</plugin>
 			<plugin>
-        <groupId>org.jvnet.jaxb2.maven2</groupId>
-        <artifactId>maven-jaxb2-plugin</artifactId>
-        <version>0.13.3</version>
+				<groupId>org.jvnet.jaxb2.maven2</groupId>
+				<artifactId>maven-jaxb2-plugin</artifactId>
+				<version>0.13.3</version>
 				<executions>
 					<execution>
 						<goals>
-              <goal>generate</goal>
+							<goal>generate</goal>
 						</goals>
-            <configuration>
-              <schemaIncludes>
-                <schemaInclude>datarequest.xsd</schemaInclude>
-              </schemaIncludes>
-              <!-- The package of your generated sources -->
-              <generatePackage>eu.toop.mp.smmclient</generatePackage>
-            </configuration>
+						<configuration>
+							<schemaIncludes>
+								<schemaInclude>datarequest.xsd</schemaInclude>
+							</schemaIncludes>
+							<!-- The package of your generated sources -->
+							<generatePackage>eu.toop.mp.smmclient</generatePackage>
+						</configuration>
 					</execution>
 				</executions>
 				<configuration>
-	        <schemaDirectory>src/main/resources/</schemaDirectory>
-          <encoding>${project.build.sourceEncoding}</encoding>
-          <strict>true</strict>
-          <args>
-            <arg>-no-header</arg>
-          </args>
-        </configuration>
+					<schemaDirectory>src/main/resources/</schemaDirectory>
+					<encoding>${project.build.sourceEncoding}</encoding>
+					<strict>true</strict>
+					<args>
+						<arg>-no-header</arg>
+					</args>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

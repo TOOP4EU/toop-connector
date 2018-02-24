@@ -15,41 +15,119 @@
  */
 package eu.toop.mp.smmclient;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.nio.charset.StandardCharsets;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.util.List;
+import java.util.Scanner;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.helger.commons.io.resource.ClassPathResource;
-import com.helger.commons.io.stream.StreamHelper;
+class SMMTest {
 
-public final class SMMTest {
-  private static final Logger LOG = LoggerFactory.getLogger(SMMTest.class);
-  private static final String EXAMPLE = "/datarequest.xml";
+	private static final String MODIFIED = "Modified!";
 
-  private final Module m = new SemanticMappingModule();
-  private final String exampleXml = StreamHelper.getAllBytesAsString(new ClassPathResource(EXAMPLE),
-      StandardCharsets.UTF_8);
+	private static final Logger LOG = LoggerFactory.getLogger(SMMTest.class);
 
-  @Test
-  public void testAddTOOPConcepts() {
-    final String result = m.addCountryConcepts(this.exampleXml);
-    LOG.info(result);
-    assertNotNull(result);
-    assertTrue(!result.isEmpty());
-  }
+	private static final String EXAMPLE = "/datarequest.xml";
+	private MappingModule m = null;
+	private String exampleXml = null;
 
-  @Test
-  public void testAddCountryConcepts() {
-    final String result = m.addTOOPConcepts(this.exampleXml);
+	public SMMTest() throws IOException {
+		m = new SemanticMappingModule();
+		InputStream is = SMMTest.class.getResourceAsStream(EXAMPLE);
+		exampleXml = convertStreamToString(is);
+		is.close();
+	}
 
-    LOG.info(result);
+	@Disabled
+	@Test
+	void testAddTOOPConcepts() {
 
-    assertNotNull(result);
-    assertTrue(!result.isEmpty());
-  }
+		JAXBContext context;
+		try {
+			LOG.info("testAddTOOPConcepts has started");
+			context = JAXBContext.newInstance(ObjectFactory.class);
+			final Unmarshaller u = context.createUnmarshaller();
+			final StringReader sr = new StringReader(exampleXml);
+			@SuppressWarnings("unchecked") // the unchecked cast is unavoidable when working with JAXB.
+			final JAXBElement<DataRequestType> elem = (JAXBElement<DataRequestType>) u.unmarshal(sr);
+			final DataRequestType requestTypeBefore = elem.getValue();
+
+			List<DataElementRequestType> elements = requestTypeBefore.getDataConsumerRequest().getDataElementRequest();
+
+			m.addCountryConcepts(elements);
+
+			final Marshaller m = context.createMarshaller();
+			m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+			String requestTypeAfter = null;
+			try (final StringWriter sw = new StringWriter()) {
+				m.marshal(elem, sw);
+				requestTypeAfter = sw.toString();
+			}
+			LOG.debug(requestTypeAfter);
+			assertTrue(!requestTypeAfter.isEmpty());
+			assertTrue(requestTypeAfter.contains(MODIFIED));
+		} catch (JAXBException | IOException e) {
+			LOG.error("An error occurred.", e);
+		}
+	}
+
+	@Disabled
+	@Test
+	void testAddCountryConcepts() {
+		JAXBContext context;
+		try {
+			LOG.info("testAddCountryConcepts has started");
+			context = JAXBContext.newInstance(ObjectFactory.class);
+			final Unmarshaller u = context.createUnmarshaller();
+			final StringReader sr = new StringReader(exampleXml);
+			@SuppressWarnings("unchecked") // the unchecked cast is unavoidable when working with JAXB.
+			final JAXBElement<DataRequestType> elem = (JAXBElement<DataRequestType>) u.unmarshal(sr);
+			final DataRequestType requestTypeBefore = elem.getValue();
+
+			List<DataElementRequestType> elements = requestTypeBefore.getDataConsumerRequest().getDataElementRequest();
+
+			m.addTOOPConcepts(elements);
+
+			final Marshaller m = context.createMarshaller();
+			m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+			String requestTypeAfter = null;
+			try (final StringWriter sw = new StringWriter()) {
+				m.marshal(elem, sw);
+				requestTypeAfter = sw.toString();
+			}
+			LOG.debug(requestTypeAfter);
+			assertTrue(!requestTypeAfter.isEmpty());
+			assertTrue(requestTypeAfter.contains(MODIFIED));
+		} catch (JAXBException | IOException e) {
+			LOG.error("An error occurred.", e);
+		}
+	}
+
+	/**
+	 * This method does *not* close the input stream. You should do it yourself.
+	 * 
+	 * @param is
+	 *            An open InputStream that will not be closed by this method!
+	 * @return The string contained in this InputStream.
+	 */
+	@SuppressWarnings("resource")
+	public String convertStreamToString(InputStream is) {
+		Scanner s = new Scanner(is).useDelimiter("\\A");
+		return s.hasNext() ? s.next() : "";
+	}
+
 }

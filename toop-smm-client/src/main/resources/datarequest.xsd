@@ -54,7 +54,7 @@
 			<xs:element name="DocumentRequestIndicator" type="xs:string"></xs:element>
 			<xs:element name="DocumentRequestTypeCode" type="xs:string"></xs:element>
 			<xs:element name="DataConsumerRequestIdentifer" type="xs:string"></xs:element>
-			<xs:element name="DataRequestInfo" type="DataRequestInfoType"
+			<xs:element name="DataElementRequest" type="DataElementRequestType"
 				minOccurs="0" maxOccurs="unbounded"></xs:element>
 		</xs:sequence>
 	</xs:complexType>
@@ -84,7 +84,7 @@
 		</xs:sequence>
 	</xs:complexType>
 
-	<xs:complexType name="DataRequestInfoType">
+	<xs:complexType name="DataElementRequestType">
 		<xs:sequence>
 			<xs:element name="DataRequestIdentifier" type="xs:string"></xs:element>
 			<xs:element name="DataConsumerConcept" type="xs:string"></xs:element>

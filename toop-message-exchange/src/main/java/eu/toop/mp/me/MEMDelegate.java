@@ -96,12 +96,13 @@ public class MEMDelegate extends AbstractGlobalSingleton {
    *          message to be dispatched
    */
   public void dispatchInboundMessage (@Nonnull final SOAPMessage message) {
-    for (final IMessageHandler messageHandler : messageHandlers) {
-      try {
-        messageHandler.handleMessage (SoapUtil.soap2MEMessage (message));
-      } catch (final Exception e) {
-        throw new IllegalStateException ("Error handling message via " + messageHandler, e);
-      }
+    try {
+      // Do it only once
+      final MEMessage aMEMessage = SoapUtil.soap2MEMessage (message);
+      for (final IMessageHandler messageHandler : messageHandlers)
+        messageHandler.handleMessage (aMEMessage);
+    } catch (final Exception e) {
+      throw new IllegalStateException ("Error handling message "+ message, e);
     }
   }
 }

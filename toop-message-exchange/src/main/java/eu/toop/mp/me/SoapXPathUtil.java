@@ -39,7 +39,7 @@ public class SoapXPathUtil {
   static {
     XPATH = XPathFactory.newInstance ().newXPath ();
     final MapBasedNamespaceContext aNamespaceCtx = new MapBasedNamespaceContext ();
-    // TODO add if needed
+    aNamespaceCtx.addDefaultNamespaceURI (EBMSUtils.NS_EBMS);
     XPATH.setNamespaceContext (aNamespaceCtx);
   }
 

@@ -16,7 +16,7 @@
     limitations under the License.
 
 -->
-<DataRequest xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="datarequest.xsd">
+<DataRequest xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../main/resources/datarequest.xsd">
   <DocumentIdentifier>DocumentIdentifier</DocumentIdentifier>
   <DocumentIssueDate>DocumentIssueDate</DocumentIssueDate>
   <DocumentIssueTime>DocumentIssueTime</DocumentIssueTime>
@@ -51,7 +51,7 @@
     <DocumentRequestIndicator>DocumentRequestIndicator</DocumentRequestIndicator>
     <DocumentRequestTypeCode>DocumentRequestTypeCode</DocumentRequestTypeCode>
     <DataConsumerRequestIdentifer>DataConsumerRequestIdentifer</DataConsumerRequestIdentifer>
-    <DataRequestInfo>
+    <DataElementRequest>
       <DataRequestIdentifier>DataRequestIdentifier</DataRequestIdentifier>
       <DataConsumerConcept>DataConsumerConcept</DataConsumerConcept>
       <DataConsumerConceptIdentifier>DataConsumerConceptIdentifier</DataConsumerConceptIdentifier>
@@ -65,6 +65,6 @@
       <ToopConceptURI>ToopConceptURI</ToopConceptURI>
       <ToopConceptDomain>ToopConceptDomain</ToopConceptDomain>
       <ToopNamespace>ToopNamespace</ToopNamespace>
-    </DataRequestInfo>
+    </DataElementRequest>
   </DataConsumerRequest>
 </DataRequest>

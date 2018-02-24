@@ -27,6 +27,7 @@ import javax.xml.soap.MessageFactory;
 import javax.xml.soap.MimeHeaders;
 import javax.xml.soap.SOAPConnection;
 import javax.xml.soap.SOAPConnectionFactory;
+import javax.xml.soap.SOAPConstants;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 
@@ -46,7 +47,8 @@ public class SoapUtil {
 
   static {
     try {
-      messageFactory = MessageFactory.newInstance ();
+      // Ensure to use SOAP 1.2
+      messageFactory = MessageFactory.newInstance (SOAPConstants.SOAP_1_2_PROTOCOL);
       soapConnectionFactory = SOAPConnectionFactory.newInstance ();
     } catch (final SOAPException e) {
       throw new InitializationException ("Failed to init factories", e);
