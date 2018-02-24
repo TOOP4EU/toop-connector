@@ -33,8 +33,6 @@ import java.util.concurrent.Executors;
  * @date: 20.02.2018.
  */
 public class SOAPMessageAccumulator {
-
-  private MimeHeaders newHeaders;
   private PipedOutputStream pipedOutputStream;
   private PipedInputStream pipedInputStream;
   private SOAPMessage nextMessage;

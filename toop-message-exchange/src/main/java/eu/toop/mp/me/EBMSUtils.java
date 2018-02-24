@@ -1,12 +1,12 @@
 /**
  * Copyright (C) 2018 toop.eu
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *         http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -110,7 +110,7 @@ public final class EBMSUtils {
     if (fm == null)
       fm = "Unknown Error";
 
-    final String ebmsMessageId = genereateEbmsMessageId(MPConfig.getMEMAS4IDSuffix ());
+    final String ebmsMessageId = genereateEbmsMessageId(MPConfig.getMEMAS4IDSuffix());
     final String category = "CONTENT";
     final String errorCode = "EBMS:0004";
     final String origin = "ebms";
@@ -199,8 +199,8 @@ public final class EBMSUtils {
           .replace(keyService, MPConfig.getMEMAS4Service ())
           .replace(keyMessageProps, generateMessageProperties(metadata))
           .replace(keyPartInfo, generatePartInfo(meMessage));
-      //@formatter:off
-      System.out.println(xml);
+      //@formatter:on
+
       LOG.trace(xml);
 
       final Document document = DOMReader.readXMLDOM(xml);
@@ -303,7 +303,7 @@ public final class EBMSUtils {
     propertiesBuilder.append("      <ns2:Property name=\"ToPartyId\">").append(submissionData.to).append("</ns2:Property>\n");
     propertiesBuilder.append("      <ns2:Property name=\"ToPartyRole\">").append(submissionData.toPartyRole).append("</ns2:Property>\n");
     //the GW is the sender of the C2 ---> C3 Message
-    propertiesBuilder.append("      <ns2:Property name=\"FromPartyId\">").append(MPConfig.getMEMAS4ToPartyID ()).append("</ns2:Property>\n");
+    propertiesBuilder.append("      <ns2:Property name=\"FromPartyId\">").append(MPConfig.getMEMAS4ToPartyID()).append("</ns2:Property>\n");
     propertiesBuilder.append("      <ns2:Property name=\"FromPartyRole\">").append(submissionData.fromPartyRole).append("</ns2:Property>\n");
     propertiesBuilder.append("      <ns2:Property name=\"originalSender\">").append(submissionData.originalSender).append("</ns2:Property>\n");
     propertiesBuilder.append("      <ns2:Property name=\"finalRecipient\">").append(submissionData.finalRecipient).append("</ns2:Property>");
