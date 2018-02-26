@@ -28,6 +28,6 @@ public class SuggestedDataModelTest {
     assertEquals ("bla", aRV.getScheme ());
     assertEquals ("CompanyCode", aRV.getValue ());
 
-    assertEquals ("http://toop.tno.nl/organization#CompanyCode", aResponse.values ().iterator ().next ());
+    assertEquals ("http://toop.eu/organization#CompanyCode", aResponse.values ().iterator ().next ());
   }
 }
