@@ -73,7 +73,7 @@ public class SemanticMappingModule implements MappingModule {
     if (StringHelper.hasNoText (sBaseURL))
       throw new IllegalArgumentException ("SMM GRLC URL is missing!");
 
-    final WebTarget target = client.target (sBaseURL).path ("api/JackJackie/toop-sparql/get-all-triples");
+    final WebTarget target = client.target (sBaseURL).path ("api/JackJackie/toop-sparql/get-mapped-toop-concept?concept=CompanyCode");
 
     LOG.info ("Sending request to: {}", target.getUri ());
     final Response r = target.request ().get ();

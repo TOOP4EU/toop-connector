@@ -7,10 +7,15 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import eu.toop.mp.smmclient.SuggestedDataModel.RequestValue;
 
 public class SuggestedDataModelTest {
+  
+  private static final Logger LOG = LoggerFactory.getLogger (SuggestedDataModelTest.class);
+  
   @Test
   public void testBasic () throws IOException {
     final SuggestedDataModel aSDM = new SuggestedDataModel ();

@@ -11,6 +11,8 @@ import javax.annotation.Nonnull;
 
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.MustImplementEqualsAndHashcode;
@@ -28,7 +30,9 @@ import eu.toop.mp.api.MPConfig;
 
 public class SuggestedDataModel {
   private final Map<String, List<String>> m_aMap = new HashMap<> ();
-
+  
+  private static final Logger LOG = LoggerFactory.getLogger (SuggestedDataModel.class);
+  
   public void addConceptToBeMapped (@Nonnull @Nonempty final String sConceptScheme,
                                     @Nonnull @Nonempty final String sConceptValue) {
     ValueEnforcer.notEmpty (sConceptScheme, "Scheme");
@@ -118,8 +122,10 @@ public class SuggestedDataModel {
 
     for (final Map.Entry<String, List<String>> aEntry : m_aMap.entrySet ()) {
       final String sSourceScheme = aEntry.getKey ();
+      LOG.info(sSourceScheme);
       for (final String sSourceValue : aEntry.getValue ()) {
-        if ("toop".equals (sSourceScheme)) {
+       LOG.info(sSourceValue);
+       if ("toop".equals (sSourceScheme)) {
           // XXX Already in "TOOP" scheme? If so, don't map
           ret.put (new RequestValue (sSourceScheme, sSourceValue), sSourceValue);
         } else {
@@ -130,6 +136,7 @@ public class SuggestedDataModel {
               if (aResults != null)
                 for (final IJson aBinding : aResults.getAsArray ("bindings")) {
                   final String sToopConcept = aBinding.getAsObject ().getAsObject ("s").getAsString ("value");
+                  LOG.info(sToopConcept);
                   ret.put (new RequestValue (sSourceScheme, sSourceValue), sToopConcept);
                 }
             }
