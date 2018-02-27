@@ -59,17 +59,17 @@ public final class MPConfig {
   public static final String SYSTEM_PROPERTY_TOOP_MP_SERVER_PROPERTIES_PATH = "toop.mp.server.properties.path";
 
   /** The default primary properties file to load */
-  public static final String PATH_PRIVATE_MESSAGE_PROPERTIES_PROPERTIES = "private-message-processor.properties";
+  public static final String PATH_PRIVATE_MESSAGE_PROCESSOR_PROPERTIES = "private-message-processor.properties";
   /** The default secondary properties file to load */
-  public static final String PATH_MESSAGE_PROPERTIES_PROPERTIES = "message-processor.properties";
+  public static final String PATH_MESSAGE_PROCESSOR_PROPERTIES = "message-processor.properties";
 
   private static ISMLInfo s_aCachedSMLInfo;
 
   /**
    * Reload the configuration file. It checks if the system property
    * {@link #SYSTEM_PROPERTY_TOOP_MP_SERVER_PROPERTIES_PATH} is present and if so,
-   * tries it first, than {@link #PATH_PRIVATE_MESSAGE_PROPERTIES_PROPERTIES} is
-   * checked and finally the {@link #PATH_MESSAGE_PROPERTIES_PROPERTIES} path is
+   * tries it first, than {@link #PATH_PRIVATE_MESSAGE_PROCESSOR_PROPERTIES} is
+   * checked and finally the {@link #PATH_MESSAGE_PROCESSOR_PROPERTIES} path is
    * checked.
    *
    * @return {@link ESuccess}
@@ -77,8 +77,8 @@ public final class MPConfig {
   @Nonnull
   public static ESuccess reloadConfiguration () {
     final ConfigFileBuilder aCFB = new ConfigFileBuilder ().addPathFromSystemProperty (SYSTEM_PROPERTY_TOOP_MP_SERVER_PROPERTIES_PATH)
-                                                           .addPath (PATH_PRIVATE_MESSAGE_PROPERTIES_PROPERTIES)
-                                                           .addPath (PATH_MESSAGE_PROPERTIES_PROPERTIES);
+                                                           .addPath (PATH_PRIVATE_MESSAGE_PROCESSOR_PROPERTIES)
+                                                           .addPath (PATH_MESSAGE_PROCESSOR_PROPERTIES);
 
     return s_aRWLock.writeLocked ( () -> {
       s_aConfigFile = aCFB.build ();
