@@ -72,11 +72,6 @@
       <groupId>eu.toop</groupId>
       <artifactId>toop-mp-api</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.glassfish.jersey.core</groupId>
-      <artifactId>jersey-client</artifactId>
-      <version>2.26-b03</version>
-    </dependency>
 		<!-- Test only -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -95,33 +90,6 @@
 						<Export-Package>eu.toop.mp.smmclient.*</Export-Package>
 						<Import-Package>!javax.annotation.*,*</Import-Package>
 					</instructions>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.jvnet.jaxb2.maven2</groupId>
-				<artifactId>maven-jaxb2-plugin</artifactId>
-				<version>0.13.3</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>generate</goal>
-						</goals>
-						<configuration>
-							<schemaIncludes>
-								<schemaInclude>datarequest.xsd</schemaInclude>
-							</schemaIncludes>
-							<!-- The package of your generated sources -->
-							<generatePackage>eu.toop.mp.smmclient</generatePackage>
-						</configuration>
-					</execution>
-				</executions>
-				<configuration>
-					<schemaDirectory>src/main/resources/</schemaDirectory>
-					<encoding>${project.build.sourceEncoding}</encoding>
-					<strict>true</strict>
-					<args>
-						<arg>-no-header</arg>
-					</args>
 				</configuration>
 			</plugin>
 		</plugins>
