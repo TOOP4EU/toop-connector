@@ -25,6 +25,8 @@ import com.helger.commons.annotation.ReturnsMutableObject;
 import com.helger.commons.collection.impl.ICommonsIterable;
 import com.helger.commons.lang.IHasSize;
 
+import eu.toop.commons.concept.ConceptValue;
+
 /**
  * Read-only interface for {@link MappedValueList}.
  *

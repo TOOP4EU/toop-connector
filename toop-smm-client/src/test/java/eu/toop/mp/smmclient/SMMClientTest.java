@@ -23,21 +23,22 @@ import java.io.IOException;
 
 import org.junit.jupiter.api.Test;
 
+import eu.toop.commons.concept.ConceptValue;
+import eu.toop.mp.api.CMP;
+
 /**
  * Test class for class {@link SMMClient}.
  *
  * @author Philip Helger
  */
 public final class SMMClientTest {
-  private static final String NS_TOOP = "http://toop.eu/organization";
-  private static final String NS_FREEDONIA = "http://example.register.fre/freedonia-business-register";
-  private static final ConceptValue CONCEPT_TOOP_1 = new ConceptValue (NS_TOOP, "CompanyCode");
-  private static final ConceptValue CONCEPT_FR_1 = new ConceptValue (NS_FREEDONIA, "FreedoniaBusinessCode");
+  private static final ConceptValue CONCEPT_TOOP_1 = new ConceptValue (CMP.NS_TOOP, "CompanyCode");
+  private static final ConceptValue CONCEPT_FR_1 = new ConceptValue (CMP.NS_FREEDONIA, "FreedoniaBusinessCode");
 
   @Test
   public void testEmpty () throws IOException {
     final SMMClient aClient = new SMMClient ();
-    final IMappedValueList ret = aClient.performMapping (NS_FREEDONIA);
+    final IMappedValueList ret = aClient.performMapping (CMP.NS_FREEDONIA);
     assertNotNull (ret);
     assertTrue (ret.isEmpty ());
     assertEquals (0, ret.size ());
@@ -47,7 +48,7 @@ public final class SMMClientTest {
   public void testOneMatch () throws IOException {
     final SMMClient aClient = new SMMClient ();
     aClient.addConceptToBeMapped (CONCEPT_TOOP_1);
-    final IMappedValueList ret = aClient.performMapping (NS_FREEDONIA);
+    final IMappedValueList ret = aClient.performMapping (CMP.NS_FREEDONIA);
     assertNotNull (ret);
     assertEquals (1, ret.size ());
 
@@ -65,8 +66,8 @@ public final class SMMClientTest {
   public void testOneMatchOneNotFound () throws IOException {
     final SMMClient aClient = new SMMClient ();
     aClient.addConceptToBeMapped (CONCEPT_TOOP_1);
-    aClient.addConceptToBeMapped (new ConceptValue (NS_TOOP, "NonExistingField"));
-    final IMappedValueList ret = aClient.performMapping (NS_FREEDONIA);
+    aClient.addConceptToBeMapped (new ConceptValue (CMP.NS_TOOP, "NonExistingField"));
+    final IMappedValueList ret = aClient.performMapping (CMP.NS_FREEDONIA);
     assertNotNull (ret);
     assertEquals (1, ret.size ());
 
@@ -84,7 +85,7 @@ public final class SMMClientTest {
   public void testNoMappingNeeded () throws IOException {
     final SMMClient aClient = new SMMClient ();
     aClient.addConceptToBeMapped (CONCEPT_FR_1);
-    final IMappedValueList ret = aClient.performMapping (NS_FREEDONIA);
+    final IMappedValueList ret = aClient.performMapping (CMP.NS_FREEDONIA);
     assertNotNull (ret);
     assertEquals (1, ret.size ());
 

@@ -30,6 +30,8 @@ import com.helger.commons.collection.impl.CommonsArrayList;
 import com.helger.commons.collection.impl.ICommonsList;
 import com.helger.commons.string.ToStringGenerator;
 
+import eu.toop.commons.concept.ConceptValue;
+
 @NotThreadSafe
 public class MappedValueList implements IMappedValueList {
   private final ICommonsList<MappedValue> m_aList;

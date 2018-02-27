@@ -25,6 +25,8 @@ import com.helger.commons.annotation.MustImplementEqualsAndHashcode;
 import com.helger.commons.hashcode.HashCodeGenerator;
 import com.helger.commons.string.ToStringGenerator;
 
+import eu.toop.commons.concept.ConceptValue;
+
 /**
  * This class contains a source schemed value and destination mapped value.
  *

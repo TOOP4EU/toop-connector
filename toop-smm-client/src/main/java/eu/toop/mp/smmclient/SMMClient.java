@@ -32,6 +32,8 @@ import com.helger.commons.collection.impl.CommonsHashMap;
 import com.helger.commons.collection.impl.ICommonsList;
 import com.helger.commons.collection.impl.ICommonsMap;
 
+import eu.toop.commons.concept.ConceptValue;
+
 @ThreadSafe
 public class SMMClient {
   private static final Logger s_aLogger = LoggerFactory.getLogger (SMMClient.class);
@@ -111,6 +113,7 @@ public class SMMClient {
             // Found no mapping
             s_aLogger.info ("Found no mapping for '" + sSourceNamespace + '#' + sSourceValue
                             + "' to destination namespace '" + sDestNamespace + "'");
+            // TODO shall we add a mapping to null?
           } else {
             if (aMatching.size () > 1)
               s_aLogger.warn ("Found " + aMatching.size () + " mappings for '" + sSourceNamespace + '#' + sSourceValue

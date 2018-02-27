@@ -32,10 +32,10 @@ import com.helger.commons.mime.CMimeType;
 import com.helger.servlet.mock.MockHttpServletRequest;
 import com.helger.servlet.response.UnifiedResponse;
 
+import eu.toop.commons.concept.ConceptValue;
 import eu.toop.commons.doctype.EToopDocumentType;
 import eu.toop.commons.doctype.EToopProcess;
 import eu.toop.commons.exchange.IMSDataRequest;
-import eu.toop.commons.exchange.RequestValue;
 import eu.toop.commons.exchange.message.ToopMessageBuilder;
 import eu.toop.commons.exchange.message.ToopRequestMessage;
 import eu.toop.commons.exchange.mock.MSDataRequest;
@@ -79,7 +79,7 @@ public class DCInputServlet extends HttpServlet {
                                                                               .getURIEncoded (),
                                                                     "DE", EToopDocumentType.DOCTYPE1.getURIEncoded (),
                                                                     EToopProcess.PROC.getURIEncoded (),
-                                                                    new CommonsArrayList<> (new RequestValue ("company",
+                                                                    new CommonsArrayList<> (new ConceptValue ("company",
                                                                                                               "demo"))),
                                                  archiveOutput, MPWebAppConfig.getSignatureHelper ());
         // Get ASiC bytes

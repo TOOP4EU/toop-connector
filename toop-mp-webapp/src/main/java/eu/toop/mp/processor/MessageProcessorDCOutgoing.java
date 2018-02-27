@@ -41,10 +41,12 @@ import com.helger.peppol.identifier.generic.process.IProcessIdentifier;
 import com.helger.scope.IScope;
 import com.helger.web.scope.singleton.AbstractGlobalWebSingleton;
 
+import eu.toop.commons.concept.ConceptValue;
 import eu.toop.commons.exchange.IMSDataRequest;
 import eu.toop.commons.exchange.IToopDataRequest;
 import eu.toop.commons.exchange.message.ToopMessageBuilder;
 import eu.toop.commons.exchange.mock.ToopDataRequest;
+import eu.toop.mp.api.CMP;
 import eu.toop.mp.api.MPConfig;
 import eu.toop.mp.api.MPSettings;
 import eu.toop.mp.me.GatewayRoutingMetadata;
@@ -53,6 +55,8 @@ import eu.toop.mp.me.MEMessage;
 import eu.toop.mp.me.MEPayload;
 import eu.toop.mp.r2d2client.IR2D2Endpoint;
 import eu.toop.mp.r2d2client.R2D2Client;
+import eu.toop.mp.smmclient.IMappedValueList;
+import eu.toop.mp.smmclient.SMMClient;
 
 /**
  * The global message processor that handles DC to DP (=DC outgoing) requests
@@ -80,7 +84,13 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
       // 1. invoke SMM
       IToopDataRequest aToopDataRequest;
       {
-        // TODO mock only
+        // Map to TOOP concepts
+        final SMMClient aClient = new SMMClient ();
+        for (final ConceptValue aValue : aCurrentObject.getAllConceptValues ())
+          aClient.addConceptToBeMapped (aValue);
+        final IMappedValueList aMappedValues = aClient.performMapping (CMP.NS_TOOP);
+
+        // TODO add all the mapped values in here
         aToopDataRequest = new ToopDataRequest (sRequestID);
       }
 
