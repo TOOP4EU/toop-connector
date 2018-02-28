@@ -22,6 +22,7 @@ import javax.annotation.concurrent.Immutable;
 
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.MustImplementEqualsAndHashcode;
+import com.helger.commons.annotation.ReturnsImmutableObject;
 import com.helger.commons.hashcode.HashCodeGenerator;
 import com.helger.commons.string.ToStringGenerator;
 
@@ -54,6 +55,13 @@ public final class MappedValue implements Serializable {
   @Nonnull
   public ConceptValue getDestination () {
     return m_aDest;
+  }
+
+  @Nonnull
+  @ReturnsImmutableObject
+  public MappedValue getSwappedSourceAndDest () {
+    // Swap source and dest
+    return new MappedValue (m_aDest, m_aSource);
   }
 
   @Override

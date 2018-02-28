@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.function.Consumer;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.GuardedBy;
 import javax.annotation.concurrent.ThreadSafe;
 
@@ -62,10 +63,18 @@ final class SMMConceptCache {
   private SMMConceptCache () {
   }
 
+  @Nullable
+  private static MappedValueList _getFromCache (@Nonnull @Nonempty final String sSourceNamespace,
+                                                @Nonnull @Nonempty final String sDestNamespace) {
+    final ICommonsMap<String, MappedValueList> aPerSrcMap = s_aCache.get (sSourceNamespace);
+    if (aPerSrcMap != null)
+      return aPerSrcMap.get (sDestNamespace);
+    return null;
+  }
+
   /**
    * Get all mapped values from source to target namespace. If not present (in
-   * cache) it is received from the remote server.
-   *
+   * cache) it is retrieved from the remote server.
    *
    * @param sSourceNamespace
    *          Source namespace to map from. May neither be <code>null</code> nor
@@ -73,46 +82,35 @@ final class SMMConceptCache {
    * @param sDestNamespace
    *          Target namespace to map to. May neither be <code>null</code> nor
    *          empty.
-   * @return The non-null list of mapped values.
+   * @return The non-<code>null</code> but maybe empty list of mapped values.
    * @throws IOException
    *           In case fetching from server failed
    */
   @Nonnull
   public static MappedValueList getAllMappedValues (@Nonnull @Nonempty final String sSourceNamespace,
                                                     @Nonnull @Nonempty final String sDestNamespace) throws IOException {
-    // Retrieve from cache
-    ICommonsMap<String, MappedValueList> aPerSrcMap = s_aRWLock.readLocked ( () -> s_aCache.get (sSourceNamespace));
-    if (aPerSrcMap == null) {
-      // Ensure source map is present - we need it anyway afterwards
-      aPerSrcMap = s_aRWLock.writeLocked ( () -> s_aCache.computeIfAbsent (sSourceNamespace,
-                                                                           k -> new CommonsHashMap<> ()));
-    }
+    ValueEnforcer.notNull (sSourceNamespace, "SourceNamespace");
+    ValueEnforcer.notNull (sDestNamespace, "DestNamespace");
 
-    // Try in read-lock
-    MappedValueList ret;
-    s_aRWLock.readLock ().lock ();
-    try {
-      ret = aPerSrcMap.get (sDestNamespace);
-    } finally {
-      s_aRWLock.readLock ().unlock ();
-    }
-
+    MappedValueList ret = s_aRWLock.readLocked ( () -> _getFromCache (sSourceNamespace, sDestNamespace));
     if (ret == null) {
-      // Not found in read-lock
       s_aRWLock.writeLock ().lock ();
       try {
-        // Try again in write lock (cannot use computeIfAbsent because of thrown
-        // IOException)
-        ret = aPerSrcMap.get (sDestNamespace);
+        // Try in cache
+        ret = _getFromCache (sSourceNamespace, sDestNamespace);
         if (ret == null) {
           // Not in cache - query from server and put in cache
           ret = remoteQueryAllMappedValues (sSourceNamespace, sDestNamespace);
-          aPerSrcMap.put (sDestNamespace, ret);
+          s_aCache.computeIfAbsent (sSourceNamespace, k -> new CommonsHashMap<> ()).put (sDestNamespace, ret);
+          // Put in the map the other way around as well (inference)
+          s_aCache.computeIfAbsent (sDestNamespace, k -> new CommonsHashMap<> ()).put (sSourceNamespace,
+                                                                                       ret.getSwappedSourceAndDest ());
         }
       } finally {
         s_aRWLock.writeLock ().unlock ();
       }
     }
+
     return ret;
   }
 

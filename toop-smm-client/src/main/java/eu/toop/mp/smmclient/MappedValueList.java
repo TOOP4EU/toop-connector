@@ -25,6 +25,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.Nonempty;
+import com.helger.commons.annotation.ReturnsMutableCopy;
 import com.helger.commons.annotation.ReturnsMutableObject;
 import com.helger.commons.collection.impl.CommonsArrayList;
 import com.helger.commons.collection.impl.ICommonsList;
@@ -100,6 +101,18 @@ public class MappedValueList implements IMappedValueList {
   public MappedValueList getAllByDestination (@Nonnull final Predicate<? super ConceptValue> aFilter) {
     ValueEnforcer.notNull (aFilter, "Filter");
     return new MappedValueList (m_aList.getAll (x -> aFilter.test (x.getDestination ())));
+  }
+
+  /**
+   * @return A new {@link MappedValueList} with the same amount of
+   *         {@link MappedValue} entries but for each value the Source and
+   *         Destination parts are swapped
+   */
+  @Nonnull
+  @ReturnsMutableCopy
+  public MappedValueList getSwappedSourceAndDest () {
+    // Ctor with mapping function
+    return new MappedValueList (new CommonsArrayList<> (m_aList, MappedValue::getSwappedSourceAndDest));
   }
 
   @Override

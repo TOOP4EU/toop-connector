@@ -15,11 +15,14 @@
  */
 package eu.toop.mp.smmclient;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.IOException;
 
 import org.junit.jupiter.api.Test;
+
+import eu.toop.mp.api.CMP;
 
 /**
  * Test class for class SMMConceptCache.
@@ -30,9 +33,13 @@ public final class SMMConceptCacheTest {
   @Test
   public void testRemoteQuery () throws IOException {
     // The only existing mapping we have atm
-    final MappedValueList aMVL = SMMConceptCache.remoteQueryAllMappedValues ("http://toop.eu/organization",
-                                                                             "http://example.register.fre/freedonia-business-register");
+    MappedValueList aMVL = SMMConceptCache.remoteQueryAllMappedValues (CMP.NS_TOOP, CMP.NS_FREEDONIA);
     assertNotNull (aMVL);
-    System.out.println (aMVL.toString ());
+    assertFalse (aMVL.isEmpty ());
+
+    // The only existing mapping we have atm
+    aMVL = SMMConceptCache.remoteQueryAllMappedValues (CMP.NS_FREEDONIA, CMP.NS_TOOP);
+    assertNotNull (aMVL);
+    assertFalse (aMVL.isEmpty ());
   }
 }
