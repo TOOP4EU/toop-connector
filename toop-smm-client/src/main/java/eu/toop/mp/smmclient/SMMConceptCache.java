@@ -92,16 +92,19 @@ final class SMMConceptCache {
     ValueEnforcer.notNull (sSourceNamespace, "SourceNamespace");
     ValueEnforcer.notNull (sDestNamespace, "DestNamespace");
 
+    // First in read-lock for maximum speed
     MappedValueList ret = s_aRWLock.readLocked ( () -> _getFromCache (sSourceNamespace, sDestNamespace));
     if (ret == null) {
+      // Not found - slow path
       s_aRWLock.writeLock ().lock ();
       try {
-        // Try in cache
+        // Try in write lock
         ret = _getFromCache (sSourceNamespace, sDestNamespace);
         if (ret == null) {
           // Not in cache - query from server and put in cache
           ret = remoteQueryAllMappedValues (sSourceNamespace, sDestNamespace);
           s_aCache.computeIfAbsent (sSourceNamespace, k -> new CommonsHashMap<> ()).put (sDestNamespace, ret);
+
           // Put in the map the other way around as well (inference)
           s_aCache.computeIfAbsent (sDestNamespace, k -> new CommonsHashMap<> ()).put (sSourceNamespace,
                                                                                        ret.getSwappedSourceAndDest ());
