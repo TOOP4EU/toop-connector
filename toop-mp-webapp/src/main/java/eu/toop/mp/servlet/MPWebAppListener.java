@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import com.helger.commons.debug.GlobalDebug;
 import com.helger.commons.id.factory.GlobalIDFactory;
 import com.helger.commons.id.factory.StringIDFromGlobalLongIDFactory;
+import com.helger.commons.string.StringHelper;
 import com.helger.web.servlets.scope.WebScopeListener;
 
 import eu.toop.commons.exchange.message.ToopMessageBuilder;
@@ -33,6 +34,7 @@ import eu.toop.commons.exchange.mock.MSDataRequest;
 import eu.toop.commons.exchange.mock.MSDataResponse;
 import eu.toop.commons.exchange.mock.ToopDataRequest;
 import eu.toop.commons.exchange.mock.ToopDataResponse;
+import eu.toop.kafkaclient.ToopKafkaClient;
 import eu.toop.mp.api.MPConfig;
 import eu.toop.mp.me.MEMDelegate;
 import eu.toop.mp.me.MEPayload;
@@ -57,6 +59,14 @@ public class MPWebAppListener extends WebScopeListener {
     GlobalIDFactory.setPersistentStringIDFactory (new StringIDFromGlobalLongIDFactory ("toop-mp-"));
     GlobalDebug.setDebugModeDirect (MPConfig.isGlobalDebug ());
     GlobalDebug.setProductionModeDirect (MPConfig.isGlobalProduction ());
+
+    {
+      // Init tracker client
+      ToopKafkaClient.setEnabled (MPConfig.isToopTrackerEnabled ());
+      final String sToopTrackerUrl = MPConfig.getToopTrackerUrl ();
+      if (StringHelper.hasText (sToopTrackerUrl))
+        ToopKafkaClient.defaultProperties ().put ("bootstrap.servers", sToopTrackerUrl);
+    }
 
     // Register the handler need
     MEMDelegate.getInstance ().registerMessageHandler (aMEMessage -> {
@@ -87,6 +97,10 @@ public class MPWebAppListener extends WebScopeListener {
   @Override
   public void contextDestroyed (@Nonnull final ServletContextEvent aEvent) {
     s_aLogger.info ("MP WebApp shutdown");
+
+    // Shutdown tracker
+    ToopKafkaClient.close ();
+
     super.contextDestroyed (aEvent);
   }
 }

@@ -68,6 +68,10 @@
       <groupId>eu.toop</groupId>
       <artifactId>toop-mp-api</artifactId>
     </dependency>
+    <dependency>
+      <groupId>eu.toop</groupId>
+      <artifactId>toop-kafka-client</artifactId>
+    </dependency>
   
     <!-- Test only -->
     <dependency>

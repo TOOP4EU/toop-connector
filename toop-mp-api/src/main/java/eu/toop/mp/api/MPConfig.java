@@ -95,6 +95,7 @@ public final class MPConfig {
     });
   }
 
+  public static final boolean DEFAULT_TOOP_TRACKER_ENABLED = false;
   public static final String DEFAULT_DIRECTORY_BASE_URL = "http://directory.central.toop";
   public static final boolean DEFAULT_USE_SML = false;
   public static final String DEFAULT_SMP_URI = "http://smp.central.toop";
@@ -116,6 +117,15 @@ public final class MPConfig {
 
   public static boolean isGlobalProduction () {
     return getConfigFile ().getAsBoolean ("global.production", GlobalDebug.isProductionMode ());
+  }
+
+  public static boolean isToopTrackerEnabled () {
+    return getConfigFile ().getAsBoolean ("toop.tracker.enabled", DEFAULT_TOOP_TRACKER_ENABLED);
+  }
+
+  @Nullable
+  public static String getToopTrackerUrl () {
+    return getConfigFile ().getAsString ("toop.tracker.url");
   }
 
   /**
