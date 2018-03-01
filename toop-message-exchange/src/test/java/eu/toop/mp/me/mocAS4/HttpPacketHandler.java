@@ -22,6 +22,9 @@ import javax.xml.soap.MimeHeader;
 import javax.xml.soap.MimeHeaders;
 import javax.xml.soap.SOAPMessage;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import eu.toop.mp.me.EBMSUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
@@ -47,6 +50,7 @@ import io.netty.handler.codec.http.HttpVersion;
  * @date: 20.02.2018.
  */
 public class HttpPacketHandler extends ChannelInboundHandlerAdapter {
+  private static final Logger LOG = LoggerFactory.getLogger (HttpPacketHandler.class);
   private final SOAPMessageAccumulator messageAccumulator;
 
   public HttpPacketHandler() {
@@ -80,14 +84,14 @@ public class HttpPacketHandler extends ChannelInboundHandlerAdapter {
       final HttpContent co = (HttpContent) msg;
 
       try {
-        System.out.println("MOC AS4 Read SOAP MESSAGE");
+        LOG.info("MOC AS4 Read SOAP MESSAGE");
         final ByteBuf content = co.content();
         final ByteBufInputStream bbis = new ByteBufInputStream(content);
         messageAccumulator.accumulate(bbis);
 
         if (msg instanceof DefaultLastHttpContent) {
           final SOAPMessage soapMessage = messageAccumulator.doFinal();
-          System.out.println("Create receipt");
+          LOG.info("Create receipt");
           final byte[] receipt = EBMSUtils.createSuccessReceipt(soapMessage);
           final FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.wrappedBuffer(receipt));
           response.headers().set(HttpHeaderNames.SERVER, "MOCAS4");
