@@ -93,11 +93,14 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
         final SMMClient aClient = new SMMClient ();
         for (final TDEDataElementRequestType aDER : aCurrentObject.getDataElementRequest ()) {
           final TDEConceptRequestType aSrcConcept = aDER.getConceptRequest ();
-          // Was semantic mapping already executed?
+          // Only if not yet mapped
           if (!aSrcConcept.getSemanticMappingExecutionIndicator ().isValue ()) {
             aClient.addConceptToBeMapped (ConceptValue.create (aSrcConcept));
           }
         }
+
+        // Main mapping
+        // TODO make destination namespace configurable
         final IMappedValueList aMappedValues = aClient.performMapping (CMP.NS_TOOP);
 
         // add all the mapped values in the request

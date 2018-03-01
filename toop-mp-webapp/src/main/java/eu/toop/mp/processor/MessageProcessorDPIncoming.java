@@ -34,7 +34,15 @@ import com.helger.commons.state.ESuccess;
 import com.helger.scope.IScope;
 import com.helger.web.scope.singleton.AbstractGlobalWebSingleton;
 
+import eu.toop.commons.concept.ConceptValue;
+import eu.toop.commons.dataexchange.TDEConceptRequestType;
+import eu.toop.commons.dataexchange.TDEDataElementRequestType;
 import eu.toop.commons.dataexchange.TDETOOPDataRequestType;
+import eu.toop.commons.jaxb.ToopXSDHelper;
+import eu.toop.mp.api.CMP;
+import eu.toop.mp.smmclient.IMappedValueList;
+import eu.toop.mp.smmclient.MappedValue;
+import eu.toop.mp.smmclient.SMMClient;
 
 /**
  * The global message processor that handles DC to DP (= DP incoming) requests
@@ -57,7 +65,49 @@ public final class MessageProcessorDPIncoming extends AbstractGlobalWebSingleton
       final String sLogPrefix = "[" + sRequestID + "] ";
       s_aLogger.info (sLogPrefix + "Received asynch request: " + aCurrentObject);
 
-      // TODO SMM to DP conceppts
+      // Map to DP concepts
+      {
+        final SMMClient aClient = new SMMClient ();
+        for (final TDEDataElementRequestType aDER : aCurrentObject.getDataElementRequest ()) {
+          final TDEConceptRequestType aSrcConcept = aDER.getConceptRequest ();
+          // ignore all DC source concepts
+          if (aSrcConcept.getSemanticMappingExecutionIndicator ().isValue ()) {
+            for (final TDEConceptRequestType aToopConcept : aSrcConcept.getConceptRequest ())
+              // Only if not yet mapped
+              if (!aToopConcept.getSemanticMappingExecutionIndicator ().isValue ()) {
+                aClient.addConceptToBeMapped (ConceptValue.create (aToopConcept));
+              }
+          }
+        }
+
+        // Main mapping
+        // TODO make destination namespace configurable
+        final IMappedValueList aMappedValues = aClient.performMapping (CMP.NS_FREEDONIA);
+
+        // add all the mapped values in the request
+        for (final TDEDataElementRequestType aDER : aCurrentObject.getDataElementRequest ()) {
+          final TDEConceptRequestType aSrcConcept = aDER.getConceptRequest ();
+          if (aSrcConcept.getSemanticMappingExecutionIndicator ().isValue ()) {
+            for (final TDEConceptRequestType aToopConcept : aSrcConcept.getConceptRequest ())
+              // Only if not yet mapped
+              if (!aToopConcept.getSemanticMappingExecutionIndicator ().isValue ()) {
+                // Now the toop concept was mapped
+                aToopConcept.getSemanticMappingExecutionIndicator ().setValue (true);
+
+                final ConceptValue aToopCV = ConceptValue.create (aToopConcept);
+                for (final MappedValue aMV : aMappedValues.getAllBySource (x -> x.equals (aToopCV))) {
+                  final TDEConceptRequestType aDstConcept = new TDEConceptRequestType ();
+                  aDstConcept.setConceptType (ToopXSDHelper.createCode ("DP"));
+                  aDstConcept.setSemanticMappingExecutionIndicator (ToopXSDHelper.createIndicator (false));
+                  aDstConcept.setConceptNamespace (ToopXSDHelper.createIdentifier (aMV.getDestination ()
+                                                                                      .getNamespace ()));
+                  aDstConcept.addConcept (ToopXSDHelper.createText (aMV.getDestination ().getValue ()));
+                  aToopConcept.addConceptRequest (aDstConcept);
+                }
+              }
+          }
+        }
+      }
     }
   }
 
