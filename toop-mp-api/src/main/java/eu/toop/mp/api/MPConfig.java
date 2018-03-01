@@ -259,6 +259,12 @@ public final class MPConfig {
     return getConfigFile ().getAsString ("mp.mem.as4.to.partyid");
   }
 
+  // Receiving GW party id
+  @Nullable
+  public static String getMEMAS4ReceivingPartyID() {
+    return getConfigFile ().getAsString ("mp.mem.as4.receiving.partyid");
+  }
+
   // GW_PARTY_ROLE
   @Nullable
   public static String getMEMAS4ToRole () {
