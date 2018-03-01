@@ -33,12 +33,10 @@ import com.helger.servlet.mock.MockHttpServletRequest;
 import com.helger.servlet.response.UnifiedResponse;
 
 import eu.toop.commons.concept.ConceptValue;
+import eu.toop.commons.dataexchange.TDETOOPDataRequestType;
 import eu.toop.commons.doctype.EToopDocumentType;
 import eu.toop.commons.doctype.EToopProcess;
-import eu.toop.commons.exchange.IMSDataRequest;
-import eu.toop.commons.exchange.message.ToopMessageBuilder;
-import eu.toop.commons.exchange.message.ToopRequestMessage;
-import eu.toop.commons.exchange.mock.MSDataRequest;
+import eu.toop.commons.exchange.ToopMessageBuilder;
 import eu.toop.mp.api.MPSettings;
 import eu.toop.mp.processor.MPWebAppConfig;
 import eu.toop.mp.processor.MessageProcessorDCOutgoing;
@@ -46,9 +44,8 @@ import eu.toop.mp.processor.MessageProcessorDCOutgoing;
 /**
  * This method is called by the <code>toop-interface</code> project in the
  * direction DC to DP.<br>
- * The input is an ASiC archive that contains the fields for a
- * {@link ToopRequestMessage} where only {@link IMSDataRequest} is used. If
- * extracted successfully it is put in {@link MessageProcessorDCOutgoing} for
+ * The input is an ASiC archive that contains a {@link TDETOOPDataRequestType}.
+ * If extracted successfully it is put in {@link MessageProcessorDCOutgoing} for
  * further processing.
  *
  * @author Philip Helger
@@ -73,14 +70,15 @@ public class DCInputServlet extends HttpServlet {
       try (final NonBlockingByteArrayOutputStream archiveOutput = new NonBlockingByteArrayOutputStream ()) {
         // Create dummy request
         // TODO use correct document type ID/process ID
-        ToopMessageBuilder.createRequestMessage (new MSDataRequest (MPSettings.getIdentifierFactory ()
-                                                                              .createParticipantIdentifier ("toop-actorid-upis",
-                                                                                                            "dcinput")
-                                                                              .getURIEncoded (),
-                                                                    "DE", EToopDocumentType.DOCTYPE1.getURIEncoded (),
-                                                                    EToopProcess.PROC.getURIEncoded (),
-                                                                    new CommonsArrayList<> (new ConceptValue ("company",
-                                                                                                              "demo"))),
+        ToopMessageBuilder.createRequestMessage (ToopMessageBuilder.createMockRequest (MPSettings.getIdentifierFactory ()
+                                                                                                 .createParticipantIdentifier ("toop-actorid-upis",
+                                                                                                                               "dcinput")
+                                                                                                 .getURIEncoded (),
+                                                                                       "DE",
+                                                                                       EToopDocumentType.DOCTYPE1.getURIEncoded (),
+                                                                                       EToopProcess.PROC.getURIEncoded (),
+                                                                                       new CommonsArrayList<> (new ConceptValue ("company",
+                                                                                                                                 "demo"))),
                                                  archiveOutput, MPWebAppConfig.getSignatureHelper ());
         // Get ASiC bytes
         aMockRequest.setContent (archiveOutput.toByteArray ());
@@ -110,27 +108,18 @@ public class DCInputServlet extends HttpServlet {
 
     // Parse POST data
     // No IToopDataRequest contained here
-    final ToopRequestMessage aMsg = ToopMessageBuilder.parseRequestMessage (aHttpServletRequest.getInputStream (),
-                                                                            MSDataRequest.getDeserializerFunction (),
-                                                                            null);
+    final TDETOOPDataRequestType aRequestMsg = ToopMessageBuilder.parseRequestMessage (aHttpServletRequest.getInputStream ());
 
-    if (aMsg == null) {
+    if (aRequestMsg == null) {
       // The message content is invalid
-      s_aLogger.error ("The request does not contain an ASiC archive!");
+      s_aLogger.error ("The request does not contain an ASiC archive, or the ASiC archive does not contain a TOOP DataRequest!");
       aUR.setStatus (HttpServletResponse.SC_BAD_REQUEST);
     } else {
-      final IMSDataRequest aMSRequest = aMsg.getMSDataRequest ();
-      if (aMSRequest == null) {
-        // The message content is invalid
-        s_aLogger.error ("The ASiC archive does not contain an MSDataRequest!");
-        aUR.setStatus (HttpServletResponse.SC_BAD_REQUEST);
-      } else {
-        // Enqueue to processor and we're good
-        MessageProcessorDCOutgoing.getInstance ().enqueue (aMSRequest);
+      // Enqueue to processor and we're good
+      MessageProcessorDCOutgoing.getInstance ().enqueue (aRequestMsg);
 
-        // Done - no content
-        aUR.setStatus (HttpServletResponse.SC_NO_CONTENT);
-      }
+      // Done - no content
+      aUR.setStatus (HttpServletResponse.SC_NO_CONTENT);
     }
 
     // Done

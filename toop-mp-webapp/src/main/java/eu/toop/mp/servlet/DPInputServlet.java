@@ -28,19 +28,14 @@ import org.slf4j.LoggerFactory;
 
 import com.helger.servlet.response.UnifiedResponse;
 
-import eu.toop.commons.exchange.IToopDataResponse;
-import eu.toop.commons.exchange.message.ToopMessageBuilder;
-import eu.toop.commons.exchange.message.ToopResponseMessage;
-import eu.toop.commons.exchange.mock.MSDataRequest;
-import eu.toop.commons.exchange.mock.MSDataResponse;
-import eu.toop.commons.exchange.mock.ToopDataRequest;
+import eu.toop.commons.dataexchange.TDETOOPDataResponseType;
+import eu.toop.commons.exchange.ToopMessageBuilder;
 import eu.toop.mp.processor.MessageProcessorDPOutgoing;
 
 /**
  * This method is called by the <code>toop-interface</code> project in the
  * direction DP to DC.<br>
- * The input is an ASiC archive that contains all fields of a
- * {@link ToopResponseMessage} except for the {@link IToopDataResponse} is used.
+ * The input is an ASiC archive that contains a {@link TDETOOPDataResponseType}.
  * If extracted successfully it is put in {@link MessageProcessorDPOutgoing} for
  * further processing.
  *
@@ -57,28 +52,18 @@ public class DPInputServlet extends HttpServlet {
 
     // Parse POST data
     // No IToopDataResponse contained here
-    final ToopResponseMessage aMsg = ToopMessageBuilder.parseResponseMessage (aHttpServletRequest.getInputStream (),
-                                                                              MSDataRequest.getDeserializerFunction (),
-                                                                              ToopDataRequest.getDeserializerFunction (),
-                                                                              MSDataResponse.getDeserializerFunction (),
-                                                                              null);
+    final TDETOOPDataResponseType aResponseMsg = ToopMessageBuilder.parseResponseMessage (aHttpServletRequest.getInputStream ());
 
-    if (aMsg == null) {
+    if (aResponseMsg == null) {
       // The message content is invalid
-      s_aLogger.error ("The request does not contain an ASiC archive!");
+      s_aLogger.error ("The request does not contain an ASiC archive or the ASiC archive does not contain a TOOP Response Message!");
       aUR.setStatus (HttpServletResponse.SC_BAD_REQUEST);
     } else {
-      if (aMsg.getMSDataRequest () == null || aMsg.getToopDataRequest () == null || aMsg.getMSDataResponse () == null) {
-        // The message content is invalid
-        s_aLogger.error ("The ASiC archive does not contain all mandatory elements!");
-        aUR.setStatus (HttpServletResponse.SC_BAD_REQUEST);
-      } else {
-        // Enqueue to processor and we're good
-        MessageProcessorDPOutgoing.getInstance ().enqueue (aMsg);
+      // Enqueue to processor and we're good
+      MessageProcessorDPOutgoing.getInstance ().enqueue (aResponseMsg);
 
-        // Done - no content
-        aUR.setStatus (HttpServletResponse.SC_NO_CONTENT);
-      }
+      // Done - no content
+      aUR.setStatus (HttpServletResponse.SC_NO_CONTENT);
     }
 
     // Done

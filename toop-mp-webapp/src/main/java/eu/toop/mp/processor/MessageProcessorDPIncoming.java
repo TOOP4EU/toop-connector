@@ -34,7 +34,7 @@ import com.helger.commons.state.ESuccess;
 import com.helger.scope.IScope;
 import com.helger.web.scope.singleton.AbstractGlobalWebSingleton;
 
-import eu.toop.commons.exchange.message.ToopResponseMessage;
+import eu.toop.commons.dataexchange.TDETOOPDataRequestType;
 
 /**
  * The global message processor that handles DC to DP (= DP incoming) requests
@@ -51,20 +51,20 @@ public final class MessageProcessorDPIncoming extends AbstractGlobalWebSingleton
    *
    * @author Philip Helger
    */
-  static final class Performer implements IConcurrentPerformer<ToopResponseMessage> {
-    public void runAsync (@Nonnull final ToopResponseMessage aCurrentObject) throws Exception {
-      final String sRequestID = aCurrentObject.getToopDataRequest ().getRequestID ();
+  static final class Performer implements IConcurrentPerformer<TDETOOPDataRequestType> {
+    public void runAsync (@Nonnull final TDETOOPDataRequestType aCurrentObject) throws Exception {
+      final String sRequestID = aCurrentObject.getDataRequestIdentifier ().getValue ();
       final String sLogPrefix = "[" + sRequestID + "] ";
       s_aLogger.info (sLogPrefix + "Received asynch request: " + aCurrentObject);
 
-      // TODO forward to toop-interface DP input
+      // TODO SMM to DP conceppts
     }
   }
 
   // Just to have custom named threads....
   private static final ThreadFactory s_aThreadFactory = new BasicThreadFactory.Builder ().setNamingPattern ("MP-DP-In-%d")
                                                                                          .setDaemon (true).build ();
-  private final ConcurrentCollectorSingle<ToopResponseMessage> m_aCollector = new ConcurrentCollectorSingle<> ();
+  private final ConcurrentCollectorSingle<TDETOOPDataRequestType> m_aCollector = new ConcurrentCollectorSingle<> ();
   private final ExecutorService m_aExecutorPool;
 
   @Deprecated
@@ -102,7 +102,7 @@ public final class MessageProcessorDPIncoming extends AbstractGlobalWebSingleton
    * @return {@link ESuccess}. Never <code>null</code>.
    */
   @Nonnull
-  public ESuccess enqueue (@Nonnull final ToopResponseMessage aMsg) {
+  public ESuccess enqueue (@Nonnull final TDETOOPDataRequestType aMsg) {
     ValueEnforcer.notNull (aMsg, "Msg");
     try {
       m_aCollector.queueObject (aMsg);

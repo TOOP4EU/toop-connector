@@ -36,16 +36,21 @@ import com.helger.commons.concurrent.collector.IConcurrentPerformer;
 import com.helger.commons.id.factory.GlobalIDFactory;
 import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 import com.helger.commons.state.ESuccess;
+import com.helger.commons.string.StringHelper;
 import com.helger.peppol.identifier.generic.doctype.IDocumentTypeIdentifier;
+import com.helger.peppol.identifier.generic.participant.IParticipantIdentifier;
 import com.helger.peppol.identifier.generic.process.IProcessIdentifier;
 import com.helger.scope.IScope;
 import com.helger.web.scope.singleton.AbstractGlobalWebSingleton;
 
 import eu.toop.commons.concept.ConceptValue;
-import eu.toop.commons.exchange.IMSDataRequest;
-import eu.toop.commons.exchange.IToopDataRequest;
-import eu.toop.commons.exchange.message.ToopMessageBuilder;
-import eu.toop.commons.exchange.mock.ToopDataRequest;
+import eu.toop.commons.dataexchange.TDEConceptRequestType;
+import eu.toop.commons.dataexchange.TDEDataElementRequestType;
+import eu.toop.commons.dataexchange.TDELegalEntityType;
+import eu.toop.commons.dataexchange.TDENaturalPersonType;
+import eu.toop.commons.dataexchange.TDETOOPDataRequestType;
+import eu.toop.commons.exchange.ToopMessageBuilder;
+import eu.toop.commons.jaxb.ToopXSDHelper;
 import eu.toop.mp.api.CMP;
 import eu.toop.mp.api.MPConfig;
 import eu.toop.mp.api.MPSettings;
@@ -56,6 +61,7 @@ import eu.toop.mp.me.MEPayload;
 import eu.toop.mp.r2d2client.IR2D2Endpoint;
 import eu.toop.mp.r2d2client.R2D2Client;
 import eu.toop.mp.smmclient.IMappedValueList;
+import eu.toop.mp.smmclient.MappedValue;
 import eu.toop.mp.smmclient.SMMClient;
 
 /**
@@ -73,8 +79,8 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
    *
    * @author Philip Helger
    */
-  static final class Performer implements IConcurrentPerformer<IMSDataRequest> {
-    public void runAsync (@Nonnull final IMSDataRequest aCurrentObject) throws Exception {
+  static final class Performer implements IConcurrentPerformer<TDETOOPDataRequestType> {
+    public void runAsync (@Nonnull final TDETOOPDataRequestType aCurrentObject) throws Exception {
       // This is the unique ID of this request message and must be used throughout the
       // whole process for identification
       final String sRequestID = GlobalIDFactory.getNewPersistentStringID () + UUID.randomUUID ().toString ();
@@ -82,26 +88,70 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
 
       s_aLogger.info (sLogPrefix + "Received asynch request: " + aCurrentObject);
       // 1. invoke SMM
-      IToopDataRequest aToopDataRequest;
       {
         // Map to TOOP concepts
         final SMMClient aClient = new SMMClient ();
-        for (final ConceptValue aValue : aCurrentObject.getAllConceptValues ())
-          aClient.addConceptToBeMapped (aValue);
+        for (final TDEDataElementRequestType aDER : aCurrentObject.getDataElementRequest ()) {
+          final TDEConceptRequestType aSrcConcept = aDER.getConceptRequest ();
+          // Was semantic mapping already executed?
+          if (!aSrcConcept.getSemanticMappingExecutionIndicator ().isValue ()) {
+            aClient.addConceptToBeMapped (ConceptValue.create (aSrcConcept));
+          }
+        }
         final IMappedValueList aMappedValues = aClient.performMapping (CMP.NS_TOOP);
 
-        // TODO add all the mapped values in here
-        aToopDataRequest = new ToopDataRequest (sRequestID);
+        // add all the mapped values in the request
+        for (final TDEDataElementRequestType aDER : aCurrentObject.getDataElementRequest ()) {
+          final TDEConceptRequestType aSrcConcept = aDER.getConceptRequest ();
+          if (!aSrcConcept.getSemanticMappingExecutionIndicator ().isValue ()) {
+            // Now the source was mapped
+            aSrcConcept.getSemanticMappingExecutionIndicator ().setValue (true);
+
+            final ConceptValue aSrcCV = ConceptValue.create (aSrcConcept);
+            for (final MappedValue aMV : aMappedValues.getAllBySource (x -> x.equals (aSrcCV))) {
+              final TDEConceptRequestType aToopConcept = new TDEConceptRequestType ();
+              aToopConcept.setConceptType (ToopXSDHelper.createCode ("TOOP"));
+              aToopConcept.setSemanticMappingExecutionIndicator (ToopXSDHelper.createIndicator (false));
+              aToopConcept.setConceptNamespace (ToopXSDHelper.createIdentifier (aMV.getDestination ().getNamespace ()));
+              aToopConcept.addConcept (ToopXSDHelper.createText (aMV.getDestination ().getValue ()));
+              aSrcConcept.addConceptRequest (aToopConcept);
+            }
+          }
+        }
       }
 
       // 2. invoke R2D2 client
       final ICommonsList<IR2D2Endpoint> aEndpoints;
+      final IParticipantIdentifier aSenderID = MPSettings.getIdentifierFactory ()
+                                                         .createParticipantIdentifier (aCurrentObject.getDataConsumer ()
+                                                                                                     .getDCElectronicAddressIdentifier ()
+                                                                                                     .getSchemeID (),
+                                                                                       aCurrentObject.getDataConsumer ()
+                                                                                                     .getDCElectronicAddressIdentifier ()
+                                                                                                     .getValue ());
+      final IDocumentTypeIdentifier aDocTypeID = MPSettings.getIdentifierFactory ()
+                                                           .parseDocumentTypeIdentifier (aCurrentObject.getDocumentTypeCode ()
+                                                                                                       .getValue ());
+      final IProcessIdentifier aProcessID = MPSettings.getIdentifierFactory ()
+                                                      .createProcessIdentifier (aCurrentObject.getProcessIdentifier ()
+                                                                                              .getSchemeID (),
+                                                                                aCurrentObject.getProcessIdentifier ()
+                                                                                              .getValue ());
       {
-        final IDocumentTypeIdentifier aDocTypeID = MPSettings.getIdentifierFactory ()
-                                                             .parseDocumentTypeIdentifier (aCurrentObject.getDocumentTypeID ());
-        final IProcessIdentifier aProcessID = MPSettings.getIdentifierFactory ()
-                                                        .parseProcessIdentifier (aCurrentObject.getProcessID ());
-        final ICommonsList<IR2D2Endpoint> aTotalEndpoints = new R2D2Client ().getEndpoints (aCurrentObject.getDestinationCountryCode (),
+
+        String sDestinationCountryCode = null;
+        final TDELegalEntityType aLegalEntity = aCurrentObject.getDataSubject ().getLegalEntity ();
+        if (aLegalEntity != null)
+          sDestinationCountryCode = aLegalEntity.getLegalEntityLegalAddress ().getCountryCode ().getValue ();
+        if (StringHelper.hasNoText (sDestinationCountryCode)) {
+          final TDENaturalPersonType aNaturalPerson = aCurrentObject.getDataSubject ().getNaturalPerson ();
+          if (aNaturalPerson != null)
+            sDestinationCountryCode = aNaturalPerson.getNaturalPersonLegalAddress ().getCountryCode ().getValue ();
+        }
+        if (StringHelper.hasNoText (sDestinationCountryCode))
+          throw new IllegalStateException ("Failed to find destination country code to query!");
+
+        final ICommonsList<IR2D2Endpoint> aTotalEndpoints = new R2D2Client ().getEndpoints (sDestinationCountryCode,
                                                                                             aDocTypeID, aProcessID);
 
         // Filter all endpoints with the corresponding transport profile
@@ -119,8 +169,7 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
         // Do this only once and not for every endpoint
         MEMessage meMessage;
         try (final NonBlockingByteArrayOutputStream aBAOS = new NonBlockingByteArrayOutputStream ()) {
-          ToopMessageBuilder.createRequestMessage (aCurrentObject, aToopDataRequest, aBAOS,
-                                                   MPWebAppConfig.getSignatureHelper ());
+          ToopMessageBuilder.createRequestMessage (aCurrentObject, aBAOS, MPWebAppConfig.getSignatureHelper ());
 
           // build MEM once
           final MEPayload aPayload = new MEPayload (AsicUtils.MIMETYPE_ASICE, sRequestID, aBAOS.toByteArray ());
@@ -129,9 +178,9 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
 
         // For all matching endpoints
         for (final IR2D2Endpoint aEP : aEndpoints) {
-          final GatewayRoutingMetadata metadata = new GatewayRoutingMetadata (aCurrentObject.getSenderParticipantID (),
-                                                                              aCurrentObject.getDocumentTypeID (),
-                                                                              aCurrentObject.getProcessID (), aEP);
+          final GatewayRoutingMetadata metadata = new GatewayRoutingMetadata (aSenderID.getURIEncoded (),
+                                                                              aDocTypeID.getURIEncoded (),
+                                                                              aProcessID.getURIEncoded (), aEP);
           MEMDelegate.getInstance ().sendMessage (metadata, meMessage);
         }
       }
@@ -141,7 +190,7 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
   // Just to have custom named threads....
   private static final ThreadFactory s_aThreadFactory = new BasicThreadFactory.Builder ().setNamingPattern ("MP-DC-Out-%d")
                                                                                          .setDaemon (true).build ();
-  private final ConcurrentCollectorSingle<IMSDataRequest> m_aCollector = new ConcurrentCollectorSingle<> ();
+  private final ConcurrentCollectorSingle<TDETOOPDataRequestType> m_aCollector = new ConcurrentCollectorSingle<> ();
   private final ExecutorService m_aExecutorPool;
 
   @Deprecated
@@ -179,7 +228,7 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
    * @return {@link ESuccess}. Never <code>null</code>.
    */
   @Nonnull
-  public ESuccess enqueue (@Nonnull final IMSDataRequest aMsg) {
+  public ESuccess enqueue (@Nonnull final TDETOOPDataRequestType aMsg) {
     ValueEnforcer.notNull (aMsg, "Msg");
     try {
       m_aCollector.queueObject (aMsg);

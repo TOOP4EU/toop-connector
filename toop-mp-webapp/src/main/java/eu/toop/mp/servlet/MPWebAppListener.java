@@ -28,12 +28,9 @@ import com.helger.commons.id.factory.StringIDFromGlobalLongIDFactory;
 import com.helger.commons.string.StringHelper;
 import com.helger.web.servlets.scope.WebScopeListener;
 
-import eu.toop.commons.exchange.message.ToopMessageBuilder;
-import eu.toop.commons.exchange.message.ToopResponseMessage;
-import eu.toop.commons.exchange.mock.MSDataRequest;
-import eu.toop.commons.exchange.mock.MSDataResponse;
-import eu.toop.commons.exchange.mock.ToopDataRequest;
-import eu.toop.commons.exchange.mock.ToopDataResponse;
+import eu.toop.commons.dataexchange.TDETOOPDataRequestType;
+import eu.toop.commons.dataexchange.TDETOOPDataResponseType;
+import eu.toop.commons.exchange.ToopMessageBuilder;
 import eu.toop.kafkaclient.ToopKafkaClient;
 import eu.toop.mp.api.MPConfig;
 import eu.toop.mp.me.MEMDelegate;
@@ -74,21 +71,16 @@ public class MPWebAppListener extends WebScopeListener {
       final MEPayload aPayload = aMEMessage.head ();
       if (aPayload != null) {
         // Extract from ASiC
-        final ToopResponseMessage aResponseMsg = ToopMessageBuilder.parseResponseMessage (aPayload.getDataInputStream (),
-                                                                                          MSDataRequest.getDeserializerFunction (),
-                                                                                          ToopDataRequest.getDeserializerFunction (),
-                                                                                          MSDataResponse.getDeserializerFunction (),
-                                                                                          ToopDataResponse.getDeserializerFunction ());
+        final Object aMsg = ToopMessageBuilder.parseRequestOrResponse (aPayload.getDataInputStream ());
 
-        // Check response before request, because response also contains request!
-        if (aResponseMsg.getToopDataResponse () != null) {
-          // This is the way from DP back to DC; we're in DC incoming mode
-          MessageProcessorDCIncoming.getInstance ().enqueue (aResponseMsg);
-        } else if (aResponseMsg.getToopDataRequest () != null) {
+        if (aMsg instanceof TDETOOPDataRequestType) {
           // This is the way from DC to DP; we're in DP incoming mode
-          MessageProcessorDPIncoming.getInstance ().enqueue (aResponseMsg);
+          MessageProcessorDPIncoming.getInstance ().enqueue ((TDETOOPDataRequestType) aMsg);
+        } else if (aMsg instanceof TDETOOPDataResponseType) {
+          // This is the way from DP back to DC; we're in DC incoming mode
+          MessageProcessorDCIncoming.getInstance ().enqueue ((TDETOOPDataResponseType) aMsg);
         } else
-          s_aLogger.error ("Unsuspported ToopResponseMessage: " + aResponseMsg);
+          s_aLogger.error ("Unsuspported ToopResponseMessage: " + aMsg);
       } else
         s_aLogger.warn ("MEMessage contains no payload: " + aMEMessage);
     });
