@@ -15,18 +15,10 @@
  */
 package eu.toop.mp.me.servlet;
 
-import com.helger.commons.mime.CMimeType;
-import com.helger.commons.mime.IMimeType;
-import com.helger.peppol.identifier.generic.participant.IParticipantIdentifier;
-import eu.toop.commons.doctype.EToopDocumentType;
-import eu.toop.commons.doctype.EToopProcess;
-import eu.toop.mp.api.MPConfig;
-import eu.toop.mp.api.MPSettings;
-import eu.toop.mp.me.*;
-import eu.toop.mp.r2d2client.IR2D2Endpoint;
-import eu.toop.mp.r2d2client.R2D2Endpoint;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 
 import javax.annotation.Nonnull;
 import javax.servlet.ServletException;
@@ -34,21 +26,32 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.soap.MimeHeaders;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPMessage;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-import java.util.Enumeration;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.helger.commons.mime.CMimeType;
+import com.helger.commons.mime.IMimeType;
+import com.helger.peppol.identifier.generic.participant.IParticipantIdentifier;
+
+import eu.toop.commons.doctype.EToopDocumentType;
+import eu.toop.commons.doctype.EToopProcess;
+import eu.toop.mp.api.MPConfig;
+import eu.toop.mp.api.MPSettings;
+import eu.toop.mp.me.GatewayRoutingMetadata;
+import eu.toop.mp.me.IMessageHandler;
+import eu.toop.mp.me.MEMDelegate;
+import eu.toop.mp.me.MEMessage;
+import eu.toop.mp.me.MEPayload;
+import eu.toop.mp.r2d2client.IR2D2Endpoint;
+import eu.toop.mp.r2d2client.R2D2Endpoint;
 
 /**
  * @author: myildiz
  * @date: 15.02.2018.
  */
 @WebServlet("/memTest")
+@Deprecated
 public class MEMTestTriggerServlet extends HttpServlet {
   private static final Logger LOG = LoggerFactory.getLogger(MEMTestTriggerServlet.class);
 
@@ -76,7 +79,7 @@ public class MEMTestTriggerServlet extends HttpServlet {
       final IMessageHandler handler = meMessage1 -> LOG.info("hooray! I Got a message");
 
       MEMDelegate.getInstance().registerMessageHandler(handler);
-    } catch (Exception e) {
+    } catch (final Exception e) {
       e.printStackTrace();
     }
   }

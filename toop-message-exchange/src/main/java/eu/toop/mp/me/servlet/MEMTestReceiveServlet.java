@@ -8,31 +8,11 @@
  */
 package eu.toop.mp.me.servlet;
 
-import com.helger.commons.datetime.PDTFactory;
-import com.helger.commons.datetime.PDTWebDateHelper;
-import com.helger.commons.mime.CMimeType;
-import com.helger.commons.mime.IMimeType;
-import com.helger.peppol.identifier.generic.participant.IParticipantIdentifier;
-import eu.toop.commons.doctype.EToopDocumentType;
-import eu.toop.commons.doctype.EToopProcess;
-import eu.toop.mp.api.MPConfig;
-import eu.toop.mp.api.MPSettings;
-import eu.toop.mp.me.GatewayRoutingMetadata;
-import eu.toop.mp.me.IMessageHandler;
-import eu.toop.mp.me.MEMDelegate;
-import eu.toop.mp.me.MEMessage;
-import eu.toop.mp.me.MEPayload;
-import eu.toop.mp.me.SoapUtil;
-import eu.toop.mp.r2d2client.IR2D2Endpoint;
-import eu.toop.mp.r2d2client.R2D2Endpoint;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Date;
+
 import javax.annotation.Nonnull;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -40,8 +20,14 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.DatatypeConverter;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import eu.toop.mp.me.IMessageHandler;
+import eu.toop.mp.me.MEMDelegate;
+import eu.toop.mp.me.MEMessage;
+import eu.toop.mp.me.MEPayload;
 
 /**
  * display the last message received and update the time
@@ -50,6 +36,7 @@ import org.slf4j.LoggerFactory;
  * @date: 15.02.2018.
  */
 @WebServlet("/memTestR")
+@Deprecated
 public class MEMTestReceiveServlet extends HttpServlet {
 
   private static final Logger LOG = LoggerFactory.getLogger(MEMTestReceiveServlet.class);
@@ -65,10 +52,10 @@ public class MEMTestReceiveServlet extends HttpServlet {
   private static String when;
 
   private static IMessageHandler handler = new IMessageHandler() {
-    SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss:SSS");
+    final SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss:SSS");
 
     @Override
-    public void handleMessage(@Nonnull MEMessage meMessage) throws Exception {
+    public void handleMessage(@Nonnull final MEMessage meMessage) throws Exception {
       LOG.debug("Handler received an inbound MEMessage");
       lastMessage = meMessage;
       //couldn't use PDTFactory.createLocalDate(when).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME
@@ -92,10 +79,10 @@ public class MEMTestReceiveServlet extends HttpServlet {
       resp.getOutputStream().println("Date: " + when);
 
       resp.getOutputStream().println("Payloads:");
-      for (MEPayload payload : lastMessage.getPayloads()) {
+      for (final MEPayload payload : lastMessage.getPayloads()) {
         resp.getOutputStream().println("\tMime Type: " + payload.getMimeTypeString());
 
-        byte[] data = payload.getData();
+        final byte[] data = payload.getData();
         if (data.length <= 100) {
           resp.getOutputStream().println("\tData     : " + new String(data));
         } else {
