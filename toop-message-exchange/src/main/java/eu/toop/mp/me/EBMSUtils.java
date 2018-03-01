@@ -423,9 +423,9 @@ public final class EBMSUtils {
   private static void validateReceipt(@Nonnull final SOAPMessage response) {
 
     ValueEnforcer.notNull(response, "Soap message");
-    try {
-      Element errorElement = (Element) SoapXPathUtil.findSingleNode(response.getSOAPPart(), "//:SignalMessage/:Error");
+    Element errorElement = (Element) SoapXPathUtil.findSingleNode(response.getSOAPPart(), "//:SignalMessage/:Error");
 
+    if (errorElement != null) {
       String cat = StringHelper.getNotNull(errorElement.getAttribute("category")).toUpperCase();
       String shortDescription = StringHelper.getNotNull(errorElement.getAttribute("shortDescription")).toUpperCase();
       String severity = StringHelper.getNotNull(errorElement.getAttribute("severity")).toUpperCase();
@@ -442,15 +442,13 @@ public final class EBMSUtils {
         errBuff.append("Invalid category . Expected [Communication], Received: [" + cat + "]\n");
       }
       if ("DECOMPRESSIONFAILURE" != shortDescription) {
-        errBuff.append("ShortDescription invalid. Expectec [DecompressionFailure], Received: [" + shortDescription + "]\n");
+        errBuff.append(
+            "ShortDescription invalid. Expectec [DecompressionFailure], Received: [" + shortDescription + "]\n");
       }
 
       if (errBuff.length() > 0) {
         throw new IllegalStateException(errBuff.toString());
       }
-    } catch (IllegalStateException ex) {
-      //weird, having an exception means success
-      //do nothing
     }
   }
 }
