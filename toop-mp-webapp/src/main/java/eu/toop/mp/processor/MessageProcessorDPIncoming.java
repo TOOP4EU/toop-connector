@@ -97,11 +97,11 @@ public final class MessageProcessorDPIncoming extends AbstractGlobalWebSingleton
                 final ConceptValue aToopCV = ConceptValue.create (aToopConcept);
                 for (final MappedValue aMV : aMappedValues.getAllBySource (x -> x.equals (aToopCV))) {
                   final TDEConceptRequestType aDstConcept = new TDEConceptRequestType ();
-                  aDstConcept.setConceptType (ToopXSDHelper.createCode ("DP"));
+                  aDstConcept.setConceptTypeCode (ToopXSDHelper.createCode ("DP"));
                   aDstConcept.setSemanticMappingExecutionIndicator (ToopXSDHelper.createIndicator (false));
                   aDstConcept.setConceptNamespace (ToopXSDHelper.createIdentifier (aMV.getDestination ()
                                                                                       .getNamespace ()));
-                  aDstConcept.addConcept (ToopXSDHelper.createText (aMV.getDestination ().getValue ()));
+                  aDstConcept.setConceptName (ToopXSDHelper.createText (aMV.getDestination ().getValue ()));
                   aToopConcept.addConceptRequest (aDstConcept);
                 }
               }

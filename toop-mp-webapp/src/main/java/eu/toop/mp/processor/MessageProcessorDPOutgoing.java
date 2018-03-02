@@ -81,8 +81,10 @@ public final class MessageProcessorDPOutgoing extends AbstractGlobalWebSingleton
       // 2. invoke R2D2 client with a single endpoint
       ICommonsList<IR2D2Endpoint> aEndpoints;
       final IDocumentTypeIdentifier aDocTypeID = MPSettings.getIdentifierFactory ()
-                                                           .parseDocumentTypeIdentifier (aCurrentObject.getDocumentTypeCode ()
-                                                                                                       .getValue ());
+                                                           .createDocumentTypeIdentifier (aCurrentObject.getDocumentTypeIdentifier ()
+                                                                                                        .getSchemeID (),
+                                                                                          aCurrentObject.getDocumentTypeIdentifier ()
+                                                                                                        .getValue ());
       final IProcessIdentifier aProcessID = MPSettings.getIdentifierFactory ()
                                                       .createProcessIdentifier (aCurrentObject.getProcessIdentifier ()
                                                                                               .getSchemeID (),

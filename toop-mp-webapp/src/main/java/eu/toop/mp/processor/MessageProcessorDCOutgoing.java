@@ -113,10 +113,10 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
             final ConceptValue aSrcCV = ConceptValue.create (aSrcConcept);
             for (final MappedValue aMV : aMappedValues.getAllBySource (x -> x.equals (aSrcCV))) {
               final TDEConceptRequestType aToopConcept = new TDEConceptRequestType ();
-              aToopConcept.setConceptType (ToopXSDHelper.createCode ("TOOP"));
+              aToopConcept.setConceptTypeCode (ToopXSDHelper.createCode ("TOOP"));
               aToopConcept.setSemanticMappingExecutionIndicator (ToopXSDHelper.createIndicator (false));
               aToopConcept.setConceptNamespace (ToopXSDHelper.createIdentifier (aMV.getDestination ().getNamespace ()));
-              aToopConcept.addConcept (ToopXSDHelper.createText (aMV.getDestination ().getValue ()));
+              aToopConcept.setConceptName (ToopXSDHelper.createText (aMV.getDestination ().getValue ()));
               aSrcConcept.addConceptRequest (aToopConcept);
             }
           }
@@ -133,8 +133,10 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
                                                                                                      .getDCElectronicAddressIdentifier ()
                                                                                                      .getValue ());
       final IDocumentTypeIdentifier aDocTypeID = MPSettings.getIdentifierFactory ()
-                                                           .parseDocumentTypeIdentifier (aCurrentObject.getDocumentTypeCode ()
-                                                                                                       .getValue ());
+                                                           .createDocumentTypeIdentifier (aCurrentObject.getDocumentTypeIdentifier ()
+                                                                                                        .getSchemeID (),
+                                                                                          aCurrentObject.getDocumentTypeIdentifier ()
+                                                                                                        .getValue ());
       final IProcessIdentifier aProcessID = MPSettings.getIdentifierFactory ()
                                                       .createProcessIdentifier (aCurrentObject.getProcessIdentifier ()
                                                                                               .getSchemeID (),
