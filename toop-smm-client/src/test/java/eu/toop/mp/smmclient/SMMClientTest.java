@@ -22,6 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import eu.toop.commons.concept.ConceptValue;
 import eu.toop.mp.api.CMP;
@@ -32,11 +34,14 @@ import eu.toop.mp.api.CMP;
  * @author Philip Helger
  */
 public final class SMMClientTest {
+  private static final Logger s_aLogger = LoggerFactory.getLogger (SMMClientTest.class);
+  
   private static final ConceptValue CONCEPT_TOOP_1 = new ConceptValue (CMP.NS_TOOP, "CompanyCode");
   private static final ConceptValue CONCEPT_FR_1 = new ConceptValue (CMP.NS_FREEDONIA, "FreedoniaBusinessCode");
 
   @Test
   public void testEmpty () throws IOException {
+    s_aLogger.info ("Starting testEmpty");
     final SMMClient aClient = new SMMClient ();
     final IMappedValueList ret = aClient.performMapping (CMP.NS_FREEDONIA);
     assertNotNull (ret);
@@ -46,6 +51,7 @@ public final class SMMClientTest {
 
   @Test
   public void testOneMatch () throws IOException {
+    s_aLogger.info ("Starting testOneMatch");
     final SMMClient aClient = new SMMClient ();
     aClient.addConceptToBeMapped (CONCEPT_TOOP_1);
     final IMappedValueList ret = aClient.performMapping (CMP.NS_FREEDONIA);
@@ -64,6 +70,7 @@ public final class SMMClientTest {
 
   @Test
   public void testOneMatchOneNotFound () throws IOException {
+    s_aLogger.info ("Starting testOneMatchOneNotFound");
     final SMMClient aClient = new SMMClient ();
     aClient.addConceptToBeMapped (CONCEPT_TOOP_1);
     aClient.addConceptToBeMapped (new ConceptValue (CMP.NS_TOOP, "NonExistingField"));
@@ -83,7 +90,8 @@ public final class SMMClientTest {
 
   @Test
   public void testNoMappingNeeded () throws IOException {
-    final SMMClient aClient = new SMMClient ();
+	s_aLogger.info ("Starting testNoMappingNeeded");
+	final SMMClient aClient = new SMMClient ();
     aClient.addConceptToBeMapped (CONCEPT_FR_1);
     final IMappedValueList ret = aClient.performMapping (CMP.NS_FREEDONIA);
     assertNotNull (ret);
