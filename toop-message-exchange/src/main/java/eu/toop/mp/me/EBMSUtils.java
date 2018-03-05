@@ -337,7 +337,7 @@ public final class EBMSUtils {
               mimeType.addParameter(CMimeType.PARAMETER_NAME_CHARSET, aCharset.name());
             }
           }
-        } catch (IllegalStateException ex) {
+        } catch (final IllegalStateException ex) {
           //ignore
         }
 
@@ -406,10 +406,10 @@ public final class EBMSUtils {
    * @param url Target URL. May not be <code>null</code>
    * @throws IllegalStateException if a fault is received instead of an ebms receipt
    */
-  public static void sendSOAPMessage(@Nonnull SOAPMessage soapMessage, @Nonnull URL url) {
+  public static void sendSOAPMessage(@Nonnull final SOAPMessage soapMessage, @Nonnull final URL url) {
     ValueEnforcer.notNull(soapMessage, "SOAP Message");
     ValueEnforcer.notNull(url, "Target url");
-    SOAPMessage response = SoapUtil.sendSOAPMessage(soapMessage, url);
+    final SOAPMessage response = SoapUtil.sendSOAPMessage(soapMessage, url);
 
     if (response != null) {
       LOG.debug(SoapUtil.describe(response));
@@ -423,25 +423,25 @@ public final class EBMSUtils {
   private static void validateReceipt(@Nonnull final SOAPMessage response) {
 
     ValueEnforcer.notNull(response, "Soap message");
-    Element errorElement = (Element) SoapXPathUtil.findSingleNode(response.getSOAPPart(), "//:SignalMessage/:Error");
+    final Element errorElement = (Element) SoapXPathUtil.findSingleNode(response.getSOAPPart(), "//:SignalMessage/:Error");
 
     if (errorElement != null) {
-      String cat = StringHelper.getNotNull(errorElement.getAttribute("category")).toUpperCase();
-      String shortDescription = StringHelper.getNotNull(errorElement.getAttribute("shortDescription")).toUpperCase();
-      String severity = StringHelper.getNotNull(errorElement.getAttribute("severity")).toUpperCase();
-      String code = StringHelper.getNotNull(errorElement.getAttribute("errorCode")).toUpperCase();
+      final String cat = StringHelper.getNotNull(errorElement.getAttribute("category")).toUpperCase();
+      final String shortDescription = StringHelper.getNotNull(errorElement.getAttribute("shortDescription")).toUpperCase();
+      final String severity = StringHelper.getNotNull(errorElement.getAttribute("severity")).toUpperCase();
+      final String code = StringHelper.getNotNull(errorElement.getAttribute("errorCode")).toUpperCase();
 
-      StringBuffer errBuff = new StringBuffer();
-      if ("EBMS:0303" != code) {
+      final StringBuilder errBuff = new StringBuilder();
+      if (!"EBMS:0303".equals (code)) {
         errBuff.append("Error code invalid. Expected [EBMS:0303], Received: [" + code + "]\n");
       }
-      if ("FAILURE" != severity) {
+      if (!"FAILURE".equals (severity)) {
         errBuff.append("Severity invalid. Expected [Failure], Received: [" + severity + "]\n");
       }
-      if ("COMMUNICATION" != cat) {
+      if (!"COMMUNICATION".equals (cat)) {
         errBuff.append("Invalid category . Expected [Communication], Received: [" + cat + "]\n");
       }
-      if ("DECOMPRESSIONFAILURE" != shortDescription) {
+      if (!"DECOMPRESSIONFAILURE".equals (shortDescription)) {
         errBuff.append(
             "ShortDescription invalid. Expectec [DecompressionFailure], Received: [" + shortDescription + "]\n");
       }
