@@ -35,7 +35,7 @@ import eu.toop.mp.api.CMP;
  */
 public final class SMMClientTest {
   private static final Logger s_aLogger = LoggerFactory.getLogger (SMMClientTest.class);
-  
+
   private static final ConceptValue CONCEPT_TOOP_1 = new ConceptValue (CMP.NS_TOOP, "CompanyCode");
   private static final ConceptValue CONCEPT_FR_1 = new ConceptValue (CMP.NS_FREEDONIA, "FreedoniaBusinessCode");
 
@@ -73,7 +73,8 @@ public final class SMMClientTest {
     s_aLogger.info ("Starting testOneMatchOneNotFound");
     final SMMClient aClient = new SMMClient ();
     aClient.addConceptToBeMapped (CONCEPT_TOOP_1);
-    aClient.addConceptToBeMapped (new ConceptValue (CMP.NS_TOOP, "NonExistingField"));
+    aClient.addConceptToBeMapped (CMP.NS_TOOP, "NonExistingField");
+    aClient.addConceptToBeMapped ("SourceNamespace", "NonExistingField");
     final IMappedValueList ret = aClient.performMapping (CMP.NS_FREEDONIA);
     assertNotNull (ret);
     assertEquals (1, ret.size ());
@@ -90,8 +91,8 @@ public final class SMMClientTest {
 
   @Test
   public void testNoMappingNeeded () throws IOException {
-	s_aLogger.info ("Starting testNoMappingNeeded");
-	final SMMClient aClient = new SMMClient ();
+    s_aLogger.info ("Starting testNoMappingNeeded");
+    final SMMClient aClient = new SMMClient ();
     aClient.addConceptToBeMapped (CONCEPT_FR_1);
     final IMappedValueList ret = aClient.performMapping (CMP.NS_FREEDONIA);
     assertNotNull (ret);
