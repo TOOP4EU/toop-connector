@@ -16,17 +16,14 @@
 package eu.toop.mp.me.mocAS4;
 
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.*;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.http.*;
-
-import javax.xml.soap.MimeHeader;
-import javax.xml.soap.MimeHeaders;
-import java.io.*;
-import java.util.Iterator;
-import java.util.Map;
+import io.netty.handler.codec.http.HttpServerCodec;
 
 
 /**
@@ -41,12 +38,12 @@ public class MockAS4 {
   private ChannelFuture channelFuture;
   private ServerBootstrap serverBootstrap;
 
-  public MockAS4(int port) throws IOException {
+  public MockAS4(final int port) {
     this.port = port;
   }
 
 
-  public void start() throws IOException, InterruptedException {
+  public void start() {
     //Create a simple netty http server
     bossGroup = new NioEventLoopGroup();
     workerGroup = new NioEventLoopGroup();
@@ -56,11 +53,11 @@ public class MockAS4 {
     serverBootstrap.channel(NioServerSocketChannel.class);
     serverBootstrap.childHandler(new ChannelInitializer<SocketChannel>() {
       @Override
-      protected void initChannel(SocketChannel socketChannel) throws Exception {
+      protected void initChannel(final SocketChannel socketChannel) throws Exception {
         socketChannel.pipeline().addLast(new HttpServerCodec(), new HttpPacketHandler());
       }
     });
-    serverBootstrap.option(ChannelOption.SO_BACKLOG, 1024);
+    serverBootstrap.option(ChannelOption.SO_BACKLOG, Integer.valueOf (1024));
 
     // Bind and start to accept incoming connections.
     channelFuture = serverBootstrap.bind(port);

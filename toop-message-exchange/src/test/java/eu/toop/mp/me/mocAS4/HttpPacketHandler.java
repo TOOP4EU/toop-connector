@@ -96,7 +96,7 @@ public class HttpPacketHandler extends ChannelInboundHandlerAdapter {
           final FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.wrappedBuffer(receipt));
           response.headers().set(HttpHeaderNames.SERVER, "MOCAS4");
           response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/xml");
-          response.headers().set(HttpHeaderNames.CONTENT_LENGTH, receipt.length);
+          response.headers().set(HttpHeaderNames.CONTENT_LENGTH, Integer.valueOf (receipt.length));
           ctx.write(response).addListener(ChannelFutureListener.CLOSE);
         }
 

@@ -15,11 +15,6 @@
  */
 package eu.toop.mp.me.mocAS4;
 
-import eu.toop.mp.me.SoapUtil;
-
-import javax.xml.soap.MimeHeaders;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPMessage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PipedInputStream;
@@ -27,6 +22,12 @@ import java.io.PipedOutputStream;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+
+import javax.xml.soap.MimeHeaders;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPMessage;
+
+import eu.toop.mp.me.SoapUtil;
 
 /**
  * @author: myildiz
@@ -36,39 +37,37 @@ public class SOAPMessageAccumulator {
   private PipedOutputStream pipedOutputStream;
   private PipedInputStream pipedInputStream;
   private SOAPMessage nextMessage;
-  private Executor messageProcessingExecutor = Executors.newSingleThreadExecutor();
+  private final Executor messageProcessingExecutor = Executors.newSingleThreadExecutor();
   private CountDownLatch messageConstructionLatch;
 
   /**
    * Resets the accumulator and prepares it for a new soap message
    *
    * @param newHeaders the MimeHeaders parsed from the HTTP headers
-   * @throws IOException
-   * @throws SOAPException
    */
-  public void reset(MimeHeaders newHeaders) {
+  public void reset(final MimeHeaders newHeaders) {
     messageConstructionLatch = new CountDownLatch(1);
     //for each new http chunk, we create a new input stream and pipe it through this mechanism
     //to the underlying soap message factory. So we are saved from caching data.
     pipedOutputStream = new PipedOutputStream();
     try {
       pipedInputStream = new PipedInputStream(pipedOutputStream);
-    } catch (IOException ex) {
+    } catch (final IOException ex) {
       throw new IllegalStateException("PipedInputStream couldn't be created", ex);
     }
 
     messageProcessingExecutor.execute(() -> {
       try {
         nextMessage = SoapUtil.createMessage(newHeaders, pipedInputStream);
-      } catch (IOException e) {
+      } catch (final IOException e) {
         e.printStackTrace();
-      } catch (SOAPException e) {
+      } catch (final SOAPException e) {
         e.printStackTrace();
       } finally {
         try {
           //good or bad, we are done reading.
           messageConstructionLatch.countDown();
-        } catch (Exception ignored) {
+        } catch (final Exception ignored) {
 
         }
       }
@@ -79,36 +78,33 @@ public class SOAPMessageAccumulator {
   /**
    * Consume the next stream and feed the content to the soap message creator
    *
-   * @param inputStream
-   * @throws IOException
+   * @param inputStream input stream
    */
-  public void accumulate(InputStream inputStream) {
+  public void accumulate(final InputStream inputStream) {
     try {
       int read;
       while ((read = inputStream.read()) > 0) {
         pipedOutputStream.write(read);
       }
-    } catch (IOException ex) {
+    } catch (final IOException ex) {
       throw new IllegalStateException("Stream piping failed", ex);
     }
   }
 
 
   /**
-   * Close the input of the pipe so that the undelying message factory will finish reading the
+   * Close the input of the pipe so that the underlying message factory will finish reading the
    * stream chunks. Wait for the message to be ready and then return the message
    *
-   * @return
-   * @throws SOAPException
-   * @throws IOException
+   * @return never <code>null</code>.
    */
   public SOAPMessage doFinal() {
     try {
       pipedOutputStream.close();
       messageConstructionLatch.await();
-    } catch (InterruptedException e) {
+    } catch (final InterruptedException e) {
       throw new IllegalStateException("Cannot wait for the message to be created");
-    } catch (IOException ex) {
+    } catch (final IOException ex) {
       throw new IllegalStateException("PipedInputStream couldn't be created", ex);
     }
     if (nextMessage == null) {
