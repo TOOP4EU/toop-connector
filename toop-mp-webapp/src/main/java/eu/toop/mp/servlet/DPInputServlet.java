@@ -30,6 +30,7 @@ import com.helger.servlet.response.UnifiedResponse;
 
 import eu.toop.commons.dataexchange.TDETOOPDataResponseType;
 import eu.toop.commons.exchange.ToopMessageBuilder;
+import eu.toop.kafkaclient.ToopKafkaClient;
 import eu.toop.mp.processor.MessageProcessorDPOutgoing;
 
 /**
@@ -48,6 +49,8 @@ public class DPInputServlet extends HttpServlet {
   @Override
   protected void doPost (final HttpServletRequest aHttpServletRequest,
                          final HttpServletResponse aHttpServletResponse) throws ServletException, IOException {
+    ToopKafkaClient.send ("MP got /dpinput request (3/4)");
+
     final UnifiedResponse aUR = UnifiedResponse.createSimple (aHttpServletRequest);
 
     // Parse POST data

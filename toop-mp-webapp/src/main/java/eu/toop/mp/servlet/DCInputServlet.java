@@ -37,6 +37,7 @@ import eu.toop.commons.dataexchange.TDETOOPDataRequestType;
 import eu.toop.commons.doctype.EToopDocumentType;
 import eu.toop.commons.doctype.EToopProcess;
 import eu.toop.commons.exchange.ToopMessageBuilder;
+import eu.toop.kafkaclient.ToopKafkaClient;
 import eu.toop.mp.api.MPSettings;
 import eu.toop.mp.processor.MPWebAppConfig;
 import eu.toop.mp.processor.MessageProcessorDCOutgoing;
@@ -104,6 +105,8 @@ public class DCInputServlet extends HttpServlet {
   @Override
   protected void doPost (final HttpServletRequest aHttpServletRequest,
                          final HttpServletResponse aHttpServletResponse) throws ServletException, IOException {
+    ToopKafkaClient.send ("MP got /dcinput request (1/4)");
+
     final UnifiedResponse aUR = UnifiedResponse.createSimple (aHttpServletRequest);
 
     // Parse POST data
