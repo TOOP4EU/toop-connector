@@ -23,7 +23,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 
-import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpGet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,9 +72,9 @@ public class R2D2Client implements IR2D2Client {
   @Nullable
   private static IJsonObject _fetchJsonObject (@Nonnull final HttpClientManager aMgr,
                                                @Nonnull final ISimpleURL aURL) throws IOException {
-    final HttpPost aPost = new HttpPost (aURL.getAsURI ());
+    final HttpGet aGet = new HttpGet (aURL.getAsURI ());
     final ResponseHandlerJson aRH = new ResponseHandlerJson ();
-    final IJson aJson = aMgr.execute (aPost, aRH);
+    final IJson aJson = aMgr.execute (aGet, aRH);
     if (aJson != null && aJson.isObject ())
       return aJson.getAsObject ();
 
