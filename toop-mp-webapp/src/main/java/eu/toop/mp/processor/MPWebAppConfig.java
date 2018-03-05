@@ -15,13 +15,13 @@
  */
 package eu.toop.mp.processor;
 
-import java.io.File;
-
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
 import com.helger.asic.SignatureHelper;
-import com.helger.commons.io.file.FileHelper;
+import com.helger.commons.io.resource.ClassPathResource;
+
+import eu.toop.mp.api.MPConfig;
 
 /**
  * Message Processor WebApp configuration
@@ -30,8 +30,10 @@ import com.helger.commons.io.file.FileHelper;
  */
 @Immutable
 public final class MPWebAppConfig {
-  private static final SignatureHelper SH = new SignatureHelper (FileHelper.getInputStream (new File ("src/main/resources/demo-keystore.jks")),
-                                                                 "password", null, "password");
+  private static final SignatureHelper SH = new SignatureHelper (ClassPathResource.getInputStream (MPConfig.getMPKeyStorePath ()),
+                                                                 MPConfig.getMPKeyStorePassword (),
+                                                                 MPConfig.getMPKeyStoreKeyAlias (),
+                                                                 MPConfig.getMPKeyStoreKeyPassword ());
 
   private MPWebAppConfig () {
   }

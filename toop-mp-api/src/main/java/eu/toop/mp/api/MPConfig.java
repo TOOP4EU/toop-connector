@@ -261,7 +261,7 @@ public final class MPConfig {
 
   // Receiving GW party id
   @Nullable
-  public static String getMEMAS4ReceivingPartyID() {
+  public static String getMEMAS4ReceivingPartyID () {
     return getConfigFile ().getAsString ("mp.mem.as4.receiving.partyid");
   }
 
@@ -282,5 +282,25 @@ public final class MPConfig {
   @Nonempty
   public static String getMEMAS4Service () {
     return getConfigFile ().getAsString ("mp.mem.as4.service", "http://www.toop.eu/as4/backend");
+  }
+
+  @Nullable
+  public static String getMPKeyStorePath () {
+    return getConfigFile ().getAsString ("mp.keystore.path");
+  }
+
+  @Nullable
+  public static String getMPKeyStorePassword () {
+    return getConfigFile ().getAsString ("mp.keystore.password");
+  }
+
+  @Nullable
+  public static String getMPKeyStoreKeyAlias () {
+    return getConfigFile ().getAsString ("mp.keystore.key.alias");
+  }
+
+  @Nullable
+  public static String getMPKeyStoreKeyPassword () {
+    return getConfigFile ().getAsString ("mp.keystore.key.password");
   }
 }
