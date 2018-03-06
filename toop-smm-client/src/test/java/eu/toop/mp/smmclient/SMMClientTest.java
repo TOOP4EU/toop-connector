@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.toop.commons.concept.ConceptValue;
+import eu.toop.commons.doctype.EToopDocumentType;
 import eu.toop.mp.api.CMP;
 
 /**
@@ -37,7 +38,8 @@ public final class SMMClientTest {
   private static final Logger s_aLogger = LoggerFactory.getLogger (SMMClientTest.class);
 
   private static final String LOG_PREFIX = "[unit test] ";
-  private static final ConceptValue CONCEPT_TOOP_1 = new ConceptValue (CMP.NS_TOOP, "CompanyCode");
+  private static final String NS_TOOP = EToopDocumentType.DOCTYPE_REGISTERED_ORGANIZATION_REQUEST.getSharedToopSMMNamespace ();
+  private static final ConceptValue CONCEPT_TOOP_1 = new ConceptValue (NS_TOOP, "CompanyCode");
   private static final ConceptValue CONCEPT_FR_1 = new ConceptValue (CMP.NS_FREEDONIA, "FreedoniaBusinessCode");
 
   @Test
@@ -74,7 +76,7 @@ public final class SMMClientTest {
     s_aLogger.info ("Starting testOneMatchOneNotFound");
     final SMMClient aClient = new SMMClient ();
     aClient.addConceptToBeMapped (CONCEPT_TOOP_1);
-    aClient.addConceptToBeMapped (CMP.NS_TOOP, "NonExistingField");
+    aClient.addConceptToBeMapped (NS_TOOP, "NonExistingField");
     aClient.addConceptToBeMapped ("SourceNamespace", "NonExistingField");
     final IMappedValueList ret = aClient.performMapping (LOG_PREFIX, CMP.NS_FREEDONIA);
     assertNotNull (ret);

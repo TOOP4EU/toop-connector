@@ -74,8 +74,8 @@ public class TestSendReceive {
 
   @Test
   public void testSendReceive() throws Exception {
-    final GatewayRoutingMetadata metadata = new GatewayRoutingMetadata("iso6523-actorid-upis::0088:123456", EToopDocumentType.DOCTYPE1.getURIEncoded (),
-                                                                       EToopProcess.PROC.getURIEncoded (), createSampleEndpoint());
+    final GatewayRoutingMetadata metadata = new GatewayRoutingMetadata("iso6523-actorid-upis::0088:123456", EToopDocumentType.DOCTYPE_REGISTERED_ORGANIZATION_REQUEST.getURIEncoded (),
+                                                                       EToopProcess.PROCESS_REQUEST_RESPONSE.getURIEncoded (), createSampleEndpoint());
 
     final String payloadId = "xmlpayload@dp";
     final IMimeType contentType = CMimeType.APPLICATION_XML;

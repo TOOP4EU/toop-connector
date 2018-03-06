@@ -72,8 +72,8 @@ public class DCInputServlet extends HttpServlet {
                                                                                                                                "dcinput")
                                                                                                  .getURIEncoded (),
                                                                                        "GF",
-                                                                                       EToopDocumentType.DOCTYPE1.getURIEncoded (),
-                                                                                       EToopProcess.PROC.getURIEncoded (),
+                                                                                       EToopDocumentType.DOCTYPE_REGISTERED_ORGANIZATION_REQUEST,
+                                                                                       EToopProcess.PROCESS_REQUEST_RESPONSE,
                                                                                        new CommonsArrayList<> (new ConceptValue ("company",
                                                                                                                                  "demo"))),
                                                  archiveOutput, MPWebAppConfig.getSignatureHelper ());

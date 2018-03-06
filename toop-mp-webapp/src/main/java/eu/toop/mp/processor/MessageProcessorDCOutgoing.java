@@ -46,10 +46,10 @@ import eu.toop.commons.dataexchange.TDEDataElementRequestType;
 import eu.toop.commons.dataexchange.TDELegalEntityType;
 import eu.toop.commons.dataexchange.TDENaturalPersonType;
 import eu.toop.commons.dataexchange.TDETOOPDataRequestType;
+import eu.toop.commons.doctype.EToopDocumentType;
 import eu.toop.commons.exchange.ToopMessageBuilder;
 import eu.toop.commons.jaxb.ToopXSDHelper;
 import eu.toop.kafkaclient.ToopKafkaClient;
-import eu.toop.mp.api.CMP;
 import eu.toop.mp.api.MPConfig;
 import eu.toop.mp.api.MPSettings;
 import eu.toop.mp.me.GatewayRoutingMetadata;
@@ -77,6 +77,16 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
    */
   static final class Performer implements IConcurrentPerformer<TDETOOPDataRequestType> {
     public void runAsync (@Nonnull final TDETOOPDataRequestType aCurrentObject) throws Exception {
+      final EToopDocumentType eDocType = EToopDocumentType.getFromIDOrNull (aCurrentObject.getDocumentTypeIdentifier ()
+                                                                                          .getSchemeID (),
+                                                                            aCurrentObject.getDocumentTypeIdentifier ()
+                                                                                          .getValue ());
+      if (eDocType == null) {
+        throw new IllegalStateException ("Failed to resolve document type "
+                                         + aCurrentObject.getDocumentTypeIdentifier ().getSchemeID () + "::"
+                                         + aCurrentObject.getDocumentTypeIdentifier ().getValue ());
+      }
+
       // This is the unique ID of this request message and must be used throughout the
       // whole process for identification
       final String sRequestID = GlobalIDFactory.getNewPersistentStringID ();
@@ -97,8 +107,8 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
         }
 
         // Main mapping
-        // TODO make destination namespace configurable
-        final IMappedValueList aMappedValues = aClient.performMapping (sLogPrefix, CMP.NS_TOOP);
+        final IMappedValueList aMappedValues = aClient.performMapping (sLogPrefix,
+                                                                       eDocType.getSharedToopSMMNamespace ());
 
         // add all the mapped values in the request
         for (final TDEDataElementRequestType aDER : aCurrentObject.getDataElementRequest ()) {
