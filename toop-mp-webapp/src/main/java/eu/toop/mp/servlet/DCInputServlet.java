@@ -75,7 +75,7 @@ public class DCInputServlet extends HttpServlet {
                                                                                                  .createParticipantIdentifier ("toop-actorid-upis",
                                                                                                                                "dcinput")
                                                                                                  .getURIEncoded (),
-                                                                                       "DE",
+                                                                                       "GF",
                                                                                        EToopDocumentType.DOCTYPE1.getURIEncoded (),
                                                                                        EToopProcess.PROC.getURIEncoded (),
                                                                                        new CommonsArrayList<> (new ConceptValue ("company",
