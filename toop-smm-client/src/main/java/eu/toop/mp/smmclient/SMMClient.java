@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import javax.annotation.Nonnull;
-import javax.annotation.concurrent.ThreadSafe;
+import javax.annotation.concurrent.NotThreadSafe;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,8 +33,9 @@ import com.helger.commons.collection.impl.ICommonsList;
 import com.helger.commons.collection.impl.ICommonsMap;
 
 import eu.toop.commons.concept.ConceptValue;
+import eu.toop.kafkaclient.ToopKafkaClient;
 
-@ThreadSafe
+@NotThreadSafe
 public class SMMClient {
   private static final Logger s_aLogger = LoggerFactory.getLogger (SMMClient.class);
 
@@ -76,6 +77,14 @@ public class SMMClient {
     return addConceptToBeMapped (aConceptValue.getNamespace (), aConceptValue.getValue ());
   }
 
+  @Nonnull
+  private int _getTotalCount () {
+    int ret = 0;
+    for (final ICommonsList<?> aList : m_aSrcMap.values ())
+      ret += aList.size ();
+    return ret;
+  }
+
   /**
    * Perform a mapping of all provided source values to the provided destination
    * namespace.
@@ -90,6 +99,8 @@ public class SMMClient {
   @Nonnull
   @ReturnsMutableCopy
   public IMappedValueList performMapping (@Nonnull final String sDestNamespace) throws IOException {
+    ToopKafkaClient.send ( () -> "SMM client mapping " + _getTotalCount () + " to '" + sDestNamespace + "'");
+
     final MappedValueList ret = new MappedValueList ();
     // for all source namespaces (maybe many)
     for (final Map.Entry<String, ICommonsList<String>> aEntry : m_aSrcMap.entrySet ()) {

@@ -43,6 +43,7 @@ import com.helger.json.IJson;
 import com.helger.json.IJsonArray;
 import com.helger.json.IJsonObject;
 
+import eu.toop.kafkaclient.ToopKafkaClient;
 import eu.toop.mp.api.MPConfig;
 
 /**
@@ -171,6 +172,7 @@ final class SMMConceptCache {
     ValueEnforcer.notEmpty (sDestNamespace, "DestinationNamespace");
 
     s_aLogger.info ("Remote querying SMM mappings from '" + sSourceNamespace + "' to '" + sDestNamespace + "'");
+    ToopKafkaClient.send ( () -> "SMM remote call (" + sSourceNamespace + ", " + sDestNamespace + ")");
 
     // Build URL with params etc.
     String sBaseURL = MPConfig.getSMMGRLCURL ();
@@ -212,6 +214,9 @@ final class SMMConceptCache {
         }
       }
     });
+
+    ToopKafkaClient.send ( () -> "SMM remote call returned " + ret.size () + " mapped values");
+
     return ret;
   }
 }
