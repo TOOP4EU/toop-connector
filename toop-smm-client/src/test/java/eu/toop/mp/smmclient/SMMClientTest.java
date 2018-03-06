@@ -36,6 +36,7 @@ import eu.toop.mp.api.CMP;
 public final class SMMClientTest {
   private static final Logger s_aLogger = LoggerFactory.getLogger (SMMClientTest.class);
 
+  private static final String LOG_PREFIX = "[unit test] ";
   private static final ConceptValue CONCEPT_TOOP_1 = new ConceptValue (CMP.NS_TOOP, "CompanyCode");
   private static final ConceptValue CONCEPT_FR_1 = new ConceptValue (CMP.NS_FREEDONIA, "FreedoniaBusinessCode");
 
@@ -43,7 +44,7 @@ public final class SMMClientTest {
   public void testEmpty () throws IOException {
     s_aLogger.info ("Starting testEmpty");
     final SMMClient aClient = new SMMClient ();
-    final IMappedValueList ret = aClient.performMapping (CMP.NS_FREEDONIA);
+    final IMappedValueList ret = aClient.performMapping (LOG_PREFIX, CMP.NS_FREEDONIA);
     assertNotNull (ret);
     assertTrue (ret.isEmpty ());
     assertEquals (0, ret.size ());
@@ -54,7 +55,7 @@ public final class SMMClientTest {
     s_aLogger.info ("Starting testOneMatch");
     final SMMClient aClient = new SMMClient ();
     aClient.addConceptToBeMapped (CONCEPT_TOOP_1);
-    final IMappedValueList ret = aClient.performMapping (CMP.NS_FREEDONIA);
+    final IMappedValueList ret = aClient.performMapping (LOG_PREFIX, CMP.NS_FREEDONIA);
     assertNotNull (ret);
     assertEquals (1, ret.size ());
 
@@ -75,7 +76,7 @@ public final class SMMClientTest {
     aClient.addConceptToBeMapped (CONCEPT_TOOP_1);
     aClient.addConceptToBeMapped (CMP.NS_TOOP, "NonExistingField");
     aClient.addConceptToBeMapped ("SourceNamespace", "NonExistingField");
-    final IMappedValueList ret = aClient.performMapping (CMP.NS_FREEDONIA);
+    final IMappedValueList ret = aClient.performMapping (LOG_PREFIX, CMP.NS_FREEDONIA);
     assertNotNull (ret);
     assertEquals (1, ret.size ());
 
@@ -94,7 +95,7 @@ public final class SMMClientTest {
     s_aLogger.info ("Starting testNoMappingNeeded");
     final SMMClient aClient = new SMMClient ();
     aClient.addConceptToBeMapped (CONCEPT_FR_1);
-    final IMappedValueList ret = aClient.performMapping (CMP.NS_FREEDONIA);
+    final IMappedValueList ret = aClient.performMapping (LOG_PREFIX, CMP.NS_FREEDONIA);
     assertNotNull (ret);
     assertEquals (1, ret.size ());
 

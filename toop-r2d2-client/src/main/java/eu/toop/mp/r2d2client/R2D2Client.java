@@ -35,6 +35,7 @@ import com.helger.commons.collection.impl.CommonsArrayList;
 import com.helger.commons.collection.impl.CommonsHashSet;
 import com.helger.commons.collection.impl.ICommonsList;
 import com.helger.commons.collection.impl.ICommonsSet;
+import com.helger.commons.error.level.EErrorLevel;
 import com.helger.commons.string.StringHelper;
 import com.helger.commons.url.ISimpleURL;
 import com.helger.commons.url.SimpleURL;
@@ -177,16 +178,18 @@ public class R2D2Client implements IR2D2Client {
     ValueEnforcer.notNull (aDocumentTypeID, "DocumentTypeID");
     ValueEnforcer.notNull (aProcessID, "ProcessID");
 
-    ToopKafkaClient.send ( () -> "MultiParticipant lookup (" + sCountryCode + ", " + aDocumentTypeID.getURIEncoded ()
-                                 + ", " + aProcessID.getURIEncoded () + ")");
+    ToopKafkaClient.send (EErrorLevel.INFO,
+                          () -> "MultiParticipant lookup (" + sCountryCode + ", " + aDocumentTypeID.getURIEncoded ()
+                                + ", " + aProcessID.getURIEncoded () + ")");
 
     final ICommonsList<IR2D2Endpoint> ret = new CommonsArrayList<> ();
 
     // Query PEPPOL Directory
     final ICommonsSet<IParticipantIdentifier> aPIs = _getAllRecipientIDsFromDirectory (sCountryCode, aDocumentTypeID);
 
-    ToopKafkaClient.send ( () -> "MultiParticipant lookup result: "
-                                 + StringHelper.getImplodedMapped (", ", aPIs, IParticipantIdentifier::getURIEncoded));
+    ToopKafkaClient.send (EErrorLevel.INFO,
+                          () -> "MultiParticipant lookup result[" + aPIs.size () + "]: "
+                                + StringHelper.getImplodedMapped (", ", aPIs, IParticipantIdentifier::getURIEncoded));
 
     // For all matching IDs (if any)
     for (final IParticipantIdentifier aPI : aPIs) {
@@ -207,8 +210,9 @@ public class R2D2Client implements IR2D2Client {
     ValueEnforcer.notNull (aDocumentTypeID, "DocumentTypeID");
     ValueEnforcer.notNull (aProcessID, "ProcessID");
 
-    ToopKafkaClient.send ( () -> "SMP lookup (" + aRecipientID.getURIEncoded () + ", "
-                                 + aDocumentTypeID.getURIEncoded () + ", " + aProcessID.getURIEncoded () + ")");
+    ToopKafkaClient.send (EErrorLevel.INFO,
+                          () -> "SMP lookup (" + aRecipientID.getURIEncoded () + ", " + aDocumentTypeID.getURIEncoded ()
+                                + ", " + aProcessID.getURIEncoded () + ")");
 
     final ICommonsList<IR2D2Endpoint> ret = new CommonsArrayList<> ();
     BDXRClient aSMPClient;
@@ -239,19 +243,19 @@ public class R2D2Client implements IR2D2Client {
                                                            aEP.getEndpointURI (), aCert);
             ret.add (aDestEP);
 
-            ToopKafkaClient.send ( () -> "SMP lookup result: " + aEP.getTransportProfile () + ", "
-                                         + aEP.getEndpointURI ());
+            ToopKafkaClient.send (EErrorLevel.INFO, () -> "SMP lookup result: " + aEP.getTransportProfile () + ", "
+                                                          + aEP.getEndpointURI ());
           }
         }
       } else {
         // else redirect
-        ToopKafkaClient.send ("SMP lookup result: maybe a redirect?");
+        ToopKafkaClient.send (EErrorLevel.INFO, "SMP lookup result: maybe a redirect?");
       }
     } catch (final CertificateException | SMPClientException ex) {
-      ToopKafkaClient.send ( () -> "SMP lookup result: exception occured: " + ex.getMessage ());
-
-      s_aLogger.error ("Error fetching SMP endpoint " + aRecipientID.getURIEncoded () + "/"
-                       + aDocumentTypeID.getURIEncoded () + "/" + aProcessID.getURIEncoded (), ex);
+      ToopKafkaClient.send (EErrorLevel.ERROR,
+                            () -> "Error fetching SMP endpoint " + aRecipientID.getURIEncoded () + "/"
+                                  + aDocumentTypeID.getURIEncoded () + "/" + aProcessID.getURIEncoded () + ": "
+                                  + ex.getMessage ());
     }
     return ret;
   }

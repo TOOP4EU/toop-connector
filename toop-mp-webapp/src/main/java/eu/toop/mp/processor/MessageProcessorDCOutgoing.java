@@ -33,6 +33,7 @@ import com.helger.commons.concurrent.BasicThreadFactory;
 import com.helger.commons.concurrent.ExecutorServiceHelper;
 import com.helger.commons.concurrent.collector.ConcurrentCollectorSingle;
 import com.helger.commons.concurrent.collector.IConcurrentPerformer;
+import com.helger.commons.error.level.EErrorLevel;
 import com.helger.commons.id.factory.GlobalIDFactory;
 import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 import com.helger.commons.state.ESuccess;
@@ -51,6 +52,7 @@ import eu.toop.commons.dataexchange.TDENaturalPersonType;
 import eu.toop.commons.dataexchange.TDETOOPDataRequestType;
 import eu.toop.commons.exchange.ToopMessageBuilder;
 import eu.toop.commons.jaxb.ToopXSDHelper;
+import eu.toop.kafkaclient.ToopKafkaClient;
 import eu.toop.mp.api.CMP;
 import eu.toop.mp.api.MPConfig;
 import eu.toop.mp.api.MPSettings;
@@ -86,7 +88,7 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
       final String sRequestID = GlobalIDFactory.getNewPersistentStringID () + UUID.randomUUID ().toString ();
       final String sLogPrefix = "[" + sRequestID + "] ";
 
-      s_aLogger.info (sLogPrefix + "Received asynch request: " + aCurrentObject);
+      ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "Received asynch request: " + aCurrentObject);
       // 1. invoke SMM
       {
         // Map to TOOP concepts
@@ -101,7 +103,7 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
 
         // Main mapping
         // TODO make destination namespace configurable
-        final IMappedValueList aMappedValues = aClient.performMapping (CMP.NS_TOOP);
+        final IMappedValueList aMappedValues = aClient.performMapping (sLogPrefix, CMP.NS_TOOP);
 
         // add all the mapped values in the request
         for (final TDEDataElementRequestType aDER : aCurrentObject.getDataElementRequest ()) {
@@ -163,9 +165,8 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
         final String sTransportProfileID = MPConfig.getMEMProtocol ().getTransportProfileID ();
         aEndpoints = aTotalEndpoints.getAll (x -> x.getTransportProtocol ().equals (sTransportProfileID));
 
-        s_aLogger.info (sLogPrefix + "R2D2 found the following endpoints[" + aEndpoints.size () + "/"
-                        + aTotalEndpoints.size () + "]: " + aEndpoints);
-
+        ToopKafkaClient.send (EErrorLevel.INFO, sLogPrefix + "R2D2 found the following endpoints[" + aEndpoints.size ()
+                                                + "/" + aTotalEndpoints.size () + "]: " + aEndpoints);
       }
 
       // 3. start message exchange to DC
@@ -186,6 +187,8 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
           final GatewayRoutingMetadata metadata = new GatewayRoutingMetadata (aSenderID.getURIEncoded (),
                                                                               aDocTypeID.getURIEncoded (),
                                                                               aProcessID.getURIEncoded (), aEP);
+          ToopKafkaClient.send (EErrorLevel.INFO, sLogPrefix + "Sending MEM message to " + aEP.getEndpointURL ()
+                                                  + " using " + aEP.getTransportProtocol ());
           MEMDelegate.getInstance ().sendMessage (metadata, meMessage);
         }
       }
@@ -240,7 +243,7 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
       return ESuccess.SUCCESS;
     } catch (final IllegalStateException ex) {
       // Queue is stopped!
-      s_aLogger.warn ("Cannot enqueue: " + ex.getMessage ());
+      ToopKafkaClient.send (EErrorLevel.WARN, () -> "Cannot enqueue " + aMsg + ": " + ex.getMessage ());
       return ESuccess.FAILURE;
     }
   }

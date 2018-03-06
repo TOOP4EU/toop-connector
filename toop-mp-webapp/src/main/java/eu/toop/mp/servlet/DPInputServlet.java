@@ -23,9 +23,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.helger.commons.error.level.EErrorLevel;
 import com.helger.servlet.response.UnifiedResponse;
 
 import eu.toop.commons.dataexchange.TDETOOPDataResponseType;
@@ -44,12 +42,10 @@ import eu.toop.mp.processor.MessageProcessorDPOutgoing;
  */
 @WebServlet ("/dpinput")
 public class DPInputServlet extends HttpServlet {
-  private static final Logger s_aLogger = LoggerFactory.getLogger (DPInputServlet.class);
-
   @Override
   protected void doPost (final HttpServletRequest aHttpServletRequest,
                          final HttpServletResponse aHttpServletResponse) throws ServletException, IOException {
-    ToopKafkaClient.send ("MP got /dpinput request (3/4)");
+    ToopKafkaClient.send (EErrorLevel.INFO, "MP got /dpinput request (3/4)");
 
     final UnifiedResponse aUR = UnifiedResponse.createSimple (aHttpServletRequest);
 
@@ -59,7 +55,8 @@ public class DPInputServlet extends HttpServlet {
 
     if (aResponseMsg == null) {
       // The message content is invalid
-      s_aLogger.error ("The request does not contain an ASiC archive or the ASiC archive does not contain a TOOP Response Message!");
+      ToopKafkaClient.send (EErrorLevel.ERROR,
+                            "The request does not contain an ASiC archive or the ASiC archive does not contain a TOOP Response Message!");
       aUR.setStatus (HttpServletResponse.SC_BAD_REQUEST);
     } else {
       // Enqueue to processor and we're good

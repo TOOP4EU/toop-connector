@@ -31,6 +31,7 @@ import com.helger.commons.collection.impl.CommonsArrayList;
 import com.helger.commons.collection.impl.CommonsHashMap;
 import com.helger.commons.collection.impl.ICommonsList;
 import com.helger.commons.collection.impl.ICommonsMap;
+import com.helger.commons.error.level.EErrorLevel;
 
 import eu.toop.commons.concept.ConceptValue;
 import eu.toop.kafkaclient.ToopKafkaClient;
@@ -89,6 +90,9 @@ public class SMMClient {
    * Perform a mapping of all provided source values to the provided destination
    * namespace.
    *
+   * @param sLogPrefix
+   *          Logging prefix to easily fit together what belongs together. May not
+   *          be <code>null</code> but may be empty.
    * @param sDestNamespace
    *          Destination namespace to map the concepts to. May neither be
    *          <code>null</code> nor empty.
@@ -98,8 +102,11 @@ public class SMMClient {
    */
   @Nonnull
   @ReturnsMutableCopy
-  public IMappedValueList performMapping (@Nonnull final String sDestNamespace) throws IOException {
-    ToopKafkaClient.send ( () -> "SMM client mapping " + _getTotalCount () + " to '" + sDestNamespace + "'");
+  public IMappedValueList performMapping (@Nonnull final String sLogPrefix,
+                                          @Nonnull final String sDestNamespace) throws IOException {
+    ToopKafkaClient.send (EErrorLevel.INFO,
+                          () -> sLogPrefix + "SMM client mapping " + _getTotalCount () + " concept(s) from "
+                                + m_aSrcMap.size () + " source namespace(s) to '" + sDestNamespace + "'");
 
     final MappedValueList ret = new MappedValueList ();
     // for all source namespaces (maybe many)
@@ -122,18 +129,20 @@ public class SMMClient {
           final MappedValueList aMatching = aValueList.getAllBySource (x -> x.hasValue (sSourceValue));
           if (aMatching.isEmpty ()) {
             // Found no mapping
-            s_aLogger.info ("Found no mapping for '" + sSourceNamespace + '#' + sSourceValue
+            s_aLogger.info (sLogPrefix + "Found no mapping for '" + sSourceNamespace + '#' + sSourceValue
                             + "' to destination namespace '" + sDestNamespace + "'");
             // TODO shall we add a mapping to null?
           } else {
             if (aMatching.size () > 1)
-              s_aLogger.warn ("Found " + aMatching.size () + " mappings for '" + sSourceNamespace + '#' + sSourceValue
-                              + "' to destination namespace '" + sDestNamespace + "'");
+              s_aLogger.warn (sLogPrefix + "Found " + aMatching.size () + " mappings for '" + sSourceNamespace + '#'
+                              + sSourceValue + "' to destination namespace '" + sDestNamespace + "'");
             ret.addAllMappedValues (aMatching);
           }
         }
       }
     }
+    ToopKafkaClient.send (EErrorLevel.INFO,
+                          () -> sLogPrefix + "SMM client mapping found " + ret.size () + " mapping(s)");
     return ret;
   }
 }

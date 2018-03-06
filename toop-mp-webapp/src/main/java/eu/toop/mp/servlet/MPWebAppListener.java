@@ -19,10 +19,8 @@ import javax.annotation.Nonnull;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.annotation.WebListener;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.helger.commons.debug.GlobalDebug;
+import com.helger.commons.error.level.EErrorLevel;
 import com.helger.commons.id.factory.GlobalIDFactory;
 import com.helger.commons.id.factory.StringIDFromGlobalLongIDFactory;
 import com.helger.commons.string.StringHelper;
@@ -46,12 +44,10 @@ import eu.toop.mp.processor.MessageProcessorDPIncoming;
  */
 @WebListener
 public class MPWebAppListener extends WebScopeListener {
-  private static final Logger s_aLogger = LoggerFactory.getLogger (MPWebAppListener.class);
-
   @Override
   public void contextInitialized (@Nonnull final ServletContextEvent aEvent) {
     super.contextInitialized (aEvent);
-    s_aLogger.info ("MP WebApp startup");
+    ToopKafkaClient.send (EErrorLevel.INFO, "MP WebApp startup");
 
     GlobalIDFactory.setPersistentStringIDFactory (new StringIDFromGlobalLongIDFactory ("toop-mp-"));
     GlobalDebug.setDebugModeDirect (MPConfig.isGlobalDebug ());
@@ -75,25 +71,24 @@ public class MPWebAppListener extends WebScopeListener {
 
         if (aMsg instanceof TDETOOPDataResponseType) {
           // This is the way from DP back to DC; we're in DC incoming mode
-          ToopKafkaClient.send ("MP got DC incoming request (4/4)");
+          ToopKafkaClient.send (EErrorLevel.INFO, "MP got DC incoming request (4/4)");
           MessageProcessorDCIncoming.getInstance ().enqueue ((TDETOOPDataResponseType) aMsg);
         } else if (aMsg instanceof TDETOOPDataRequestType) {
           // This is the way from DC to DP; we're in DP incoming mode
-          ToopKafkaClient.send ("MP got DP incoming request (2/4)");
+          ToopKafkaClient.send (EErrorLevel.INFO, "MP got DP incoming request (2/4)");
           MessageProcessorDPIncoming.getInstance ().enqueue ((TDETOOPDataRequestType) aMsg);
         } else
-          s_aLogger.error ("Unsuspported ToopResponseMessage: " + aMsg);
+          ToopKafkaClient.send (EErrorLevel.ERROR, () -> "Unsuspported Message: " + aMsg);
       } else
-        s_aLogger.warn ("MEMessage contains no payload: " + aMEMessage);
+        ToopKafkaClient.send (EErrorLevel.WARN, () -> "MEMessage contains no payload: " + aMEMessage);
     });
 
-    ToopKafkaClient.send ("MP starting");
+    ToopKafkaClient.send (EErrorLevel.INFO, "MP starting");
   }
 
   @Override
   public void contextDestroyed (@Nonnull final ServletContextEvent aEvent) {
-    ToopKafkaClient.send ("MP stopping");
-    s_aLogger.info ("MP WebApp shutdown");
+    ToopKafkaClient.send (EErrorLevel.INFO, "MP WebApp shutdown");
 
     // Shutdown tracker
     ToopKafkaClient.close ();

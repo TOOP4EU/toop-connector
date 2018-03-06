@@ -25,14 +25,13 @@ import javax.annotation.concurrent.ThreadSafe;
 
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.Nonempty;
 import com.helger.commons.collection.impl.CommonsHashMap;
 import com.helger.commons.collection.impl.ICommonsMap;
 import com.helger.commons.concurrent.SimpleReadWriteLock;
+import com.helger.commons.error.level.EErrorLevel;
 import com.helger.commons.string.StringHelper;
 import com.helger.commons.url.ISimpleURL;
 import com.helger.commons.url.SimpleURL;
@@ -53,15 +52,20 @@ import eu.toop.mp.api.MPConfig;
  * @author Philip Helger
  */
 @ThreadSafe
-final class SMMConceptCache {
-  private static final Logger s_aLogger = LoggerFactory.getLogger (SMMConceptCache.class);
-
+public final class SMMConceptCache {
   // Static cache
   private static final SimpleReadWriteLock s_aRWLock = new SimpleReadWriteLock ();
   @GuardedBy ("s_aRWLock")
   private static final ICommonsMap<String, ICommonsMap<String, MappedValueList>> s_aCache = new CommonsHashMap<> ();
 
   private SMMConceptCache () {
+  }
+
+  /**
+   * Remove all cache values.
+   */
+  public static void clearCache () {
+    s_aRWLock.writeLocked ( () -> s_aCache.clear ());
   }
 
   @Nullable
@@ -171,8 +175,8 @@ final class SMMConceptCache {
     ValueEnforcer.notEmpty (sSourceNamespace, "SourceNamespace");
     ValueEnforcer.notEmpty (sDestNamespace, "DestinationNamespace");
 
-    s_aLogger.info ("Remote querying SMM mappings from '" + sSourceNamespace + "' to '" + sDestNamespace + "'");
-    ToopKafkaClient.send ( () -> "SMM remote call (" + sSourceNamespace + ", " + sDestNamespace + ")");
+    ToopKafkaClient.send (EErrorLevel.INFO, () -> "Remote querying SMM mappings from '" + sSourceNamespace + "' to '"
+                                                  + sDestNamespace + "'");
 
     // Build URL with params etc.
     String sBaseURL = MPConfig.getSMMGRLCURL ();
@@ -215,7 +219,7 @@ final class SMMConceptCache {
       }
     });
 
-    ToopKafkaClient.send ( () -> "SMM remote call returned " + ret.size () + " mapped values");
+    ToopKafkaClient.send (EErrorLevel.INFO, () -> "SMM remote call returned " + ret.size () + " mapped values");
 
     return ret;
   }

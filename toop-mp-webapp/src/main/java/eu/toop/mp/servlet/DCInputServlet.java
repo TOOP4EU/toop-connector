@@ -23,10 +23,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.helger.commons.collection.impl.CommonsArrayList;
+import com.helger.commons.error.level.EErrorLevel;
 import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 import com.helger.commons.mime.CMimeType;
 import com.helger.servlet.mock.MockHttpServletRequest;
@@ -53,8 +51,6 @@ import eu.toop.mp.processor.MessageProcessorDCOutgoing;
  */
 @WebServlet ("/dcinput")
 public class DCInputServlet extends HttpServlet {
-  private static final Logger s_aLogger = LoggerFactory.getLogger (DCInputServlet.class);
-
   /**
    * This is a demo method to easily send an MSDataRequest to itself. Invoke with
    * <code>http://localhost:8090/dcinput?demo</code>. This method must be disabled
@@ -105,7 +101,7 @@ public class DCInputServlet extends HttpServlet {
   @Override
   protected void doPost (final HttpServletRequest aHttpServletRequest,
                          final HttpServletResponse aHttpServletResponse) throws ServletException, IOException {
-    ToopKafkaClient.send ("MP got /dcinput request (1/4)");
+    ToopKafkaClient.send (EErrorLevel.INFO, "MP got /dcinput request (1/4)");
 
     final UnifiedResponse aUR = UnifiedResponse.createSimple (aHttpServletRequest);
 
@@ -115,7 +111,8 @@ public class DCInputServlet extends HttpServlet {
 
     if (aRequestMsg == null) {
       // The message content is invalid
-      s_aLogger.error ("The request does not contain an ASiC archive, or the ASiC archive does not contain a TOOP DataRequest!");
+      ToopKafkaClient.send (EErrorLevel.ERROR,
+                            "The request does not contain an ASiC archive, or the ASiC archive does not contain a TOOP DataRequest!");
       aUR.setStatus (HttpServletResponse.SC_BAD_REQUEST);
     } else {
       // Enqueue to processor and we're good
