@@ -64,10 +64,7 @@ public class MEMDelegate extends AbstractGlobalSingleton {
     final SOAPMessage soapMessage = EBMSUtils.convert2MEOutboundAS4Message(submissionData, meMessage);
     LOG.debug(SoapUtil.describe(soapMessage));
     LOG.debug("Send soap message");
-    if (true)
-      EBMSUtils.sendSOAPMessage(soapMessage, URLHelper.getAsURL(gatewayRoutingMetadata.getEndpoint ().getEndpointURL ()));
-    else
-      EBMSUtils.sendSOAPMessage(soapMessage, URLHelper.getAsURL(MPConfig.getMEMAS4Endpoint()));
+    EBMSUtils.sendSOAPMessage(soapMessage, URLHelper.getAsURL(MPConfig.getMEMAS4Endpoint()));
     LOG.debug("SOAP Message sent");
   }
 

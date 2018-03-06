@@ -17,6 +17,7 @@ package eu.toop.mp.r2d2client;
 
 import java.io.IOException;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
 import javax.annotation.Nonnull;
@@ -34,6 +35,7 @@ import com.helger.commons.collection.impl.CommonsHashSet;
 import com.helger.commons.collection.impl.ICommonsList;
 import com.helger.commons.collection.impl.ICommonsSet;
 import com.helger.commons.error.level.EErrorLevel;
+import com.helger.commons.io.stream.NonBlockingByteArrayInputStream;
 import com.helger.commons.string.StringHelper;
 import com.helger.commons.url.ISimpleURL;
 import com.helger.commons.url.SimpleURL;
@@ -53,6 +55,7 @@ import com.helger.peppol.identifier.generic.doctype.IDocumentTypeIdentifier;
 import com.helger.peppol.identifier.generic.participant.IParticipantIdentifier;
 import com.helger.peppol.identifier.generic.process.IProcessIdentifier;
 import com.helger.peppol.smpclient.exception.SMPClientException;
+import com.helger.security.certificate.CertificateHelper;
 
 import eu.toop.kafkaclient.ToopKafkaClient;
 import eu.toop.mp.api.MPConfig;
@@ -294,7 +297,14 @@ public class R2D2Client implements IR2D2Client
           for (final EndpointType aEP : aProcess.getServiceEndpointList ().getEndpoint ())
           {
             // Convert String to X509Certificate
-            final X509Certificate aCert = BDXRClientReadOnly.getEndpointCertificate (aEP);
+            X509Certificate aCert;
+            if (true)
+            {
+              final CertificateFactory aCertificateFactory = CertificateHelper.getX509CertificateFactory ();
+              aCert = (X509Certificate) aCertificateFactory.generateCertificate (new NonBlockingByteArrayInputStream (aEP.getCertificate ()));
+            }
+            else
+              aCert = BDXRClientReadOnly.getEndpointCertificate (aEP);
 
             // Convert to our data structure
             final R2D2Endpoint aDestEP = new R2D2Endpoint (aRecipientID,
