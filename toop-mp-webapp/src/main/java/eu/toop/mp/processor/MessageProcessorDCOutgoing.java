@@ -15,15 +15,11 @@
  */
 package eu.toop.mp.processor;
 
-import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 import javax.annotation.Nonnull;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.helger.asic.AsicUtils;
 import com.helger.commons.ValueEnforcer;
@@ -74,8 +70,6 @@ import eu.toop.mp.smmclient.SMMClient;
  * @author Philip Helger
  */
 public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton {
-  protected static final Logger s_aLogger = LoggerFactory.getLogger (MessageProcessorDCOutgoing.class);
-
   /**
    * The nested performer class that does the hard work.
    *
@@ -85,9 +79,10 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
     public void runAsync (@Nonnull final TDETOOPDataRequestType aCurrentObject) throws Exception {
       // This is the unique ID of this request message and must be used throughout the
       // whole process for identification
-      final String sRequestID = GlobalIDFactory.getNewPersistentStringID () + UUID.randomUUID ().toString ();
+      final String sRequestID = GlobalIDFactory.getNewPersistentStringID ();
       final String sLogPrefix = "[" + sRequestID + "] ";
 
+      ToopKafkaClient.send (EErrorLevel.INFO, () -> "Created new unique request ID [" + sRequestID + "]");
       ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "Received asynch request: " + aCurrentObject);
       // 1. invoke SMM
       {
@@ -158,7 +153,8 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
         if (StringHelper.hasNoText (sDestinationCountryCode))
           throw new IllegalStateException ("Failed to find destination country code to query!");
 
-        final ICommonsList<IR2D2Endpoint> aTotalEndpoints = new R2D2Client ().getEndpoints (sDestinationCountryCode,
+        final ICommonsList<IR2D2Endpoint> aTotalEndpoints = new R2D2Client ().getEndpoints (sLogPrefix,
+                                                                                            sDestinationCountryCode,
                                                                                             aDocTypeID, aProcessID);
 
         // Filter all endpoints with the corresponding transport profile
@@ -243,7 +239,7 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
       return ESuccess.SUCCESS;
     } catch (final IllegalStateException ex) {
       // Queue is stopped!
-      ToopKafkaClient.send (EErrorLevel.WARN, () -> "Cannot enqueue " + aMsg + ": " + ex.getMessage ());
+      ToopKafkaClient.send (EErrorLevel.WARN, () -> "Cannot enqueue " + aMsg, ex);
       return ESuccess.FAILURE;
     }
   }

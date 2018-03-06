@@ -24,8 +24,6 @@ import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 
 import org.apache.http.client.methods.HttpGet;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.Nonempty;
@@ -67,19 +65,24 @@ import eu.toop.mp.api.MPSettings;
  * @author Philip Helger, BRZ, AT
  */
 @Immutable
-public class R2D2Client implements IR2D2Client {
-  private static final Logger s_aLogger = LoggerFactory.getLogger (R2D2Client.class);
-
+public class R2D2Client implements IR2D2Client
+{
   @Nullable
-  private static IJsonObject _fetchJsonObject (@Nonnull final HttpClientManager aMgr,
-                                               @Nonnull final ISimpleURL aURL) throws IOException {
+  private static IJsonObject _fetchJsonObject (@Nonnull final String sLogPrefix,
+                                               @Nonnull final HttpClientManager aMgr,
+                                               @Nonnull final ISimpleURL aURL) throws IOException
+  {
     final HttpGet aGet = new HttpGet (aURL.getAsURI ());
     final ResponseHandlerJson aRH = new ResponseHandlerJson ();
     final IJson aJson = aMgr.execute (aGet, aRH);
     if (aJson != null && aJson.isObject ())
       return aJson.getAsObject ();
 
-    s_aLogger.error ("Failed to fetch " + aURL.getAsStringWithEncodedParameters () + " - stopping");
+    ToopKafkaClient.send (EErrorLevel.ERROR,
+                          () -> sLogPrefix +
+                                "Failed to fetch " +
+                                aURL.getAsStringWithEncodedParameters () +
+                                " - stopping");
     return null;
   }
 
@@ -87,43 +90,51 @@ public class R2D2Client implements IR2D2Client {
    * Query PEPPPOL Directory for all matching recipient IDs.
    *
    * @param sCountryCode
-   *          Country code to use. Must be a 2-digit string. May not be
-   *          <code>null</code>.
+   *        Country code to use. Must be a 2-digit string. May not be
+   *        <code>null</code>.
    * @param aDocumentTypeID
-   *          Document type ID to query. May not be <code>null</code>.
+   *        Document type ID to query. May not be <code>null</code>.
    * @return A non-<code>null</code> but maybe empty set of Participant IDs.
    */
   @Nonnull
-  private static ICommonsSet<IParticipantIdentifier> _getAllRecipientIDsFromDirectory (@Nonnull @Nonempty final String sCountryCode,
-                                                                                       @Nonnull final IDocumentTypeIdentifier aDocumentTypeID) {
-    final ICommonsSet<IParticipantIdentifier> ret = new CommonsHashSet<> ();
+  private static ICommonsSet <IParticipantIdentifier> _getAllRecipientIDsFromDirectory (@Nonnull final String sLogPrefix,
+                                                                                        @Nonnull @Nonempty final String sCountryCode,
+                                                                                        @Nonnull final IDocumentTypeIdentifier aDocumentTypeID)
+  {
+    final ICommonsSet <IParticipantIdentifier> ret = new CommonsHashSet <> ();
 
     final HttpClientFactory aHCFactory = new HttpClientFactory ();
     // For proxy etc
     aHCFactory.setUseSystemProperties (true);
 
-    try (final HttpClientManager aMgr = new HttpClientManager (aHCFactory)) {
+    try (final HttpClientManager aMgr = new HttpClientManager (aHCFactory))
+    {
       // Build base URL and fetch x records per HTTP request
       final int nMaxResultsPerPage = 100;
-      final SimpleURL aBaseURL = new SimpleURL (MPConfig.getR2D2DirectoryBaseUrl ()
-                                                + "/search/1.0/json").add ("doctype", aDocumentTypeID.getURIEncoded ())
-                                                                     .add ("country", sCountryCode)
-                                                                     .add ("rpc", nMaxResultsPerPage);
+      final SimpleURL aBaseURL = new SimpleURL (MPConfig.getR2D2DirectoryBaseUrl () +
+                                                "/search/1.0/json").add ("doctype", aDocumentTypeID.getURIEncoded ())
+                                                                   .add ("country", sCountryCode)
+                                                                   .add ("rpc", nMaxResultsPerPage);
 
       // Fetch first object
-      IJsonObject aResult = _fetchJsonObject (aMgr, aBaseURL);
-      if (aResult != null) {
+      IJsonObject aResult = _fetchJsonObject (sLogPrefix, aMgr, aBaseURL);
+      if (aResult != null)
+      {
         // Start querying results
         int nResultPageIndex = 0;
         int nLoops = 0;
-        while (true) {
+        while (true)
+        {
           int nMatchCount = 0;
           final IJsonArray aMatches = aResult.getAsArray ("matches");
-          if (aMatches != null) {
-            for (final IJson aMatch : aMatches) {
+          if (aMatches != null)
+          {
+            for (final IJson aMatch : aMatches)
+            {
               ++nMatchCount;
               final IJsonObject aID = aMatch.getAsObject ().getAsObject ("participantID");
-              if (aID != null) {
+              if (aID != null)
+              {
                 final String sScheme = aID.getAsString ("scheme");
                 final String sValue = aID.getAsString ("value");
                 final IParticipantIdentifier aPI = MPSettings.getIdentifierFactory ()
@@ -131,38 +142,56 @@ public class R2D2Client implements IR2D2Client {
                 if (aPI != null)
                   ret.add (aPI);
                 else
-                  s_aLogger.warn ("Failed to create participant identifier from '" + sScheme + "' and '" + sValue
-                                  + "'");
-              } else
-                s_aLogger.warn ("Match does not contain participant ID");
+                  ToopKafkaClient.send (EErrorLevel.WARN,
+                                        () -> sLogPrefix +
+                                              "Failed to create participant identifier from '" +
+                                              sScheme +
+                                              "' and '" +
+                                              sValue +
+                                              "'");
+              }
+              else
+                ToopKafkaClient.send (EErrorLevel.WARN, () -> sLogPrefix + "Match does not contain participant ID");
             }
-          } else
-            s_aLogger.warn ("JSON response contains no 'matches'");
+          }
+          else
+            ToopKafkaClient.send (EErrorLevel.WARN, () -> sLogPrefix + "JSON response contains no 'matches'");
 
-          if (nMatchCount < nMaxResultsPerPage) {
+          if (nMatchCount < nMaxResultsPerPage)
+          {
             // Got less results than expected - end of list
             break;
           }
 
-          if (++nLoops > 100) {
+          if (++nLoops > 100)
+          {
             // Avoid endless loop
-            s_aLogger.error ("Endless loop in PD fetching?");
+            ToopKafkaClient.send (EErrorLevel.ERROR, () -> sLogPrefix + "Endless loop in PD fetching?");
             break;
           }
 
           // Query next page
           nResultPageIndex++;
-          aResult = _fetchJsonObject (aMgr, aBaseURL.getClone ().add ("rpi", nResultPageIndex));
-          if (aResult == null) {
+          aResult = _fetchJsonObject (sLogPrefix, aMgr, aBaseURL.getClone ().add ("rpi", nResultPageIndex));
+          if (aResult == null)
+          {
             // Unexpected error - stop querying
             // Error was already logged
             break;
           }
         }
       }
-    } catch (final IOException ex) {
-      s_aLogger.warn ("Error querying PEPPOL Directory for matches (" + sCountryCode + ", "
-                      + aDocumentTypeID.getURIEncoded () + ")", ex);
+    }
+    catch (final IOException ex)
+    {
+      ToopKafkaClient.send (EErrorLevel.ERROR,
+                            () -> sLogPrefix +
+                                  "Error querying PEPPOL Directory for matches (" +
+                                  sCountryCode +
+                                  ", " +
+                                  aDocumentTypeID.getURIEncoded () +
+                                  ")",
+                            ex);
     }
 
     return ret;
@@ -170,31 +199,45 @@ public class R2D2Client implements IR2D2Client {
 
   @Nonnull
   @ReturnsMutableCopy
-  public ICommonsList<IR2D2Endpoint> getEndpoints (@Nonnull @Nonempty final String sCountryCode,
-                                                   @Nonnull final IDocumentTypeIdentifier aDocumentTypeID,
-                                                   @Nonnull final IProcessIdentifier aProcessID) {
+  public ICommonsList <IR2D2Endpoint> getEndpoints (@Nonnull final String sLogPrefix,
+                                                    @Nonnull @Nonempty final String sCountryCode,
+                                                    @Nonnull final IDocumentTypeIdentifier aDocumentTypeID,
+                                                    @Nonnull final IProcessIdentifier aProcessID)
+  {
     ValueEnforcer.notEmpty (sCountryCode, "CountryCode");
     ValueEnforcer.isTrue (sCountryCode.length () == 2, "CountryCode must have length 2");
     ValueEnforcer.notNull (aDocumentTypeID, "DocumentTypeID");
     ValueEnforcer.notNull (aProcessID, "ProcessID");
 
     ToopKafkaClient.send (EErrorLevel.INFO,
-                          () -> "MultiParticipant lookup (" + sCountryCode + ", " + aDocumentTypeID.getURIEncoded ()
-                                + ", " + aProcessID.getURIEncoded () + ")");
+                          () -> sLogPrefix +
+                                "MultiParticipant lookup (" +
+                                sCountryCode +
+                                ", " +
+                                aDocumentTypeID.getURIEncoded () +
+                                ", " +
+                                aProcessID.getURIEncoded () +
+                                ")");
 
-    final ICommonsList<IR2D2Endpoint> ret = new CommonsArrayList<> ();
+    final ICommonsList <IR2D2Endpoint> ret = new CommonsArrayList <> ();
 
     // Query PEPPOL Directory
-    final ICommonsSet<IParticipantIdentifier> aPIs = _getAllRecipientIDsFromDirectory (sCountryCode, aDocumentTypeID);
+    final ICommonsSet <IParticipantIdentifier> aPIs = _getAllRecipientIDsFromDirectory (sLogPrefix,
+                                                                                        sCountryCode,
+                                                                                        aDocumentTypeID);
 
     ToopKafkaClient.send (EErrorLevel.INFO,
-                          () -> "MultiParticipant lookup result[" + aPIs.size () + "]: "
-                                + StringHelper.getImplodedMapped (", ", aPIs, IParticipantIdentifier::getURIEncoded));
+                          () -> sLogPrefix +
+                                "MultiParticipant lookup result[" +
+                                aPIs.size () +
+                                "]: " +
+                                StringHelper.getImplodedMapped (", ", aPIs, IParticipantIdentifier::getURIEncoded));
 
     // For all matching IDs (if any)
-    for (final IParticipantIdentifier aPI : aPIs) {
+    for (final IParticipantIdentifier aPI : aPIs)
+    {
       // Single SMP query
-      final ICommonsList<IR2D2Endpoint> aLocal = getEndpoints (aPI, aDocumentTypeID, aProcessID);
+      final ICommonsList <IR2D2Endpoint> aLocal = getEndpoints (sLogPrefix, aPI, aDocumentTypeID, aProcessID);
       ret.addAll (aLocal);
     }
 
@@ -203,59 +246,89 @@ public class R2D2Client implements IR2D2Client {
 
   @Nonnull
   @ReturnsMutableCopy
-  public ICommonsList<IR2D2Endpoint> getEndpoints (@Nonnull final IParticipantIdentifier aRecipientID,
-                                                   @Nonnull final IDocumentTypeIdentifier aDocumentTypeID,
-                                                   @Nonnull final IProcessIdentifier aProcessID) {
+  public ICommonsList <IR2D2Endpoint> getEndpoints (@Nonnull final String sLogPrefix,
+                                                    @Nonnull final IParticipantIdentifier aRecipientID,
+                                                    @Nonnull final IDocumentTypeIdentifier aDocumentTypeID,
+                                                    @Nonnull final IProcessIdentifier aProcessID)
+  {
     ValueEnforcer.notNull (aRecipientID, "Recipient");
     ValueEnforcer.notNull (aDocumentTypeID, "DocumentTypeID");
     ValueEnforcer.notNull (aProcessID, "ProcessID");
 
     ToopKafkaClient.send (EErrorLevel.INFO,
-                          () -> "SMP lookup (" + aRecipientID.getURIEncoded () + ", " + aDocumentTypeID.getURIEncoded ()
-                                + ", " + aProcessID.getURIEncoded () + ")");
+                          () -> sLogPrefix +
+                                "SMP lookup (" +
+                                aRecipientID.getURIEncoded () +
+                                ", " +
+                                aDocumentTypeID.getURIEncoded () +
+                                ", " +
+                                aProcessID.getURIEncoded () +
+                                ")");
 
-    final ICommonsList<IR2D2Endpoint> ret = new CommonsArrayList<> ();
+    final ICommonsList <IR2D2Endpoint> ret = new CommonsArrayList <> ();
     BDXRClient aSMPClient;
-    if (MPConfig.isR2D2UseDNS ()) {
+    if (MPConfig.isR2D2UseDNS ())
+    {
       // Use dynamic lookup via DNS
       aSMPClient = new BDXRClient (MPSettings.getSMPUrlProvider (), aRecipientID, MPConfig.getR2D2SML ());
-    } else {
+    }
+    else
+    {
       // Use a constant SMP URL
       aSMPClient = new BDXRClient (MPConfig.getR2D2SMPUrl ());
     }
-    try {
+    try
+    {
       // Query SMP
       final SignedServiceMetadataType aSG = aSMPClient.getServiceRegistration (aRecipientID, aDocumentTypeID);
       final ServiceInformationType aSI = aSG.getServiceMetadata ().getServiceInformation ();
-      if (aSI != null) {
+      if (aSI != null)
+      {
         // Find the first process that matches (should be only one!)
         final ProcessType aProcess = CollectionHelper.findFirst (aSI.getProcessList ().getProcess (),
                                                                  x -> x.getProcessIdentifier ()
                                                                        .hasSameContent (aProcessID));
-        if (aProcess != null) {
+        if (aProcess != null)
+        {
           // Add all endpoints to the result list
-          for (final EndpointType aEP : aProcess.getServiceEndpointList ().getEndpoint ()) {
+          for (final EndpointType aEP : aProcess.getServiceEndpointList ().getEndpoint ())
+          {
             // Convert String to X509Certificate
             final X509Certificate aCert = BDXRClientReadOnly.getEndpointCertificate (aEP);
 
             // Convert to our data structure
-            final R2D2Endpoint aDestEP = new R2D2Endpoint (aRecipientID, aEP.getTransportProfile (),
-                                                           aEP.getEndpointURI (), aCert);
+            final R2D2Endpoint aDestEP = new R2D2Endpoint (aRecipientID,
+                                                           aEP.getTransportProfile (),
+                                                           aEP.getEndpointURI (),
+                                                           aCert);
             ret.add (aDestEP);
 
-            ToopKafkaClient.send (EErrorLevel.INFO, () -> "SMP lookup result: " + aEP.getTransportProfile () + ", "
-                                                          + aEP.getEndpointURI ());
+            ToopKafkaClient.send (EErrorLevel.INFO,
+                                  () -> sLogPrefix +
+                                        "SMP lookup result: " +
+                                        aEP.getTransportProfile () +
+                                        ", " +
+                                        aEP.getEndpointURI ());
           }
         }
-      } else {
-        // else redirect
-        ToopKafkaClient.send (EErrorLevel.INFO, "SMP lookup result: maybe a redirect?");
       }
-    } catch (final CertificateException | SMPClientException ex) {
+      else
+      {
+        // else redirect
+        ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "SMP lookup result: maybe a redirect?");
+      }
+    }
+    catch (final CertificateException | SMPClientException ex)
+    {
       ToopKafkaClient.send (EErrorLevel.ERROR,
-                            () -> "Error fetching SMP endpoint " + aRecipientID.getURIEncoded () + "/"
-                                  + aDocumentTypeID.getURIEncoded () + "/" + aProcessID.getURIEncoded () + ": "
-                                  + ex.getMessage ());
+                            () -> sLogPrefix +
+                                  "Error fetching SMP endpoint " +
+                                  aRecipientID.getURIEncoded () +
+                                  "/" +
+                                  aDocumentTypeID.getURIEncoded () +
+                                  "/" +
+                                  aProcessID.getURIEncoded (),
+                            ex);
     }
     return ret;
   }

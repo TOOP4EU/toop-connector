@@ -21,15 +21,13 @@ import java.util.concurrent.ThreadFactory;
 
 import javax.annotation.Nonnull;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.UsedViaReflection;
 import com.helger.commons.concurrent.BasicThreadFactory;
 import com.helger.commons.concurrent.ExecutorServiceHelper;
 import com.helger.commons.concurrent.collector.ConcurrentCollectorSingle;
 import com.helger.commons.concurrent.collector.IConcurrentPerformer;
+import com.helger.commons.error.level.EErrorLevel;
 import com.helger.commons.state.ESuccess;
 import com.helger.scope.IScope;
 import com.helger.web.scope.singleton.AbstractGlobalWebSingleton;
@@ -39,6 +37,7 @@ import eu.toop.commons.dataexchange.TDEConceptRequestType;
 import eu.toop.commons.dataexchange.TDEDataElementRequestType;
 import eu.toop.commons.dataexchange.TDETOOPDataRequestType;
 import eu.toop.commons.jaxb.ToopXSDHelper;
+import eu.toop.kafkaclient.ToopKafkaClient;
 import eu.toop.mp.api.CMP;
 import eu.toop.mp.smmclient.IMappedValueList;
 import eu.toop.mp.smmclient.MappedValue;
@@ -52,8 +51,6 @@ import eu.toop.mp.smmclient.SMMClient;
  * @author Philip Helger
  */
 public final class MessageProcessorDPIncoming extends AbstractGlobalWebSingleton {
-  protected static final Logger s_aLogger = LoggerFactory.getLogger (MessageProcessorDPIncoming.class);
-
   /**
    * The nested performer class that does the hard work.
    *
@@ -63,7 +60,7 @@ public final class MessageProcessorDPIncoming extends AbstractGlobalWebSingleton
     public void runAsync (@Nonnull final TDETOOPDataRequestType aCurrentObject) throws Exception {
       final String sRequestID = aCurrentObject.getDataRequestIdentifier ().getValue ();
       final String sLogPrefix = "[" + sRequestID + "] ";
-      s_aLogger.info (sLogPrefix + "Received asynch request: " + aCurrentObject);
+      ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "Received asynch request: " + aCurrentObject);
 
       // Map to DP concepts
       {
@@ -159,7 +156,7 @@ public final class MessageProcessorDPIncoming extends AbstractGlobalWebSingleton
       return ESuccess.SUCCESS;
     } catch (final IllegalStateException ex) {
       // Queue is stopped!
-      s_aLogger.warn ("Cannot enqueue: " + ex.getMessage ());
+      ToopKafkaClient.send (EErrorLevel.WARN, () -> "Cannot enqueue " + aMsg, ex);
       return ESuccess.FAILURE;
     }
   }

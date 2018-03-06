@@ -21,9 +21,6 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.NotThreadSafe;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.Nonempty;
 import com.helger.commons.annotation.ReturnsMutableCopy;
@@ -38,8 +35,6 @@ import eu.toop.kafkaclient.ToopKafkaClient;
 
 @NotThreadSafe
 public class SMMClient {
-  private static final Logger s_aLogger = LoggerFactory.getLogger (SMMClient.class);
-
   private final ICommonsMap<String, ICommonsList<String>> m_aSrcMap = new CommonsHashMap<> ();
 
   public SMMClient () {
@@ -121,7 +116,8 @@ public class SMMClient {
       } else {
         // Namespace are different - get the mapping list
         // This eventually performs a remote call!
-        final MappedValueList aValueList = SMMConceptCache.getAllMappedValues (sSourceNamespace, sDestNamespace);
+        final MappedValueList aValueList = SMMConceptCache.getAllMappedValues (sLogPrefix, sSourceNamespace,
+                                                                               sDestNamespace);
 
         // Map all source values
         for (final String sSourceValue : aEntry.getValue ()) {
@@ -129,13 +125,17 @@ public class SMMClient {
           final MappedValueList aMatching = aValueList.getAllBySource (x -> x.hasValue (sSourceValue));
           if (aMatching.isEmpty ()) {
             // Found no mapping
-            s_aLogger.info (sLogPrefix + "Found no mapping for '" + sSourceNamespace + '#' + sSourceValue
-                            + "' to destination namespace '" + sDestNamespace + "'");
+            ToopKafkaClient.send (EErrorLevel.INFO,
+                                  () -> sLogPrefix + "Found no mapping for '" + sSourceNamespace + '#' + sSourceValue
+                                        + "' to destination namespace '" + sDestNamespace + "'");
             // TODO shall we add a mapping to null?
           } else {
-            if (aMatching.size () > 1)
-              s_aLogger.warn (sLogPrefix + "Found " + aMatching.size () + " mappings for '" + sSourceNamespace + '#'
-                              + sSourceValue + "' to destination namespace '" + sDestNamespace + "'");
+            if (aMatching.size () > 1) {
+              ToopKafkaClient.send (EErrorLevel.WARN,
+                                    () -> sLogPrefix + "Found " + aMatching.size () + " mappings for '"
+                                          + sSourceNamespace + '#' + sSourceValue + "' to destination namespace '"
+                                          + sDestNamespace + "'");
+            }
             ret.addAllMappedValues (aMatching);
           }
         }

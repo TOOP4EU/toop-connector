@@ -21,20 +21,19 @@ import java.util.concurrent.ThreadFactory;
 
 import javax.annotation.Nonnull;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.UsedViaReflection;
 import com.helger.commons.concurrent.BasicThreadFactory;
 import com.helger.commons.concurrent.ExecutorServiceHelper;
 import com.helger.commons.concurrent.collector.ConcurrentCollectorSingle;
 import com.helger.commons.concurrent.collector.IConcurrentPerformer;
+import com.helger.commons.error.level.EErrorLevel;
 import com.helger.commons.state.ESuccess;
 import com.helger.scope.IScope;
 import com.helger.web.scope.singleton.AbstractGlobalWebSingleton;
 
 import eu.toop.commons.dataexchange.TDETOOPDataResponseType;
+import eu.toop.kafkaclient.ToopKafkaClient;
 
 /**
  * The global message processor that handles DP to DC (= DC incoming) requests
@@ -44,8 +43,6 @@ import eu.toop.commons.dataexchange.TDETOOPDataResponseType;
  * @author Philip Helger
  */
 public final class MessageProcessorDCIncoming extends AbstractGlobalWebSingleton {
-  protected static final Logger s_aLogger = LoggerFactory.getLogger (MessageProcessorDCIncoming.class);
-
   /**
    * The nested performer class that does the hard work.
    *
@@ -55,7 +52,7 @@ public final class MessageProcessorDCIncoming extends AbstractGlobalWebSingleton
     public void runAsync (@Nonnull final TDETOOPDataResponseType aCurrentObject) throws Exception {
       final String sRequestID = aCurrentObject.getDataRequestIdentifier ().getValue ();
       final String sLogPrefix = "[" + sRequestID + "] ";
-      s_aLogger.info (sLogPrefix + "Received asynch request: " + aCurrentObject);
+      ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "Received asynch request: " + aCurrentObject);
 
       // TODO forward to toop-interface DC input
     }
@@ -109,7 +106,7 @@ public final class MessageProcessorDCIncoming extends AbstractGlobalWebSingleton
       return ESuccess.SUCCESS;
     } catch (final IllegalStateException ex) {
       // Queue is stopped!
-      s_aLogger.warn ("Cannot enqueue: " + ex.getMessage ());
+      ToopKafkaClient.send (EErrorLevel.WARN, () -> "Cannot enqueue " + aMsg, ex);
       return ESuccess.FAILURE;
     }
   }

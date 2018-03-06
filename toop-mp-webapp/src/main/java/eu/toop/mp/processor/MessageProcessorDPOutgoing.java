@@ -21,9 +21,6 @@ import java.util.concurrent.ThreadFactory;
 
 import javax.annotation.Nonnull;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.helger.asic.AsicUtils;
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.UsedViaReflection;
@@ -32,6 +29,7 @@ import com.helger.commons.concurrent.BasicThreadFactory;
 import com.helger.commons.concurrent.ExecutorServiceHelper;
 import com.helger.commons.concurrent.collector.ConcurrentCollectorSingle;
 import com.helger.commons.concurrent.collector.IConcurrentPerformer;
+import com.helger.commons.error.level.EErrorLevel;
 import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 import com.helger.commons.state.ESuccess;
 import com.helger.peppol.identifier.generic.doctype.IDocumentTypeIdentifier;
@@ -42,6 +40,7 @@ import com.helger.web.scope.singleton.AbstractGlobalWebSingleton;
 
 import eu.toop.commons.dataexchange.TDETOOPDataResponseType;
 import eu.toop.commons.exchange.ToopMessageBuilder;
+import eu.toop.kafkaclient.ToopKafkaClient;
 import eu.toop.mp.api.MPConfig;
 import eu.toop.mp.api.MPSettings;
 import eu.toop.mp.me.GatewayRoutingMetadata;
@@ -59,8 +58,6 @@ import eu.toop.mp.r2d2client.R2D2Client;
  * @author Philip Helger
  */
 public final class MessageProcessorDPOutgoing extends AbstractGlobalWebSingleton {
-  protected static final Logger s_aLogger = LoggerFactory.getLogger (MessageProcessorDPOutgoing.class);
-
   /**
    * The nested performer class that does the hard work.
    *
@@ -70,7 +67,7 @@ public final class MessageProcessorDPOutgoing extends AbstractGlobalWebSingleton
     public void runAsync (@Nonnull final TDETOOPDataResponseType aCurrentObject) throws Exception {
       final String sRequestID = aCurrentObject.getDataRequestIdentifier ().getValue ();
       final String sLogPrefix = "[" + sRequestID + "] ";
-      s_aLogger.info (sLogPrefix + "Received asynch request: " + aCurrentObject);
+      ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "Received asynch request: " + aCurrentObject);
 
       // 1. invoke SMM
       {
@@ -99,15 +96,17 @@ public final class MessageProcessorDPOutgoing extends AbstractGlobalWebSingleton
                                                                                                  aCurrentObject.getDataConsumer ()
                                                                                                                .getDCElectronicAddressIdentifier ()
                                                                                                                .getValue ());
-        final ICommonsList<IR2D2Endpoint> aTotalEndpoints = new R2D2Client ().getEndpoints (aOriginalSenderID,
+        final ICommonsList<IR2D2Endpoint> aTotalEndpoints = new R2D2Client ().getEndpoints (sLogPrefix,
+                                                                                            aOriginalSenderID,
                                                                                             aDocTypeID, aProcessID);
 
         // Filter all endpoints with the corresponding transport profile
         final String sTransportProfileID = MPConfig.getMEMProtocol ().getTransportProfileID ();
         aEndpoints = aTotalEndpoints.getAll (x -> x.getTransportProtocol ().equals (sTransportProfileID));
 
-        s_aLogger.info (sLogPrefix + "R2D2 found the following endpoints[" + aEndpoints.size () + "/"
-                        + aTotalEndpoints.size () + "]: " + aEndpoints);
+        ToopKafkaClient.send (EErrorLevel.INFO,
+                              () -> sLogPrefix + "R2D2 found the following endpoints[" + aEndpoints.size () + "/"
+                                    + aTotalEndpoints.size () + "]: " + aEndpoints);
       }
 
       // 3. start message exchange to DC
@@ -186,7 +185,7 @@ public final class MessageProcessorDPOutgoing extends AbstractGlobalWebSingleton
       return ESuccess.SUCCESS;
     } catch (final IllegalStateException ex) {
       // Queue is stopped!
-      s_aLogger.warn ("Cannot enqueue: " + ex.getMessage ());
+      ToopKafkaClient.send (EErrorLevel.WARN, () -> "Cannot enqueue " + aMsg, ex);
       return ESuccess.FAILURE;
     }
   }

@@ -81,6 +81,8 @@ public final class SMMConceptCache {
    * Get all mapped values from source to target namespace. If not present (in
    * cache) it is retrieved from the remote server.
    *
+   * @param sLogPrefix
+   *          Log prefix. May not be <code>null</code> but may be empty.
    * @param sSourceNamespace
    *          Source namespace to map from. May neither be <code>null</code> nor
    *          empty.
@@ -92,7 +94,8 @@ public final class SMMConceptCache {
    *           In case fetching from server failed
    */
   @Nonnull
-  public static MappedValueList getAllMappedValues (@Nonnull @Nonempty final String sSourceNamespace,
+  public static MappedValueList getAllMappedValues (@Nonnull final String sLogPrefix,
+                                                    @Nonnull @Nonempty final String sSourceNamespace,
                                                     @Nonnull @Nonempty final String sDestNamespace) throws IOException {
     ValueEnforcer.notNull (sSourceNamespace, "SourceNamespace");
     ValueEnforcer.notNull (sDestNamespace, "DestNamespace");
@@ -107,7 +110,7 @@ public final class SMMConceptCache {
         ret = _getFromCache (sSourceNamespace, sDestNamespace);
         if (ret == null) {
           // Not in cache - query from server and put in cache
-          ret = remoteQueryAllMappedValues (sSourceNamespace, sDestNamespace);
+          ret = remoteQueryAllMappedValues (sLogPrefix, sSourceNamespace, sDestNamespace);
           s_aCache.computeIfAbsent (sSourceNamespace, k -> new CommonsHashMap<> ()).put (sDestNamespace, ret);
 
           // Put in the map the other way around as well (inference)
@@ -161,6 +164,8 @@ public final class SMMConceptCache {
    * This method unconditionally executes a remote request to retrieve all
    * mappings from source namespace to target namespace.
    *
+   * @param sLogPrefix
+   *          Log prefix. May not be <code>null</code> but may be empty.
    * @param sSourceNamespace
    *          Source namespace. May neither be <code>null</code> nor empty.
    * @param sDestNamespace
@@ -170,13 +175,14 @@ public final class SMMConceptCache {
    *           In case the HTTP connection has a problem
    */
   @Nonnull
-  public static MappedValueList remoteQueryAllMappedValues (@Nonnull @Nonempty final String sSourceNamespace,
+  public static MappedValueList remoteQueryAllMappedValues (@Nonnull final String sLogPrefix,
+                                                            @Nonnull @Nonempty final String sSourceNamespace,
                                                             @Nonnull @Nonempty final String sDestNamespace) throws IOException {
     ValueEnforcer.notEmpty (sSourceNamespace, "SourceNamespace");
     ValueEnforcer.notEmpty (sDestNamespace, "DestinationNamespace");
 
-    ToopKafkaClient.send (EErrorLevel.INFO, () -> "Remote querying SMM mappings from '" + sSourceNamespace + "' to '"
-                                                  + sDestNamespace + "'");
+    ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "Remote querying SMM mappings from '" + sSourceNamespace
+                                                  + "' to '" + sDestNamespace + "'");
 
     // Build URL with params etc.
     String sBaseURL = MPConfig.getSMMGRLCURL ();
@@ -219,7 +225,8 @@ public final class SMMConceptCache {
       }
     });
 
-    ToopKafkaClient.send (EErrorLevel.INFO, () -> "SMM remote call returned " + ret.size () + " mapped values");
+    ToopKafkaClient.send (EErrorLevel.INFO,
+                          () -> sLogPrefix + "SMM remote call returned " + ret.size () + " mapped values");
 
     return ret;
   }
