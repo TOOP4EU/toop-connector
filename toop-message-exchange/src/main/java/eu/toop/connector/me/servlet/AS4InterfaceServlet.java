@@ -9,13 +9,7 @@
 package eu.toop.connector.me.servlet;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.WritableByteChannel;
 import java.util.Enumeration;
 
 import javax.servlet.ServletException;
@@ -24,14 +18,13 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.soap.MimeHeaders;
-import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.toop.connector.api.TCConfig;
+import com.helger.commons.io.stream.StreamHelper;
+
 import eu.toop.connector.me.EBMSUtils;
 import eu.toop.connector.me.MEMDelegate;
 import eu.toop.connector.me.SoapUtil;
@@ -41,18 +34,12 @@ import eu.toop.connector.me.SoapXPathUtil;
  * @author: myildiz
  * @date: 15.02.2018.
  */
-@WebServlet("/as4Interface")
+@WebServlet("/from-as4")
 public class AS4InterfaceServlet extends HttpServlet {
 
   private static final Logger LOG = LoggerFactory.getLogger(AS4InterfaceServlet.class);
 
-  @Override
-  protected void doGet(final HttpServletRequest req,
-      final HttpServletResponse resp) throws ServletException, IOException {
-
-    resp.setStatus(HttpServletResponse.SC_OK);
-    resp.getOutputStream().println(TCConfig.getMEMAS4FromPartyID() + ": Please use POST");
-  }
+  // No need to overwrite doGet - returns HTTP 405 by default
 
   @Override
   protected void doPost(final HttpServletRequest req,
@@ -68,9 +55,10 @@ public class AS4InterfaceServlet extends HttpServlet {
 
     SOAPMessage receivedMessage = null;
     try {
-      byte[] bytes = IOUtils.toByteArray(req.getInputStream());
+      final byte[] bytes = StreamHelper.getAllBytes (req.getInputStream());
 
-      LOG.debug("Read inbound message");
+      if (LOG.isDebugEnabled ())
+        LOG.debug("Read inbound message");
       //Todo, remove buffering later
       receivedMessage = SoapUtil.createMessage(mimeHeaders, new ByteArrayInputStream(bytes));
 
@@ -81,7 +69,7 @@ public class AS4InterfaceServlet extends HttpServlet {
       }
 
       //get the action from the soap message
-      String action = SoapXPathUtil
+      final String action = SoapXPathUtil
           .safeFindSingleNode(receivedMessage.getSOAPHeader(), "//:CollaborationInfo/:Action").getTextContent();
 
 
@@ -98,29 +86,38 @@ public class AS4InterfaceServlet extends HttpServlet {
           throw new UnsupportedOperationException("Action " + action + " is not supported");
       }
 
-      LOG.debug("Create success receipt");
+      if (LOG.isDebugEnabled ())
+        LOG.debug("Create success receipt");
       final byte[] successReceipt = EBMSUtils.createSuccessReceipt(receivedMessage);
 
-      LOG.debug("Send success receipt");
+      if (LOG.isDebugEnabled ())
+        LOG.debug("Send success receipt");
       resp.setStatus(HttpServletResponse.SC_OK);
-      IOUtils.write(successReceipt, resp.getOutputStream());
+      resp.getOutputStream().write (successReceipt);
+      resp.getOutputStream().flush ();
     } catch (final Throwable th) {
       LOG.error("Failed to process incoming AS4 message", th);
-      LOG.debug("Create fault");
-      byte[] fault = EBMSUtils.createFault(receivedMessage, th.getMessage());
-      LOG.debug("Write fault to the stream");
+      if (LOG.isDebugEnabled ())
+        LOG.debug("Create fault");
+      final byte[] fault = EBMSUtils.createFault(receivedMessage, th.getMessage());
+      if (LOG.isDebugEnabled ())
+        LOG.debug("Write fault to the stream");
       resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-      IOUtils.write(fault, resp.getOutputStream());
+      resp.getOutputStream().write (fault);
+      resp.getOutputStream().flush ();
     }
   }
 
-  private void processNotification(SOAPMessage receivedMessage) {
-    LOG.debug("Received notification");
-    LOG.debug(SoapUtil.describe(receivedMessage));
+  private void processNotification(final SOAPMessage receivedMessage) {
+    if (LOG.isDebugEnabled ()) {
+      LOG.debug("Received notification");
+      LOG.debug(SoapUtil.describe(receivedMessage));
+    }
   }
 
-  private void processDelivery(SOAPMessage receivedMessage) {
-    LOG.debug("Dispatch inbound message");
+  private void processDelivery(final SOAPMessage receivedMessage) {
+    if (LOG.isDebugEnabled ())
+      LOG.debug("Dispatch inbound message");
     MEMDelegate.getInstance().dispatchInboundMessage(receivedMessage);
   }
 
@@ -129,8 +126,9 @@ public class AS4InterfaceServlet extends HttpServlet {
     final Enumeration<String> headerNames = req.getHeaderNames();
     while (headerNames.hasMoreElements()) {
       final String header = headerNames.nextElement();
-      String reqHeader = req.getHeader(header);
-      LOG.debug("HEADER " + header + " " + reqHeader);
+      final String reqHeader = req.getHeader(header);
+      if (LOG.isDebugEnabled ())
+        LOG.debug("HEADER " + header + " " + reqHeader);
       mimeHeaders.addHeader(header, reqHeader);
     }
     return mimeHeaders;
