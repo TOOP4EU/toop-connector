@@ -50,7 +50,7 @@ import eu.toop.kafkaclient.ToopKafkaClient;
  * @author Philip Helger
  */
 @WebServlet ("/from-dc")
-public class DCInputServlet extends HttpServlet {
+public class FromDCServlet extends HttpServlet {
   /**
    * This is a demo method to easily send an MSDataRequest to itself. Invoke with
    * <code>http://localhost:8090/from-dc?demo</code>. This method must be disabled

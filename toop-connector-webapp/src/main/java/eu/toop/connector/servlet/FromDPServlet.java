@@ -41,7 +41,7 @@ import eu.toop.kafkaclient.ToopKafkaClient;
  * @author Philip Helger
  */
 @WebServlet ("/from-dp")
-public class DPInputServlet extends HttpServlet {
+public class FromDPServlet extends HttpServlet {
   @Override
   protected void doPost (final HttpServletRequest aHttpServletRequest,
                          final HttpServletResponse aHttpServletResponse) throws ServletException, IOException {
