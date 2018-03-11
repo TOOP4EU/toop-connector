@@ -17,49 +17,49 @@
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>eu.toop</groupId>
-		<artifactId>toop-connector-parent-pom</artifactId>
-		<version>1.0.0-SNAPSHOT</version>
-	</parent>
-	<artifactId>toop-smm-client</artifactId>
-	<packaging>bundle</packaging>
-	<name>toop-smm-client</name>
-	<description>Contains the TOOP Semantic Mapping Module client</description>
-	<url>https://github.com/toop4eu/toop-connector/toop-smm-client</url>
-	<inceptionYear>2018</inceptionYear>
-	<licenses>
-		<license>
-			<name>Apache 2</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0</url>
-			<distribution>repo</distribution>
-		</license>
-	</licenses>
-	<organization>
-		<name>toop.eu</name>
-		<url>http://www.toop.eu</url>
-	</organization>
-	<developers>
-		<developer>
-			<id>philip</id>
-			<name>Philip Helger</name>
-			<email>ph(at)helger.com</email>
-		</developer>
-		<developer>
-			<id>verhoosel</id>
-			<name>Jack Verhoosel</name>
-			<email>jack.verhoosel(at)tno.nl</email>
-		</developer>
-		<developer>
-			<id>nouwt</id>
-			<name>Barry Nouwt</name>
-			<email>barry.nouwt(at)tno.nl</email>
-			<url>http://www.tno.nl</url>
-		</developer>
-	</developers>
-	<dependencies>
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>eu.toop</groupId>
+    <artifactId>toop-connector-parent-pom</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+  </parent>
+  <artifactId>toop-smm-client</artifactId>
+  <packaging>bundle</packaging>
+  <name>toop-smm-client</name>
+  <description>Contains the TOOP Semantic Mapping Module client</description>
+  <url>https://github.com/toop4eu/toop-connector/toop-smm-client</url>
+  <inceptionYear>2018</inceptionYear>
+  <licenses>
+    <license>
+      <name>Apache 2</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <organization>
+    <name>toop.eu</name>
+    <url>http://www.toop.eu</url>
+  </organization>
+  <developers>
+    <developer>
+      <id>philip</id>
+      <name>Philip Helger</name>
+      <email>ph(at)helger.com</email>
+    </developer>
+    <developer>
+      <id>verhoosel</id>
+      <name>Jack Verhoosel</name>
+      <email>jack.verhoosel(at)tno.nl</email>
+    </developer>
+    <developer>
+      <id>nouwt</id>
+      <name>Barry Nouwt</name>
+      <email>barry.nouwt(at)tno.nl</email>
+      <url>http://www.tno.nl</url>
+    </developer>
+  </developers>
+  <dependencies>
     <dependency>
       <groupId>com.helger</groupId>
       <artifactId>ph-commons</artifactId>
@@ -81,25 +81,25 @@
       <artifactId>toop-connector-api</artifactId>
     </dependency>
 		<!-- Test only -->
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-simple</artifactId>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<configuration>
-					<instructions>
-						<Automatic-Module-Name>eu.toop.mp.smmclient</Automatic-Module-Name>
-						<Export-Package>eu.toop.mp.smmclient.*</Export-Package>
-						<Import-Package>!javax.annotation.*,*</Import-Package>
-					</instructions>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <configuration>
+          <instructions>
+            <Automatic-Module-Name>eu.toop.connector.smmclient</Automatic-Module-Name>
+            <Export-Package>eu.toop.connector.smmclient.*</Export-Package>
+            <Import-Package>!javax.annotation.*,*</Import-Package>
+          </instructions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>
