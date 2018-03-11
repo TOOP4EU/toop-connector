@@ -13,22 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package eu.toop.mp.api;
+package eu.toop.connector.api;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Test;
 
+import eu.toop.connector.api.TCSettings;
+
 /**
- * Test class for class {@link MPSettings}.
+ * Test class for class {@link TCSettings}.
  *
  * @author Philip Helger
  *
  */
-public final class MPSettingsTest {
+public final class TCSettingsTest {
   @Test
   public void testBasic () {
-    assertNotNull (MPSettings.getIdentifierFactory ());
-    assertNotNull (MPSettings.getSMPUrlProvider ());
+    assertNotNull (TCSettings.getIdentifierFactory ());
+    assertNotNull (TCSettings.getSMPUrlProvider ());
   }
 }

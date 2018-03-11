@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package eu.toop.mp.api;
+package eu.toop.connector.api;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -28,19 +28,19 @@ import com.helger.peppol.smp.ESMPTransportProfile;
  *
  * @author Philip Helger
  */
-public enum EMPProtocol implements IHasID<String> {
+public enum ETCProtocol implements IHasID<String> {
   /**
    * AS4 using the common transport profile introduced by eSENS
    */
   AS4 ("as4", ESMPTransportProfile.TRANSPORT_PROFILE_BDXR_AS4.getID ());
 
-  public static final EMPProtocol DEFAULT = AS4;
+  public static final ETCProtocol DEFAULT = AS4;
 
   private final String m_sID;
 
   private String m_sTransportProfileID;
 
-  private EMPProtocol (@Nonnull @Nonempty final String sID, @Nonnull @Nonempty final String sTransportProfileID) {
+  private ETCProtocol (@Nonnull @Nonempty final String sID, @Nonnull @Nonempty final String sTransportProfileID) {
     m_sID = sID;
     m_sTransportProfileID = sTransportProfileID;
   }
@@ -62,7 +62,7 @@ public enum EMPProtocol implements IHasID<String> {
   }
 
   @Nullable
-  public static EMPProtocol getFromIDOrNull (@Nullable final String sID) {
-    return EnumHelper.getFromIDOrNull (EMPProtocol.class, sID);
+  public static ETCProtocol getFromIDOrNull (@Nullable final String sID) {
+    return EnumHelper.getFromIDOrNull (ETCProtocol.class, sID);
   }
 }

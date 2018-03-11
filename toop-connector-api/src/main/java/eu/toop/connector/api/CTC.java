@@ -1,11 +1,11 @@
-package eu.toop.mp.api;
+package eu.toop.connector.api;
 
 import javax.annotation.concurrent.Immutable;
 
 @Immutable
-public final class CMP {
+public final class CTC {
   public static final String NS_FREEDONIA = "http://example.register.fre/freedonia-business-register";
 
-  private CMP () {
+  private CTC () {
   }
 }

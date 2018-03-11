@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package eu.toop.mp.api;
+package eu.toop.connector.api;
 
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
@@ -24,13 +24,13 @@ import com.helger.peppol.url.EsensURLProvider;
 import com.helger.peppol.url.IPeppolURLProvider;
 
 /**
- * This class contains global settings for the MessageProcessor.
+ * This class contains global settings for the TOOP Connector.
  *
  * @author Philip Helger, BRZ, AT
  */
 @Immutable
-public final class MPSettings {
-  private MPSettings () {
+public final class TCSettings {
+  private TCSettings () {
   }
 
   @Nonnull

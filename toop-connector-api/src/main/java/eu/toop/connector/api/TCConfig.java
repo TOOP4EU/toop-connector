@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package eu.toop.mp.api;
+package eu.toop.connector.api;
 
 import java.net.URI;
 
@@ -37,13 +37,13 @@ import com.helger.settings.exchange.configfile.ConfigFile;
 import com.helger.settings.exchange.configfile.ConfigFileBuilder;
 
 /**
- * This class contains global configuration elements for the MessageProcessor.
+ * This class contains global configuration elements for the TOOP COnnector.
  *
  * @author Philip Helger, BRZ, AT
  */
 @Immutable
-public final class MPConfig {
-  private static final Logger s_aLogger = LoggerFactory.getLogger (MPConfig.class);
+public final class TCConfig {
+  private static final Logger s_aLogger = LoggerFactory.getLogger (TCConfig.class);
   private static final SimpleReadWriteLock s_aRWLock = new SimpleReadWriteLock ();
   @GuardedBy ("s_aRWLock")
   private static ConfigFile s_aConfigFile;
@@ -54,31 +54,31 @@ public final class MPConfig {
 
   /**
    * The name of the primary system property which points to the
-   * <code>message-processor.properties</code> files
+   * <code>toop-connector.properties</code> files
    */
-  public static final String SYSTEM_PROPERTY_TOOP_MP_SERVER_PROPERTIES_PATH = "toop.mp.server.properties.path";
+  public static final String SYSTEM_PROPERTY_TOOP_CONNECTOR_SERVER_PROPERTIES_PATH = "toop.connector.server.properties.path";
 
   /** The default primary properties file to load */
-  public static final String PATH_PRIVATE_MESSAGE_PROCESSOR_PROPERTIES = "private-message-processor.properties";
+  public static final String PATH_PRIVATE_TOOP_CONNECTOR_PROPERTIES = "private-toop-connector.properties";
   /** The default secondary properties file to load */
-  public static final String PATH_MESSAGE_PROCESSOR_PROPERTIES = "message-processor.properties";
+  public static final String PATH_TOOP_CONNECTOR_PROPERTIES = "toop-connector.properties";
 
   private static ISMLInfo s_aCachedSMLInfo;
 
   /**
    * Reload the configuration file. It checks if the system property
-   * {@link #SYSTEM_PROPERTY_TOOP_MP_SERVER_PROPERTIES_PATH} is present and if so,
-   * tries it first, than {@link #PATH_PRIVATE_MESSAGE_PROCESSOR_PROPERTIES} is
-   * checked and finally the {@link #PATH_MESSAGE_PROCESSOR_PROPERTIES} path is
+   * {@link #SYSTEM_PROPERTY_TOOP_CONNECTOR_SERVER_PROPERTIES_PATH} is present and
+   * if so, tries it first, than {@link #PATH_PRIVATE_TOOP_CONNECTOR_PROPERTIES}
+   * is checked and finally the {@link #PATH_TOOP_CONNECTOR_PROPERTIES} path is
    * checked.
    *
    * @return {@link ESuccess}
    */
   @Nonnull
   public static ESuccess reloadConfiguration () {
-    final ConfigFileBuilder aCFB = new ConfigFileBuilder ().addPathFromSystemProperty (SYSTEM_PROPERTY_TOOP_MP_SERVER_PROPERTIES_PATH)
-                                                           .addPath (PATH_PRIVATE_MESSAGE_PROCESSOR_PROPERTIES)
-                                                           .addPath (PATH_MESSAGE_PROCESSOR_PROPERTIES);
+    final ConfigFileBuilder aCFB = new ConfigFileBuilder ().addPathFromSystemProperty (SYSTEM_PROPERTY_TOOP_CONNECTOR_SERVER_PROPERTIES_PATH)
+                                                           .addPath (PATH_PRIVATE_TOOP_CONNECTOR_PROPERTIES)
+                                                           .addPath (PATH_TOOP_CONNECTOR_PROPERTIES);
 
     return s_aRWLock.writeLocked ( () -> {
       s_aConfigFile = aCFB.build ();
@@ -86,21 +86,21 @@ public final class MPConfig {
         // Clear cache
         s_aCachedSMLInfo = null;
 
-        s_aLogger.info ("Read TOOP MP server properties from " + s_aConfigFile.getReadResource ().getPath ());
+        s_aLogger.info ("Read TOOP Connector server properties from " + s_aConfigFile.getReadResource ().getPath ());
         return ESuccess.SUCCESS;
       }
 
-      s_aLogger.warn ("Failed to read TOOP MP server properties from " + aCFB.getAllPaths ());
+      s_aLogger.warn ("Failed to read TOOP Connector server properties from " + aCFB.getAllPaths ());
       return ESuccess.FAILURE;
     });
   }
 
   public static final boolean DEFAULT_TOOP_TRACKER_ENABLED = false;
-  public static final String DEFAULT_DIRECTORY_BASE_URL = "http://directory.central.toop";
+  public static final String DEFAULT_DIRECTORY_BASE_URL = "http://directory.central.toop:7071";
   public static final boolean DEFAULT_USE_SML = false;
-  public static final String DEFAULT_SMP_URI = "http://smp.central.toop";
+  public static final String DEFAULT_SMP_URI = "http://smp.central.toop:80";
 
-  private MPConfig () {
+  private TCConfig () {
   }
 
   /**
@@ -207,9 +207,9 @@ public final class MPConfig {
    * @return The overall protocol to use. Never <code>null</code>.
    */
   @Nonnull
-  public static EMPProtocol getMEMProtocol () {
-    final String sID = getConfigFile ().getAsString ("mp.mem.protocol", EMPProtocol.DEFAULT.getID ());
-    final EMPProtocol eProtocol = EMPProtocol.getFromIDOrNull (sID);
+  public static ETCProtocol getMEMProtocol () {
+    final String sID = getConfigFile ().getAsString ("mp.mem.protocol", ETCProtocol.DEFAULT.getID ());
+    final ETCProtocol eProtocol = ETCProtocol.getFromIDOrNull (sID);
     if (eProtocol == null)
       throw new IllegalStateException ("Failed to resolve protocol with ID '" + sID + "'");
     return eProtocol;
@@ -221,9 +221,9 @@ public final class MPConfig {
    *         <code>null</code>.
    */
   @Nonnull
-  public static EMPAS4Interface getMEMAS4Interface () {
-    final String sID = getConfigFile ().getAsString ("mp.mem.as4.interface", EMPAS4Interface.DEFAULT.getID ());
-    final EMPAS4Interface eProtocol = EMPAS4Interface.getFromIDOrNull (sID);
+  public static ETCAS4Interface getMEMAS4Interface () {
+    final String sID = getConfigFile ().getAsString ("mp.mem.as4.interface", ETCAS4Interface.DEFAULT.getID ());
+    final ETCAS4Interface eProtocol = ETCAS4Interface.getFromIDOrNull (sID);
     if (eProtocol == null)
       throw new IllegalStateException ("Failed to resolve AS4 interface with ID '" + sID + "'");
     return eProtocol;

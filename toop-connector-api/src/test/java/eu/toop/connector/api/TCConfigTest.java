@@ -13,23 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package eu.toop.mp.api;
+package eu.toop.connector.api;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import org.junit.jupiter.api.Test;
 
+import eu.toop.connector.api.TCConfig;
+
 /**
- * Test class for class {@link MPConfig}.
+ * Test class for class {@link TCConfig}.
  *
  * @author Philip Helger
  *
  */
-public final class MPConfigTest {
+public final class TCConfigTest {
   @Test
   public void testBasic () {
-    assertEquals ("http://directory.central.toop/pd", MPConfig.getR2D2DirectoryBaseUrl ());
-    assertFalse (MPConfig.isR2D2UseDNS ());
+    assertEquals ("http://directory.central.toop/pd", TCConfig.getR2D2DirectoryBaseUrl ());
+    assertFalse (TCConfig.isR2D2UseDNS ());
   }
 }
