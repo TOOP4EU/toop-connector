@@ -40,12 +40,12 @@ import eu.toop.kafkaclient.ToopKafkaClient;
  *
  * @author Philip Helger
  */
-@WebServlet ("/dpinput")
+@WebServlet ("/from-dp")
 public class DPInputServlet extends HttpServlet {
   @Override
   protected void doPost (final HttpServletRequest aHttpServletRequest,
                          final HttpServletResponse aHttpServletResponse) throws ServletException, IOException {
-    ToopKafkaClient.send (EErrorLevel.INFO, "MP got /dpinput request (3/4)");
+    ToopKafkaClient.send (EErrorLevel.INFO, "MP got /from-dp request (3/4)");
 
     final UnifiedResponse aUR = UnifiedResponse.createSimple (aHttpServletRequest);
 

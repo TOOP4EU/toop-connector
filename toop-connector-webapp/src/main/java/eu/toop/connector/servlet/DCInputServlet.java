@@ -49,11 +49,11 @@ import eu.toop.kafkaclient.ToopKafkaClient;
  *
  * @author Philip Helger
  */
-@WebServlet ("/dcinput")
+@WebServlet ("/from-dc")
 public class DCInputServlet extends HttpServlet {
   /**
    * This is a demo method to easily send an MSDataRequest to itself. Invoke with
-   * <code>http://localhost:8090/dcinput?demo</code>. This method must be disabled
+   * <code>http://localhost:8090/from-dc?demo</code>. This method must be disabled
    * in production!
    */
   @Override
@@ -101,7 +101,7 @@ public class DCInputServlet extends HttpServlet {
   @Override
   protected void doPost (final HttpServletRequest aHttpServletRequest,
                          final HttpServletResponse aHttpServletResponse) throws ServletException, IOException {
-    ToopKafkaClient.send (EErrorLevel.INFO, "MP got /dcinput request (1/4)");
+    ToopKafkaClient.send (EErrorLevel.INFO, "MP got /from-dc request (1/4)");
 
     final UnifiedResponse aUR = UnifiedResponse.createSimple (aHttpServletRequest);
 

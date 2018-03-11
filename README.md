@@ -3,7 +3,7 @@ The joint message process for both sides of the process
 
 ## Done
 * Handle the way on DC side from DC backend to AS4 (1/4)
-  * Input from DC is received via Servlet `/dcinput` (from Demo UI - `HttpClientInvoker`)
+  * Input from DC is received via Servlet `/from-dc` (from Demo UI - `HttpClientInvoker`)
   * ASiC container is unwrapped and the `IMSDataRequest` object is extracted and processed asynchronously in class `MessageProcessorDCOutgoing`
     * A new Request ID (String) is created
     * The call to the SMM client is missing there currently stubbed
@@ -14,7 +14,7 @@ The joint message process for both sides of the process
   * Handler for this is initialized in `MPWebAppListener`
     * ASiC contianer is parsed and message is forwarded to `MessageProcessorDPIncoming`
 * Handle the way on DP side from DP backend (3/4)
-  * Servlet `/dpinput` is present, the `ToopResponseMessage` object is extracted and processed asynchronously in class `MessageProcessorDPOutgoing`
+  * Servlet `/from-dp` is present, the `ToopResponseMessage` object is extracted and processed asynchronously in class `MessageProcessorDPOutgoing`
     * The call to the SMM client is missing there currently stubbed
     * The call to R2D2 client happens (based on sender PID) but has no result because we don't have a directory yet
     * Therefore no endpoints are found the calls to MEM are purely theoretical :)

@@ -8,7 +8,6 @@
  */
 package eu.toop.connector.me.servlet;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Enumeration;
 
@@ -23,6 +22,7 @@ import javax.xml.soap.SOAPMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.helger.commons.io.stream.NonBlockingByteArrayInputStream;
 import com.helger.commons.io.stream.StreamHelper;
 
 import eu.toop.connector.me.EBMSUtils;
@@ -43,7 +43,7 @@ public class AS4InterfaceServlet extends HttpServlet {
 
   @Override
   protected void doPost(final HttpServletRequest req,
-      final HttpServletResponse resp) throws ServletException, IOException {
+                        final HttpServletResponse resp) throws ServletException, IOException {
 
     LOG.info("Received a message from the gateway");
 
@@ -59,19 +59,18 @@ public class AS4InterfaceServlet extends HttpServlet {
 
       if (LOG.isDebugEnabled ())
         LOG.debug("Read inbound message");
+
       //Todo, remove buffering later
-      receivedMessage = SoapUtil.createMessage(mimeHeaders, new ByteArrayInputStream(bytes));
+      receivedMessage = SoapUtil.createMessage(mimeHeaders, new NonBlockingByteArrayInputStream(bytes));
 
       //check if the message is a notification message
 
-      if (LOG.isTraceEnabled()) {
+      if (LOG.isTraceEnabled())
         LOG.trace(SoapUtil.describe(receivedMessage));
-      }
 
       //get the action from the soap message
       final String action = SoapXPathUtil
           .safeFindSingleNode(receivedMessage.getSOAPHeader(), "//:CollaborationInfo/:Action").getTextContent();
-
 
       switch(action)  {
         case "Deliver" :
@@ -83,7 +82,7 @@ public class AS4InterfaceServlet extends HttpServlet {
           break;
 
         default:
-          throw new UnsupportedOperationException("Action " + action + " is not supported");
+          throw new UnsupportedOperationException("Action '" + action + "' is not supported");
       }
 
       if (LOG.isDebugEnabled ())
