@@ -57,9 +57,9 @@ import com.helger.peppol.identifier.generic.process.IProcessIdentifier;
 import com.helger.peppol.smpclient.exception.SMPClientException;
 import com.helger.security.certificate.CertificateHelper;
 
+import eu.toop.connector.api.TCConfig;
+import eu.toop.connector.api.TCSettings;
 import eu.toop.kafkaclient.ToopKafkaClient;
-import eu.toop.mp.api.MPConfig;
-import eu.toop.mp.api.MPSettings;
 
 /**
  * The default implementation of {@link IR2D2Client}. It performs the query
@@ -114,7 +114,7 @@ public class R2D2Client implements IR2D2Client
     {
       // Build base URL and fetch x records per HTTP request
       final int nMaxResultsPerPage = 100;
-      final SimpleURL aBaseURL = new SimpleURL (MPConfig.getR2D2DirectoryBaseUrl () +
+      final SimpleURL aBaseURL = new SimpleURL (TCConfig.getR2D2DirectoryBaseUrl () +
                                                 "/search/1.0/json").add ("doctype", aDocumentTypeID.getURIEncoded ())
                                                                    .add ("country", sCountryCode)
                                                                    .add ("rpc", nMaxResultsPerPage);
@@ -140,7 +140,7 @@ public class R2D2Client implements IR2D2Client
               {
                 final String sScheme = aID.getAsString ("scheme");
                 final String sValue = aID.getAsString ("value");
-                final IParticipantIdentifier aPI = MPSettings.getIdentifierFactory ()
+                final IParticipantIdentifier aPI = TCSettings.getIdentifierFactory ()
                                                              .createParticipantIdentifier (sScheme, sValue);
                 if (aPI != null)
                   ret.add (aPI);
@@ -270,15 +270,15 @@ public class R2D2Client implements IR2D2Client
 
     final ICommonsList <IR2D2Endpoint> ret = new CommonsArrayList <> ();
     BDXRClient aSMPClient;
-    if (MPConfig.isR2D2UseDNS ())
+    if (TCConfig.isR2D2UseDNS ())
     {
       // Use dynamic lookup via DNS
-      aSMPClient = new BDXRClient (MPSettings.getSMPUrlProvider (), aRecipientID, MPConfig.getR2D2SML ());
+      aSMPClient = new BDXRClient (TCSettings.getSMPUrlProvider (), aRecipientID, TCConfig.getR2D2SML ());
     }
     else
     {
       // Use a constant SMP URL
-      aSMPClient = new BDXRClient (MPConfig.getR2D2SMPUrl ());
+      aSMPClient = new BDXRClient (TCConfig.getR2D2SMPUrl ());
     }
     try
     {

@@ -35,8 +35,8 @@ import eu.toop.commons.dataexchange.TDETOOPDataRequestType;
 import eu.toop.commons.doctype.EToopDocumentType;
 import eu.toop.commons.doctype.EToopProcess;
 import eu.toop.commons.exchange.ToopMessageBuilder;
+import eu.toop.connector.api.TCSettings;
 import eu.toop.kafkaclient.ToopKafkaClient;
-import eu.toop.mp.api.MPSettings;
 import eu.toop.mp.processor.MPWebAppConfig;
 import eu.toop.mp.processor.MessageProcessorDCOutgoing;
 
@@ -67,7 +67,7 @@ public class DCInputServlet extends HttpServlet {
       try (final NonBlockingByteArrayOutputStream archiveOutput = new NonBlockingByteArrayOutputStream ()) {
         // Create dummy request
         // TODO use correct document type ID/process ID
-        ToopMessageBuilder.createRequestMessage (ToopMessageBuilder.createMockRequest (MPSettings.getIdentifierFactory ()
+        ToopMessageBuilder.createRequestMessage (ToopMessageBuilder.createMockRequest (TCSettings.getIdentifierFactory ()
                                                                                                  .createParticipantIdentifier ("toop-actorid-upis",
                                                                                                                                "dcinput")
                                                                                                  .getURIEncoded (),

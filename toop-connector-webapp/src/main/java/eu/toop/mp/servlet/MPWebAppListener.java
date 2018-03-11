@@ -29,8 +29,8 @@ import com.helger.web.servlets.scope.WebScopeListener;
 import eu.toop.commons.dataexchange.TDETOOPDataRequestType;
 import eu.toop.commons.dataexchange.TDETOOPDataResponseType;
 import eu.toop.commons.exchange.ToopMessageBuilder;
+import eu.toop.connector.api.TCConfig;
 import eu.toop.kafkaclient.ToopKafkaClient;
-import eu.toop.mp.api.MPConfig;
 import eu.toop.mp.me.MEMDelegate;
 import eu.toop.mp.me.MEPayload;
 import eu.toop.mp.processor.MessageProcessorDCIncoming;
@@ -50,13 +50,13 @@ public class MPWebAppListener extends WebScopeListener {
     ToopKafkaClient.send (EErrorLevel.INFO, "MP WebApp startup");
 
     GlobalIDFactory.setPersistentStringIDFactory (new StringIDFromGlobalLongIDFactory ("toop-mp-"));
-    GlobalDebug.setDebugModeDirect (MPConfig.isGlobalDebug ());
-    GlobalDebug.setProductionModeDirect (MPConfig.isGlobalProduction ());
+    GlobalDebug.setDebugModeDirect (TCConfig.isGlobalDebug ());
+    GlobalDebug.setProductionModeDirect (TCConfig.isGlobalProduction ());
 
     {
       // Init tracker client
-      ToopKafkaClient.setEnabled (MPConfig.isToopTrackerEnabled ());
-      final String sToopTrackerUrl = MPConfig.getToopTrackerUrl ();
+      ToopKafkaClient.setEnabled (TCConfig.isToopTrackerEnabled ());
+      final String sToopTrackerUrl = TCConfig.getToopTrackerUrl ();
       if (StringHelper.hasText (sToopTrackerUrl))
         ToopKafkaClient.defaultProperties ().put ("bootstrap.servers", sToopTrackerUrl);
     }

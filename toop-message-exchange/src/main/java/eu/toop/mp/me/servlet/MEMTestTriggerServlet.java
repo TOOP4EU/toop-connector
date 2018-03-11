@@ -36,8 +36,8 @@ import com.helger.peppol.identifier.generic.participant.IParticipantIdentifier;
 
 import eu.toop.commons.doctype.EToopDocumentType;
 import eu.toop.commons.doctype.EToopProcess;
-import eu.toop.mp.api.MPConfig;
-import eu.toop.mp.api.MPSettings;
+import eu.toop.connector.api.TCConfig;
+import eu.toop.connector.api.TCSettings;
 import eu.toop.mp.me.GatewayRoutingMetadata;
 import eu.toop.mp.me.IMessageHandler;
 import eu.toop.mp.me.MEMDelegate;
@@ -59,7 +59,7 @@ public class MEMTestTriggerServlet extends HttpServlet {
   protected void doGet(final HttpServletRequest req,
                        final HttpServletResponse resp) throws ServletException, IOException {
     resp.setStatus(HttpServletResponse.SC_OK);
-    resp.getOutputStream().println("Starting the test. Will send an as4 message to the " + MPConfig.getMEMAS4ToPartyID());
+    resp.getOutputStream().println("Starting the test. Will send an as4 message to the " + TCConfig.getMEMAS4ToPartyID());
 
 
     final GatewayRoutingMetadata metadata;
@@ -87,7 +87,7 @@ public class MEMTestTriggerServlet extends HttpServlet {
 
   @Nonnull
   private IR2D2Endpoint createSampleEndpoint() throws Exception {
-    final IParticipantIdentifier identifier = MPSettings.getIdentifierFactory().createParticipantIdentifier("var1",
+    final IParticipantIdentifier identifier = TCSettings.getIdentifierFactory().createParticipantIdentifier("var1",
         "var2");
 
     final X509Certificate x509 = (X509Certificate) CertificateFactory.getInstance("X509")

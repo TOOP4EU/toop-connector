@@ -23,7 +23,7 @@ import java.io.IOException;
 import org.junit.jupiter.api.Test;
 
 import eu.toop.commons.doctype.EToopDocumentType;
-import eu.toop.mp.api.CMP;
+import eu.toop.connector.api.CTC;
 
 /**
  * Test class for class SMMConceptCache.
@@ -39,12 +39,12 @@ public final class SMMConceptCacheTest {
     SMMConceptCache.clearCache ();
 
     // The only existing mapping we have atm
-    MappedValueList aMVL = SMMConceptCache.remoteQueryAllMappedValues (LOG_PREFIX, NS_TOOP, CMP.NS_FREEDONIA);
+    MappedValueList aMVL = SMMConceptCache.remoteQueryAllMappedValues (LOG_PREFIX, NS_TOOP, CTC.NS_FREEDONIA);
     assertNotNull (aMVL);
     assertFalse (aMVL.isEmpty ());
 
     // The only existing mapping we have atm
-    aMVL = SMMConceptCache.remoteQueryAllMappedValues (LOG_PREFIX, CMP.NS_FREEDONIA, NS_TOOP);
+    aMVL = SMMConceptCache.remoteQueryAllMappedValues (LOG_PREFIX, CTC.NS_FREEDONIA, NS_TOOP);
     assertNotNull (aMVL);
     assertFalse (aMVL.isEmpty ());
   }

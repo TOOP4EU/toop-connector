@@ -40,9 +40,9 @@ import com.helger.web.scope.singleton.AbstractGlobalWebSingleton;
 
 import eu.toop.commons.dataexchange.TDETOOPDataResponseType;
 import eu.toop.commons.exchange.ToopMessageBuilder;
+import eu.toop.connector.api.TCConfig;
+import eu.toop.connector.api.TCSettings;
 import eu.toop.kafkaclient.ToopKafkaClient;
-import eu.toop.mp.api.MPConfig;
-import eu.toop.mp.api.MPSettings;
 import eu.toop.mp.me.GatewayRoutingMetadata;
 import eu.toop.mp.me.MEMDelegate;
 import eu.toop.mp.me.MEMessage;
@@ -77,19 +77,19 @@ public final class MessageProcessorDPOutgoing extends AbstractGlobalWebSingleton
 
       // 2. invoke R2D2 client with a single endpoint
       ICommonsList<IR2D2Endpoint> aEndpoints;
-      final IDocumentTypeIdentifier aDocTypeID = MPSettings.getIdentifierFactory ()
+      final IDocumentTypeIdentifier aDocTypeID = TCSettings.getIdentifierFactory ()
                                                            .createDocumentTypeIdentifier (aCurrentObject.getDocumentTypeIdentifier ()
                                                                                                         .getSchemeID (),
                                                                                           aCurrentObject.getDocumentTypeIdentifier ()
                                                                                                         .getValue ());
-      final IProcessIdentifier aProcessID = MPSettings.getIdentifierFactory ()
+      final IProcessIdentifier aProcessID = TCSettings.getIdentifierFactory ()
                                                       .createProcessIdentifier (aCurrentObject.getProcessIdentifier ()
                                                                                               .getSchemeID (),
                                                                                 aCurrentObject.getProcessIdentifier ()
                                                                                               .getValue ());
       {
         // The destination EP is the sender of the original document!
-        final IParticipantIdentifier aOriginalSenderID = MPSettings.getIdentifierFactory ()
+        final IParticipantIdentifier aOriginalSenderID = TCSettings.getIdentifierFactory ()
                                                                    .createParticipantIdentifier (aCurrentObject.getDataConsumer ()
                                                                                                                .getDCElectronicAddressIdentifier ()
                                                                                                                .getSchemeID (),
@@ -101,7 +101,7 @@ public final class MessageProcessorDPOutgoing extends AbstractGlobalWebSingleton
                                                                                             aDocTypeID, aProcessID);
 
         // Filter all endpoints with the corresponding transport profile
-        final String sTransportProfileID = MPConfig.getMEMProtocol ().getTransportProfileID ();
+        final String sTransportProfileID = TCConfig.getMEMProtocol ().getTransportProfileID ();
         aEndpoints = aTotalEndpoints.getAll (x -> x.getTransportProtocol ().equals (sTransportProfileID));
 
         ToopKafkaClient.send (EErrorLevel.INFO,

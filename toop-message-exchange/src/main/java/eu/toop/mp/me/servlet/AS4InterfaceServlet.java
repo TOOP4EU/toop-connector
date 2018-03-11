@@ -28,11 +28,11 @@ import javax.xml.soap.MimeHeaders;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 
-import eu.toop.mp.api.MPConfig;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.toop.connector.api.TCConfig;
 import eu.toop.mp.me.EBMSUtils;
 import eu.toop.mp.me.MEMDelegate;
 import eu.toop.mp.me.SoapUtil;
@@ -51,7 +51,7 @@ public class AS4InterfaceServlet extends HttpServlet {
       final HttpServletResponse resp) throws ServletException, IOException {
 
     resp.setStatus(HttpServletResponse.SC_OK);
-    resp.getOutputStream().println(MPConfig.getMEMAS4FromPartyID() + ": Please use POST");
+    resp.getOutputStream().println(TCConfig.getMEMAS4FromPartyID() + ": Please use POST");
   }
 
   @Override

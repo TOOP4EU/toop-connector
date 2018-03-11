@@ -46,7 +46,7 @@ import com.helger.xml.serialize.read.DOMReader;
 import com.helger.xml.serialize.write.XMLWriterSettings;
 import com.helger.xml.transform.TransformSourceFactory;
 
-import eu.toop.mp.api.MPConfig;
+import eu.toop.connector.api.TCConfig;
 
 public final class EBMSUtils {
 
@@ -68,7 +68,7 @@ public final class EBMSUtils {
     try {
       final StreamSource stylesource = TransformSourceFactory.create (new ClassPathResource ("/receipt-generator.xslt"));
       final Transformer transformer = TransformerFactory.newInstance ().newTransformer (stylesource);
-      transformer.setParameter ("messageid", genereateEbmsMessageId (MPConfig.getMEMAS4IDSuffix ()));
+      transformer.setParameter ("messageid", genereateEbmsMessageId (TCConfig.getMEMAS4IDSuffix ()));
       transformer.setParameter ("timestamp", DateTimeUtils.getCurrentTimestamp ());
       try (final NonBlockingByteArrayOutputStream baos = new NonBlockingByteArrayOutputStream ()) {
         transformer.transform (new DOMSource (message.getSOAPPart ()), new StreamResult (baos));
@@ -116,7 +116,7 @@ public final class EBMSUtils {
       {
         final IMicroElement eMessageInfo = eSignalMessage.appendElement (NS_EBMS, "MessageInfo");
         eMessageInfo.appendElement (NS_EBMS, "Timestamp").appendText (DateTimeUtils.getCurrentTimestamp ());
-        final String ebmsMessageId = genereateEbmsMessageId (MPConfig.getMEMAS4IDSuffix ());
+        final String ebmsMessageId = genereateEbmsMessageId (TCConfig.getMEMAS4IDSuffix ());
         eMessageInfo.appendElement (NS_EBMS, "MessageId").appendText (ebmsMessageId);
       }
       {
@@ -192,7 +192,7 @@ public final class EBMSUtils {
       {
         final IMicroElement eMessageInfo = eUserMessage.appendElement (NS_EBMS, "MessageInfo");
         eMessageInfo.appendElement (NS_EBMS, "Timestamp").appendText (DateTimeUtils.getCurrentTimestamp ());
-        final String ebmsMessageId = genereateEbmsMessageId (MPConfig.getMEMAS4IDSuffix ());
+        final String ebmsMessageId = genereateEbmsMessageId (TCConfig.getMEMAS4IDSuffix ());
         eMessageInfo.appendElement (NS_EBMS, "MessageId").appendText (ebmsMessageId);
       }
       {
@@ -201,21 +201,21 @@ public final class EBMSUtils {
           final IMicroElement eFrom = ePartyInfo.appendElement (NS_EBMS, "From");
           eFrom.appendElement (NS_EBMS, "PartyId")
                // .setAttribute ("type", "urn:oasis:names:tc:ebcore:partyid-type:unregistered")
-               .appendText (MPConfig.getMEMAS4FromPartyID ());
-          eFrom.appendElement (NS_EBMS, "Role").appendText (MPConfig.getMEMAS4FromRole ());
+               .appendText (TCConfig.getMEMAS4FromPartyID ());
+          eFrom.appendElement (NS_EBMS, "Role").appendText (TCConfig.getMEMAS4FromRole ());
         }
         {
           final IMicroElement eTo = ePartyInfo.appendElement (NS_EBMS, "To");
           eTo.appendElement (NS_EBMS, "PartyId")
              // .setAttribute ("type", "urn:oasis:names:tc:ebcore:partyid-type:unregistered")
-             .appendText (MPConfig.getMEMAS4ToPartyID ());
-          eTo.appendElement (NS_EBMS, "Role").appendText (MPConfig.getMEMAS4ToRole ());
+             .appendText (TCConfig.getMEMAS4ToPartyID ());
+          eTo.appendElement (NS_EBMS, "Role").appendText (TCConfig.getMEMAS4ToRole ());
         }
       }
       {
         final IMicroElement eCollaborationInfo = eUserMessage.appendElement (NS_EBMS, "CollaborationInfo");
-        eCollaborationInfo.appendElement (NS_EBMS, "Service").appendText (MPConfig.getMEMAS4Service ());
-        eCollaborationInfo.appendElement (NS_EBMS, "Action").appendText (MPConfig.getMEMAS4Action ());
+        eCollaborationInfo.appendElement (NS_EBMS, "Service").appendText (TCConfig.getMEMAS4Service ());
+        eCollaborationInfo.appendElement (NS_EBMS, "Action").appendText (TCConfig.getMEMAS4Action ());
         eCollaborationInfo.appendElement (NS_EBMS, "ConversationId").appendText (metadata.conversationId);
       }
 
@@ -377,7 +377,7 @@ public final class EBMSUtils {
     // we need the certificate to obtain the to party id
     ValueEnforcer.notNull (certificate, "Endpoint Certificate");
     final SubmissionData submissionData = new SubmissionData ();
-    submissionData.messageId = genereateEbmsMessageId (MPConfig.getMEMAS4IDSuffix ());
+    submissionData.messageId = genereateEbmsMessageId (TCConfig.getMEMAS4IDSuffix ());
     submissionData.action = gatewayRoutingMetadata.getDocumentTypeId ();
     submissionData.service = gatewayRoutingMetadata.getProcessId ();
 
@@ -389,8 +389,8 @@ public final class EBMSUtils {
     // }
 
     // TODO: get it from the certificate
-    submissionData.to = MPConfig.getMEMAS4ReceivingPartyID ();
-    submissionData.from = MPConfig.getMEMAS4ToPartyID ();
+    submissionData.to = TCConfig.getMEMAS4ReceivingPartyID ();
+    submissionData.from = TCConfig.getMEMAS4ToPartyID ();
     // ldapDN.getRdn(0).getValue().toString();
 
     // TODO: infer it from the transaction id

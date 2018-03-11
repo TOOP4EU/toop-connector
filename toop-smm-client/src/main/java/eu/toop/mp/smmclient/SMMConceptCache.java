@@ -42,8 +42,8 @@ import com.helger.json.IJson;
 import com.helger.json.IJsonArray;
 import com.helger.json.IJsonObject;
 
+import eu.toop.connector.api.TCConfig;
 import eu.toop.kafkaclient.ToopKafkaClient;
-import eu.toop.mp.api.MPConfig;
 
 /**
  * This is the SMM client concept cache. It asks remotely if something is not in
@@ -185,7 +185,7 @@ public final class SMMConceptCache {
                                                   + "' to '" + sDestNamespace + "'");
 
     // Build URL with params etc.
-    String sBaseURL = MPConfig.getSMMGRLCURL ();
+    String sBaseURL = TCConfig.getSMMGRLCURL ();
     if (StringHelper.hasNoText (sBaseURL))
       throw new IllegalArgumentException ("SMM GRLC URL is missing!");
     if (!sBaseURL.endsWith ("/"))

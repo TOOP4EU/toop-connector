@@ -34,7 +34,7 @@ import com.helger.scope.mock.ScopeAwareTestSetup;
 
 import eu.toop.commons.doctype.EToopDocumentType;
 import eu.toop.commons.doctype.EToopProcess;
-import eu.toop.mp.api.MPSettings;
+import eu.toop.connector.api.TCSettings;
 import eu.toop.mp.me.mocAS4.MockAS4;
 import eu.toop.mp.r2d2client.IR2D2Endpoint;
 import eu.toop.mp.r2d2client.R2D2Endpoint;
@@ -95,7 +95,7 @@ public class TestSendReceive {
 
   @Nonnull
   private IR2D2Endpoint createSampleEndpoint() throws Exception {
-    final IParticipantIdentifier identifier = MPSettings.getIdentifierFactory().createParticipantIdentifier("var1",
+    final IParticipantIdentifier identifier = TCSettings.getIdentifierFactory().createParticipantIdentifier("var1",
         "var2");
 
     final X509Certificate x509 = (X509Certificate) CertificateFactory.getInstance("X509")

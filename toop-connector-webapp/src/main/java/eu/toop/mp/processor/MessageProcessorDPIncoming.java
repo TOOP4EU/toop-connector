@@ -37,8 +37,8 @@ import eu.toop.commons.dataexchange.TDEConceptRequestType;
 import eu.toop.commons.dataexchange.TDEDataElementRequestType;
 import eu.toop.commons.dataexchange.TDETOOPDataRequestType;
 import eu.toop.commons.jaxb.ToopXSDHelper;
+import eu.toop.connector.api.CTC;
 import eu.toop.kafkaclient.ToopKafkaClient;
-import eu.toop.mp.api.CMP;
 import eu.toop.mp.smmclient.IMappedValueList;
 import eu.toop.mp.smmclient.MappedValue;
 import eu.toop.mp.smmclient.SMMClient;
@@ -79,7 +79,7 @@ public final class MessageProcessorDPIncoming extends AbstractGlobalWebSingleton
 
         // Main mapping
         // TODO make destination namespace configurable
-        final IMappedValueList aMappedValues = aClient.performMapping (sLogPrefix, CMP.NS_FREEDONIA);
+        final IMappedValueList aMappedValues = aClient.performMapping (sLogPrefix, CTC.NS_FREEDONIA);
 
         // add all the mapped values in the request
         for (final TDEDataElementRequestType aDER : aCurrentObject.getDataElementRequest ()) {

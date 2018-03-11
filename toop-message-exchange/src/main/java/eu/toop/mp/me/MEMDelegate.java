@@ -24,7 +24,7 @@ import com.helger.commons.annotation.UsedViaReflection;
 import com.helger.commons.url.URLHelper;
 import com.helger.scope.singleton.AbstractGlobalSingleton;
 
-import eu.toop.mp.api.MPConfig;
+import eu.toop.connector.api.TCConfig;
 
 /**
  * The API Entry class for the Message Exchange API.
@@ -64,7 +64,7 @@ public class MEMDelegate extends AbstractGlobalSingleton {
     final SOAPMessage soapMessage = EBMSUtils.convert2MEOutboundAS4Message(submissionData, meMessage);
     LOG.debug(SoapUtil.describe(soapMessage));
     LOG.debug("Send soap message");
-    EBMSUtils.sendSOAPMessage(soapMessage, URLHelper.getAsURL(MPConfig.getMEMAS4Endpoint()));
+    EBMSUtils.sendSOAPMessage(soapMessage, URLHelper.getAsURL(TCConfig.getMEMAS4Endpoint()));
     LOG.debug("SOAP Message sent");
   }
 

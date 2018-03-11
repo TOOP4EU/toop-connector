@@ -21,7 +21,7 @@ import javax.annotation.concurrent.Immutable;
 import com.helger.asic.SignatureHelper;
 import com.helger.commons.io.resource.ClassPathResource;
 
-import eu.toop.mp.api.MPConfig;
+import eu.toop.connector.api.TCConfig;
 
 /**
  * Message Processor WebApp configuration
@@ -30,10 +30,10 @@ import eu.toop.mp.api.MPConfig;
  */
 @Immutable
 public final class MPWebAppConfig {
-  private static final SignatureHelper SH = new SignatureHelper (ClassPathResource.getInputStream (MPConfig.getMPKeyStorePath ()),
-                                                                 MPConfig.getMPKeyStorePassword (),
-                                                                 MPConfig.getMPKeyStoreKeyAlias (),
-                                                                 MPConfig.getMPKeyStoreKeyPassword ());
+  private static final SignatureHelper SH = new SignatureHelper (ClassPathResource.getInputStream (TCConfig.getMPKeyStorePath ()),
+                                                                 TCConfig.getMPKeyStorePassword (),
+                                                                 TCConfig.getMPKeyStoreKeyAlias (),
+                                                                 TCConfig.getMPKeyStoreKeyPassword ());
 
   private MPWebAppConfig () {
   }

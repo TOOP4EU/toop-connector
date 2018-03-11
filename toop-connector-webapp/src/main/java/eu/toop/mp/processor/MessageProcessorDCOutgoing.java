@@ -49,9 +49,9 @@ import eu.toop.commons.dataexchange.TDETOOPDataRequestType;
 import eu.toop.commons.doctype.EToopDocumentType;
 import eu.toop.commons.exchange.ToopMessageBuilder;
 import eu.toop.commons.jaxb.ToopXSDHelper;
+import eu.toop.connector.api.TCConfig;
+import eu.toop.connector.api.TCSettings;
 import eu.toop.kafkaclient.ToopKafkaClient;
-import eu.toop.mp.api.MPConfig;
-import eu.toop.mp.api.MPSettings;
 import eu.toop.mp.me.GatewayRoutingMetadata;
 import eu.toop.mp.me.MEMDelegate;
 import eu.toop.mp.me.MEMessage;
@@ -132,19 +132,19 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
 
       // 2. invoke R2D2 client
       final ICommonsList<IR2D2Endpoint> aEndpoints;
-      final IParticipantIdentifier aSenderID = MPSettings.getIdentifierFactory ()
+      final IParticipantIdentifier aSenderID = TCSettings.getIdentifierFactory ()
                                                          .createParticipantIdentifier (aCurrentObject.getDataConsumer ()
                                                                                                      .getDCElectronicAddressIdentifier ()
                                                                                                      .getSchemeID (),
                                                                                        aCurrentObject.getDataConsumer ()
                                                                                                      .getDCElectronicAddressIdentifier ()
                                                                                                      .getValue ());
-      final IDocumentTypeIdentifier aDocTypeID = MPSettings.getIdentifierFactory ()
+      final IDocumentTypeIdentifier aDocTypeID = TCSettings.getIdentifierFactory ()
                                                            .createDocumentTypeIdentifier (aCurrentObject.getDocumentTypeIdentifier ()
                                                                                                         .getSchemeID (),
                                                                                           aCurrentObject.getDocumentTypeIdentifier ()
                                                                                                         .getValue ());
-      final IProcessIdentifier aProcessID = MPSettings.getIdentifierFactory ()
+      final IProcessIdentifier aProcessID = TCSettings.getIdentifierFactory ()
                                                       .createProcessIdentifier (aCurrentObject.getProcessIdentifier ()
                                                                                               .getSchemeID (),
                                                                                 aCurrentObject.getProcessIdentifier ()
@@ -168,7 +168,7 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
                                                                                             aDocTypeID, aProcessID);
 
         // Filter all endpoints with the corresponding transport profile
-        final String sTransportProfileID = MPConfig.getMEMProtocol ().getTransportProfileID ();
+        final String sTransportProfileID = TCConfig.getMEMProtocol ().getTransportProfileID ();
         aEndpoints = aTotalEndpoints.getAll (x -> x.getTransportProtocol ().equals (sTransportProfileID));
 
         ToopKafkaClient.send (EErrorLevel.INFO, sLogPrefix + "R2D2 found the following endpoints[" + aEndpoints.size ()
