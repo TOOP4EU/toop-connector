@@ -20,14 +20,14 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>eu.toop</groupId>
-    <artifactId>toop-mp-parent-pom</artifactId>
+    <artifactId>toop-connector-parent-pom</artifactId>
     <version>1.0.0-SNAPSHOT</version>
   </parent>
-  <artifactId>toop-mp-api</artifactId>
+  <artifactId>toop-connector-api</artifactId>
   <packaging>bundle</packaging>
-  <name>toop-mp-api</name>
-  <description>Contains the TOOP Data Consumer adapter components</description>
-  <url>https://github.com/toop4eu/toop-message-processor/toop-mp-api</url>
+  <name>toop-connector-api</name>
+  <description>Contains the TOOP Connector shared API</description>
+  <url>https://github.com/toop4eu/toop-connector/toop-connector-api</url>
   <inceptionYear>2018</inceptionYear>
   <licenses>
     <license>
@@ -75,8 +75,8 @@
         <artifactId>maven-bundle-plugin</artifactId>
         <configuration>
           <instructions>
-            <Automatic-Module-Name>eu.toop.mp.api</Automatic-Module-Name>
-            <Export-Package>eu.toop.mp.api.*</Export-Package>
+            <Automatic-Module-Name>eu.toop.connector.api</Automatic-Module-Name>
+            <Export-Package>eu.toop.connector.api.*</Export-Package>
             <Import-Package>!javax.annotation.*,*</Import-Package>
           </instructions>
         </configuration>

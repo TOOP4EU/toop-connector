@@ -21,14 +21,14 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>eu.toop</groupId>
-		<artifactId>toop-mp-parent-pom</artifactId>
+		<artifactId>toop-connector-parent-pom</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>toop-smm-client</artifactId>
 	<packaging>bundle</packaging>
 	<name>toop-smm-client</name>
 	<description>Contains the TOOP Semantic Mapping Module client</description>
-	<url>https://github.com/toop4eu/toop-message-processor/toop-smm-client</url>
+	<url>https://github.com/toop4eu/toop-connector/toop-smm-client</url>
 	<inceptionYear>2018</inceptionYear>
 	<licenses>
 		<license>
@@ -78,7 +78,7 @@
     </dependency>
     <dependency>
       <groupId>eu.toop</groupId>
-      <artifactId>toop-mp-api</artifactId>
+      <artifactId>toop-connector-api</artifactId>
     </dependency>
 		<!-- Test only -->
 		<dependency>

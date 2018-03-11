@@ -24,12 +24,12 @@
     <version>1.0.2</version>
   </parent>
   <groupId>eu.toop</groupId>
-  <artifactId>toop-mp-parent-pom</artifactId>
+  <artifactId>toop-connector-parent-pom</artifactId>
   <version>1.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <name>toop-mp-parent-pom</name>
-  <description>Base POM to build the toop-message-processor projects</description>
-  <url>https://github.com/toop4eu/toop-message-processor</url>
+  <name>toop-connector-parent-pom</name>
+  <description>Base POM to build the toop-connector projects</description>
+  <url>https://github.com/toop4eu/toop-connector</url>
   <inceptionYear>2018</inceptionYear>
  
   <licenses>
@@ -41,9 +41,9 @@
   </licenses>
   
   <scm>
-    <connection>scm:git:git@github.com:toop4eu/toop-message-processor.git</connection>
-    <developerConnection>scm:git:git@github.com:toop4eu/toop-message-processor.git</developerConnection>
-    <url>http://github.com/toop4eu/toop-message-processor</url>
+    <connection>scm:git:git@github.com:toop4eu/toop-connector.git</connection>
+    <developerConnection>scm:git:git@github.com:toop4eu/toop-connector.git</developerConnection>
+    <url>http://github.com/toop4eu/toop-connector</url>
     <tag>HEAD</tag>
   </scm>
 
@@ -103,7 +103,7 @@
       <!-- The sub-projects of this project have a constant version -->
       <dependency>
         <groupId>eu.toop</groupId>
-        <artifactId>toop-mp-api</artifactId>
+        <artifactId>toop-connector-api</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -126,10 +126,10 @@
   
   <!-- Sub-projects - must match child directory names; order is important! -->
   <modules>
-    <module>toop-mp-api</module>
+    <module>toop-connector-api</module>
     <module>toop-smm-client</module>
     <module>toop-r2d2-client</module>
     <module>toop-message-exchange</module>
-    <module>toop-mp-webapp</module>
+    <module>toop-connector-webapp</module>
   </modules>
 </project>
