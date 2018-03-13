@@ -30,6 +30,7 @@ import org.w3c.dom.Node;
 
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.charset.CharsetHelper;
+import com.helger.commons.error.level.EErrorLevel;
 import com.helger.commons.io.resource.ClassPathResource;
 import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 import com.helger.commons.mime.CMimeType;
@@ -47,6 +48,7 @@ import com.helger.xml.serialize.write.XMLWriterSettings;
 import com.helger.xml.transform.TransformSourceFactory;
 
 import eu.toop.connector.api.TCConfig;
+import eu.toop.kafkaclient.ToopKafkaClient;
 
 public final class EBMSUtils {
 
@@ -462,8 +464,12 @@ public final class EBMSUtils {
       }
 
       if (errBuff.length () > 0) {
+        ToopKafkaClient.send (EErrorLevel.ERROR, () -> "Error from AS4 transmission: " + errBuff.toString ());
         throw new IllegalStateException (errBuff.toString ());
       }
+    } else {
+      // Short info that it worked
+      ToopKafkaClient.send (EErrorLevel.INFO, () -> "AS4 transmission seemed to have worked out fine");
     }
   }
 }

@@ -31,9 +31,12 @@ import javax.xml.soap.SOAPConstants;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 
+import com.helger.commons.error.level.EErrorLevel;
 import com.helger.commons.exception.InitializationException;
 import com.helger.commons.http.CHttpHeader;
 import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
+
+import eu.toop.kafkaclient.ToopKafkaClient;
 
 /**
  * @author: myildiz
@@ -77,11 +80,12 @@ public class SoapUtil {
   /**
    * This method sends a SOAP1.2 message to the given url.
    *
-   * @param message
-   * @param endpoint
-   * @return
+   * @param message message to be send
+   * @param endpoint endpoint to send the message to
+   * @return The response message
    */
   public static SOAPMessage sendSOAPMessage (final SOAPMessage message, final URL endpoint) {
+    ToopKafkaClient.send (EErrorLevel.INFO, () -> "Sending AS4 SOAP message to " + endpoint.toExternalForm ());
     try {
       final SOAPConnection connection = soapConnectionFactory.createConnection ();
       return connection.call (message, endpoint);
