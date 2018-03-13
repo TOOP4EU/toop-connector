@@ -30,10 +30,10 @@ import eu.toop.connector.api.TCConfig;
  */
 @Immutable
 public final class MPWebAppConfig {
-  private static final SignatureHelper SH = new SignatureHelper (ClassPathResource.getInputStream (TCConfig.getMPKeyStorePath ()),
-                                                                 TCConfig.getMPKeyStorePassword (),
-                                                                 TCConfig.getMPKeyStoreKeyAlias (),
-                                                                 TCConfig.getMPKeyStoreKeyPassword ());
+  private static final SignatureHelper SH = new SignatureHelper (ClassPathResource.getInputStream (TCConfig.getKeystorePath ()),
+                                                                 TCConfig.getKeystorePassword (),
+                                                                 TCConfig.getKeystoreKeyAlias (),
+                                                                 TCConfig.getKeystoreKeyPassword ());
 
   private MPWebAppConfig () {
   }

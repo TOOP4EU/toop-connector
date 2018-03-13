@@ -21,6 +21,10 @@ import java.util.concurrent.ThreadFactory;
 
 import javax.annotation.Nonnull;
 
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ByteArrayEntity;
+
+import com.helger.asic.SignatureHelper;
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.UsedViaReflection;
 import com.helger.commons.concurrent.BasicThreadFactory;
@@ -28,8 +32,11 @@ import com.helger.commons.concurrent.ExecutorServiceHelper;
 import com.helger.commons.concurrent.collector.ConcurrentCollectorSingle;
 import com.helger.commons.concurrent.collector.IConcurrentPerformer;
 import com.helger.commons.error.level.EErrorLevel;
+import com.helger.commons.io.resourceprovider.DefaultResourceProvider;
+import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 import com.helger.commons.state.ESuccess;
 import com.helger.commons.string.StringHelper;
+import com.helger.httpclient.HttpClientManager;
 import com.helger.scope.IScope;
 import com.helger.web.scope.singleton.AbstractGlobalWebSingleton;
 
@@ -37,8 +44,10 @@ import eu.toop.commons.concept.ConceptValue;
 import eu.toop.commons.dataexchange.TDEConceptRequestType;
 import eu.toop.commons.dataexchange.TDEDataElementRequestType;
 import eu.toop.commons.dataexchange.TDETOOPDataRequestType;
+import eu.toop.commons.exchange.ToopMessageBuilder;
 import eu.toop.commons.jaxb.ToopXSDHelper;
 import eu.toop.connector.api.TCConfig;
+import eu.toop.connector.api.http.TCHttpClientFactory;
 import eu.toop.connector.smmclient.IMappedValueList;
 import eu.toop.connector.smmclient.MappedValue;
 import eu.toop.connector.smmclient.SMMClient;
@@ -113,6 +122,25 @@ public final class MessageProcessorDPIncoming extends AbstractGlobalWebSingleton
       }
 
       // Forward to the DP at /to-dp interface
+      final TCHttpClientFactory aHCFactory = new TCHttpClientFactory ();
+
+      try (final HttpClientManager aMgr = new HttpClientManager (aHCFactory)) {
+        final SignatureHelper aSH = new SignatureHelper (new DefaultResourceProvider ().getInputStream (TCConfig.getKeystorePath ()),
+                                                         TCConfig.getKeystorePassword (),
+                                                         TCConfig.getKeystoreKeyAlias (),
+                                                         TCConfig.getKeystoreKeyPassword ());
+
+        try (final NonBlockingByteArrayOutputStream aBAOS = new NonBlockingByteArrayOutputStream ()) {
+          ToopMessageBuilder.createRequestMessage (aCurrentObject, aBAOS, aSH);
+
+          // Send to DP (see ToDPServlet in toop-interface)
+          final String sDestinationUrl = TCConfig.getMPToopInterfaceDPUrl ();
+
+          final HttpPost aPost = new HttpPost (sDestinationUrl);
+          aPost.setEntity (new ByteArrayEntity (aBAOS.toByteArray ()));
+          aMgr.execute (aPost);
+        }
+      }
     }
   }
 

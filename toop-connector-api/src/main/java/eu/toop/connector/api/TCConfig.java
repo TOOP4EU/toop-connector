@@ -293,22 +293,27 @@ public final class TCConfig {
   }
 
   @Nullable
-  public static String getMPKeyStorePath () {
+  public static String getMPToopInterfaceDPUrl () {
+    return getConfigFile ().getAsString ("toop.mp.dp.url");
+  }
+
+  @Nullable
+  public static String getKeystorePath () {
     return getConfigFile ().getAsString ("toop.keystore.path");
   }
 
   @Nullable
-  public static String getMPKeyStorePassword () {
+  public static String getKeystorePassword () {
     return getConfigFile ().getAsString ("toop.keystore.password");
   }
 
   @Nullable
-  public static String getMPKeyStoreKeyAlias () {
+  public static String getKeystoreKeyAlias () {
     return getConfigFile ().getAsString ("toop.keystore.key.alias");
   }
 
   @Nullable
-  public static String getMPKeyStoreKeyPassword () {
+  public static String getKeystoreKeyPassword () {
     return getConfigFile ().getAsString ("toop.keystore.key.password");
   }
 }
