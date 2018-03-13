@@ -21,6 +21,10 @@ import java.util.concurrent.ThreadFactory;
 
 import javax.annotation.Nonnull;
 
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ByteArrayEntity;
+
+import com.helger.asic.SignatureHelper;
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.UsedViaReflection;
 import com.helger.commons.concurrent.BasicThreadFactory;
@@ -28,11 +32,17 @@ import com.helger.commons.concurrent.ExecutorServiceHelper;
 import com.helger.commons.concurrent.collector.ConcurrentCollectorSingle;
 import com.helger.commons.concurrent.collector.IConcurrentPerformer;
 import com.helger.commons.error.level.EErrorLevel;
+import com.helger.commons.io.resourceprovider.DefaultResourceProvider;
+import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 import com.helger.commons.state.ESuccess;
+import com.helger.httpclient.HttpClientManager;
 import com.helger.scope.IScope;
 import com.helger.web.scope.singleton.AbstractGlobalWebSingleton;
 
 import eu.toop.commons.dataexchange.TDETOOPDataResponseType;
+import eu.toop.commons.exchange.ToopMessageBuilder;
+import eu.toop.connector.api.TCConfig;
+import eu.toop.connector.api.http.TCHttpClientFactory;
 import eu.toop.kafkaclient.ToopKafkaClient;
 
 /**
@@ -54,7 +64,26 @@ public final class MessageProcessorDCIncoming extends AbstractGlobalWebSingleton
       final String sLogPrefix = "[" + sRequestID + "] ";
       ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "Received DC Incoming Request (4/4)");
 
-      // TODO forward to toop-interface DC input
+      // Forward to the DC at /to-dc interface
+      final TCHttpClientFactory aHCFactory = new TCHttpClientFactory ();
+
+      try (final HttpClientManager aMgr = new HttpClientManager (aHCFactory)) {
+        final SignatureHelper aSH = new SignatureHelper (new DefaultResourceProvider ().getInputStream (TCConfig.getKeystorePath ()),
+                                                         TCConfig.getKeystorePassword (),
+                                                         TCConfig.getKeystoreKeyAlias (),
+                                                         TCConfig.getKeystoreKeyPassword ());
+
+        try (final NonBlockingByteArrayOutputStream aBAOS = new NonBlockingByteArrayOutputStream ()) {
+          ToopMessageBuilder.createResponseMessage (aResponse, aBAOS, aSH);
+
+          // Send to DC (see ToDCServlet in toop-interface)
+          final String sDestinationUrl = TCConfig.getMPToopInterfaceDCUrl ();
+
+          final HttpPost aPost = new HttpPost (sDestinationUrl);
+          aPost.setEntity (new ByteArrayEntity (aBAOS.toByteArray ()));
+          aMgr.execute (aPost);
+        }
+      }
     }
   }
 

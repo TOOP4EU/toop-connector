@@ -301,9 +301,20 @@ public final class TCConfig {
     return getConfigFile ().getAsString ("toop.mem.as4.service");
   }
 
+  /**
+   * @return The URL of the DP backend for step 2/4
+   */
   @Nullable
   public static String getMPToopInterfaceDPUrl () {
     return getConfigFile ().getAsString ("toop.mp.dp.url");
+  }
+
+  /**
+   * @return The URL of the DC backend for step 4/4
+   */
+  @Nullable
+  public static String getMPToopInterfaceDCUrl () {
+    return getConfigFile ().getAsString ("toop.mp.dc.url");
   }
 
   @Nullable
