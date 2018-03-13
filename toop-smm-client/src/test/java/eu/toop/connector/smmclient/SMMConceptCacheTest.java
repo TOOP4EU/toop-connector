@@ -20,12 +20,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.IOException;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import eu.toop.commons.doctype.EToopDocumentType;
 import eu.toop.connector.api.CTC;
-import eu.toop.connector.smmclient.MappedValueList;
-import eu.toop.connector.smmclient.SMMConceptCache;
 
 /**
  * Test class for class SMMConceptCache.
@@ -36,17 +35,39 @@ public final class SMMConceptCacheTest {
   private static final String LOG_PREFIX = "[unit test] ";
   private static final String NS_TOOP = EToopDocumentType.DOCTYPE_REGISTERED_ORGANIZATION_REQUEST.getSharedToopSMMNamespace ();
 
-  @Test
-  public void testRemoteQuery () throws IOException {
+  @BeforeEach
+  public void reset () {
     SMMConceptCache.clearCache ();
+  }
 
+  @Test
+  public void testRemoteQueryToopFreedonia () throws IOException {
     // The only existing mapping we have atm
-    MappedValueList aMVL = SMMConceptCache.remoteQueryAllMappedValues (LOG_PREFIX, NS_TOOP, CTC.NS_FREEDONIA);
+    final MappedValueList aMVL = SMMConceptCache.remoteQueryAllMappedValues (LOG_PREFIX, NS_TOOP, CTC.NS_FREEDONIA);
     assertNotNull (aMVL);
     assertFalse (aMVL.isEmpty ());
+  }
 
+  @Test
+  public void testRemoteQueryFreedoniaToop () throws IOException {
     // The only existing mapping we have atm
-    aMVL = SMMConceptCache.remoteQueryAllMappedValues (LOG_PREFIX, CTC.NS_FREEDONIA, NS_TOOP);
+    final MappedValueList aMVL = SMMConceptCache.remoteQueryAllMappedValues (LOG_PREFIX, CTC.NS_FREEDONIA, NS_TOOP);
+    assertNotNull (aMVL);
+    assertFalse (aMVL.isEmpty ());
+  }
+
+  @Test
+  public void testRemoteQueryToopElonia () throws IOException {
+    // The only existing mapping we have atm
+    final MappedValueList aMVL = SMMConceptCache.remoteQueryAllMappedValues (LOG_PREFIX, NS_TOOP, CTC.NS_ELONIA);
+    assertNotNull (aMVL);
+    assertFalse (aMVL.isEmpty ());
+  }
+
+  @Test
+  public void testRemoteQueryEloniaToop () throws IOException {
+    // The only existing mapping we have atm
+    final MappedValueList aMVL = SMMConceptCache.remoteQueryAllMappedValues (LOG_PREFIX, CTC.NS_ELONIA, NS_TOOP);
     assertNotNull (aMVL);
     assertFalse (aMVL.isEmpty ());
   }

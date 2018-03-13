@@ -15,6 +15,9 @@
  */
 package eu.toop.connector.servlet;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 import javax.annotation.Nonnull;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.annotation.WebListener;
@@ -44,14 +47,22 @@ import eu.toop.kafkaclient.ToopKafkaClient;
  */
 @WebListener
 public class MPWebAppListener extends WebScopeListener {
+  private String m_sLogPrefix;
+
   @Override
   public void contextInitialized (@Nonnull final ServletContextEvent aEvent) {
     super.contextInitialized (aEvent);
-    ToopKafkaClient.send (EErrorLevel.INFO, "MP WebApp startup");
 
     GlobalIDFactory.setPersistentStringIDFactory (new StringIDFromGlobalLongIDFactory ("toop-mp-"));
     GlobalDebug.setDebugModeDirect (TCConfig.isGlobalDebug ());
     GlobalDebug.setProductionModeDirect (TCConfig.isGlobalProduction ());
+
+    // Get my IP address for debugging
+    try {
+      m_sLogPrefix = "[" + InetAddress.getLocalHost ().getHostAddress () + "] ";
+    } catch (final UnknownHostException ex) {
+      m_sLogPrefix = "";
+    }
 
     {
       // Init tracker client
@@ -60,6 +71,8 @@ public class MPWebAppListener extends WebScopeListener {
       if (StringHelper.hasText (sToopTrackerUrl))
         ToopKafkaClient.defaultProperties ().put ("bootstrap.servers", sToopTrackerUrl);
     }
+
+    ToopKafkaClient.send (EErrorLevel.INFO, () -> m_sLogPrefix + "TOOP Connector WebApp startup");
 
     // Register the handler need
     MEMDelegate.getInstance ().registerMessageHandler (aMEMessage -> {
@@ -71,24 +84,24 @@ public class MPWebAppListener extends WebScopeListener {
 
         if (aMsg instanceof TDETOOPDataResponseType) {
           // This is the way from DP back to DC; we're in DC incoming mode
-          ToopKafkaClient.send (EErrorLevel.INFO, "MP got DC incoming request (4/4)");
+          ToopKafkaClient.send (EErrorLevel.INFO, () -> m_sLogPrefix + "TC got DC incoming request (4/4)");
           MessageProcessorDCIncoming.getInstance ().enqueue ((TDETOOPDataResponseType) aMsg);
         } else if (aMsg instanceof TDETOOPDataRequestType) {
           // This is the way from DC to DP; we're in DP incoming mode
-          ToopKafkaClient.send (EErrorLevel.INFO, "MP got DP incoming request (2/4)");
+          ToopKafkaClient.send (EErrorLevel.INFO, () -> m_sLogPrefix + "TC got DP incoming request (2/4)");
           MessageProcessorDPIncoming.getInstance ().enqueue ((TDETOOPDataRequestType) aMsg);
         } else
-          ToopKafkaClient.send (EErrorLevel.ERROR, () -> "Unsuspported Message: " + aMsg);
+          ToopKafkaClient.send (EErrorLevel.ERROR, () -> m_sLogPrefix + "Unsuspported Message: " + aMsg);
       } else
-        ToopKafkaClient.send (EErrorLevel.WARN, () -> "MEMessage contains no payload: " + aMEMessage);
+        ToopKafkaClient.send (EErrorLevel.WARN, () -> m_sLogPrefix + "MEMessage contains no payload: " + aMEMessage);
     });
 
-    ToopKafkaClient.send (EErrorLevel.INFO, "MP starting");
+    ToopKafkaClient.send (EErrorLevel.INFO, m_sLogPrefix + "TOOP Connector started");
   }
 
   @Override
   public void contextDestroyed (@Nonnull final ServletContextEvent aEvent) {
-    ToopKafkaClient.send (EErrorLevel.INFO, "MP WebApp shutdown");
+    ToopKafkaClient.send (EErrorLevel.INFO, m_sLogPrefix + "TOOP Connector shutting down");
 
     // Shutdown tracker
     ToopKafkaClient.close ();
