@@ -57,11 +57,20 @@ public class MPWebAppListener extends WebScopeListener {
     GlobalDebug.setDebugModeDirect (TCConfig.isGlobalDebug ());
     GlobalDebug.setProductionModeDirect (TCConfig.isGlobalProduction ());
 
-    // Get my IP address for debugging
-    try {
-      m_sLogPrefix = "[" + InetAddress.getLocalHost ().getHostAddress () + "] ";
-    } catch (final UnknownHostException ex) {
-      m_sLogPrefix = "";
+    m_sLogPrefix = TCConfig.getToopInstanceName ();
+    if (StringHelper.hasNoText (m_sLogPrefix)) {
+      // Get my IP address for debugging as default
+      try {
+        m_sLogPrefix = "[" + InetAddress.getLocalHost ().getHostAddress () + "] ";
+      } catch (final UnknownHostException ex) {
+        m_sLogPrefix = "";
+      }
+    } else {
+      if (!m_sLogPrefix.startsWith ("["))
+        m_sLogPrefix = "[" + m_sLogPrefix + "]";
+
+      // Would have been trimmed when reading the properties file, so add manually
+      m_sLogPrefix += " ";
     }
 
     {

@@ -119,6 +119,15 @@ public final class TCConfig {
     return getConfigFile ().getAsBoolean ("global.production", GlobalDebug.isProductionMode ());
   }
 
+  /**
+   * @return A debug name to identify an instance. If none is provided, the IP
+   *         address is used.
+   */
+  @Nullable
+  public static String getToopInstanceName () {
+    return getConfigFile ().getAsString ("toop.instancename");
+  }
+
   public static boolean isToopTrackerEnabled () {
     return getConfigFile ().getAsBoolean ("toop.tracker.enabled", DEFAULT_TOOP_TRACKER_ENABLED);
   }
