@@ -42,7 +42,6 @@ public final class SMMConceptCacheTest {
 
   @Test
   public void testRemoteQueryToopFreedonia () throws IOException {
-    // The only existing mapping we have atm
     final MappedValueList aMVL = SMMConceptCache.remoteQueryAllMappedValues (LOG_PREFIX, NS_TOOP, CTC.NS_FREEDONIA);
     assertNotNull (aMVL);
     assertFalse (aMVL.isEmpty ());
@@ -50,7 +49,6 @@ public final class SMMConceptCacheTest {
 
   @Test
   public void testRemoteQueryFreedoniaToop () throws IOException {
-    // The only existing mapping we have atm
     final MappedValueList aMVL = SMMConceptCache.remoteQueryAllMappedValues (LOG_PREFIX, CTC.NS_FREEDONIA, NS_TOOP);
     assertNotNull (aMVL);
     assertFalse (aMVL.isEmpty ());
@@ -58,7 +56,6 @@ public final class SMMConceptCacheTest {
 
   @Test
   public void testRemoteQueryToopElonia () throws IOException {
-    // The only existing mapping we have atm
     final MappedValueList aMVL = SMMConceptCache.remoteQueryAllMappedValues (LOG_PREFIX, NS_TOOP, CTC.NS_ELONIA);
     assertNotNull (aMVL);
     assertFalse (aMVL.isEmpty ());
@@ -66,7 +63,6 @@ public final class SMMConceptCacheTest {
 
   @Test
   public void testRemoteQueryEloniaToop () throws IOException {
-    // The only existing mapping we have atm
     final MappedValueList aMVL = SMMConceptCache.remoteQueryAllMappedValues (LOG_PREFIX, CTC.NS_ELONIA, NS_TOOP);
     assertNotNull (aMVL);
     assertFalse (aMVL.isEmpty ());
