@@ -138,7 +138,7 @@ public final class TCConfig {
     // E.g.
     // http://localhost:8001/
     // https://hamster.tno.nl/plasido-grlc/
-    return getConfigFile ().getAsString ("mp.smm.grlc.url");
+    return getConfigFile ().getAsString ("toop.smm.grlc.url");
   }
 
   /**
@@ -148,7 +148,7 @@ public final class TCConfig {
   @Nonnull
   @Nonempty
   public static String getR2D2DirectoryBaseUrl () {
-    return getConfigFile ().getAsString ("mp.r2d2.directory.baseurl", DEFAULT_DIRECTORY_BASE_URL);
+    return getConfigFile ().getAsString ("toop.r2d2.directory.baseurl", DEFAULT_DIRECTORY_BASE_URL);
   }
 
   /**
@@ -157,7 +157,7 @@ public final class TCConfig {
    * @see #getR2D2SMPUrl()
    */
   public static boolean isR2D2UseDNS () {
-    return getConfigFile ().getAsBoolean ("mp.r2d2.usedns", DEFAULT_USE_SML);
+    return getConfigFile ().getAsBoolean ("toop.r2d2.usedns", DEFAULT_USE_SML);
   }
 
   /**
@@ -168,19 +168,19 @@ public final class TCConfig {
   public static ISMLInfo getR2D2SML () {
     ISMLInfo ret = s_aCachedSMLInfo;
     if (ret == null) {
-      final String sSMLID = getConfigFile ().getAsString ("mp.r2d2.sml.id");
+      final String sSMLID = getConfigFile ().getAsString ("toop.r2d2.sml.id");
       final ESML eSML = ESML.getFromIDOrNull (sSMLID);
       if (eSML != null)
         // Pre-configured SML
         ret = eSML;
       else {
         // Custom SML
-        final String sDisplayName = getConfigFile ().getAsString ("mp.r2d2.sml.name", "MP SML");
+        final String sDisplayName = getConfigFile ().getAsString ("toop.r2d2.sml.name", "MP SML");
         // E.g. edelivery.tech.ec.europa.eu.
-        final String sDNSZone = getConfigFile ().getAsString ("mp.r2d2.sml.dnszone");
+        final String sDNSZone = getConfigFile ().getAsString ("toop.r2d2.sml.dnszone");
         // E.g. https://edelivery.tech.ec.europa.eu/edelivery-sml
-        final String sManagementServiceURL = getConfigFile ().getAsString ("mp.r2d2.sml.serviceurl");
-        final boolean bClientCertificateRequired = getConfigFile ().getAsBoolean ("mp.r2d2.sml.clientcert", false);
+        final String sManagementServiceURL = getConfigFile ().getAsString ("toop.r2d2.sml.serviceurl");
+        final boolean bClientCertificateRequired = getConfigFile ().getAsBoolean ("toop.r2d2.sml.clientcert", false);
         ret = new SMLInfo (sDisplayName, sDNSZone, sManagementServiceURL, bClientCertificateRequired);
       }
       // Remember in cache
@@ -196,7 +196,7 @@ public final class TCConfig {
   @Nullable
   public static URI getR2D2SMPUrl () {
     // E.g. http://smp.central.toop
-    final String sURI = getConfigFile ().getAsString ("mp.r2d2.smp.url", DEFAULT_SMP_URI);
+    final String sURI = getConfigFile ().getAsString ("toop.r2d2.smp.url", DEFAULT_SMP_URI);
     return URLHelper.getAsURI (sURI);
   }
 
@@ -208,7 +208,7 @@ public final class TCConfig {
    */
   @Nonnull
   public static ETCProtocol getMEMProtocol () {
-    final String sID = getConfigFile ().getAsString ("mp.mem.protocol", ETCProtocol.DEFAULT.getID ());
+    final String sID = getConfigFile ().getAsString ("toop.mem.protocol", ETCProtocol.DEFAULT.getID ());
     final ETCProtocol eProtocol = ETCProtocol.getFromIDOrNull (sID);
     if (eProtocol == null)
       throw new IllegalStateException ("Failed to resolve protocol with ID '" + sID + "'");
@@ -222,7 +222,7 @@ public final class TCConfig {
    */
   @Nonnull
   public static ETCAS4Interface getMEMAS4Interface () {
-    final String sID = getConfigFile ().getAsString ("mp.mem.as4.interface", ETCAS4Interface.DEFAULT.getID ());
+    final String sID = getConfigFile ().getAsString ("toop.mem.as4.interface", ETCAS4Interface.DEFAULT.getID ());
     final ETCAS4Interface eProtocol = ETCAS4Interface.getFromIDOrNull (sID);
     if (eProtocol == null)
       throw new IllegalStateException ("Failed to resolve AS4 interface with ID '" + sID + "'");
@@ -232,75 +232,74 @@ public final class TCConfig {
   // GW_URL
   @Nullable
   public static String getMEMAS4Endpoint () {
-    return getConfigFile ().getAsString ("mp.mem.as4.endpoint");
+    return getConfigFile ().getAsString ("toop.mem.as4.endpoint");
   }
 
   // ME_NAME
   @Nullable
   public static String getMEMAS4IDSuffix () {
-    return getConfigFile ().getAsString ("mp.mem.as4.idsuffix");
+    return getConfigFile ().getAsString ("toop.mem.as4.idsuffix");
   }
 
   // ME_PARTY_ID
   @Nullable
   public static String getMEMAS4FromPartyID () {
-    return getConfigFile ().getAsString ("mp.mem.as4.from.partyid");
+    return getConfigFile ().getAsString ("toop.mem.as4.from.partyid");
   }
 
   // ME_PARTY_ROLE
   @Nullable
   public static String getMEMAS4FromRole () {
-    return getConfigFile ().getAsString ("mp.mem.as4.from.role");
+    return getConfigFile ().getAsString ("toop.mem.as4.from.role");
   }
 
   // GW_PARTY_ID
   @Nullable
   public static String getMEMAS4ToPartyID () {
-    return getConfigFile ().getAsString ("mp.mem.as4.to.partyid");
+    return getConfigFile ().getAsString ("toop.mem.as4.to.partyid");
   }
 
   // Receiving GW party id
   @Nullable
   public static String getMEMAS4ReceivingPartyID () {
-    return getConfigFile ().getAsString ("mp.mem.as4.receiving.partyid");
+    return getConfigFile ().getAsString ("toop.mem.as4.receiving.partyid");
   }
 
   // GW_PARTY_ROLE
   @Nullable
   public static String getMEMAS4ToRole () {
-    return getConfigFile ().getAsString ("mp.mem.as4.to.role");
+    return getConfigFile ().getAsString ("toop.mem.as4.to.role");
   }
 
   // SUBMIT_ACTION
   @Nullable
   public static String getMEMAS4Action () {
-    return getConfigFile ().getAsString ("mp.mem.as4.action");
+    return getConfigFile ().getAsString ("toop.mem.as4.action");
   }
 
   // SUBMIT_SERVICE
-  @Nonnull
-  @Nonempty
+  @Nullable
   public static String getMEMAS4Service () {
-    return getConfigFile ().getAsString ("mp.mem.as4.service", "http://www.toop.eu/as4/backend");
+    return getConfigFile ().getAsString ("toop.mem.as4.service");
   }
 
   @Nullable
   public static String getMPKeyStorePath () {
-    return getConfigFile ().getAsString ("mp.keystore.path");
+    return getConfigFile ().getAsString ("toop.keystore.path");
   }
 
   @Nullable
   public static String getMPKeyStorePassword () {
-    return getConfigFile ().getAsString ("mp.keystore.password");
+    return getConfigFile ().getAsString ("toop.keystore.password");
   }
 
   @Nullable
   public static String getMPKeyStoreKeyAlias () {
-    return getConfigFile ().getAsString ("mp.keystore.key.alias");
+    return getConfigFile ().getAsString ("toop.keystore.key.alias");
   }
 
   @Nullable
   public static String getMPKeyStoreKeyPassword () {
-    return getConfigFile ().getAsString ("mp.keystore.key.password");
+    return getConfigFile ().getAsString ("toop.keystore.key.password");
   }
 }
