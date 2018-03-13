@@ -35,7 +35,6 @@ import com.helger.commons.error.level.EErrorLevel;
 import com.helger.commons.string.StringHelper;
 import com.helger.commons.url.ISimpleURL;
 import com.helger.commons.url.SimpleURL;
-import com.helger.httpclient.HttpClientFactory;
 import com.helger.httpclient.HttpClientManager;
 import com.helger.httpclient.response.ResponseHandlerJson;
 import com.helger.json.IJson;
@@ -43,6 +42,7 @@ import com.helger.json.IJsonArray;
 import com.helger.json.IJsonObject;
 
 import eu.toop.connector.api.TCConfig;
+import eu.toop.connector.api.http.TCHttpClientFactory;
 import eu.toop.kafkaclient.ToopKafkaClient;
 
 /**
@@ -139,16 +139,14 @@ public final class SMMConceptCache {
    * @param <T>
    *          data type to be handled
    */
-  private static <T> void _httpClientGet (@Nonnull final ISimpleURL aDestinationURL,
-                                          @Nonnull final ResponseHandler<T> aResponseHandler,
-                                          @Nonnull final Consumer<T> aResultHandler) throws IOException {
+  private static <T> void _httpClientGetJson (@Nonnull final ISimpleURL aDestinationURL,
+                                              @Nonnull final ResponseHandler<T> aResponseHandler,
+                                              @Nonnull final Consumer<T> aResultHandler) throws IOException {
     ValueEnforcer.notNull (aDestinationURL, "DestinationURL");
     ValueEnforcer.notNull (aResponseHandler, "ResponseHandler");
     ValueEnforcer.notNull (aResultHandler, "ResultHandler");
 
-    final HttpClientFactory aHCFactory = new HttpClientFactory ();
-    // For proxy etc
-    aHCFactory.setUseSystemProperties (true);
+    final TCHttpClientFactory aHCFactory = new TCHttpClientFactory ();
 
     try (final HttpClientManager aMgr = new HttpClientManager (aHCFactory)) {
       final HttpGet aGet = new HttpGet (aDestinationURL.getAsStringWithEncodedParameters ());
@@ -202,7 +200,7 @@ public final class SMMConceptCache {
     final MappedValueList ret = new MappedValueList ();
 
     // Execute HTTP request
-    _httpClientGet (aDestinationURL, aJsonHandler, aJson -> {
+    _httpClientGetJson (aDestinationURL, aJsonHandler, aJson -> {
       // Interpret result
       if (aJson.isObject ()) {
         final IJsonObject aResults = aJson.getAsObject ().getAsObject ("results");

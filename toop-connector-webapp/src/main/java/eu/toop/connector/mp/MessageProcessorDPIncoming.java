@@ -29,6 +29,7 @@ import com.helger.commons.concurrent.collector.ConcurrentCollectorSingle;
 import com.helger.commons.concurrent.collector.IConcurrentPerformer;
 import com.helger.commons.error.level.EErrorLevel;
 import com.helger.commons.state.ESuccess;
+import com.helger.commons.string.StringHelper;
 import com.helger.scope.IScope;
 import com.helger.web.scope.singleton.AbstractGlobalWebSingleton;
 
@@ -63,7 +64,8 @@ public final class MessageProcessorDPIncoming extends AbstractGlobalWebSingleton
       ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "Received asynch request: " + aCurrentObject);
 
       // Map to DP concepts
-      {
+      final String sDestinationMappingURI = TCConfig.getSMMMappingNamespaceURI ();
+      if (StringHelper.hasText (sDestinationMappingURI)) {
         final SMMClient aClient = new SMMClient ();
         for (final TDEDataElementRequestType aDER : aCurrentObject.getDataElementRequest ()) {
           final TDEConceptRequestType aSrcConcept = aDER.getConceptRequest ();
@@ -78,8 +80,7 @@ public final class MessageProcessorDPIncoming extends AbstractGlobalWebSingleton
         }
 
         // Main mapping
-        final IMappedValueList aMappedValues = aClient.performMapping (sLogPrefix,
-                                                                       TCConfig.getSMMMappingNamespaceURI ());
+        final IMappedValueList aMappedValues = aClient.performMapping (sLogPrefix, sDestinationMappingURI);
 
         // add all the mapped values in the request
         for (final TDEDataElementRequestType aDER : aCurrentObject.getDataElementRequest ()) {
@@ -104,7 +105,14 @@ public final class MessageProcessorDPIncoming extends AbstractGlobalWebSingleton
               }
           }
         }
+        ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "Finished mapping concepts to namespace '"
+                                                      + sDestinationMappingURI + "'.");
+      } else {
+        ToopKafkaClient.send (EErrorLevel.INFO,
+                              () -> sLogPrefix + "No destination mapping URI provided, so no mapping executed.");
       }
+
+      // Forward to the DP at /to-dp interface
     }
   }
 

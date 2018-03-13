@@ -39,7 +39,6 @@ import com.helger.commons.io.stream.NonBlockingByteArrayInputStream;
 import com.helger.commons.string.StringHelper;
 import com.helger.commons.url.ISimpleURL;
 import com.helger.commons.url.SimpleURL;
-import com.helger.httpclient.HttpClientFactory;
 import com.helger.httpclient.HttpClientManager;
 import com.helger.httpclient.response.ResponseHandlerJson;
 import com.helger.json.IJson;
@@ -59,6 +58,7 @@ import com.helger.security.certificate.CertificateHelper;
 
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.TCSettings;
+import eu.toop.connector.api.http.TCHttpClientFactory;
 import eu.toop.kafkaclient.ToopKafkaClient;
 
 /**
@@ -106,9 +106,7 @@ public class R2D2Client implements IR2D2Client
   {
     final ICommonsSet <IParticipantIdentifier> ret = new CommonsHashSet <> ();
 
-    final HttpClientFactory aHCFactory = new HttpClientFactory ();
-    // For proxy etc
-    aHCFactory.setUseSystemProperties (true);
+    final TCHttpClientFactory aHCFactory = new TCHttpClientFactory ();
 
     try (final HttpClientManager aMgr = new HttpClientManager (aHCFactory))
     {
