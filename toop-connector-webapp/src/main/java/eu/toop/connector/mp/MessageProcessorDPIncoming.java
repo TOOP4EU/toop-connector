@@ -67,16 +67,16 @@ public final class MessageProcessorDPIncoming extends AbstractGlobalWebSingleton
    * @author Philip Helger
    */
   static final class Performer implements IConcurrentPerformer<TDETOOPDataRequestType> {
-    public void runAsync (@Nonnull final TDETOOPDataRequestType aCurrentObject) throws Exception {
-      final String sRequestID = aCurrentObject.getDataRequestIdentifier ().getValue ();
+    public void runAsync (@Nonnull final TDETOOPDataRequestType aRequest) throws Exception {
+      final String sRequestID = aRequest.getDataRequestIdentifier ().getValue ();
       final String sLogPrefix = "[" + sRequestID + "] ";
-      ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "Received asynch request: " + aCurrentObject);
+      ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "Received DP Incoming Request (2/4)");
 
       // Map to DP concepts
       final String sDestinationMappingURI = TCConfig.getSMMMappingNamespaceURI ();
       if (StringHelper.hasText (sDestinationMappingURI)) {
         final SMMClient aClient = new SMMClient ();
-        for (final TDEDataElementRequestType aDER : aCurrentObject.getDataElementRequest ()) {
+        for (final TDEDataElementRequestType aDER : aRequest.getDataElementRequest ()) {
           final TDEConceptRequestType aSrcConcept = aDER.getConceptRequest ();
           // ignore all DC source concepts
           if (aSrcConcept.getSemanticMappingExecutionIndicator ().isValue ()) {
@@ -92,7 +92,7 @@ public final class MessageProcessorDPIncoming extends AbstractGlobalWebSingleton
         final IMappedValueList aMappedValues = aClient.performMapping (sLogPrefix, sDestinationMappingURI);
 
         // add all the mapped values in the request
-        for (final TDEDataElementRequestType aDER : aCurrentObject.getDataElementRequest ()) {
+        for (final TDEDataElementRequestType aDER : aRequest.getDataElementRequest ()) {
           final TDEConceptRequestType aSrcConcept = aDER.getConceptRequest ();
           if (aSrcConcept.getSemanticMappingExecutionIndicator ().isValue ()) {
             for (final TDEConceptRequestType aToopConcept : aSrcConcept.getConceptRequest ())
@@ -131,7 +131,7 @@ public final class MessageProcessorDPIncoming extends AbstractGlobalWebSingleton
                                                          TCConfig.getKeystoreKeyPassword ());
 
         try (final NonBlockingByteArrayOutputStream aBAOS = new NonBlockingByteArrayOutputStream ()) {
-          ToopMessageBuilder.createRequestMessage (aCurrentObject, aBAOS, aSH);
+          ToopMessageBuilder.createRequestMessage (aRequest, aBAOS, aSH);
 
           // Send to DP (see ToDPServlet in toop-interface)
           final String sDestinationUrl = TCConfig.getMPToopInterfaceDPUrl ();

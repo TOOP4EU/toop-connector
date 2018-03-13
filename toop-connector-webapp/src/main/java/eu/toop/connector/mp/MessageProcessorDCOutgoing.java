@@ -76,15 +76,15 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
    * @author Philip Helger
    */
   static final class Performer implements IConcurrentPerformer<TDETOOPDataRequestType> {
-    public void runAsync (@Nonnull final TDETOOPDataRequestType aCurrentObject) throws Exception {
-      final EToopDocumentType eDocType = EToopDocumentType.getFromIDOrNull (aCurrentObject.getDocumentTypeIdentifier ()
-                                                                                          .getSchemeID (),
-                                                                            aCurrentObject.getDocumentTypeIdentifier ()
-                                                                                          .getValue ());
+    public void runAsync (@Nonnull final TDETOOPDataRequestType aRequest) throws Exception {
+      final EToopDocumentType eDocType = EToopDocumentType.getFromIDOrNull (aRequest.getDocumentTypeIdentifier ()
+                                                                                    .getSchemeID (),
+                                                                            aRequest.getDocumentTypeIdentifier ()
+                                                                                    .getValue ());
       if (eDocType == null) {
         throw new IllegalStateException ("Failed to resolve document type "
-                                         + aCurrentObject.getDocumentTypeIdentifier ().getSchemeID () + "::"
-                                         + aCurrentObject.getDocumentTypeIdentifier ().getValue ());
+                                         + aRequest.getDocumentTypeIdentifier ().getSchemeID () + "::"
+                                         + aRequest.getDocumentTypeIdentifier ().getValue ());
       }
 
       // This is the unique ID of this request message and must be used throughout the
@@ -93,15 +93,15 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
       final String sLogPrefix = "[" + sRequestID + "] ";
 
       // Remember request ID
-      aCurrentObject.setDataRequestIdentifier (ToopXSDHelper.createIdentifier (sRequestID));
+      aRequest.setDataRequestIdentifier (ToopXSDHelper.createIdentifier (sRequestID));
 
       ToopKafkaClient.send (EErrorLevel.INFO, () -> "Created new unique request ID [" + sRequestID + "]");
-      ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "Received asynch request: " + aCurrentObject);
+      ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "Received DC Request (1/4)");
       // 1. invoke SMM
       {
         // Map to TOOP concepts
         final SMMClient aClient = new SMMClient ();
-        for (final TDEDataElementRequestType aDER : aCurrentObject.getDataElementRequest ()) {
+        for (final TDEDataElementRequestType aDER : aRequest.getDataElementRequest ()) {
           final TDEConceptRequestType aSrcConcept = aDER.getConceptRequest ();
           // Only if not yet mapped
           if (!aSrcConcept.getSemanticMappingExecutionIndicator ().isValue ()) {
@@ -114,7 +114,7 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
                                                                        eDocType.getSharedToopSMMNamespace ());
 
         // add all the mapped values in the request
-        for (final TDEDataElementRequestType aDER : aCurrentObject.getDataElementRequest ()) {
+        for (final TDEDataElementRequestType aDER : aRequest.getDataElementRequest ()) {
           final TDEConceptRequestType aSrcConcept = aDER.getConceptRequest ();
           if (!aSrcConcept.getSemanticMappingExecutionIndicator ().isValue ()) {
             // Now the source was mapped
@@ -136,30 +136,30 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
       // 2. invoke R2D2 client
       final ICommonsList<IR2D2Endpoint> aEndpoints;
       final IParticipantIdentifier aSenderID = TCSettings.getIdentifierFactory ()
-                                                         .createParticipantIdentifier (aCurrentObject.getDataConsumer ()
-                                                                                                     .getDCElectronicAddressIdentifier ()
-                                                                                                     .getSchemeID (),
-                                                                                       aCurrentObject.getDataConsumer ()
-                                                                                                     .getDCElectronicAddressIdentifier ()
-                                                                                                     .getValue ());
+                                                         .createParticipantIdentifier (aRequest.getDataConsumer ()
+                                                                                               .getDCElectronicAddressIdentifier ()
+                                                                                               .getSchemeID (),
+                                                                                       aRequest.getDataConsumer ()
+                                                                                               .getDCElectronicAddressIdentifier ()
+                                                                                               .getValue ());
       final IDocumentTypeIdentifier aDocTypeID = TCSettings.getIdentifierFactory ()
-                                                           .createDocumentTypeIdentifier (aCurrentObject.getDocumentTypeIdentifier ()
-                                                                                                        .getSchemeID (),
-                                                                                          aCurrentObject.getDocumentTypeIdentifier ()
-                                                                                                        .getValue ());
+                                                           .createDocumentTypeIdentifier (aRequest.getDocumentTypeIdentifier ()
+                                                                                                  .getSchemeID (),
+                                                                                          aRequest.getDocumentTypeIdentifier ()
+                                                                                                  .getValue ());
       final IProcessIdentifier aProcessID = TCSettings.getIdentifierFactory ()
-                                                      .createProcessIdentifier (aCurrentObject.getProcessIdentifier ()
-                                                                                              .getSchemeID (),
-                                                                                aCurrentObject.getProcessIdentifier ()
-                                                                                              .getValue ());
+                                                      .createProcessIdentifier (aRequest.getProcessIdentifier ()
+                                                                                        .getSchemeID (),
+                                                                                aRequest.getProcessIdentifier ()
+                                                                                        .getValue ());
       {
 
         String sDestinationCountryCode = null;
-        final TDELegalEntityType aLegalEntity = aCurrentObject.getDataSubject ().getLegalEntity ();
+        final TDELegalEntityType aLegalEntity = aRequest.getDataSubject ().getLegalEntity ();
         if (aLegalEntity != null)
           sDestinationCountryCode = aLegalEntity.getLegalEntityLegalAddress ().getCountryCode ().getValue ();
         if (StringHelper.hasNoText (sDestinationCountryCode)) {
-          final TDENaturalPersonType aNaturalPerson = aCurrentObject.getDataSubject ().getNaturalPerson ();
+          final TDENaturalPersonType aNaturalPerson = aRequest.getDataSubject ().getNaturalPerson ();
           if (aNaturalPerson != null)
             sDestinationCountryCode = aNaturalPerson.getNaturalPersonLegalAddress ().getCountryCode ().getValue ();
         }
@@ -184,7 +184,7 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
         // Do this only once and not for every endpoint
         MEMessage meMessage;
         try (final NonBlockingByteArrayOutputStream aBAOS = new NonBlockingByteArrayOutputStream ()) {
-          ToopMessageBuilder.createRequestMessage (aCurrentObject, aBAOS, MPWebAppConfig.getSignatureHelper ());
+          ToopMessageBuilder.createRequestMessage (aRequest, aBAOS, MPWebAppConfig.getSignatureHelper ());
 
           // build MEM once
           final MEPayload aPayload = new MEPayload (AsicUtils.MIMETYPE_ASICE, sRequestID, aBAOS.toByteArray ());

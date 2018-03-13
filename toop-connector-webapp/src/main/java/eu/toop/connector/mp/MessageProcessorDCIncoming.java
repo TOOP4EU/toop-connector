@@ -49,10 +49,10 @@ public final class MessageProcessorDCIncoming extends AbstractGlobalWebSingleton
    * @author Philip Helger
    */
   static final class Performer implements IConcurrentPerformer<TDETOOPDataResponseType> {
-    public void runAsync (@Nonnull final TDETOOPDataResponseType aCurrentObject) throws Exception {
-      final String sRequestID = aCurrentObject.getDataRequestIdentifier ().getValue ();
+    public void runAsync (@Nonnull final TDETOOPDataResponseType aResponse) throws Exception {
+      final String sRequestID = aResponse.getDataRequestIdentifier ().getValue ();
       final String sLogPrefix = "[" + sRequestID + "] ";
-      ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "Received asynch request: " + aCurrentObject);
+      ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "Received DC Incoming Request (4/4)");
 
       // TODO forward to toop-interface DC input
     }
