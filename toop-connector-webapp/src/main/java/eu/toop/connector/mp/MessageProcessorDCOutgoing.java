@@ -92,6 +92,9 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
       final String sRequestID = GlobalIDFactory.getNewPersistentStringID ();
       final String sLogPrefix = "[" + sRequestID + "] ";
 
+      // Remember request ID
+      aCurrentObject.setDataRequestIdentifier (ToopXSDHelper.createIdentifier (sRequestID));
+
       ToopKafkaClient.send (EErrorLevel.INFO, () -> "Created new unique request ID [" + sRequestID + "]");
       ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "Received asynch request: " + aCurrentObject);
       // 1. invoke SMM
