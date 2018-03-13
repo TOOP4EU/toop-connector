@@ -20,7 +20,7 @@
   <Appenders>
     <Console name="STDOUT" target="SYSTEM_OUT">
       <!-- Location may be an issue when async logging is used! -->
-      <PatternLayout pattern="[TOOP MP][%date{ISO8601}] [%-5level] [%thread] %msg -- %location%n" />
+      <PatternLayout pattern="[TOOP TC][%date{ISO8601}] [%-5level] [%thread] %msg -- %location%n" />
     </Console>
   </Appenders>
   <Loggers>

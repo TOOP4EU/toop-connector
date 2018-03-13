@@ -79,7 +79,7 @@ public final class MessageProcessorDPIncoming extends AbstractGlobalWebSingleton
 
         // Main mapping
         // TODO make destination namespace configurable
-        final IMappedValueList aMappedValues = aClient.performMapping (sLogPrefix, CTC.NS_FREEDONIA);
+        final IMappedValueList aMappedValues = aClient.performMapping (sLogPrefix, CTC.NS_ELONIA);
 
         // add all the mapped values in the request
         for (final TDEDataElementRequestType aDER : aCurrentObject.getDataElementRequest ()) {
