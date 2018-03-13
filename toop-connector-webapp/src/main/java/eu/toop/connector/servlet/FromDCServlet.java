@@ -23,20 +23,11 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.helger.commons.collection.impl.CommonsArrayList;
 import com.helger.commons.error.level.EErrorLevel;
-import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
-import com.helger.commons.mime.CMimeType;
-import com.helger.servlet.mock.MockHttpServletRequest;
 import com.helger.servlet.response.UnifiedResponse;
 
-import eu.toop.commons.concept.ConceptValue;
 import eu.toop.commons.dataexchange.TDETOOPDataRequestType;
-import eu.toop.commons.doctype.EToopDocumentType;
-import eu.toop.commons.doctype.EToopProcess;
 import eu.toop.commons.exchange.ToopMessageBuilder;
-import eu.toop.connector.api.TCSettings;
-import eu.toop.connector.mp.MPWebAppConfig;
 import eu.toop.connector.mp.MessageProcessorDCOutgoing;
 import eu.toop.kafkaclient.ToopKafkaClient;
 
@@ -51,53 +42,6 @@ import eu.toop.kafkaclient.ToopKafkaClient;
  */
 @WebServlet ("/from-dc")
 public class FromDCServlet extends HttpServlet {
-  /**
-   * This is a demo method to easily send an MSDataRequest to itself. Invoke with
-   * <code>http://localhost:8090/from-dc?demo</code>. This method must be disabled
-   * in production!
-   */
-  @Override
-  protected void doGet (final HttpServletRequest aHttpServletRequest,
-                        final HttpServletResponse aHttpServletResponse) throws ServletException, IOException {
-    // XXX DEMO code!
-    if (aHttpServletRequest.getParameter ("demo") != null) {
-      // Put a fake DC request in the queue
-      final MockHttpServletRequest aMockRequest = new MockHttpServletRequest ();
-
-      try (final NonBlockingByteArrayOutputStream archiveOutput = new NonBlockingByteArrayOutputStream ()) {
-        // Create dummy request
-        // TODO use correct document type ID/process ID
-        ToopMessageBuilder.createRequestMessage (ToopMessageBuilder.createMockRequest (TCSettings.getIdentifierFactory ()
-                                                                                                 .createParticipantIdentifier ("toop-actorid-upis",
-                                                                                                                               "dcinput")
-                                                                                                 .getURIEncoded (),
-                                                                                       "GF",
-                                                                                       EToopDocumentType.DOCTYPE_REGISTERED_ORGANIZATION_REQUEST,
-                                                                                       EToopProcess.PROCESS_REQUEST_RESPONSE,
-                                                                                       new CommonsArrayList<> (new ConceptValue ("company",
-                                                                                                                                 "demo"))),
-                                                 archiveOutput, MPWebAppConfig.getSignatureHelper ());
-        // Get ASiC bytes
-        aMockRequest.setContent (archiveOutput.toByteArray ());
-      }
-
-      // Post dummy request
-      doPost (aMockRequest, aHttpServletResponse);
-
-      if (aHttpServletResponse.getStatus () == HttpServletResponse.SC_NO_CONTENT) {
-        // So that something is visible
-        aHttpServletResponse.setStatus (HttpServletResponse.SC_OK);
-        aHttpServletResponse.setContentType (CMimeType.TEXT_HTML.getAsString ());
-        aHttpServletResponse.getWriter ()
-                            .println ("<html><body><h1>Demo request processed successfully!</h1></body></html>");
-        aHttpServletResponse.getWriter ().flush ();
-      }
-    } else {
-      // Response with HTTP 405 (Method not supported)
-      super.doGet (aHttpServletRequest, aHttpServletResponse);
-    }
-  }
-
   @Override
   protected void doPost (final HttpServletRequest aHttpServletRequest,
                          final HttpServletResponse aHttpServletResponse) throws ServletException, IOException {
