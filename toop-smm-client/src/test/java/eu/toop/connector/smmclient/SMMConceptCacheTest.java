@@ -24,7 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import eu.toop.commons.doctype.EToopDocumentType;
-import eu.toop.connector.api.CTC;
 
 /**
  * Test class for class SMMConceptCache.
@@ -34,6 +33,8 @@ import eu.toop.connector.api.CTC;
 public final class SMMConceptCacheTest {
   private static final String LOG_PREFIX = "[unit test] ";
   private static final String NS_TOOP = EToopDocumentType.DOCTYPE_REGISTERED_ORGANIZATION_REQUEST.getSharedToopSMMNamespace ();
+  private static final String NS_ELONIA = "http://example.register.elo/elonia-business-register";
+  private static final String NS_FREEDONIA = "http://example.register.fre/freedonia-business-register";
 
   @BeforeEach
   public void reset () {
@@ -42,28 +43,28 @@ public final class SMMConceptCacheTest {
 
   @Test
   public void testRemoteQueryToopFreedonia () throws IOException {
-    final MappedValueList aMVL = SMMConceptCache.remoteQueryAllMappedValues (LOG_PREFIX, NS_TOOP, CTC.NS_FREEDONIA);
+    final MappedValueList aMVL = SMMConceptCache.remoteQueryAllMappedValues (LOG_PREFIX, NS_TOOP, NS_FREEDONIA);
     assertNotNull (aMVL);
     assertFalse (aMVL.isEmpty ());
   }
 
   @Test
   public void testRemoteQueryFreedoniaToop () throws IOException {
-    final MappedValueList aMVL = SMMConceptCache.remoteQueryAllMappedValues (LOG_PREFIX, CTC.NS_FREEDONIA, NS_TOOP);
+    final MappedValueList aMVL = SMMConceptCache.remoteQueryAllMappedValues (LOG_PREFIX, NS_FREEDONIA, NS_TOOP);
     assertNotNull (aMVL);
     assertFalse (aMVL.isEmpty ());
   }
 
   @Test
   public void testRemoteQueryToopElonia () throws IOException {
-    final MappedValueList aMVL = SMMConceptCache.remoteQueryAllMappedValues (LOG_PREFIX, NS_TOOP, CTC.NS_ELONIA);
+    final MappedValueList aMVL = SMMConceptCache.remoteQueryAllMappedValues (LOG_PREFIX, NS_TOOP, NS_ELONIA);
     assertNotNull (aMVL);
     assertFalse (aMVL.isEmpty ());
   }
 
   @Test
   public void testRemoteQueryEloniaToop () throws IOException {
-    final MappedValueList aMVL = SMMConceptCache.remoteQueryAllMappedValues (LOG_PREFIX, CTC.NS_ELONIA, NS_TOOP);
+    final MappedValueList aMVL = SMMConceptCache.remoteQueryAllMappedValues (LOG_PREFIX, NS_ELONIA, NS_TOOP);
     assertNotNull (aMVL);
     assertFalse (aMVL.isEmpty ());
   }

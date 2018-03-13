@@ -27,10 +27,6 @@ import org.slf4j.LoggerFactory;
 
 import eu.toop.commons.concept.ConceptValue;
 import eu.toop.commons.doctype.EToopDocumentType;
-import eu.toop.connector.api.CTC;
-import eu.toop.connector.smmclient.IMappedValueList;
-import eu.toop.connector.smmclient.MappedValue;
-import eu.toop.connector.smmclient.SMMClient;
 
 /**
  * Test class for class {@link SMMClient}.
@@ -40,16 +36,18 @@ import eu.toop.connector.smmclient.SMMClient;
 public final class SMMClientTest {
   private static final Logger s_aLogger = LoggerFactory.getLogger (SMMClientTest.class);
 
+  private static final String NS_FREEDONIA = "http://example.register.fre/freedonia-business-register";
+
   private static final String LOG_PREFIX = "[unit test] ";
   private static final String NS_TOOP = EToopDocumentType.DOCTYPE_REGISTERED_ORGANIZATION_REQUEST.getSharedToopSMMNamespace ();
   private static final ConceptValue CONCEPT_TOOP_1 = new ConceptValue (NS_TOOP, "CompanyCode");
-  private static final ConceptValue CONCEPT_FR_1 = new ConceptValue (CTC.NS_FREEDONIA, "FreedoniaBusinessCode");
+  private static final ConceptValue CONCEPT_FR_1 = new ConceptValue (NS_FREEDONIA, "FreedoniaBusinessCode");
 
   @Test
   public void testEmpty () throws IOException {
     s_aLogger.info ("Starting testEmpty");
     final SMMClient aClient = new SMMClient ();
-    final IMappedValueList ret = aClient.performMapping (LOG_PREFIX, CTC.NS_FREEDONIA);
+    final IMappedValueList ret = aClient.performMapping (LOG_PREFIX, NS_FREEDONIA);
     assertNotNull (ret);
     assertTrue (ret.isEmpty ());
     assertEquals (0, ret.size ());
@@ -60,7 +58,7 @@ public final class SMMClientTest {
     s_aLogger.info ("Starting testOneMatch");
     final SMMClient aClient = new SMMClient ();
     aClient.addConceptToBeMapped (CONCEPT_TOOP_1);
-    final IMappedValueList ret = aClient.performMapping (LOG_PREFIX, CTC.NS_FREEDONIA);
+    final IMappedValueList ret = aClient.performMapping (LOG_PREFIX, NS_FREEDONIA);
     assertNotNull (ret);
     assertEquals (1, ret.size ());
 
@@ -81,7 +79,7 @@ public final class SMMClientTest {
     aClient.addConceptToBeMapped (CONCEPT_TOOP_1);
     aClient.addConceptToBeMapped (NS_TOOP, "NonExistingField");
     aClient.addConceptToBeMapped ("SourceNamespace", "NonExistingField");
-    final IMappedValueList ret = aClient.performMapping (LOG_PREFIX, CTC.NS_FREEDONIA);
+    final IMappedValueList ret = aClient.performMapping (LOG_PREFIX, NS_FREEDONIA);
     assertNotNull (ret);
     assertEquals (1, ret.size ());
 
@@ -100,7 +98,7 @@ public final class SMMClientTest {
     s_aLogger.info ("Starting testNoMappingNeeded");
     final SMMClient aClient = new SMMClient ();
     aClient.addConceptToBeMapped (CONCEPT_FR_1);
-    final IMappedValueList ret = aClient.performMapping (LOG_PREFIX, CTC.NS_FREEDONIA);
+    final IMappedValueList ret = aClient.performMapping (LOG_PREFIX, NS_FREEDONIA);
     assertNotNull (ret);
     assertEquals (1, ret.size ());
 

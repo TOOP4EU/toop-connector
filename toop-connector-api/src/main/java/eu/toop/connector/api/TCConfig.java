@@ -142,6 +142,15 @@ public final class TCConfig {
   }
 
   /**
+   *
+   * @return The destination namespace URI to map to (for DP incoming step 2/4)
+   */
+  @Nullable
+  public static String getSMMMappingNamespaceURI () {
+    return getConfigFile ().getAsString ("toop.smm.namespaceuri");
+  }
+
+  /**
    * @return The PEPPOL Directory base URL for R2D2.Should never end with a slash.
    *         Example: {@link #DEFAULT_DIRECTORY_BASE_URL}.
    */
