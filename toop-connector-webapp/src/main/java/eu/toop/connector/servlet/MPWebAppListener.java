@@ -75,7 +75,7 @@ public class MPWebAppListener extends WebScopeListener {
 
     {
       // Init tracker client
-      ToopKafkaClient.setEnabled (TCConfig.isToopTrackerEnabled ());
+      ToopKafkaClient.setKafkaEnabled (TCConfig.isToopTrackerEnabled ());
       final String sToopTrackerUrl = TCConfig.getToopTrackerUrl ();
       if (StringHelper.hasText (sToopTrackerUrl))
         ToopKafkaClient.defaultProperties ().put ("bootstrap.servers", sToopTrackerUrl);
