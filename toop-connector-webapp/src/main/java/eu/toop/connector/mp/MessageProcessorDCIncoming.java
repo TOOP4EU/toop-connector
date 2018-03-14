@@ -79,6 +79,8 @@ public final class MessageProcessorDCIncoming extends AbstractGlobalWebSingleton
           // Send to DC (see ToDCServlet in toop-interface)
           final String sDestinationUrl = TCConfig.getMPToopInterfaceDCUrl ();
 
+          ToopKafkaClient.send (EErrorLevel.INFO, () -> "Posting signed ASiC response to " + sDestinationUrl);
+
           final HttpPost aPost = new HttpPost (sDestinationUrl);
           aPost.setEntity (new ByteArrayEntity (aBAOS.toByteArray ()));
           aMgr.execute (aPost);
