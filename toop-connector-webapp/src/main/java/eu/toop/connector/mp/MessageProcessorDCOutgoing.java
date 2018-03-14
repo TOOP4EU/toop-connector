@@ -21,6 +21,9 @@ import java.util.concurrent.ThreadFactory;
 
 import javax.annotation.Nonnull;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.helger.asic.AsicUtils;
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.UsedViaReflection;
@@ -76,6 +79,8 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
    * @author Philip Helger
    */
   static final class Performer implements IConcurrentPerformer<TDETOOPDataRequestType> {
+    private static final Logger s_aLogger = LoggerFactory.getLogger (MessageProcessorDCOutgoing.Performer.class);
+
     public void runAsync (@Nonnull final TDETOOPDataRequestType aRequest) throws Exception {
       final EToopDocumentType eDocType = EToopDocumentType.getFromIDOrNull (aRequest.getDocumentTypeIdentifier ()
                                                                                     .getSchemeID (),
@@ -174,8 +179,10 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
         final String sTransportProfileID = TCConfig.getMEMProtocol ().getTransportProfileID ();
         aEndpoints = aTotalEndpoints.getAll (x -> x.getTransportProtocol ().equals (sTransportProfileID));
 
-        ToopKafkaClient.send (EErrorLevel.INFO, sLogPrefix + "R2D2 found the following endpoints[" + aEndpoints.size ()
-                                                + "/" + aTotalEndpoints.size () + "]: " + aEndpoints);
+        ToopKafkaClient.send (EErrorLevel.INFO, sLogPrefix + "R2D2 found [" + aEndpoints.size () + "/"
+                                                + aTotalEndpoints.size () + "] endpoints");
+        if (s_aLogger.isDebugEnabled ())
+          s_aLogger.info (sLogPrefix + "Endpoint details: " + aEndpoints);
       }
 
       // 3. start message exchange to DC

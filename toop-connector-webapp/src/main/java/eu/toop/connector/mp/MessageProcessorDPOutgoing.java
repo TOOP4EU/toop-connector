@@ -21,6 +21,9 @@ import java.util.concurrent.ThreadFactory;
 
 import javax.annotation.Nonnull;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.helger.asic.AsicUtils;
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.UsedViaReflection;
@@ -64,6 +67,8 @@ public final class MessageProcessorDPOutgoing extends AbstractGlobalWebSingleton
    * @author Philip Helger
    */
   static final class Performer implements IConcurrentPerformer<TDETOOPDataResponseType> {
+    private static final Logger s_aLogger = LoggerFactory.getLogger (MessageProcessorDPOutgoing.Performer.class);
+
     public void runAsync (@Nonnull final TDETOOPDataResponseType aResponse) throws Exception {
       final String sRequestID = aResponse.getDataRequestIdentifier ().getValue ();
       final String sLogPrefix = "[" + sRequestID + "] ";
@@ -75,21 +80,21 @@ public final class MessageProcessorDPOutgoing extends AbstractGlobalWebSingleton
       // The destination EP is the sender of the original document!
       final IParticipantIdentifier aDCParticipantID = TCSettings.getIdentifierFactory ()
                                                                 .createParticipantIdentifier (aResponse.getDataConsumer ()
-                                                                                                            .getDCElectronicAddressIdentifier ()
-                                                                                                            .getSchemeID (),
+                                                                                                       .getDCElectronicAddressIdentifier ()
+                                                                                                       .getSchemeID (),
                                                                                               aResponse.getDataConsumer ()
-                                                                                                            .getDCElectronicAddressIdentifier ()
-                                                                                                            .getValue ());
+                                                                                                       .getDCElectronicAddressIdentifier ()
+                                                                                                       .getValue ());
       final IDocumentTypeIdentifier aDocTypeID = TCSettings.getIdentifierFactory ()
                                                            .createDocumentTypeIdentifier (aResponse.getDocumentTypeIdentifier ()
-                                                                                                        .getSchemeID (),
+                                                                                                   .getSchemeID (),
                                                                                           aResponse.getDocumentTypeIdentifier ()
-                                                                                                        .getValue ());
+                                                                                                   .getValue ());
       final IProcessIdentifier aProcessID = TCSettings.getIdentifierFactory ()
                                                       .createProcessIdentifier (aResponse.getProcessIdentifier ()
-                                                                                              .getSchemeID (),
+                                                                                         .getSchemeID (),
                                                                                 aResponse.getProcessIdentifier ()
-                                                                                              .getValue ());
+                                                                                         .getValue ());
 
       ICommonsList<IR2D2Endpoint> aEndpoints;
       {
@@ -103,19 +108,21 @@ public final class MessageProcessorDPOutgoing extends AbstractGlobalWebSingleton
 
         // Expecting exactly one endpoint!
         ToopKafkaClient.send (aEndpoints.size () == 1 ? EErrorLevel.INFO : EErrorLevel.ERROR,
-                              () -> sLogPrefix + "R2D2 found the following endpoints[" + aEndpoints.size () + "/"
-                                    + aTotalEndpoints.size () + "]: " + aEndpoints);
+                              () -> sLogPrefix + "R2D2 found [" + aEndpoints.size () + "/" + aTotalEndpoints.size ()
+                                    + "] endpoints");
+        if (s_aLogger.isDebugEnabled ())
+          s_aLogger.info (sLogPrefix + "Endpoint details: " + aEndpoints);
       }
 
       // 3. start message exchange to DC
       // The sender of the response is the DP
       final IParticipantIdentifier aDPParticipantID = TCSettings.getIdentifierFactory ()
                                                                 .createParticipantIdentifier (aResponse.getDataProvider ()
-                                                                                                            .getDPElectronicAddressIdentifier ()
-                                                                                                            .getSchemeID (),
+                                                                                                       .getDPElectronicAddressIdentifier ()
+                                                                                                       .getSchemeID (),
                                                                                               aResponse.getDataProvider ()
-                                                                                                            .getDPElectronicAddressIdentifier ()
-                                                                                                            .getValue ());
+                                                                                                       .getDPElectronicAddressIdentifier ()
+                                                                                                       .getValue ());
 
       if (aEndpoints.isNotEmpty ()) {
         // Combine MS data and TOOP data into a single ASiC message
