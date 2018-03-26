@@ -18,6 +18,7 @@ package eu.toop.connector.me;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.security.cert.X509Certificate;
+import java.util.Locale;
 import java.util.UUID;
 
 import javax.annotation.Nonnull;
@@ -43,6 +44,7 @@ import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 import com.helger.commons.mime.CMimeType;
 import com.helger.commons.mime.MimeType;
 import com.helger.commons.mime.MimeTypeParser;
+import com.helger.commons.regex.RegExHelper;
 import com.helger.commons.string.StringHelper;
 import com.helger.xml.microdom.IMicroDocument;
 import com.helger.xml.microdom.IMicroElement;
@@ -67,7 +69,7 @@ public final class EBMSUtils {
   private EBMSUtils () {
   }
 
-  /**
+  /*
    * See
    * http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/profiles/AS4-profile/v1.0/os/AS4-profile-v1.0-os.html#__RefHeading__26454_1909778835
    */
@@ -184,7 +186,7 @@ public final class EBMSUtils {
     return ret;
   }
 
-  /**
+  /*
    * The conversion procedure goes here
    */
   public static SOAPMessage convert2MEOutboundAS4Message (final SubmissionData metadata, final MEMessage meMessage) {
@@ -314,7 +316,7 @@ public final class EBMSUtils {
       message.getAttachments ().forEachRemaining (attObj -> {
         final AttachmentPart att = (AttachmentPart) attObj;
         // remove surplus characters
-        final String href = att.getContentId ().replaceAll ("<|>", "");
+        final String href = RegExHelper.stringReplacePattern ("<|>", att.getContentId (), "");
         Node partInfo;
         try {
           // throws exception if part info does not exist
@@ -449,11 +451,11 @@ public final class EBMSUtils {
                                                                          "//:SignalMessage/:Error");
 
     if (errorElement != null) {
-      final String cat = StringHelper.getNotNull (errorElement.getAttribute ("category")).toUpperCase ();
+      final String cat = StringHelper.getNotNull (errorElement.getAttribute ("category")).toUpperCase (Locale.US);
       final String shortDescription = StringHelper.getNotNull (errorElement.getAttribute ("shortDescription"))
-                                                  .toUpperCase ();
-      final String severity = StringHelper.getNotNull (errorElement.getAttribute ("severity")).toUpperCase ();
-      final String code = StringHelper.getNotNull (errorElement.getAttribute ("errorCode")).toUpperCase ();
+                                                  .toUpperCase (Locale.US);
+      final String severity = StringHelper.getNotNull (errorElement.getAttribute ("severity")).toUpperCase (Locale.US);
+      final String code = StringHelper.getNotNull (errorElement.getAttribute ("errorCode")).toUpperCase (Locale.US);
 
       final StringBuilder errBuff = new StringBuilder ();
       if (!"EBMS:0303".equals (code)) {

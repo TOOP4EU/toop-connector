@@ -27,6 +27,9 @@ import javax.xml.soap.MimeHeaders;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import eu.toop.connector.me.SoapUtil;
 
 /**
@@ -34,6 +37,8 @@ import eu.toop.connector.me.SoapUtil;
  * @date: 20.02.2018.
  */
 public class SOAPMessageAccumulator {
+  private static final Logger LOG = LoggerFactory.getLogger (SOAPMessageAccumulator.class);
+
   private PipedOutputStream pipedOutputStream;
   private PipedInputStream pipedInputStream;
   private SOAPMessage nextMessage;
@@ -59,10 +64,8 @@ public class SOAPMessageAccumulator {
     messageProcessingExecutor.execute(() -> {
       try {
         nextMessage = SoapUtil.createMessage(newHeaders, pipedInputStream);
-      } catch (final IOException e) {
-        e.printStackTrace();
-      } catch (final SOAPException e) {
-        e.printStackTrace();
+      } catch (final IOException  | SOAPException e) {
+        LOG.error ("ooops", e);
       } finally {
         try {
           //good or bad, we are done reading.

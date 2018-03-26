@@ -18,6 +18,7 @@ package eu.toop.connector.me;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 import javax.annotation.Nonnull;
 
@@ -44,6 +45,6 @@ public final class DateTimeUtils {
   @Nonempty
   public static String getCurrentTimestamp() {
     final ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
-    return now.format(DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH:mm:ss.SSSX"));
+    return now.format(DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH:mm:ss.SSSX", Locale.US));
   }
 }

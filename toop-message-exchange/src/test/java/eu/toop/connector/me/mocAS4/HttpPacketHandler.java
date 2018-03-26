@@ -72,7 +72,7 @@ public class HttpPacketHandler extends ChannelInboundHandlerAdapter {
       try {
         messageAccumulator.reset(getMimeHeaders(req.headers()));
       } catch (final Exception e) {
-        e.printStackTrace();
+        LOG.error ("oops", e);
       }
       if (HttpUtil.is100ContinueExpected(req)) {
         ctx.write(new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.CONTINUE));
@@ -101,14 +101,14 @@ public class HttpPacketHandler extends ChannelInboundHandlerAdapter {
         }
 
       } catch (final Exception e) {
-        e.printStackTrace();
+       LOG.error ("oops", e);
       }
     }
   }
 
   @Override
   public void exceptionCaught(final ChannelHandlerContext ctx, final Throwable cause) {
-    cause.printStackTrace();
+    LOG.error ("Got an error", cause);
     ctx.close();
   }
 
@@ -123,6 +123,7 @@ public class HttpPacketHandler extends ChannelInboundHandlerAdapter {
     }
 
     mimeHeaders.getAllHeaders().forEachRemaining(header -> {
+      @SuppressWarnings ("unused")
       final MimeHeader mh = (MimeHeader) header;
     });
     return mimeHeaders;
