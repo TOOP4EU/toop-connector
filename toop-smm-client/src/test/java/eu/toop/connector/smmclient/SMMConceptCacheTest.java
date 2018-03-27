@@ -53,6 +53,8 @@ public final class SMMConceptCacheTest {
     final MappedValueList aMVL = SMMConceptCache.remoteQueryAllMappedValues (LOG_PREFIX, NS_FREEDONIA, NS_TOOP);
     assertNotNull (aMVL);
     assertFalse (aMVL.isEmpty ());
+    if (false)
+      aMVL.forEach (x -> System.out.println (x.getSource ().getValue ()));
   }
 
   @Test
