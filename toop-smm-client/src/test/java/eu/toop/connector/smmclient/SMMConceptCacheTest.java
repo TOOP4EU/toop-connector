@@ -22,10 +22,10 @@ import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import eu.toop.commons.doctype.EToopDocumentType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import eu.toop.commons.doctype.EToopDocumentType;
 
 /**
  * Test class for class SMMConceptCache.
@@ -33,46 +33,44 @@ import org.slf4j.LoggerFactory;
  * @author Philip Helger
  */
 public final class SMMConceptCacheTest {
-
-  private static final Logger s_aLogger = LoggerFactory.getLogger(SMMConceptCacheTest.class);
+  private static final Logger s_aLogger = LoggerFactory.getLogger (SMMConceptCacheTest.class);
   private static final String LOG_PREFIX = "[unit test] ";
-  private static final String NS_TOOP = EToopDocumentType.DOCTYPE_REGISTERED_ORGANIZATION_REQUEST.getSharedToopSMMNamespace();
+  private static final String NS_TOOP = EToopDocumentType.DOCTYPE_REGISTERED_ORGANIZATION_REQUEST.getSharedToopSMMNamespace ();
   private static final String NS_ELONIA = "http://example.register.elo/elonia-business-register";
   private static final String NS_FREEDONIA = "http://example.register.fre/freedonia-business-register";
 
   @BeforeEach
-  public void reset() {
-    SMMConceptCache.clearCache();
+  public void reset () {
+    SMMConceptCache.clearCache ();
   }
 
   @Test
-  public void testRemoteQueryToopFreedonia() throws IOException {
-    final MappedValueList aMVL = SMMConceptCache.remoteQueryAllMappedValues(LOG_PREFIX, NS_TOOP, NS_FREEDONIA);
-    assertNotNull(aMVL);
-    assertFalse(aMVL.isEmpty());
+  public void testRemoteQueryToopFreedonia () throws IOException {
+    final MappedValueList aMVL = SMMConceptCache.remoteQueryAllMappedValues (LOG_PREFIX, NS_TOOP, NS_FREEDONIA);
+    assertNotNull (aMVL);
+    assertFalse (aMVL.isEmpty ());
   }
 
   @Test
-  public void testRemoteQueryFreedoniaToop() throws IOException {
-    final MappedValueList aMVL = SMMConceptCache.remoteQueryAllMappedValues(LOG_PREFIX, NS_FREEDONIA, NS_TOOP);
-    assertNotNull(aMVL);
-    assertFalse(aMVL.isEmpty());
-    if (false) {
-      aMVL.forEach(x -> s_aLogger.debug(x.getSource().getValue()));
-    }
+  public void testRemoteQueryFreedoniaToop () throws IOException {
+    final MappedValueList aMVL = SMMConceptCache.remoteQueryAllMappedValues (LOG_PREFIX, NS_FREEDONIA, NS_TOOP);
+    assertNotNull (aMVL);
+    assertFalse (aMVL.isEmpty ());
+    if (false)
+      aMVL.forEach (x -> s_aLogger.info (x.getSource ().getValue ()));
   }
 
   @Test
-  public void testRemoteQueryToopElonia() throws IOException {
-    final MappedValueList aMVL = SMMConceptCache.remoteQueryAllMappedValues(LOG_PREFIX, NS_TOOP, NS_ELONIA);
-    assertNotNull(aMVL);
-    assertFalse(aMVL.isEmpty());
+  public void testRemoteQueryToopElonia () throws IOException {
+    final MappedValueList aMVL = SMMConceptCache.remoteQueryAllMappedValues (LOG_PREFIX, NS_TOOP, NS_ELONIA);
+    assertNotNull (aMVL);
+    assertFalse (aMVL.isEmpty ());
   }
 
   @Test
-  public void testRemoteQueryEloniaToop() throws IOException {
-    final MappedValueList aMVL = SMMConceptCache.remoteQueryAllMappedValues(LOG_PREFIX, NS_ELONIA, NS_TOOP);
-    assertNotNull(aMVL);
-    assertFalse(aMVL.isEmpty());
+  public void testRemoteQueryEloniaToop () throws IOException {
+    final MappedValueList aMVL = SMMConceptCache.remoteQueryAllMappedValues (LOG_PREFIX, NS_ELONIA, NS_TOOP);
+    assertNotNull (aMVL);
+    assertFalse (aMVL.isEmpty ());
   }
 }
