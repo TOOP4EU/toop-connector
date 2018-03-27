@@ -72,5 +72,7 @@ public final class SMMConceptCacheTest {
     final MappedValueList aMVL = SMMConceptCache.remoteQueryAllMappedValues (LOG_PREFIX, NS_ELONIA, NS_TOOP);
     assertNotNull (aMVL);
     assertFalse (aMVL.isEmpty ());
+    if (false)
+      aMVL.forEach (x -> s_aLogger.info (x.getSource ().getValue ()));
   }
 }
