@@ -99,6 +99,9 @@ IMessageHandler handler = new IMessageHandler() {
 MEMDelegate.get().registerMessageHandler(handler);
 ```
 
+##Receivin Notifications
+The message exchange module provides information about the status of a message previously submitted for delivery to the receiving corner. The sending AS4 
+
 ## Configuring the Message Exchange Module
 
 Coming soon...
