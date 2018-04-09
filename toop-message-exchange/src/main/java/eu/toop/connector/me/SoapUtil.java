@@ -12,6 +12,7 @@
  */
 package eu.toop.connector.me;
 
+import com.helger.commons.ValueEnforcer;
 import com.helger.commons.error.level.EErrorLevel;
 import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 import eu.toop.kafkaclient.ToopKafkaClient;
@@ -27,6 +28,7 @@ import javax.xml.soap.SOAPConnectionFactory;
 import javax.xml.soap.SOAPConstants;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
+import org.w3c.dom.Node;
 
 /**
  * @author: myildiz
@@ -83,10 +85,6 @@ public class SoapUtil {
   public static SOAPMessage createMessage(final MimeHeaders headers,
       final InputStream is) throws IOException, SOAPException {
     return messageFactory.createMessage(headers, is);
-  }
-
-  public static MEMessage soap2MEMessage(final SOAPMessage message) throws Exception {
-    return EBMSUtils.soap2MEMessage(message);
   }
 
   public static String describe(final SOAPMessage message) {

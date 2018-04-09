@@ -34,6 +34,7 @@ public class MEMDelegate extends AbstractGlobalSingleton {
 
   private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MEMDelegate.class);
   private final List<IMessageHandler> messageHandlers = new ArrayList<>();
+  private final List<INotificationHandler> notificationHandlers = new ArrayList<>();
 
   @Deprecated
   @UsedViaReflection
@@ -66,8 +67,8 @@ public class MEMDelegate extends AbstractGlobalSingleton {
   }
 
   /**
-   * Register a new message handler to be able to handle the inbound messages from the AS4 gateway. <p> Duplicate
-   * checking skipped for now. So if you register a handler twice, its handle method will be called twice.
+   * Register a new message handler to handle the inbound messages from the AS4 gateway. <p> Duplicate checking skipped
+   * for now. So if you register a handler twice, its handle method will be called twice.
    *
    * @param aMessageHandler message handler to be added
    */
@@ -87,6 +88,27 @@ public class MEMDelegate extends AbstractGlobalSingleton {
   }
 
   /**
+   * Register a new notification handler to handle the notifications. <p> Duplicate checking skipped for now. So if you
+   * register a handler twice, its handle method will be called twice.
+   *
+   * @param notificationHandler message handler to be added
+   */
+  public void registerNotificationHandler(@Nonnull final INotificationHandler notificationHandler) {
+    ValueEnforcer.notNull(notificationHandler, "NotificationHandler");
+    notificationHandlers.add(notificationHandler);
+  }
+
+  /**
+   * Remove a notification handler from this delegate
+   *
+   * @param notificationHandler Message handler to be removed
+   */
+  public void deregisterNotificationHandler(@Nonnull final INotificationHandler notificationHandler) {
+    ValueEnforcer.notNull(notificationHandler, "NotificationHandler");
+    notificationHandlers.add(notificationHandler);
+  }
+
+  /**
    * Dispatch the received inbound message form the AS4 gateway to the handlers
    *
    * @param message message to be dispatched
@@ -94,12 +116,27 @@ public class MEMDelegate extends AbstractGlobalSingleton {
   public void dispatchInboundMessage(@Nonnull final SOAPMessage message) {
     try {
       // Do it only once
-      final MEMessage aMEMessage = SoapUtil.soap2MEMessage(message);
+      final MEMessage aMEMessage = EBMSUtils.soap2MEMessage(message);
       for (final IMessageHandler messageHandler : messageHandlers) {
         messageHandler.handleMessage(aMEMessage);
       }
     } catch (final Exception e) {
       throw new MEException("Error handling message " + message, e);
+    }
+  }
+
+  /**
+   * Dispatch the received notification to the registered listeners
+   */
+  public void dispatchNotification(SOAPMessage sNotification) {
+    try {
+      // Do it only once
+      final Notification notification = EBMSUtils.soap2Notification(sNotification);
+      for (final INotificationHandler notificationHandler : notificationHandlers) {
+        notificationHandler.handleNotification(notification);
+      }
+    } catch (final Exception e) {
+      throw new MEException("Error handling message " + sNotification, e);
     }
   }
 }

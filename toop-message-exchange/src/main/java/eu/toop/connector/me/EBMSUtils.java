@@ -380,6 +380,55 @@ public final class EBMSUtils {
     return meMessage;
   }
 
+
+  public static Notification soap2Notification(SOAPMessage sNotification) {
+    ValueEnforcer.notNull(sNotification, "Notification");
+
+    Notification notification = new Notification();
+
+    try {
+      Node messagePropsNode = SoapXPathUtil.safeFindSingleNode(sNotification.getSOAPHeader(), "//:MessageProperties");
+
+      String refToMessageId = SoapXPathUtil
+          .safeFindSingleNode(messagePropsNode, ".//:Property[@name='RefToMessageId']/text()").getTextContent();
+      notification.setRefToMessageID(refToMessageId);
+
+      String sSignalType = SoapXPathUtil.safeFindSingleNode(messagePropsNode, ".//:Property[@name='SignalType']")
+          .getTextContent();
+      if ("ERROR".equalsIgnoreCase(sSignalType)) {
+        notification.setSignalType(SignalType.ERROR);
+      } else {
+        notification.setSignalType(SignalType.RECEIPT);
+      }
+
+      try {
+        String errorCode = SoapXPathUtil.safeFindSingleNode(messagePropsNode, ".//:Property[@name='ErrorCode']")
+            .getTextContent();
+        notification.setErrorCode(errorCode);
+      } catch (Exception ignored) {
+      }
+
+      try {
+        String shortDesc = SoapXPathUtil.safeFindSingleNode(messagePropsNode, ".//:Property[@name='ShortDescription']")
+            .getTextContent();
+        notification.setShortDescription(shortDesc);
+      } catch (Exception ignored) {
+      }
+      try {
+        String desc = SoapXPathUtil.safeFindSingleNode(messagePropsNode, ".//:Property[@name='Description']")
+            .getTextContent();
+        notification.setDescription(desc);
+      } catch (Exception ignored) {
+      }
+
+      return notification;
+    } catch (RuntimeException ex) {
+      throw ex;
+    } catch (Exception ex) {
+      throw new MEException(ex);
+    }
+  }
+
   /**
    * process the GatewayRoutingMetadata object and obtain the actual submission data
    *
