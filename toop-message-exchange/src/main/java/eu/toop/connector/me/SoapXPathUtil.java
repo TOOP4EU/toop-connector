@@ -57,7 +57,7 @@ public class SoapXPathUtil {
       final Node o = (Node) XPATH.evaluate(xpath, node, XPathConstants.NODE);
       return o;
     } catch (final XPathExpressionException e) {
-      throw new IllegalStateException(e);
+      throw new MEException(e);
     }
   }
 
@@ -66,30 +66,30 @@ public class SoapXPathUtil {
    * @param node
    * @param xpath
    * @return
-   * @throws IllegalStateException
+   * @throws MEException
    */
   @Nonnull
   public static Node safeFindSingleNode(@Nonnull final Node node,
-      @Nonnull final String xpath) throws IllegalStateException {
+      @Nonnull final String xpath) throws MEException {
     try {
       final Node o = (Node) XPATH.evaluate(xpath, node, XPathConstants.NODE);
       if (o == null) {
-        throw new IllegalStateException("No match for [" + xpath + "]");
+        throw new MEException("No match for [" + xpath + "]");
       }
 
       return o;
     } catch (final XPathExpressionException e) {
-      throw new IllegalStateException(e);
+      throw new MEException(e);
     }
   }
 
   @Nonnull
   public static List<Node> listNodes(@Nonnull final Node node,
-      @Nonnull final String xpath) throws IllegalStateException {
+      @Nonnull final String xpath) throws MEException {
     try {
       final NodeList o = (NodeList) XPATH.evaluate(xpath, node, XPathConstants.NODESET);
       if (o == null) {
-        throw new IllegalStateException("No match for [" + xpath + "]");
+        throw new MEException("No match for [" + xpath + "]");
       }
 
       final List<Node> els = new ArrayList<>();
@@ -98,7 +98,7 @@ public class SoapXPathUtil {
       }
       return els;
     } catch (final XPathExpressionException e) {
-      throw new IllegalStateException(e);
+      throw new MEException(e);
     }
   }
 }

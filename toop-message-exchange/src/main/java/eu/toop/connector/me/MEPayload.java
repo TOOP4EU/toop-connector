@@ -1,26 +1,16 @@
 /**
  * Copyright (C) 2018 toop.eu
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
  */
 package eu.toop.connector.me;
-
-import java.io.InputStream;
-import java.util.UUID;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.concurrent.Immutable;
 
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.Nonempty;
@@ -28,6 +18,11 @@ import com.helger.commons.annotation.ReturnsMutableObject;
 import com.helger.commons.io.stream.NonBlockingByteArrayInputStream;
 import com.helger.commons.mime.IMimeType;
 import com.helger.commons.string.StringHelper;
+import java.io.InputStream;
+import java.util.UUID;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.annotation.concurrent.Immutable;
 
 /**
  * @author: myildiz
@@ -35,6 +30,7 @@ import com.helger.commons.string.StringHelper;
  */
 @Immutable
 public final class MEPayload {
+
   /**
    * Type of the payload
    */
@@ -53,49 +49,44 @@ public final class MEPayload {
 
   @Nonnull
   @Nonempty
-  public static String createRandomPayloadID () {
-    return UUID.randomUUID ().toString () + "@mp.toop";
+  public static String createRandomPayloadID() {
+    return UUID.randomUUID().toString() + "@mp.toop";
   }
 
-  public MEPayload (@Nonnull final IMimeType aMimeType, @Nullable final String sPayloadID,
-                    @Nonnull final byte[] aData) {
-    ValueEnforcer.notNull (aMimeType, "MimeType");
-    ValueEnforcer.notNull (aData, "Data");
+  public MEPayload(@Nonnull final IMimeType aMimeType, @Nullable final String sPayloadID,
+      @Nonnull final byte[] aData) {
+    ValueEnforcer.notNull(aMimeType, "MimeType");
+    ValueEnforcer.notNull(aData, "Data");
 
     mimeType = aMimeType;
     // Ensure a payload is present
-    payloadId = StringHelper.hasText (sPayloadID) ? sPayloadID : createRandomPayloadID ();
+    payloadId = StringHelper.hasText(sPayloadID) ? sPayloadID : createRandomPayloadID();
     data = aData;
   }
 
   @Nonnull
-  public IMimeType getMimeType () {
-    return mimeType;
+  public String getMimeTypeString() {
+    return mimeType.getAsString();
   }
 
   @Nonnull
-  public String getMimeTypeString () {
-    return mimeType.getAsString ();
-  }
-
-  @Nonnull
-  public String getPayloadId () {
+  public String getPayloadId() {
     return payloadId;
   }
 
   @Nonnull
   @ReturnsMutableObject
-  public byte[] getData () {
+  public byte[] getData() {
     return data;
   }
 
   @Nonnull
-  public InputStream getDataInputStream () {
-    return new NonBlockingByteArrayInputStream (data);
+  public InputStream getDataInputStream() {
+    return new NonBlockingByteArrayInputStream(data);
   }
 
   @Override
-  public String toString () {
-    return "Payload [" + payloadId + ", " + mimeType.getAsString () + "], length: " + data.length;
+  public String toString() {
+    return "Payload [" + payloadId + ", " + mimeType.getAsString() + "], length: " + data.length;
   }
 }

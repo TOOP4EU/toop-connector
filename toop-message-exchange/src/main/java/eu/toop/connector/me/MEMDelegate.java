@@ -1,33 +1,27 @@
 /**
  * Copyright (C) 2018 toop.eu
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
  */
 package eu.toop.connector.me;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.NotThreadSafe;
-import javax.xml.soap.SOAPMessage;
 
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.UsedViaReflection;
 import com.helger.commons.url.URLHelper;
 import com.helger.scope.singleton.AbstractGlobalSingleton;
-
 import eu.toop.connector.api.TCConfig;
+import java.util.ArrayList;
+import java.util.List;
+import javax.annotation.Nonnull;
+import javax.annotation.concurrent.NotThreadSafe;
+import javax.xml.soap.SOAPMessage;
 
 /**
  * The API Entry class for the Message Exchange API.
@@ -59,10 +53,10 @@ public class MEMDelegate extends AbstractGlobalSingleton {
    */
   public void sendMessage(final GatewayRoutingMetadata gatewayRoutingMetadata, final MEMessage meMessage) {
     LOG.debug(
-        "send message called for procid: " + gatewayRoutingMetadata.getProcessId() + " docid: " + gatewayRoutingMetadata
+        "Send message called for procid: " + gatewayRoutingMetadata.getProcessId() + " docid: " + gatewayRoutingMetadata
             .getDocumentTypeId());
     LOG.debug("Convert gateway routing metadata to submission data");
-    final SubmissionData submissionData = EBMSUtils.inferSubmissionData(gatewayRoutingMetadata);
+    final SubmissionMessageProperties submissionData = EBMSUtils.inferSubmissionData(gatewayRoutingMetadata);
     LOG.debug("Create SOAP Message based on the submission data and the payloads");
     final SOAPMessage soapMessage = EBMSUtils.convert2MEOutboundAS4Message(submissionData, meMessage);
     LOG.debug(SoapUtil.describe(soapMessage));
@@ -105,7 +99,7 @@ public class MEMDelegate extends AbstractGlobalSingleton {
         messageHandler.handleMessage(aMEMessage);
       }
     } catch (final Exception e) {
-      throw new IllegalStateException("Error handling message " + message, e);
+      throw new MEException("Error handling message " + message, e);
     }
   }
 }

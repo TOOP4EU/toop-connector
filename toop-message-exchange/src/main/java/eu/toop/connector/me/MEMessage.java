@@ -15,13 +15,11 @@
  */
 package eu.toop.connector.me;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.Nonnull;
-
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.ReturnsMutableObject;
+import java.util.ArrayList;
+import java.util.List;
+import javax.annotation.Nonnull;
 
 /**
  * @author: myildiz
@@ -42,13 +40,13 @@ public class MEMessage {
    * For ease of use, get the first payload
    *
    * @return the first payload
-   * @throws IllegalStateException
+   * @throws MEException
    *           in case non is contained
    */
   @Nonnull
   public MEPayload head () {
     if (payloads.isEmpty ())
-      throw new IllegalStateException ("There is no payload");
+      throw new MEException ("There is no payload");
     return payloads.get (0);
   }
 

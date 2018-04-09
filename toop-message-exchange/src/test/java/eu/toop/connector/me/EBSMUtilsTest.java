@@ -30,17 +30,12 @@ import org.slf4j.LoggerFactory;
 import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 import com.helger.commons.mime.CMimeType;
 
-import eu.toop.connector.me.EBMSUtils;
-import eu.toop.connector.me.MEMessage;
-import eu.toop.connector.me.MEPayload;
-import eu.toop.connector.me.SubmissionData;
-
 public final class EBSMUtilsTest {
   private static final Logger LOG = LoggerFactory.getLogger (EBSMUtilsTest.class);
 
   @Test
   public void testFault () throws SOAPException, IOException {
-    final SubmissionData sd = new SubmissionData ();
+    final SubmissionMessageProperties sd = new SubmissionMessageProperties();
     sd.conversationId = "EBSMUtilsTestConv";
     final MEMessage msg = new MEMessage (new MEPayload (CMimeType.APPLICATION_XML, "blafoo",
                                                         "<?xml version='1.0'?><root demo='true' />".getBytes (StandardCharsets.ISO_8859_1)));

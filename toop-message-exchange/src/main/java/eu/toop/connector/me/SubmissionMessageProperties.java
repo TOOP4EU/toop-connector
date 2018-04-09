@@ -19,10 +19,13 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
+ * This class represents a the message properties that will take place in the
+ * outbound submission message
+ *
  * @author: myildiz
  * @date: 15.02.2018.
  */
-public class SubmissionData {
+public class SubmissionMessageProperties {
   /**
    * The actual sender of the data
    */
@@ -54,17 +57,25 @@ public class SubmissionData {
    * TO party ID
    */
   @Nonnull
-  public String to;
+  public String toPartyId;
   /**
    * TO party Role
    */
   @Nonnull
   public String toPartyRole;
+
+
+  /**
+   * ToPartyIdType: The identification of the naming scheme of the used party identifier
+   */
+  @Nullable
+  public String toPartyIdType;
+
   /**
    * FROM party ID
    */
   @Nonnull
-  public String from;
+  public String fromPartyId;
   /**
    * FROM party ID
    */
@@ -81,4 +92,16 @@ public class SubmissionData {
    */
   @Nonnull
   public String action;
+
+  /**
+   * ToPartyCertificate: the certificate of the destination gateway, to be used for encryption
+   */
+  @Nonnull
+  public String toPartyCertificate;
+
+  /**
+   * TargetURL: is the URL address of the destination AS4 gateway.
+   */
+  @Nonnull
+  public String targetURL;
 }
