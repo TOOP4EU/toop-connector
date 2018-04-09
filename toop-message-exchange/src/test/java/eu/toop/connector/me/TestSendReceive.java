@@ -95,7 +95,8 @@ public class TestSendReceive {
 
     MEMDelegate.getInstance().registerMessageHandler(handler);
 
-    // TODO: receive side is not implemented yet
+    final INotificationHandler notificationHandler = notification -> LOG.info("A [" + notification.getSignalType() +
+        "] notification received for the message [" + notification.getRefToMessageID() + "]");
   }
 
   @Nonnull
