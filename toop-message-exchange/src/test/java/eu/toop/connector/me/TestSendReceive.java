@@ -97,6 +97,8 @@ public class TestSendReceive {
 
     final INotificationHandler notificationHandler = notification -> LOG.info("A [" + notification.getSignalType() +
         "] notification received for the message [" + notification.getRefToMessageID() + "]");
+
+    MEMDelegate.getInstance().registerNotificationHandler(notificationHandler);
   }
 
   @Nonnull

@@ -99,12 +99,22 @@ IMessageHandler handler = new IMessageHandler() {
 MEMDelegate.get().registerMessageHandler(handler);
 ```
 
-##Receivin Notifications
-The message exchange module provides information about the status of a message previously submitted for delivery to the receiving corner. The sending AS4 
+##Receiving Notifications
+The message exchange module provides information about the status of a message previously submitted for delivery to the receiving corner. The sending AS4 gateway sends back a `Notify` message to the submitter for this. You can capture and use that information like below:
 
-## Configuring the Message Exchange Module
 
-Coming soon...
+```java
+INotificationHandler handler = new INotificationHandler() {
+  @Override
+  public void handleNotification(Notification notification) {
+    LOG.info("A [" + notification.getSignalType() +
+            "] notification received for the message [" + notification.getRefToMessageID() + "]");
+  }
+};
+
+MEMDelegate.get().registerNotificationHandler(handler);
+```
+
 
 ## Sample Test Case
 
