@@ -26,17 +26,6 @@ import javax.annotation.Nullable;
  * @date: 15.02.2018.
  */
 public class SubmissionMessageProperties {
-  /**
-   * The actual sender of the data
-   */
-  @Nullable
-  public String originalSender;
-
-  /**
-   * The final recipient (on the other MS side)
-   */
-  @Nonnull
-  public String finalRecipient;
 
   /**
    * Ref to message id - referencing to the previous ebms message id if any

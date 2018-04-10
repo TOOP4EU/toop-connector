@@ -240,8 +240,6 @@ public final class EBMSUtils {
         eMessageProperties.appendChild(_property("ToPartyRole", metadata.toPartyRole));
         eMessageProperties.appendChild(_property("FromPartyId", metadata.fromPartyId));
         eMessageProperties.appendChild(_property("FromPartyRole", metadata.fromPartyRole));
-        eMessageProperties.appendChild(_property("originalSender", metadata.originalSender));
-        eMessageProperties.appendChild(_property("finalRecipient", metadata.finalRecipient));
         //NOTE: ToPartyCertificate is the DER+BASE64 encoded X509 certificate.
         //First decode as byte array, then parse it using CertificateFactory.getInstance("X509", "BC")
         //recommended provider: BouncyCastleProvider
@@ -455,9 +453,6 @@ public final class EBMSUtils {
     // TODO: read if from config maybe
     submissionData.toPartyRole = "http://toop.eu/identifiers/roles/dc";
     submissionData.fromPartyRole = "http://toop.eu/identifiers/roles/dp";
-
-    submissionData.originalSender = gatewayRoutingMetadata.getSenderParticipantId();
-    submissionData.finalRecipient = endpoint.getParticipantID().getURIEncoded();
 
     submissionData.targetURL = endpoint.getEndpointURL();
 
