@@ -15,6 +15,7 @@
  */
 package eu.toop.connector.api;
 
+import java.io.File;
 import java.net.URI;
 
 import javax.annotation.Nonnull;
@@ -28,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import com.helger.commons.annotation.Nonempty;
 import com.helger.commons.concurrent.SimpleReadWriteLock;
 import com.helger.commons.debug.GlobalDebug;
+import com.helger.commons.io.file.FileOperationManager;
 import com.helger.commons.state.ESuccess;
 import com.helger.commons.url.URLHelper;
 import com.helger.peppol.sml.ESML;
@@ -82,16 +84,22 @@ public final class TCConfig {
 
     return s_aRWLock.writeLocked ( () -> {
       s_aConfigFile = aCFB.build ();
-      if (s_aConfigFile.isRead ()) {
-        // Clear cache
-        s_aCachedSMLInfo = null;
-
-        s_aLogger.info ("Read TOOP Connector server properties from " + s_aConfigFile.getReadResource ().getPath ());
-        return ESuccess.SUCCESS;
+      if (!s_aConfigFile.isRead ()) {
+        s_aLogger.warn ("Failed to read TOOP Connector server properties from " + aCFB.getAllPaths ());
+        return ESuccess.FAILURE;
       }
 
-      s_aLogger.warn ("Failed to read TOOP Connector server properties from " + aCFB.getAllPaths ());
-      return ESuccess.FAILURE;
+      // Clear cache
+      s_aCachedSMLInfo = null;
+
+      // Ensure dump directories are present if enabled
+      if (isDebugFromDCDumpEnabled ())
+        FileOperationManager.INSTANCE.createDirRecursiveIfNotExisting (getDebugFromDCDumpPath ());
+      if (isDebugFromDPDumpEnabled ())
+        FileOperationManager.INSTANCE.createDirRecursiveIfNotExisting (getDebugFromDPDumpPath ());
+
+      s_aLogger.info ("Read TOOP Connector server properties from " + s_aConfigFile.getReadResource ().getPath ());
+      return ESuccess.SUCCESS;
     });
   }
 
@@ -335,5 +343,35 @@ public final class TCConfig {
   @Nullable
   public static String getKeystoreKeyPassword () {
     return getConfigFile ().getAsString ("toop.keystore.key.password");
+  }
+
+  public static boolean isDebugFromDCDumpEnabled () {
+    return getConfigFile ().getAsBoolean ("toop.debug.from-dc.dump.enabled", false);
+  }
+
+  @Nullable
+  public static File getDebugFromDCDumpPath () {
+    final String sPath = getConfigFile ().getAsString ("toop.debug.from-dc.dump.path");
+    return sPath == null ? null : new File (sPath);
+  }
+
+  @Nullable
+  public static File getDebugFromDCDumpPathIfEnabled () {
+    return isDebugFromDCDumpEnabled () ? getDebugFromDCDumpPath () : null;
+  }
+
+  public static boolean isDebugFromDPDumpEnabled () {
+    return getConfigFile ().getAsBoolean ("toop.debug.from-dp.dump.enabled", false);
+  }
+
+  @Nullable
+  public static File getDebugFromDPDumpPath () {
+    final String sPath = getConfigFile ().getAsString ("toop.debug.from-dp.dump.path");
+    return sPath == null ? null : new File (sPath);
+  }
+
+  @Nullable
+  public static File getDebugFromDPDumpPathIfEnabled () {
+    return isDebugFromDPDumpEnabled () ? getDebugFromDPDumpPath () : null;
   }
 }

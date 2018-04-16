@@ -28,7 +28,9 @@ import com.helger.servlet.response.UnifiedResponse;
 
 import eu.toop.commons.dataexchange.TDETOOPDataResponseType;
 import eu.toop.commons.exchange.ToopMessageBuilder;
+import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.mp.MessageProcessorDPOutgoing;
+import eu.toop.connector.mp.TCDumpHelper;
 import eu.toop.kafkaclient.ToopKafkaClient;
 
 /**
@@ -51,7 +53,9 @@ public class FromDPServlet extends HttpServlet {
 
     // Parse POST data
     // No IToopDataResponse contained here
-    final TDETOOPDataResponseType aResponseMsg = ToopMessageBuilder.parseResponseMessage (aHttpServletRequest.getInputStream ());
+    final TDETOOPDataResponseType aResponseMsg = ToopMessageBuilder.parseResponseMessage (TCDumpHelper.getDumpInputStream (aHttpServletRequest.getInputStream (),
+                                                                                                                           TCConfig.getDebugFromDPDumpPathIfEnabled (),
+                                                                                                                           "from-dp.asic"));
 
     if (aResponseMsg == null) {
       // The message content is invalid
