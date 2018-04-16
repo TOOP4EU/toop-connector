@@ -83,7 +83,7 @@ public class MPWebAppListener extends WebScopeListener {
 
     ToopKafkaClient.send (EErrorLevel.INFO, () -> m_sLogPrefix + "TOOP Connector WebApp startup");
 
-    // Register the handler need
+    // Register the AS4 handler needed
     MEMDelegate.getInstance ().registerMessageHandler (aMEMessage -> {
       // Always use response, because it is the super set of request and response
       final MEPayload aPayload = aMEMessage.head ();
