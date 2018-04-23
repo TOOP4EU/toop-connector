@@ -160,11 +160,11 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
       {
 
         String sDestinationCountryCode = null;
-        final TDELegalEntityType aLegalEntity = aRequest.getDataSubject ().getLegalEntity ();
+        final TDELegalEntityType aLegalEntity = aRequest.getDataRequestSubject ().getLegalEntity ();
         if (aLegalEntity != null)
           sDestinationCountryCode = aLegalEntity.getLegalEntityLegalAddress ().getCountryCode ().getValue ();
         if (StringHelper.hasNoText (sDestinationCountryCode)) {
-          final TDENaturalPersonType aNaturalPerson = aRequest.getDataSubject ().getNaturalPerson ();
+          final TDENaturalPersonType aNaturalPerson = aRequest.getDataRequestSubject ().getNaturalPerson ();
           if (aNaturalPerson != null)
             sDestinationCountryCode = aNaturalPerson.getNaturalPersonLegalAddress ().getCountryCode ().getValue ();
         }
