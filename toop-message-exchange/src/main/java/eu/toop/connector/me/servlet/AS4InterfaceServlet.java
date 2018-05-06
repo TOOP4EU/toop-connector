@@ -12,6 +12,7 @@
  */
 package eu.toop.connector.me.servlet;
 
+import eu.toop.connector.me.EBMSActions;
 import java.io.IOException;
 import java.util.Enumeration;
 
@@ -38,120 +39,146 @@ import eu.toop.connector.me.SoapXPathUtil;
  * @author: myildiz
  * @date: 15.02.2018.
  */
-@WebServlet ("/from-as4")
+@WebServlet("/from-as4")
 public class AS4InterfaceServlet extends HttpServlet {
 
-  private static final Logger LOG = LoggerFactory.getLogger (AS4InterfaceServlet.class);
+  private static final Logger LOG = LoggerFactory.getLogger(AS4InterfaceServlet.class);
 
   // No need to overwrite doGet - returns HTTP 405 by default
 
   @Override
-  protected void doPost (final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+  protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
 
-    LOG.info ("Received a message from the gateway");
+    LOG.info("Received a message from the gateway");
 
     // Convert the request headers into MimeHeaders
-    final MimeHeaders mimeHeaders = readMimeHeaders (req);
+    final MimeHeaders mimeHeaders = readMimeHeaders(req);
 
     // no matter what happens, we will return either a receipt or a fault
-    resp.setContentType ("text/xml");
+    resp.setContentType("text/xml");
 
     SOAPMessage receivedMessage = null;
     try {
-      final byte[] bytes = StreamHelper.getAllBytes (req.getInputStream ());
+      final byte[] bytes = StreamHelper.getAllBytes(req.getInputStream());
 
-      if (LOG.isDebugEnabled ()) {
-        LOG.debug ("Read inbound message");
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("Read inbound message");
       }
 
       // Todo, remove buffering later
-      receivedMessage = SoapUtil.createMessage (mimeHeaders, new NonBlockingByteArrayInputStream (bytes));
+      receivedMessage = SoapUtil.createMessage(mimeHeaders, new NonBlockingByteArrayInputStream(bytes));
 
       // check if the message is a notification message
 
-      if (LOG.isTraceEnabled ()) {
-        LOG.trace (SoapUtil.describe (receivedMessage));
+      if (LOG.isTraceEnabled()) {
+        LOG.trace(SoapUtil.describe(receivedMessage));
       }
 
       // get the action from the soap message
-      final Node node = SoapXPathUtil.safeFindSingleNode (receivedMessage.getSOAPHeader (), "//:CollaborationInfo/:Action");
-      final String action = node.getTextContent ();
+      final Node node = SoapXPathUtil
+          .safeFindSingleNode(receivedMessage.getSOAPHeader(), "//:CollaborationInfo/:Action");
+      final String action = node.getTextContent();
 
       switch (action) {
-      case "Deliver":
-        processDelivery (receivedMessage);
-        break;
+        case EBMSActions.ACTION_DELIVER:
+          processDelivery(receivedMessage);
+          break;
 
-      case "Notify":
-        processNotification (receivedMessage);
-        break;
+        case EBMSActions.ACTION_RELAY:
+          processNotification(receivedMessage);
+          break;
 
-      default:
-        throw new UnsupportedOperationException ("Action '" + action + "' is not supported");
+        //does not exist in the standard CIT interface.
+        case EBMSActions.ACTION_SUBMISSION_RESULT:
+          processSubmissionResult(receivedMessage);
+          break;
+
+        default:
+          throw new UnsupportedOperationException("Action '" + action + "' is not supported");
       }
 
-      if (LOG.isDebugEnabled ()) {
-        LOG.debug ("Create success receipt");
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("Create success receipt");
       }
-      final byte[] successReceipt = EBMSUtils.createSuccessReceipt (receivedMessage);
+      final byte[] successReceipt = EBMSUtils.createSuccessReceipt(receivedMessage);
 
-      if (LOG.isDebugEnabled ()) {
-        LOG.debug ("Send success receipt");
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("Send success receipt");
       }
-      resp.setStatus (HttpServletResponse.SC_OK);
-      resp.getOutputStream ().write (successReceipt);
-      resp.getOutputStream ().flush ();
+      resp.setStatus(HttpServletResponse.SC_OK);
+      resp.getOutputStream().write(successReceipt);
+      resp.getOutputStream().flush();
     } catch (final Throwable th) {
-      LOG.error ("Failed to process incoming AS4 message", th);
-      if (LOG.isDebugEnabled ()) {
-        LOG.debug ("Create fault");
-      }
-      final byte[] fault = EBMSUtils.createFault (receivedMessage, th.getMessage ());
-      if (LOG.isDebugEnabled ()) {
-        LOG.debug ("Write fault to the stream");
-      }
-      resp.setStatus (HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-      resp.getOutputStream ().write (fault);
-      resp.getOutputStream ().flush ();
+      sendBackFault(resp, receivedMessage, th);
     }
   }
 
-  private void processNotification (final SOAPMessage notification) {
-    if (LOG.isDebugEnabled ()) {
-      LOG.debug ("------->> Received notification <<-------");
-      LOG.debug ("Dispatch notification");
+  /**
+   * Create a fault message from the given input data and send it back to the client
+   */
+  protected void sendBackFault(HttpServletResponse resp, SOAPMessage receivedMessage, Throwable th) throws IOException {
+    LOG.error("Failed to process incoming AS4 message", th);
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("Create fault");
     }
-
-    if (LOG.isTraceEnabled ()) {
-      LOG.debug (SoapUtil.describe (notification));
+    final byte[] fault = EBMSUtils.createFault(receivedMessage, th.getMessage());
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("Write fault to the stream");
     }
-
-    MEMDelegate.getInstance ().dispatchNotification (notification);
+    resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+    resp.getOutputStream().write(fault);
+    resp.getOutputStream().flush();
   }
 
-  private void processDelivery (final SOAPMessage receivedMessage) {
-    if (LOG.isDebugEnabled ()) {
-      LOG.debug ("------->> Received notification <<-------");
-      LOG.debug ("Dispatch inbound message");
+  protected void processSubmissionResult(final SOAPMessage submissionResult) {
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("------->> Received SubmissionResult <<-------");
+      LOG.debug("Dispatch SubmissionResult");
     }
 
-    if (LOG.isTraceEnabled ()) {
-      LOG.debug (SoapUtil.describe (receivedMessage));
+    if (LOG.isTraceEnabled()) {
+      LOG.debug(SoapUtil.describe(submissionResult));
     }
 
-    MEMDelegate.getInstance ().dispatchInboundMessage (receivedMessage);
+    MEMDelegate.getInstance().dispatchSubmissionResult(submissionResult);
   }
 
-  private MimeHeaders readMimeHeaders (final HttpServletRequest req) {
-    final MimeHeaders mimeHeaders = new MimeHeaders ();
-    final Enumeration<String> headerNames = req.getHeaderNames ();
-    while (headerNames.hasMoreElements ()) {
-      final String header = headerNames.nextElement ();
-      final String reqHeader = req.getHeader (header);
-      if (LOG.isDebugEnabled ()) {
-        LOG.debug ("HEADER " + header + " " + reqHeader);
+  protected void processNotification(final SOAPMessage notification) {
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("------->> Received notification <<-------");
+      LOG.debug("Dispatch notification");
+    }
+
+    if (LOG.isTraceEnabled()) {
+      LOG.debug(SoapUtil.describe(notification));
+    }
+
+    MEMDelegate.getInstance().dispatchNotification(notification);
+  }
+
+  protected void processDelivery(final SOAPMessage receivedMessage) {
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("------->> Received notification <<-------");
+      LOG.debug("Dispatch inbound message");
+    }
+
+    if (LOG.isTraceEnabled()) {
+      LOG.debug(SoapUtil.describe(receivedMessage));
+    }
+
+    MEMDelegate.getInstance().dispatchInboundMessage(receivedMessage);
+  }
+
+  protected MimeHeaders readMimeHeaders(final HttpServletRequest req) {
+    final MimeHeaders mimeHeaders = new MimeHeaders();
+    final Enumeration<String> headerNames = req.getHeaderNames();
+    while (headerNames.hasMoreElements()) {
+      final String header = headerNames.nextElement();
+      final String reqHeader = req.getHeader(header);
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("HEADER " + header + " " + reqHeader);
       }
-      mimeHeaders.addHeader (header, reqHeader);
+      mimeHeaders.addHeader(header, reqHeader);
     }
     return mimeHeaders;
   }

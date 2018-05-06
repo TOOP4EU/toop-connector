@@ -1,5 +1,6 @@
-package eu.toop.connector.me;
+package eu.toop.connector.me.notifications;
 
+import eu.toop.connector.me.MEException;
 import javax.annotation.Nonnull;
 
 /**
@@ -8,13 +9,13 @@ import javax.annotation.Nonnull;
  *
  * @author yerlibilgin
  */
-public interface INotificationHandler {
+public interface IRelayResultHandler {
 
   /**
    * Implement this method in order to receive Notifications about the dispatch of the outbound message to
    * the inner corner of the receiving side
    *
-   * @throws Exception in case of error
+   * @throws MEException in case of error
    */
-  void handleNotification(@Nonnull Notification notification) throws Exception;
+  void handleNotification(@Nonnull RelayResult notification);
 }

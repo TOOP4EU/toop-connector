@@ -18,9 +18,7 @@ import java.util.Arrays;
 import java.util.Date;
 
 import javax.annotation.Nonnull;
-import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.DatatypeConverter;
@@ -28,7 +26,7 @@ import javax.xml.bind.DatatypeConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.toop.connector.me.IMessageHandler;
+import eu.toop.connector.me.notifications.IMessageHandler;
 import eu.toop.connector.me.MEMDelegate;
 import eu.toop.connector.me.MEMessage;
 import eu.toop.connector.me.MEPayload;
@@ -41,7 +39,7 @@ import eu.toop.connector.me.MEPayload;
  */
 @WebServlet("/memTestR")
 @Deprecated
-public class MEMTestReceiveServlet extends HttpServlet {
+public class MEMTestReceiveServlet extends AS4InterfaceServlet {
 
   private static final Logger LOG = LoggerFactory.getLogger(MEMTestReceiveServlet.class);
 

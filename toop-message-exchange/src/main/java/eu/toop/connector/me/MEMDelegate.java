@@ -17,10 +17,19 @@ import com.helger.commons.annotation.UsedViaReflection;
 import com.helger.commons.url.URLHelper;
 import com.helger.scope.singleton.AbstractGlobalSingleton;
 import eu.toop.connector.api.TCConfig;
+import eu.toop.connector.me.notifications.IMessageHandler;
+import eu.toop.connector.me.notifications.IRelayResultHandler;
+import eu.toop.connector.me.notifications.ISubmissionResultHandler;
+import eu.toop.connector.me.notifications.InternalRelayResultHandler;
+import eu.toop.connector.me.notifications.InternalSubmissionResultHandler;
+import eu.toop.connector.me.notifications.Notification;
+import eu.toop.connector.me.notifications.RelayResult;
+import eu.toop.connector.me.notifications.SubmissionResult;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.NotThreadSafe;
+import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 
 /**
@@ -34,11 +43,24 @@ public class MEMDelegate extends AbstractGlobalSingleton {
 
   private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MEMDelegate.class);
   private final List<IMessageHandler> messageHandlers = new ArrayList<>();
-  private final List<INotificationHandler> notificationHandlers = new ArrayList<>();
+  private final List<IRelayResultHandler> relayResultHandlers = new ArrayList<>();
+  private final List<ISubmissionResultHandler> submissionResultHandlers = new ArrayList<>();
 
-  @Deprecated
+  private final InternalRelayResultHandler internalRelayResultHandler;
+  private final InternalSubmissionResultHandler internalSRHandler;
+
+
   @UsedViaReflection
   public MEMDelegate() {
+    //register this both as a submission result listener
+    //and a notification listener in order to watch the process of
+    //a send message call
+
+    internalRelayResultHandler = new InternalRelayResultHandler();
+    internalSRHandler = new InternalSubmissionResultHandler();
+
+    relayResultHandlers.add(internalRelayResultHandler);
+    submissionResultHandlers.add(internalSRHandler);
   }
 
   @Nonnull
@@ -52,7 +74,7 @@ public class MEMDelegate extends AbstractGlobalSingleton {
    * @param gatewayRoutingMetadata The container for the endpoint information and docid/procid
    * @param meMessage the payloads and their metadata to be sent to the gateway.
    */
-  public void sendMessage(final GatewayRoutingMetadata gatewayRoutingMetadata, final MEMessage meMessage) {
+  public boolean sendMessage(final GatewayRoutingMetadata gatewayRoutingMetadata, final MEMessage meMessage) {
     LOG.debug(
         "Send message called for procid: " + gatewayRoutingMetadata.getProcessId() + " docid: " + gatewayRoutingMetadata
             .getDocumentTypeId());
@@ -60,10 +82,54 @@ public class MEMDelegate extends AbstractGlobalSingleton {
     final SubmissionMessageProperties submissionData = EBMSUtils.inferSubmissionData(gatewayRoutingMetadata);
     LOG.debug("Create SOAP Message based on the submission data and the payloads");
     final SOAPMessage soapMessage = EBMSUtils.convert2MEOutboundAS4Message(submissionData, meMessage);
-    LOG.debug(SoapUtil.describe(soapMessage));
-    LOG.debug("Send soap message");
+    if (LOG.isTraceEnabled()) {
+      LOG.trace(SoapUtil.describe(soapMessage));
+    }
+
+    String messageID;
+    try {
+      messageID = SoapXPathUtil.safeFindSingleNode(soapMessage.getSOAPHeader(), "//:MessageInfo/:MessageId")
+          .getTextContent();
+    } catch (SOAPException e) {
+      throw new MEException(e);
+    }
+
+    LOG.debug("New soap message ID " + messageID);
+    LOG.debug("Send soap message " + messageID);
     EBMSUtils.sendSOAPMessage(soapMessage, URLHelper.getAsURL(TCConfig.getMEMAS4Endpoint()));
-    LOG.debug("SOAP Message sent");
+    LOG.debug("SOAP Message " + messageID + " sent");
+
+    long timeout = TCConfig.getGatewayNotificationWaitTimeout();
+    //now that we have sent the object, first wait for the submission result
+    LOG.debug("Wait for SubmissionResult for " + messageID);
+    SubmissionResult submissionResult = (SubmissionResult) internalSRHandler.obtainNotification(messageID, timeout);
+
+    LOG.info("SubmissionResult " + submissionResult.getMessageID());
+    LOG.info("SubmissionResult " + submissionResult.getResult());
+    if (submissionResult.getResult() != ResultType.RECEIPT) {
+      LOG.error("SubmitMessageId: " + submissionResult.getErrorCode());
+      LOG.error("C2-C3 MessageId: " + submissionResult.getRefToMessageID());
+      LOG.error("ErrorCode: " + submissionResult.getErrorCode());
+      LOG.error("Description: " + submissionResult.getDescription());
+      return false;
+    }
+
+    LOG.debug("Wait for RelayResult for " + messageID);
+    RelayResult relayResult = (RelayResult) internalRelayResultHandler.obtainNotification(messageID, timeout);
+
+    LOG.info("RelayResult " + relayResult.getMessageID());
+    LOG.info("RelayResult " + relayResult.getResult());
+    if (relayResult.getResult() != ResultType.RECEIPT) {
+      LOG.error("SubmitMessageId: " + relayResult.getErrorCode());
+      LOG.error("C2-C3 MessageId: " + relayResult.getRefToMessageID());
+      LOG.error("ErrorCode: " + relayResult.getErrorCode());
+      LOG.error("Severity: " + relayResult.getSeverity());
+      LOG.error("ShortDescription: " + relayResult.getShortDescription());
+      LOG.error("Description: " + relayResult.getDescription());
+      return false;
+    }
+
+    return true;
   }
 
   /**
@@ -93,9 +159,9 @@ public class MEMDelegate extends AbstractGlobalSingleton {
    *
    * @param notificationHandler message handler to be added
    */
-  public void registerNotificationHandler(@Nonnull final INotificationHandler notificationHandler) {
+  public void registerNotificationHandler(@Nonnull final IRelayResultHandler notificationHandler) {
     ValueEnforcer.notNull(notificationHandler, "NotificationHandler");
-    notificationHandlers.add(notificationHandler);
+    relayResultHandlers.add(notificationHandler);
   }
 
   /**
@@ -103,9 +169,30 @@ public class MEMDelegate extends AbstractGlobalSingleton {
    *
    * @param notificationHandler Message handler to be removed
    */
-  public void deregisterNotificationHandler(@Nonnull final INotificationHandler notificationHandler) {
+  public void deregisterNotificationHandler(@Nonnull final IRelayResultHandler notificationHandler) {
     ValueEnforcer.notNull(notificationHandler, "NotificationHandler");
-    notificationHandlers.add(notificationHandler);
+    relayResultHandlers.add(notificationHandler);
+  }
+
+  /**
+   * Register a new submission result handler to handle the SubmissionResult's. <p> Duplicate checking skipped for now.
+   * So if you register a handler twice, its handle method will be called twice.
+   *
+   * @param submissionResultHandler submission result handler to be added
+   */
+  public void registerSubmissionResultHandler(@Nonnull final ISubmissionResultHandler submissionResultHandler) {
+    ValueEnforcer.notNull(submissionResultHandler, "SubmissionResultHandler");
+    submissionResultHandlers.add(submissionResultHandler);
+  }
+
+  /**
+   * Remove a submissionResultHandler handler from this delegate
+   *
+   * @param submissionResultHandler submissionResultHandler to be removed
+   */
+  public void deregisterSubmissionResultHandler(@Nonnull final ISubmissionResultHandler submissionResultHandler) {
+    ValueEnforcer.notNull(submissionResultHandler, "SubmissionResultHandler");
+    submissionResultHandlers.remove(submissionResultHandler);
   }
 
   /**
@@ -131,12 +218,27 @@ public class MEMDelegate extends AbstractGlobalSingleton {
   public void dispatchNotification(SOAPMessage sNotification) {
     try {
       // Do it only once
-      final Notification notification = EBMSUtils.soap2Notification(sNotification);
-      for (final INotificationHandler notificationHandler : notificationHandlers) {
+      final RelayResult notification = EBMSUtils.soap2RelayResult(sNotification);
+      for (final IRelayResultHandler notificationHandler : relayResultHandlers) {
         notificationHandler.handleNotification(notification);
       }
     } catch (final Exception e) {
       throw new MEException("Error handling message " + sNotification, e);
+    }
+  }
+
+  /**
+   * Dispatch the received SubmissioNResult to the registered listeners
+   */
+  public void dispatchSubmissionResult(SOAPMessage submissionResult) {
+    try {
+      // Do it only once
+      final SubmissionResult sSubmissionResult = EBMSUtils.soap2SubmissionResult(submissionResult);
+      for (final ISubmissionResultHandler submissionResultHandler : submissionResultHandlers) {
+        submissionResultHandler.handleSubmissionResult(sSubmissionResult);
+      }
+    } catch (final Exception e) {
+      throw new MEException("Error handling message " + submissionResult, e);
     }
   }
 }

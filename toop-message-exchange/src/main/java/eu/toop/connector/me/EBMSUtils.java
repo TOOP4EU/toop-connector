@@ -12,31 +12,6 @@
  */
 package eu.toop.connector.me;
 
-import eu.toop.connector.r2d2client.IR2D2Endpoint;
-import java.net.URL;
-import java.nio.charset.Charset;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-import java.util.Locale;
-import java.util.UUID;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.xml.XMLConstants;
-import javax.xml.bind.DatatypeConverter;
-import javax.xml.soap.AttachmentPart;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPMessage;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
-
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.charset.CharsetHelper;
 import com.helger.commons.error.level.EErrorLevel;
@@ -56,9 +31,31 @@ import com.helger.xml.namespace.MapBasedNamespaceContext;
 import com.helger.xml.serialize.read.DOMReader;
 import com.helger.xml.serialize.write.XMLWriterSettings;
 import com.helger.xml.transform.TransformSourceFactory;
-
 import eu.toop.connector.api.TCConfig;
+import eu.toop.connector.me.notifications.RelayResult;
+import eu.toop.connector.me.notifications.SubmissionResult;
+import eu.toop.connector.r2d2client.IR2D2Endpoint;
 import eu.toop.kafkaclient.ToopKafkaClient;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
+import java.util.Locale;
+import java.util.UUID;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.xml.XMLConstants;
+import javax.xml.bind.DatatypeConverter;
+import javax.xml.soap.AttachmentPart;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPMessage;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 public final class EBMSUtils {
 
@@ -105,16 +102,11 @@ public final class EBMSUtils {
   public static byte[] createFault(@Nullable final SOAPMessage soapMessage, @Nullable final String faultMessage) {
     final String fm = faultMessage != null ? faultMessage : "Unknown Error";
     String refToMessageInError;
-    try {
-      if (soapMessage != null) {
-        final Node element = SoapXPathUtil.safeFindSingleNode(soapMessage.getSOAPHeader(),
-            "//:MessageInfo/:MessageId");
-        refToMessageInError = element.getTextContent();
-      } else {
-        refToMessageInError = "";
-      }
-    } catch (final SOAPException e) {
-      throw new MEException(e.getMessage(), e);
+
+    if (soapMessage != null) {
+      refToMessageInError = getMessageId(soapMessage);
+    } else {
+      refToMessageInError = "";
     }
 
     final IMicroDocument aDoc = new MicroDocument();
@@ -224,7 +216,7 @@ public final class EBMSUtils {
       {
         final IMicroElement eCollaborationInfo = eUserMessage.appendElement(NS_EBMS, "CollaborationInfo");
         eCollaborationInfo.appendElement(NS_EBMS, "Service").appendText(TCConfig.getMEMAS4Service());
-        eCollaborationInfo.appendElement(NS_EBMS, "Action").appendText(TCConfig.getMEMAS4Action());
+        eCollaborationInfo.appendElement(NS_EBMS, "Action").appendText(EBMSActions.ACTION_SUBMIT);
         eCollaborationInfo.appendElement(NS_EBMS, "ConversationId").appendText(metadata.conversationId);
       }
 
@@ -379,47 +371,101 @@ public final class EBMSUtils {
   }
 
 
-  public static Notification soap2Notification(SOAPMessage sNotification) {
+  public static RelayResult soap2RelayResult(SOAPMessage sNotification) {
     ValueEnforcer.notNull(sNotification, "Notification");
 
-    Notification notification = new Notification();
+    RelayResult notification = new RelayResult();
 
     try {
       Node messagePropsNode = SoapXPathUtil.safeFindSingleNode(sNotification.getSOAPHeader(), "//:MessageProperties");
+
+      String messageId = SoapXPathUtil
+          .safeFindSingleNode(messagePropsNode, ".//:Property[@name='MessageId']/text()").getTextContent();
+      notification.setMessageID(messageId);
 
       String refToMessageId = SoapXPathUtil
           .safeFindSingleNode(messagePropsNode, ".//:Property[@name='RefToMessageId']/text()").getTextContent();
       notification.setRefToMessageID(refToMessageId);
 
-      String sSignalType = SoapXPathUtil.safeFindSingleNode(messagePropsNode, ".//:Property[@name='SignalType']")
+      String sSignalType = SoapXPathUtil.safeFindSingleNode(messagePropsNode, ".//:Property[@name='Result']")
           .getTextContent();
-      if ("ERROR".equalsIgnoreCase(sSignalType)) {
-        notification.setSignalType(SignalType.ERROR);
+      if (!"ERROR".equalsIgnoreCase(sSignalType)) {
+        notification.setResult(ResultType.RECEIPT);
       } else {
-        notification.setSignalType(SignalType.RECEIPT);
-      }
+        notification.setResult(ResultType.ERROR);
 
-      try {
-        String errorCode = SoapXPathUtil.safeFindSingleNode(messagePropsNode, ".//:Property[@name='ErrorCode']")
-            .getTextContent();
-        notification.setErrorCode(errorCode);
-      } catch (Exception ignored) {
-      }
+        try {
+          String errorCode = SoapXPathUtil.safeFindSingleNode(messagePropsNode, ".//:Property[@name='ErrorCode']")
+              .getTextContent();
+          notification.setErrorCode(errorCode);
+        } catch (Exception e) {
+          throw new IllegalStateException("ErrorCode is mandatory for relay result errors.");
+        }
 
-      try {
-        String shortDesc = SoapXPathUtil.safeFindSingleNode(messagePropsNode, ".//:Property[@name='ShortDescription']")
-            .getTextContent();
-        notification.setShortDescription(shortDesc);
-      } catch (Exception ignored) {
-      }
-      try {
-        String desc = SoapXPathUtil.safeFindSingleNode(messagePropsNode, ".//:Property[@name='Description']")
-            .getTextContent();
-        notification.setDescription(desc);
-      } catch (Exception ignored) {
+        try {
+          String severity = SoapXPathUtil.safeFindSingleNode(messagePropsNode, ".//:Property[@name='severity']")
+              .getTextContent();
+          notification.setSeverity(severity);
+        } catch (Exception e) {
+          throw new IllegalStateException("ErrorCode is mandatory for relay result errors.");
+        }
+
+        try {
+          String shortDesc = SoapXPathUtil
+              .safeFindSingleNode(messagePropsNode, ".//:Property[@name='ShortDescription']")
+              .getTextContent();
+          notification.setShortDescription(shortDesc);
+        } catch (Exception ignored) {
+        }
+
+        try {
+          String desc = SoapXPathUtil.safeFindSingleNode(messagePropsNode, ".//:Property[@name='Description']")
+              .getTextContent();
+          notification.setDescription(desc);
+        } catch (Exception ignored) {
+        }
       }
 
       return notification;
+    } catch (RuntimeException ex) {
+      throw ex;
+    } catch (Exception ex) {
+      throw new MEException(ex);
+    }
+  }
+
+  public static SubmissionResult soap2SubmissionResult(SOAPMessage sSubmissionResult) {
+    ValueEnforcer.notNull(sSubmissionResult, "SubmissionResult");
+
+    SubmissionResult submissionResult = new SubmissionResult();
+
+    try {
+      Node messagePropsNode = SoapXPathUtil
+          .safeFindSingleNode(sSubmissionResult.getSOAPHeader(), "//:MessageProperties");
+
+      String refToMessageID = SoapXPathUtil
+          .safeFindSingleNode(messagePropsNode, ".//:Property[@name='RefToMessageId']/text()").getTextContent();
+      submissionResult.setRefToMessageID(refToMessageID);
+
+      String messageID = SoapXPathUtil
+          .safeFindSingleNode(messagePropsNode, ".//:Property[@name='MessageId']/text()").getTextContent();
+      submissionResult.setMessageID(messageID);
+
+      String sSignalType = SoapXPathUtil.safeFindSingleNode(messagePropsNode, ".//:Property[@name='Result']")
+          .getTextContent();
+      if ("ERROR".equalsIgnoreCase(sSignalType)) {
+        submissionResult.setResult(ResultType.ERROR);
+      } else {
+        submissionResult.setResult(ResultType.RECEIPT);
+      }
+
+      try {
+        String description = SoapXPathUtil.safeFindSingleNode(messagePropsNode, ".//:Property[@name='Description']")
+            .getTextContent();
+        submissionResult.setDescription(description);
+      } catch (Exception ignored) {
+      }
+      return submissionResult;
     } catch (RuntimeException ex) {
       throw ex;
     } catch (Exception ex) {
@@ -530,5 +576,22 @@ public final class EBMSUtils {
       // Short info that it worked
       ToopKafkaClient.send(EErrorLevel.INFO, () -> "AS4 transmission seemed to have worked out fine");
     }
+  }
+
+  /**
+   * Find the //:MessageInfo/eb:MessageId.text and return it.
+   *
+   * @throws IllegalArgumentException if the message header does not contain an ebms message id
+   */
+  public static String getMessageId(SOAPMessage soapMessage) {
+    final Node element;
+    try {
+      element = SoapXPathUtil.safeFindSingleNode(soapMessage.getSOAPHeader(),
+          "//:MessageInfo/:MessageId");
+    } catch (SOAPException e) {
+      throw new MEException(e.getMessage(), e);
+    }
+
+    return element.getTextContent();
   }
 }

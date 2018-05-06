@@ -1,37 +1,43 @@
-package eu.toop.connector.me;
+package eu.toop.connector.me.notifications;
 
+import eu.toop.connector.me.ResultType;
 import java.io.Serializable;
 
 /**
- *
- * A java representation of a notification. See TOOP AS4 GW backend interface specification
  * @author yerlibilgin
  */
 public class Notification implements Serializable {
 
+  private static final long EXPIRATION_PERIOD = 5 * 60 * 1000;
   /**
-   * reference to the message (i.e. the ebms message id of the actual message)
+   * The message id of the SUBMIT message (C1 --> C2)
+   */
+  private String messageID;
+  /**
+   * The message id of the outbound message (C2 --> C3)
    */
   private String refToMessageID;
-
   /**
    * The type of this notification
    */
-  private SignalType signalType;
-
+  private ResultType result;
   /**
    * The context specific error code (or null in case of success)
    */
   private String errorCode;
-
-  private String shortDescription;
-
-
   /**
    * Long description if any
    */
   private String description;
 
+  /**
+   * The local milliseconds time when this object was created
+   */
+  private long creationTime;
+
+  Notification(){
+    creationTime = System.currentTimeMillis();
+  }
 
   public String getRefToMessageID() {
     return refToMessageID;
@@ -41,12 +47,12 @@ public class Notification implements Serializable {
     this.refToMessageID = refToMessageID;
   }
 
-  public SignalType getSignalType() {
-    return signalType;
+  public ResultType getResult() {
+    return result;
   }
 
-  public void setSignalType(SignalType signalType) {
-    this.signalType = signalType;
+  public void setResult(ResultType result) {
+    this.result = result;
   }
 
   public String getErrorCode() {
@@ -55,14 +61,6 @@ public class Notification implements Serializable {
 
   public void setErrorCode(String errorCode) {
     this.errorCode = errorCode;
-  }
-
-  public String getShortDescription() {
-    return shortDescription;
-  }
-
-  public void setShortDescription(String shortDescription) {
-    this.shortDescription = shortDescription;
   }
 
   public String getDescription() {
@@ -76,5 +74,18 @@ public class Notification implements Serializable {
   @Override
   public String toString() {
     return "Notification for " + refToMessageID;
+  }
+
+  public String getMessageID() {
+    return messageID;
+  }
+
+  public void setMessageID(String messageID) {
+    this.messageID = messageID;
+  }
+
+
+  public boolean isExpired(long currentTime){
+    return (currentTime - creationTime) > EXPIRATION_PERIOD;
   }
 }

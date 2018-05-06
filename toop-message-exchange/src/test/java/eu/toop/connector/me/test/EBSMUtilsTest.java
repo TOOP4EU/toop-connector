@@ -13,10 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package eu.toop.connector.me;
+package eu.toop.connector.me.test;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import eu.toop.connector.me.EBMSUtils;
+import eu.toop.connector.me.MEMessage;
+import eu.toop.connector.me.MEPayload;
+import eu.toop.connector.me.SubmissionMessageProperties;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
@@ -37,7 +41,7 @@ public final class EBSMUtilsTest {
   public void testFault () throws SOAPException, IOException {
     final SubmissionMessageProperties sd = new SubmissionMessageProperties();
     sd.conversationId = "EBSMUtilsTestConv";
-    final MEMessage msg = new MEMessage (new MEPayload (CMimeType.APPLICATION_XML, "blafoo",
+    final MEMessage msg = new MEMessage (new MEPayload(CMimeType.APPLICATION_XML, "blafoo",
                                                         "<?xml version='1.0'?><root demo='true' />".getBytes (StandardCharsets.ISO_8859_1)));
     final SOAPMessage sm = EBMSUtils.convert2MEOutboundAS4Message (sd, msg);
     assertNotNull (sm);

@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
@@ -50,7 +51,7 @@ public class SoapXPathUtil {
    * @param xpath
    * @return
    */
-  @Nonnull
+  @Nullable
   public static Node findSingleNode(@Nonnull final Node node,
       @Nonnull final String xpath) {
     try {

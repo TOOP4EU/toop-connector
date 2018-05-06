@@ -19,7 +19,12 @@ final byte[] payloadData = "<sample>xml</sample>".getBytes (StandardCharsets.ISO
 final MEPayload payload = new MEPayload (contentType, payloadId, payloadData);
 final MEMessage meMessage = new MEMessage (payload);
 
-MEMDelegate.getInstance ().sendMessage (metadata, meMessage);
+boolean result = MEMDelegate.getInstance ().sendMessage (metadata, meMessage);
+
+if(result == true){
+  //that's great my message just got sent to the other
+  //gateway
+}
 ```
 
 This message will create this AS4 message:

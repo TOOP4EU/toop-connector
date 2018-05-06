@@ -19,9 +19,7 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
 import javax.annotation.Nonnull;
-import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -37,7 +35,7 @@ import eu.toop.commons.doctype.EToopProcess;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.TCSettings;
 import eu.toop.connector.me.GatewayRoutingMetadata;
-import eu.toop.connector.me.IMessageHandler;
+import eu.toop.connector.me.notifications.IMessageHandler;
 import eu.toop.connector.me.MEMDelegate;
 import eu.toop.connector.me.MEMessage;
 import eu.toop.connector.me.MEPayload;
@@ -50,7 +48,7 @@ import eu.toop.connector.r2d2client.R2D2Endpoint;
  */
 @WebServlet("/memTest")
 @Deprecated
-public class MEMTestTriggerServlet extends HttpServlet {
+public class MEMTestTriggerServlet extends AS4InterfaceServlet {
 
   private static final Logger LOG = LoggerFactory.getLogger(MEMTestTriggerServlet.class);
 
@@ -82,7 +80,6 @@ public class MEMTestTriggerServlet extends HttpServlet {
       e.printStackTrace();
     }
   }
-
 
   @Nonnull
   private IR2D2Endpoint createSampleEndpoint() throws Exception {

@@ -3,7 +3,7 @@ package eu.toop.connector.me;
 /**
  * @author yerlibilgin
  */
-public enum SignalType {
+public enum ResultType {
   /**
    * The signal is a RECEIPT signal (the notification is a success notification)
    */
