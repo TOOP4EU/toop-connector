@@ -200,12 +200,12 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
 
         // For all matching endpoints
         for (final IR2D2Endpoint aEP : aEndpoints) {
-          final GatewayRoutingMetadata metadata = new GatewayRoutingMetadata (aSenderID.getURIEncoded (),
-                                                                              aDocTypeID.getURIEncoded (),
-                                                                              aProcessID.getURIEncoded (), aEP);
-          ToopKafkaClient.send (EErrorLevel.INFO, sLogPrefix + "Sending MEM message to " + aEP.getEndpointURL ()
-                                                  + " using " + aEP.getTransportProtocol ());
-          MEMDelegate.getInstance ().sendMessage (metadata, meMessage);
+          final GatewayRoutingMetadata aMetadata = new GatewayRoutingMetadata (aSenderID.getURIEncoded (),
+                                                                               aDocTypeID.getURIEncoded (),
+                                                                               aProcessID.getURIEncoded (), aEP);
+          ToopKafkaClient.send (EErrorLevel.INFO, sLogPrefix + "Sending MEM message to '" + aEP.getEndpointURL ()
+                                                  + "' using transport protocol '" + aEP.getTransportProtocol () + "'");
+          MEMDelegate.getInstance ().sendMessage (aMetadata, meMessage);
         }
       }
     }
