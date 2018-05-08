@@ -41,7 +41,7 @@ import com.helger.peppol.identifier.generic.process.IProcessIdentifier;
 import com.helger.scope.IScope;
 import com.helger.web.scope.singleton.AbstractGlobalWebSingleton;
 
-import eu.toop.commons.dataexchange.TDETOOPDataResponseType;
+import eu.toop.commons.dataexchange.TDETOOPResponseType;
 import eu.toop.commons.exchange.ToopMessageBuilder;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.TCSettings;
@@ -67,10 +67,10 @@ public final class MessageProcessorDPOutgoing extends AbstractGlobalWebSingleton
    *
    * @author Philip Helger
    */
-  static final class Performer implements IConcurrentPerformer<TDETOOPDataResponseType> {
+  static final class Performer implements IConcurrentPerformer<TDETOOPResponseType> {
     private static final Logger s_aLogger = LoggerFactory.getLogger (MessageProcessorDPOutgoing.Performer.class);
 
-    public void runAsync (@Nonnull final TDETOOPDataResponseType aResponse) throws Exception {
+    public void runAsync (@Nonnull final TDETOOPResponseType aResponse) throws Exception {
       final String sRequestID = aResponse.getDataRequestIdentifier ().getValue ();
       final String sLogPrefix = "[" + sRequestID + "] ";
       ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "Received DP outgoing response (3/4)");
@@ -159,7 +159,7 @@ public final class MessageProcessorDPOutgoing extends AbstractGlobalWebSingleton
   // Just to have custom named threads....
   private static final ThreadFactory s_aThreadFactory = new BasicThreadFactory.Builder ().setNamingPattern ("MP-DP-Out-%d")
                                                                                          .setDaemon (true).build ();
-  private final ConcurrentCollectorSingle<TDETOOPDataResponseType> m_aCollector = new ConcurrentCollectorSingle<> ();
+  private final ConcurrentCollectorSingle<TDETOOPResponseType> m_aCollector = new ConcurrentCollectorSingle<> ();
   private final ExecutorService m_aExecutorPool;
 
   @Deprecated
@@ -197,7 +197,7 @@ public final class MessageProcessorDPOutgoing extends AbstractGlobalWebSingleton
    * @return {@link ESuccess}. Never <code>null</code>.
    */
   @Nonnull
-  public ESuccess enqueue (@Nonnull final TDETOOPDataResponseType aMsg) {
+  public ESuccess enqueue (@Nonnull final TDETOOPResponseType aMsg) {
     ValueEnforcer.notNull (aMsg, "Msg");
     try {
       m_aCollector.queueObject (aMsg);

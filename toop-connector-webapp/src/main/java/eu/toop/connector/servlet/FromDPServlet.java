@@ -26,7 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.helger.commons.error.level.EErrorLevel;
 import com.helger.servlet.response.UnifiedResponse;
 
-import eu.toop.commons.dataexchange.TDETOOPDataResponseType;
+import eu.toop.commons.dataexchange.TDETOOPResponseType;
 import eu.toop.commons.exchange.ToopMessageBuilder;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.mp.MessageProcessorDPOutgoing;
@@ -36,8 +36,8 @@ import eu.toop.kafkaclient.ToopKafkaClient;
 /**
  * This method is called by the <code>toop-interface</code> project in the
  * direction DP to DC.<br>
- * The input is an ASiC archive that contains a {@link TDETOOPDataResponseType}.
- * If extracted successfully it is put in {@link MessageProcessorDPOutgoing} for
+ * The input is an ASiC archive that contains a {@link TDETOOPResponseType}. If
+ * extracted successfully it is put in {@link MessageProcessorDPOutgoing} for
  * further processing.
  *
  * @author Philip Helger
@@ -53,9 +53,9 @@ public class FromDPServlet extends HttpServlet {
 
     // Parse POST data
     // No IToopDataResponse contained here
-    final TDETOOPDataResponseType aResponseMsg = ToopMessageBuilder.parseResponseMessage (TCDumpHelper.getDumpInputStream (aHttpServletRequest.getInputStream (),
-                                                                                                                           TCConfig.getDebugFromDPDumpPathIfEnabled (),
-                                                                                                                           "from-dp.asic"));
+    final TDETOOPResponseType aResponseMsg = ToopMessageBuilder.parseResponseMessage (TCDumpHelper.getDumpInputStream (aHttpServletRequest.getInputStream (),
+                                                                                                                       TCConfig.getDebugFromDPDumpPathIfEnabled (),
+                                                                                                                       "from-dp.asic"));
 
     if (aResponseMsg == null) {
       // The message content is invalid

@@ -26,7 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.helger.commons.error.level.EErrorLevel;
 import com.helger.servlet.response.UnifiedResponse;
 
-import eu.toop.commons.dataexchange.TDETOOPDataRequestType;
+import eu.toop.commons.dataexchange.TDETOOPRequestType;
 import eu.toop.commons.exchange.ToopMessageBuilder;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.mp.MessageProcessorDCOutgoing;
@@ -36,8 +36,8 @@ import eu.toop.kafkaclient.ToopKafkaClient;
 /**
  * This method is called by the <code>toop-interface</code> project in the
  * direction DC to DP.<br>
- * The input is an ASiC archive that contains a {@link TDETOOPDataRequestType}.
- * If extracted successfully it is put in {@link MessageProcessorDCOutgoing} for
+ * The input is an ASiC archive that contains a {@link TDETOOPRequestType}. If
+ * extracted successfully it is put in {@link MessageProcessorDCOutgoing} for
  * further processing.
  *
  * @author Philip Helger
@@ -53,9 +53,9 @@ public class FromDCServlet extends HttpServlet {
 
     // Parse POST data
     // No IToopDataRequest contained here
-    final TDETOOPDataRequestType aRequestMsg = ToopMessageBuilder.parseRequestMessage (TCDumpHelper.getDumpInputStream (aHttpServletRequest.getInputStream (),
-                                                                                                                        TCConfig.getDebugFromDCDumpPathIfEnabled (),
-                                                                                                                        "from-dc.asic"));
+    final TDETOOPRequestType aRequestMsg = ToopMessageBuilder.parseRequestMessage (TCDumpHelper.getDumpInputStream (aHttpServletRequest.getInputStream (),
+                                                                                                                    TCConfig.getDebugFromDCDumpPathIfEnabled (),
+                                                                                                                    "from-dc.asic"));
 
     if (aRequestMsg == null) {
       // The message content is invalid
