@@ -45,6 +45,7 @@ import eu.toop.commons.dataexchange.TDETOOPDataResponseType;
 import eu.toop.commons.exchange.ToopMessageBuilder;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.TCSettings;
+import eu.toop.connector.me.EActingSide;
 import eu.toop.connector.me.GatewayRoutingMetadata;
 import eu.toop.connector.me.MEMDelegate;
 import eu.toop.connector.me.MEMessage;
@@ -140,7 +141,8 @@ public final class MessageProcessorDPOutgoing extends AbstractGlobalWebSingleton
           // routing metadata - sender ID!
           final GatewayRoutingMetadata aGWM = new GatewayRoutingMetadata (aDPParticipantID.getURIEncoded (),
                                                                           aDocTypeID.getURIEncoded (),
-                                                                          aProcessID.getURIEncoded (), aEP);
+                                                                          aProcessID.getURIEncoded (), aEP,
+                                                                          EActingSide.DP);
           // Reuse the same MEMessage for each endpoint
           MEMDelegate.getInstance ().sendMessage (aGWM, aMEMessage);
         }

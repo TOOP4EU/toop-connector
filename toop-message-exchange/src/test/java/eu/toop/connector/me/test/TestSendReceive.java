@@ -12,13 +12,28 @@
  */
 package eu.toop.connector.me.test;
 
+import java.nio.charset.StandardCharsets;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+
+import javax.annotation.Nonnull;
+
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.helger.commons.mime.CMimeType;
 import com.helger.commons.mime.IMimeType;
 import com.helger.peppol.identifier.generic.participant.IParticipantIdentifier;
 import com.helger.scope.mock.ScopeAwareTestSetup;
+
 import eu.toop.commons.doctype.EToopDocumentType;
 import eu.toop.commons.doctype.EToopProcess;
 import eu.toop.connector.api.TCSettings;
+import eu.toop.connector.me.EActingSide;
 import eu.toop.connector.me.GatewayRoutingMetadata;
 import eu.toop.connector.me.MEMDelegate;
 import eu.toop.connector.me.MEMessage;
@@ -27,16 +42,6 @@ import eu.toop.connector.me.notifications.IMessageHandler;
 import eu.toop.connector.me.notifications.IRelayResultHandler;
 import eu.toop.connector.r2d2client.IR2D2Endpoint;
 import eu.toop.connector.r2d2client.R2D2Endpoint;
-import java.nio.charset.StandardCharsets;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-import javax.annotation.Nonnull;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This test suite tests the whole sending/receiving of a simple MEMessage by mocking the as4 gateway
@@ -86,7 +91,7 @@ public class TestSendReceive {
   public void testSendReceive() throws Exception {
     final GatewayRoutingMetadata metadata = new GatewayRoutingMetadata("iso6523-actorid-upis::0088:123456",
         EToopDocumentType.DOCTYPE_REGISTERED_ORGANIZATION_REQUEST.getURIEncoded(),
-        EToopProcess.PROCESS_REQUEST_RESPONSE.getURIEncoded(), createSampleEndpoint());
+        EToopProcess.PROCESS_REQUEST_RESPONSE.getURIEncoded(), createSampleEndpoint(), EActingSide.DC);
 
     final String payloadId = "xmlpayload@dp";
     final IMimeType contentType = CMimeType.APPLICATION_XML;
@@ -95,7 +100,7 @@ public class TestSendReceive {
     final MEPayload payload = new MEPayload(contentType, payloadId, payloadData);
     final MEMessage meMessage = new MEMessage(payload);
 
-    boolean result = MEMDelegate.getInstance().sendMessage(metadata, meMessage);
+    final boolean result = MEMDelegate.getInstance().sendMessage(metadata, meMessage);
 
     Assertions.assertTrue(result, "Message sending result must be true");
 

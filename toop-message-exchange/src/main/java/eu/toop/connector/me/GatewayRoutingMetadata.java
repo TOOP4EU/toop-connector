@@ -49,18 +49,23 @@ public class GatewayRoutingMetadata implements Serializable {
    */
   private final IR2D2Endpoint endpoint;
 
+  private final EActingSide side;
+
 
   public GatewayRoutingMetadata(@Nonnull @Nonempty final String sSenderParticipantId,
       @Nonnull @Nonempty final String sDocumentTypeId,
-      @Nonnull @Nonempty final String sProcessId, @Nonnull final IR2D2Endpoint aEndpoint) {
+      @Nonnull @Nonempty final String sProcessId, @Nonnull final IR2D2Endpoint aEndpoint,
+      @Nonnull final EActingSide eSide) {
     ValueEnforcer.notEmpty(sSenderParticipantId, "SenderParticipantID");
     ValueEnforcer.notEmpty(sDocumentTypeId, "DocumentTypeID");
     ValueEnforcer.notEmpty(sProcessId, "ProcessID");
     ValueEnforcer.notNull(aEndpoint, "Endpoint");
+    ValueEnforcer.notNull(eSide, "Side");
     senderParticipantId = sSenderParticipantId;
     documentTypeId = sDocumentTypeId;
     processId = sProcessId;
     endpoint = aEndpoint;
+    side = eSide;
   }
 
   @Nonnull
@@ -84,5 +89,10 @@ public class GatewayRoutingMetadata implements Serializable {
   @Nonnull
   public IR2D2Endpoint getEndpoint() {
     return endpoint;
+  }
+
+  @Nonnull
+  public EActingSide getSide() {
+    return side;
   }
 }

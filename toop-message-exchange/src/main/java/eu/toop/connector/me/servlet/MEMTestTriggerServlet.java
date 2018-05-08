@@ -34,11 +34,12 @@ import eu.toop.commons.doctype.EToopDocumentType;
 import eu.toop.commons.doctype.EToopProcess;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.TCSettings;
+import eu.toop.connector.me.EActingSide;
 import eu.toop.connector.me.GatewayRoutingMetadata;
-import eu.toop.connector.me.notifications.IMessageHandler;
 import eu.toop.connector.me.MEMDelegate;
 import eu.toop.connector.me.MEMessage;
 import eu.toop.connector.me.MEPayload;
+import eu.toop.connector.me.notifications.IMessageHandler;
 import eu.toop.connector.r2d2client.IR2D2Endpoint;
 import eu.toop.connector.r2d2client.R2D2Endpoint;
 
@@ -62,7 +63,7 @@ public class MEMTestTriggerServlet extends AS4InterfaceServlet {
     try {
       metadata = new GatewayRoutingMetadata("iso6523-actorid-upis::0088:123456",
           EToopDocumentType.DOCTYPE_REGISTERED_ORGANIZATION_REQUEST.getURIEncoded(),
-          EToopProcess.PROCESS_REQUEST_RESPONSE.getURIEncoded(), createSampleEndpoint());
+          EToopProcess.PROCESS_REQUEST_RESPONSE.getURIEncoded(), createSampleEndpoint(), EActingSide.DC);
 
       final String payloadId = "xmlpayload@dp";
       final IMimeType contentType = CMimeType.APPLICATION_XML;
@@ -86,7 +87,7 @@ public class MEMTestTriggerServlet extends AS4InterfaceServlet {
     final IParticipantIdentifier identifier = TCSettings.getIdentifierFactory()
         .createParticipantIdentifier("var1", "var2");
 
-    InputStream certStream = this.getClass().getResourceAsStream("/testcert.der");
+    final InputStream certStream = this.getClass().getResourceAsStream("/testcert.der");
     final X509Certificate x509 = (X509Certificate) CertificateFactory.getInstance("X509")
         .generateCertificate(certStream);
     final R2D2Endpoint endpoint = new R2D2Endpoint(identifier, "protocol", "http://sampleendpointurl", x509);
