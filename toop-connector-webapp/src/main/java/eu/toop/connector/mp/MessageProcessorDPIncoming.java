@@ -73,7 +73,8 @@ public final class MessageProcessorDPIncoming extends AbstractGlobalWebSingleton
       ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "Received DP Incoming Request (2/4)");
 
       // Map to DP concepts
-      final String sDestinationMappingURI = TCConfig.getSMMMappingNamespaceURI ();
+      // TODO make it dependent on requested document type
+      final String sDestinationMappingURI = TCConfig.getSMMMappingNamespaceURIForDP ();
       if (StringHelper.hasText (sDestinationMappingURI)) {
         final SMMClient aClient = new SMMClient ();
         for (final TDEDataElementRequestType aDER : aRequest.getDataElementRequest ()) {

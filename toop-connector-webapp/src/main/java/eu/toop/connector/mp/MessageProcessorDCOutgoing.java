@@ -54,6 +54,7 @@ import eu.toop.commons.exchange.ToopMessageBuilder;
 import eu.toop.commons.jaxb.ToopXSDHelper;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.TCSettings;
+import eu.toop.connector.me.EActingSide;
 import eu.toop.connector.me.GatewayRoutingMetadata;
 import eu.toop.connector.me.MEMDelegate;
 import eu.toop.connector.me.MEMessage;
@@ -200,12 +201,17 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
 
         // For all matching endpoints
         for (final IR2D2Endpoint aEP : aEndpoints) {
-          final GatewayRoutingMetadata metadata = new GatewayRoutingMetadata (aSenderID.getURIEncoded (),
-                                                                              aDocTypeID.getURIEncoded (),
-                                                                              aProcessID.getURIEncoded (), aEP);
-          ToopKafkaClient.send (EErrorLevel.INFO, sLogPrefix + "Sending MEM message to " + aEP.getEndpointURL ()
-                                                  + " using " + aEP.getTransportProtocol ());
-          MEMDelegate.getInstance ().sendMessage (metadata, meMessage);
+          final GatewayRoutingMetadata aMetadata = new GatewayRoutingMetadata (aSenderID.getURIEncoded (),
+                                                                               aDocTypeID.getURIEncoded (),
+                                                                               aProcessID.getURIEncoded (), aEP,
+                                                                               EActingSide.DC);
+          ToopKafkaClient.send (EErrorLevel.INFO, sLogPrefix + "Sending MEM message to '" + aEP.getEndpointURL ()
+                                                  + "' using transport protocol '" + aEP.getTransportProtocol () + "'");
+          MEMDelegate.getInstance ().sendMessage (aMetadata, meMessage);
+
+          // XXX just send to the first one, to mimic, that this is how it will be in the
+          // final version (where step 4/4 will aggregate)
+          break;
         }
       }
     }

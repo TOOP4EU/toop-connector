@@ -61,16 +61,6 @@ public class SubmissionMessageProperties {
   public String toPartyIdType;
 
   /**
-   * FROM party ID
-   */
-  @Nonnull
-  public String fromPartyId;
-  /**
-   * FROM party ID
-   */
-  @Nonnull
-  public String fromPartyRole;
-  /**
    * //CollaborationInfo/service
    */
   @Nonnull
