@@ -29,8 +29,8 @@ import com.helger.commons.id.factory.StringIDFromGlobalLongIDFactory;
 import com.helger.commons.string.StringHelper;
 import com.helger.web.servlets.scope.WebScopeListener;
 
-import eu.toop.commons.dataexchange.TDETOOPDataRequestType;
-import eu.toop.commons.dataexchange.TDETOOPDataResponseType;
+import eu.toop.commons.dataexchange.TDETOOPRequestType;
+import eu.toop.commons.dataexchange.TDETOOPResponseType;
 import eu.toop.commons.exchange.ToopMessageBuilder;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.me.MEMDelegate;
@@ -91,14 +91,14 @@ public class MPWebAppListener extends WebScopeListener {
         // Extract from ASiC
         final Object aMsg = ToopMessageBuilder.parseRequestOrResponse (aPayload.getDataInputStream ());
 
-        if (aMsg instanceof TDETOOPDataResponseType) {
+        if (aMsg instanceof TDETOOPResponseType) {
           // This is the way from DP back to DC; we're in DC incoming mode
           ToopKafkaClient.send (EErrorLevel.INFO, () -> m_sLogPrefix + "TC got DC incoming request (4/4)");
-          MessageProcessorDCIncoming.getInstance ().enqueue ((TDETOOPDataResponseType) aMsg);
-        } else if (aMsg instanceof TDETOOPDataRequestType) {
+          MessageProcessorDCIncoming.getInstance ().enqueue ((TDETOOPResponseType) aMsg);
+        } else if (aMsg instanceof TDETOOPRequestType) {
           // This is the way from DC to DP; we're in DP incoming mode
           ToopKafkaClient.send (EErrorLevel.INFO, () -> m_sLogPrefix + "TC got DP incoming request (2/4)");
-          MessageProcessorDPIncoming.getInstance ().enqueue ((TDETOOPDataRequestType) aMsg);
+          MessageProcessorDPIncoming.getInstance ().enqueue ((TDETOOPRequestType) aMsg);
         } else
           ToopKafkaClient.send (EErrorLevel.ERROR, () -> m_sLogPrefix + "Unsuspported Message: " + aMsg);
       } else

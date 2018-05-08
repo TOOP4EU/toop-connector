@@ -48,7 +48,7 @@ import eu.toop.commons.dataexchange.TDEConceptRequestType;
 import eu.toop.commons.dataexchange.TDEDataElementRequestType;
 import eu.toop.commons.dataexchange.TDELegalEntityType;
 import eu.toop.commons.dataexchange.TDENaturalPersonType;
-import eu.toop.commons.dataexchange.TDETOOPDataRequestType;
+import eu.toop.commons.dataexchange.TDETOOPRequestType;
 import eu.toop.commons.doctype.EToopDocumentType;
 import eu.toop.commons.exchange.ToopMessageBuilder;
 import eu.toop.commons.jaxb.ToopXSDHelper;
@@ -79,10 +79,10 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
    *
    * @author Philip Helger
    */
-  static final class Performer implements IConcurrentPerformer<TDETOOPDataRequestType> {
+  static final class Performer implements IConcurrentPerformer<TDETOOPRequestType> {
     private static final Logger s_aLogger = LoggerFactory.getLogger (MessageProcessorDCOutgoing.Performer.class);
 
-    public void runAsync (@Nonnull final TDETOOPDataRequestType aRequest) throws Exception {
+    public void runAsync (@Nonnull final TDETOOPRequestType aRequest) throws Exception {
       final EToopDocumentType eDocType = EToopDocumentType.getFromIDOrNull (aRequest.getDocumentTypeIdentifier ()
                                                                                     .getSchemeID (),
                                                                             aRequest.getDocumentTypeIdentifier ()
@@ -220,7 +220,7 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
   // Just to have custom named threads....
   private static final ThreadFactory s_aThreadFactory = new BasicThreadFactory.Builder ().setNamingPattern ("MP-DC-Out-%d")
                                                                                          .setDaemon (true).build ();
-  private final ConcurrentCollectorSingle<TDETOOPDataRequestType> m_aCollector = new ConcurrentCollectorSingle<> ();
+  private final ConcurrentCollectorSingle<TDETOOPRequestType> m_aCollector = new ConcurrentCollectorSingle<> ();
   private final ExecutorService m_aExecutorPool;
 
   @Deprecated
@@ -258,7 +258,7 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
    * @return {@link ESuccess}. Never <code>null</code>.
    */
   @Nonnull
-  public ESuccess enqueue (@Nonnull final TDETOOPDataRequestType aMsg) {
+  public ESuccess enqueue (@Nonnull final TDETOOPRequestType aMsg) {
     ValueEnforcer.notNull (aMsg, "Msg");
     try {
       m_aCollector.queueObject (aMsg);
