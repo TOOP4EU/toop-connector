@@ -205,6 +205,8 @@ public class MEMDelegate extends AbstractGlobalSingleton {
    * @param message message to be dispatched
    */
   public void dispatchInboundMessage(@Nonnull final SOAPMessage message) {
+    LOG.info("Received a Deliver message\n" + //
+         "   Inbound  AS4  Message ID: " + EBMSUtils.getMessageId(message));
     try {
       // Do it only once
       final MEMessage aMEMessage = EBMSUtils.soap2MEMessage(message);

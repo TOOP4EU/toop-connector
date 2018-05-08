@@ -12,7 +12,7 @@
  */
 package eu.toop.connector.me.servlet;
 
-import eu.toop.connector.me.EBMSActions;
+import eu.toop.connector.me.MEMConstants;
 import java.io.IOException;
 import java.util.Enumeration;
 
@@ -78,16 +78,16 @@ public class AS4InterfaceServlet extends HttpServlet {
       final String action = node.getTextContent();
 
       switch (action) {
-        case EBMSActions.ACTION_DELIVER:
+        case MEMConstants.ACTION_DELIVER:
           processDelivery(receivedMessage);
           break;
 
-        case EBMSActions.ACTION_RELAY:
+        case MEMConstants.ACTION_RELAY:
           processRelayResult(receivedMessage);
           break;
 
         //does not exist in the standard CIT interface.
-        case EBMSActions.ACTION_SUBMISSION_RESULT:
+        case MEMConstants.ACTION_SUBMISSION_RESULT:
           processSubmissionResult(receivedMessage);
           break;
 
@@ -107,12 +107,12 @@ public class AS4InterfaceServlet extends HttpServlet {
       resp.getOutputStream().write(successReceipt);
       resp.getOutputStream().flush();
 
-      LOG.info("Done processing inbound AS4 message");
+      LOG.debug("Done processing inbound AS4 message");
     } catch (final Throwable th) {
       LOG.error("Error processing the message", th);
       sendBackFault(resp, receivedMessage, th);
     } finally {
-      LOG.info("End doPost");
+      LOG.debug("End doPost");
     }
 
     resp.getOutputStream().close();

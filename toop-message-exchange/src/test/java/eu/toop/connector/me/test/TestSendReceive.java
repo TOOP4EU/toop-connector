@@ -15,6 +15,7 @@ package eu.toop.connector.me.test;
 import com.helger.commons.url.URLHelper;
 import com.helger.scope.mock.ScopeAwareTestSetup;
 import eu.toop.connector.api.TCConfig;
+import eu.toop.connector.me.EActingSide;
 import eu.toop.connector.me.GatewayRoutingMetadata;
 import eu.toop.connector.me.MEMDelegate;
 import eu.toop.connector.me.MEMessage;
@@ -83,7 +84,8 @@ public class TestSendReceive {
 
   @Test
   public void testSendReceive() {
-    final GatewayRoutingMetadata metadata = SampleDataProvider.createGatewayRoutingMetadata();
+    final GatewayRoutingMetadata metadata = SampleDataProvider
+        .createGatewayRoutingMetadata(EActingSide.DC, TCConfig.getMEMAS4Endpoint());
     final MEMessage meMessage = SampleDataProvider.createSampleMessage();
 
     boolean result = MEMDelegate.getInstance().sendMessage(metadata, meMessage);
@@ -94,10 +96,6 @@ public class TestSendReceive {
 
     MEMDelegate.getInstance().registerMessageHandler(handler);
 
-    final IRelayResultHandler notificationHandler = notification -> LOG.info("A [" + notification.getResult() +
-        "] notification received for the message [" + notification.getRefToMessageID() + "]");
-
-    MEMDelegate.getInstance().registerNotificationHandler(notificationHandler);
   }
 
 }

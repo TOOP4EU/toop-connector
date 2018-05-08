@@ -30,7 +30,7 @@ public class SubmissionHandler {
 
 
       LOG.info("Send back a submission result");
-      SOAPMessage submissionResult = TestEBMSUtils.inferSubmissionResult(receivedMessage);
+      SOAPMessage submissionResult = DummyEBMSUtils.inferSubmissionResult(receivedMessage);
 
       EBMSUtils.sendSOAPMessage(submissionResult, BACKEND_URL);
 
@@ -42,7 +42,7 @@ public class SubmissionHandler {
 
 
       LOG.info("Send back a relay result");
-      SOAPMessage relayResult = TestEBMSUtils.inferRelayResult(receivedMessage);
+      SOAPMessage relayResult = DummyEBMSUtils.inferRelayResult(receivedMessage);
 
       EBMSUtils.sendSOAPMessage(relayResult, BACKEND_URL);
 

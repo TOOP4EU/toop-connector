@@ -2,6 +2,7 @@ package eu.toop.connector.me.test;
 
 import com.helger.scope.mock.ScopeAwareTestSetup;
 import eu.toop.connector.api.TCConfig;
+import eu.toop.connector.me.EActingSide;
 import eu.toop.connector.me.GatewayRoutingMetadata;
 import eu.toop.connector.me.MEMDelegate;
 import eu.toop.connector.me.MEMessage;
@@ -27,14 +28,13 @@ public class IntegrationTest {
 
   static {
     System.setProperty(TCConfig.SYSTEM_PROPERTY_TOOP_CONNECTOR_SERVER_PROPERTIES_PATH,
-        "toop-connector.elonia.test.properties");
+        "toop-connector.elonia.integrationTest.properties");
     PropertyConfigurator.configure(IntegrationTest.class.getResourceAsStream("/log4j.properties"));
   }
 
   private static final Logger LOG = LoggerFactory.getLogger(IntegrationTest.class);
 
   public static void main(String[] args) throws Exception {
-
 
     ScopeAwareTestSetup.setupScopeTests();
     //initialize c1
@@ -46,13 +46,15 @@ public class IntegrationTest {
 
     BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
 
-
     //wait for the other side to receive the message
     final DeliveryWatcher deliveryWatcher = new DeliveryWatcher();
     MEMDelegate.getInstance().registerMessageHandler(deliveryWatcher);
 
     Thread.sleep(1000);
 
+    //the URL of both C2 and C3 were set to the same endpoint
+    //for this test.
+    String recivingSideURL = TCConfig.getMEMAS4Endpoint();
 
     String command;
     inputLoop:
@@ -60,12 +62,12 @@ public class IntegrationTest {
       switch (command) {
         case "e2f":
           updateConfig(command);
-          sendMessage(deliveryWatcher);
+          sendMessage(deliveryWatcher, EActingSide.DC, recivingSideURL);
           break;
 
         case "f2e":
           updateConfig(command);
-          sendMessage(deliveryWatcher);
+          sendMessage(deliveryWatcher, EActingSide.DP, recivingSideURL);
           break;
 
         case "q":
@@ -83,7 +85,7 @@ public class IntegrationTest {
   private static void updateConfig(String line) {
     String targetConfiguration = "toop-connector.elonia.integrationTest.properties";
 
-    switch (line){
+    switch (line) {
       case "e2f":
         targetConfiguration = "toop-connector.elonia.integrationTest.properties";
         break;
@@ -102,23 +104,32 @@ public class IntegrationTest {
   /**
    * Send a message from one side to the other
    */
-  private static void sendMessage(DeliveryWatcher deliveryWatcher, ) {
+  private static void sendMessage(DeliveryWatcher deliveryWatcher, EActingSide actingSide,
+      String recivingSideURL) {
     deliveryWatcher.reset();
 
-    final GatewayRoutingMetadata gatewayRoutingMetadata = SampleDataProvider.createGatewayRoutingMetadata();
+    //set the address of the receiving gateway to t
+    final GatewayRoutingMetadata gatewayRoutingMetadata = SampleDataProvider.createGatewayRoutingMetadata(actingSide,
+        recivingSideURL);
     final MEMessage meMessage = SampleDataProvider.createSampleMessage();
 
     boolean result = MEMDelegate.getInstance().sendMessage(gatewayRoutingMetadata, meMessage);
 
     if (!result) {
+      LOG.info("TEST for " + actingSide + " FAILED");
       LOG.error("Failed to send a message");
+
+      return;
     }
 
+    LOG.info("Wait for the delivery");
     MEMessage obtainedMessage = deliveryWatcher.obtainMessage(60, TimeUnit.SECONDS);
     if (obtainedMessage == null) {
       LOG.error("Failed to receive a message from the other side within 20 seconds timeout");
+      LOG.info("TEST for " + actingSide + " FAILED");
     } else {
       LOG.info("The message was successfully received from the other side");
+      LOG.info("TEST for " + actingSide + " SUCCESSFUL");
     }
   }
 
@@ -133,7 +144,7 @@ public class IntegrationTest {
   static class DeliveryWatcher implements IMessageHandler {
 
     private CountDownLatch latch = new CountDownLatch(1);
-    private MEMessage meMessage;
+    private volatile MEMessage meMessage;
 
 
     public void reset() {
@@ -149,18 +160,31 @@ public class IntegrationTest {
      */
     @Override
     public void handleMessage(@Nonnull MEMessage meMessage) throws Exception {
-      this.meMessage = meMessage;
+      synchronized (this) {
+        this.meMessage = meMessage;
+      }
+
       latch.countDown();
     }
 
     public MEMessage obtainMessage(long timeout, TimeUnit timeUnit) {
+
+      if (this.meMessage != null) {
+        return meMessage;
+      }
+
       try {
         latch.await(timeout, timeUnit);
       } catch (InterruptedException e) {
         LOG.error("wait interrupted", e);
       }
-
-      return meMessage;
+      synchronized (this) {
+        try {
+          return meMessage;
+        } finally {
+          meMessage = null;
+        }
+      }
     }
   }
 }
