@@ -208,6 +208,10 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
           ToopKafkaClient.send (EErrorLevel.INFO, sLogPrefix + "Sending MEM message to '" + aEP.getEndpointURL ()
                                                   + "' using transport protocol '" + aEP.getTransportProtocol () + "'");
           MEMDelegate.getInstance ().sendMessage (aMetadata, meMessage);
+
+          // XXX just send to the first one, to mimic, that this is how it will be in the
+          // final version (where step 4/4 will aggregate)
+          break;
         }
       }
     }
