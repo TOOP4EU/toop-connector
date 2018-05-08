@@ -230,8 +230,8 @@ public final class EBMSUtils {
         eMessageProperties.appendChild(_property("ToPartyId", metadata.toPartyId));
         eMessageProperties.appendChild(_property("ToPartyIdType", metadata.toPartyIdType));
         eMessageProperties.appendChild(_property("ToPartyRole", metadata.toPartyRole));
-        eMessageProperties.appendChild(_property("FromPartyId", metadata.fromPartyId));
-        eMessageProperties.appendChild(_property("FromPartyRole", metadata.fromPartyRole));
+        //eMessageProperties.appendChild(_property("FromPartyId", metadata.fromPartyId));
+        //eMessageProperties.appendChild(_property("FromPartyRole", metadata.fromPartyRole));
         //NOTE: ToPartyCertificate is the DER+BASE64 encoded X509 certificate.
         //First decode as byte array, then parse it using CertificateFactory.getInstance("X509", "BC")
         //recommended provider: BouncyCastleProvider
@@ -407,7 +407,7 @@ public final class EBMSUtils {
               .getTextContent();
           notification.setSeverity(severity);
         } catch (Exception e) {
-          throw new IllegalStateException("ErrorCode is mandatory for relay result errors.");
+          //throw new IllegalStateException("Severity is mandatory for relay result errors.");
         }
 
         try {
@@ -447,24 +447,25 @@ public final class EBMSUtils {
           .safeFindSingleNode(messagePropsNode, ".//:Property[@name='RefToMessageId']/text()").getTextContent();
       submissionResult.setRefToMessageID(refToMessageID);
 
-      String messageID = SoapXPathUtil
-          .safeFindSingleNode(messagePropsNode, ".//:Property[@name='MessageId']/text()").getTextContent();
-      submissionResult.setMessageID(messageID);
-
       String sSignalType = SoapXPathUtil.safeFindSingleNode(messagePropsNode, ".//:Property[@name='Result']")
           .getTextContent();
       if ("ERROR".equalsIgnoreCase(sSignalType)) {
         submissionResult.setResult(ResultType.ERROR);
-      } else {
-        submissionResult.setResult(ResultType.RECEIPT);
-      }
 
-      try {
+        //description must be there when there is an error
         String description = SoapXPathUtil.safeFindSingleNode(messagePropsNode, ".//:Property[@name='Description']")
             .getTextContent();
         submissionResult.setDescription(description);
-      } catch (Exception ignored) {
+
+      } else {
+        submissionResult.setResult(ResultType.RECEIPT);
+
+        //message id is conditional, it must be there only in case of receipt
+        String messageID = SoapXPathUtil
+            .safeFindSingleNode(messagePropsNode, ".//:Property[@name='MessageId']/text()").getTextContent();
+        submissionResult.setMessageID(messageID);
       }
+
       return submissionResult;
     } catch (RuntimeException ex) {
       throw ex;
@@ -554,24 +555,14 @@ public final class EBMSUtils {
       final String code = StringHelper.getNotNull(errorElement.getAttribute("errorCode")).toUpperCase(Locale.US);
 
       final StringBuilder errBuff = new StringBuilder();
-      if (!"EBMS:0303".equals(code)) {
-        errBuff.append("Error code invalid. Expected [EBMS:0303], Received: [" + code + "]\n");
-      }
-      if (!"FAILURE".equals(severity)) {
-        errBuff.append("Severity invalid. Expected [Failure], Received: [" + severity + "]\n");
-      }
-      if (!"COMMUNICATION".equals(cat)) {
-        errBuff.append("Invalid category . Expected [Communication], Received: [" + cat + "]\n");
-      }
-      if (!"DECOMPRESSIONFAILURE".equals(shortDescription)) {
-        errBuff.append("ShortDescription invalid. Expected [DecompressionFailure], Received: [" + shortDescription
-            + "]\n");
-      }
+      errBuff.append("CODE: [" + code + "]\n");
+      errBuff.append("Severity: [" + severity + "]\n");
+      errBuff.append("Category: [" + cat + "]\n");
+      errBuff.append("ShortDescription: [" + shortDescription
+          + "]\n");
+      ToopKafkaClient.send(EErrorLevel.ERROR, () -> "Error from AS4 transmission:" + errBuff.toString());
+      throw new MEException(errBuff.toString());
 
-      if (errBuff.length() > 0) {
-        ToopKafkaClient.send(EErrorLevel.ERROR, () -> "Error from AS4 transmission: " + errBuff.toString());
-        throw new MEException(errBuff.toString());
-      }
     } else {
       // Short info that it worked
       ToopKafkaClient.send(EErrorLevel.INFO, () -> "AS4 transmission seemed to have worked out fine");

@@ -9,7 +9,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
  * @author yerlibilgin
  */
 public class BackendServletContainer {
-  public static void init(final int port) {
+  public static void createServletOn(final int port,  String localPath) {
     new Thread(() -> {
       try {
         Server server = new Server(port);
@@ -17,7 +17,7 @@ public class BackendServletContainer {
         ServletHandler servletHandler = new ServletHandler();
         server.setHandler(servletHandler);
 
-        ServletHolder servletHolder = servletHandler.addServletWithMapping(AS4InterfaceServlet.class, "/backend");
+        ServletHolder servletHolder = servletHandler.addServletWithMapping(AS4InterfaceServlet.class, localPath);
 
         servletHolder.getServlet();
 

@@ -12,25 +12,15 @@
  */
 package eu.toop.connector.me.test;
 
-import com.helger.commons.mime.CMimeType;
-import com.helger.commons.mime.IMimeType;
-import com.helger.peppol.identifier.generic.participant.IParticipantIdentifier;
+import com.helger.commons.url.URLHelper;
 import com.helger.scope.mock.ScopeAwareTestSetup;
-import eu.toop.commons.doctype.EToopDocumentType;
-import eu.toop.commons.doctype.EToopProcess;
-import eu.toop.connector.api.TCSettings;
+import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.me.GatewayRoutingMetadata;
 import eu.toop.connector.me.MEMDelegate;
 import eu.toop.connector.me.MEMessage;
-import eu.toop.connector.me.MEPayload;
 import eu.toop.connector.me.notifications.IMessageHandler;
 import eu.toop.connector.me.notifications.IRelayResultHandler;
-import eu.toop.connector.r2d2client.IR2D2Endpoint;
-import eu.toop.connector.r2d2client.R2D2Endpoint;
-import java.nio.charset.StandardCharsets;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-import javax.annotation.Nonnull;
+import java.net.URL;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -47,7 +37,9 @@ import org.slf4j.LoggerFactory;
 public class TestSendReceive {
 
   static {
-    System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "INFO");
+    System.setProperty(TCConfig.SYSTEM_PROPERTY_TOOP_CONNECTOR_SERVER_PROPERTIES_PATH,
+        "toop-connector.elonia.unitTest.properties");
+    TCConfig.reloadConfiguration();
   }
 
   //this must be created after the above level setting statement
@@ -62,11 +54,18 @@ public class TestSendReceive {
   public static void prepare() throws Exception {
     // Port must match the message-processor.properties
     LOG.debug("Prepare for the test");
-    final int backendPort = 10001;
-    final int gwPort = 10002;
 
-    BackendServletContainer.init(backendPort);
-    GWMocServletContainer.init(gwPort);
+    final URL backendURL = URLHelper.getAsURL("http://localhost:10001/backend");
+    final URL gwURL = URLHelper.getAsURL(TCConfig.getMEMAS4Endpoint());
+
+    LOG.info("backend port: " + backendURL.getPort());
+    LOG.info("backend localpath: " + backendURL.getPath());
+    LOG.info("GW port: " + gwURL.getPort());
+    LOG.info("GW localpath: " + gwURL.getPath());
+
+    BackendServletContainer.createServletOn(backendURL.getPort(), backendURL.getPath());
+
+    GWMocServletContainer.createServletOn(gwURL.getPort(), gwURL.getPath());
 
     ScopeAwareTestSetup.setupScopeTests();
 
@@ -83,17 +82,9 @@ public class TestSendReceive {
   }
 
   @Test
-  public void testSendReceive() throws Exception {
-    final GatewayRoutingMetadata metadata = new GatewayRoutingMetadata("iso6523-actorid-upis::0088:123456",
-        EToopDocumentType.DOCTYPE_REGISTERED_ORGANIZATION_REQUEST.getURIEncoded(),
-        EToopProcess.PROCESS_REQUEST_RESPONSE.getURIEncoded(), createSampleEndpoint());
-
-    final String payloadId = "xmlpayload@dp";
-    final IMimeType contentType = CMimeType.APPLICATION_XML;
-    final byte[] payloadData = "<sample>xml</sample>".getBytes(StandardCharsets.ISO_8859_1);
-
-    final MEPayload payload = new MEPayload(contentType, payloadId, payloadData);
-    final MEMessage meMessage = new MEMessage(payload);
+  public void testSendReceive() {
+    final GatewayRoutingMetadata metadata = SampleDataProvider.createGatewayRoutingMetadata();
+    final MEMessage meMessage = SampleDataProvider.createSampleMessage();
 
     boolean result = MEMDelegate.getInstance().sendMessage(metadata, meMessage);
 
@@ -107,18 +98,6 @@ public class TestSendReceive {
         "] notification received for the message [" + notification.getRefToMessageID() + "]");
 
     MEMDelegate.getInstance().registerNotificationHandler(notificationHandler);
-  }
-
-  @Nonnull
-  private IR2D2Endpoint createSampleEndpoint() throws Exception {
-    final IParticipantIdentifier identifier = TCSettings.getIdentifierFactory().createParticipantIdentifier("var1",
-        "var2");
-
-    final X509Certificate x509 = (X509Certificate) CertificateFactory.getInstance("X509")
-        .generateCertificate(this.getClass()
-            .getResourceAsStream("/testcert.der"));
-    final R2D2Endpoint endpoint = new R2D2Endpoint(identifier, "protocol", "http://sampleendpointurl", x509);
-    return endpoint;
   }
 
 }

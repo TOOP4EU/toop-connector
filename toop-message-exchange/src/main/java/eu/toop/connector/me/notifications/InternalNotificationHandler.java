@@ -38,17 +38,16 @@ public class InternalNotificationHandler {
 
 
   protected void handleNotification(Notification notification) {
-    LOG.info("A " + notification.getClass().getSimpleName() + " received for messageID " + notification.getMessageID());
     LockableObjectCarrier carrier;
 
     //check the message quee and see if the new object is already there
     synchronized (messageQueue) {
-      String messageID = notification.getMessageID();
-      if (messageQueue.containsKey(messageID)) {
-        carrier = messageQueue.get(messageID);
+      String submitMessageID = notification.getRefToMessageID();
+      if (messageQueue.containsKey(submitMessageID)) {
+        carrier = messageQueue.get(submitMessageID);
       } else {
         carrier = new LockableObjectCarrier();
-        messageQueue.put(messageID, carrier);
+        messageQueue.put(submitMessageID, carrier);
       }
     }
 
@@ -61,31 +60,31 @@ public class InternalNotificationHandler {
 
 
   /**
-   * Wait for a {@link Notification} for a message with the given <code>messageId</code> and for a maximum timeout of
+   * Wait for a {@link Notification} for a message with the given <code>submitMessageID</code> and for a maximum timeout of
    * <code>timeout</code>. Return the obtained notification
    *
-   * @param messageId the id of the submit message
+   * @param submitMessageID the id of the submit message
    * @param timeout maximum amount to wait for the object. 0 means forever
    * @return the obtained {@link Notification}
    */
-  public Notification obtainNotification(String messageId, long timeout) {
+  public Notification obtainNotification(String submitMessageID, long timeout) {
     ValueEnforcer.isGE0(timeout, "timeout");
-    ValueEnforcer.notNull(messageId, "MessageId");
+    ValueEnforcer.notNull(submitMessageID, "MessageId");
 
     LockableObjectCarrier<Notification> carrier = null;
 
-    LOG.debug("Wait for a " + targetTypeName + " with a messageID: " + messageId);
+    LOG.debug("Wait for a " + targetTypeName + " with a messageID: " + submitMessageID);
 
     synchronized (messageQueue) {
-      if (messageQueue.containsKey(messageId)) {
-        LOG.debug("we already have a " + targetTypeName + " message for " + messageId);
-        carrier = messageQueue.remove(messageId);
+      if (messageQueue.containsKey(submitMessageID)) {
+        LOG.debug("we already have a " + targetTypeName + " message for " + submitMessageID);
+        carrier = messageQueue.remove(submitMessageID);
       } else {
         //we don't have a carrier yet. Create one
-        LOG.debug("We don't have a " + targetTypeName + " waiter for " + messageId + ". Create a waiter for it");
+        LOG.debug("We don't have a " + targetTypeName + " waiter for " + submitMessageID + ". Create a waiter for it");
 
         carrier = new LockableObjectCarrier();
-        messageQueue.put(messageId, carrier);
+        messageQueue.put(submitMessageID, carrier);
       }
     }
 
@@ -96,14 +95,14 @@ public class InternalNotificationHandler {
         try {
           carrier.wait(timeout);
         } catch (InterruptedException e) {
-          LOG.warn("Wait for message " + messageId + " was interrupted.");
-          throw new MEException("Wait for message " + messageId + " was interrupted.", e);
+          LOG.warn("Wait for message " + submitMessageID + " was interrupted.");
+          throw new MEException("Wait for message " + submitMessageID + " was interrupted.", e);
         }
       }
     }
 
     if (carrier.getActualObject() == null) {
-      throw new MEException("Couldn't obtain a " + targetTypeName + " with a messageID " + messageId);
+      throw new MEException("Couldn't obtain a " + targetTypeName + " with a messageID " + submitMessageID);
     }
 
     return carrier.getActualObject();

@@ -1,6 +1,5 @@
 package eu.toop.connector.me.test;
 
-import com.helger.commons.string.StringHelper;
 import eu.toop.connector.me.DateTimeUtils;
 import eu.toop.connector.me.EBMSActions;
 import eu.toop.connector.me.EBMSUtils;

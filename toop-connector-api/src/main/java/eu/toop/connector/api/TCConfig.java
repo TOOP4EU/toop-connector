@@ -239,19 +239,6 @@ public final class TCConfig {
     return eProtocol;
   }
 
-  /**
-   * @return The basic AS4 interface that must be fulfilled. Never <code>null</code>.
-   */
-  @Nonnull
-  public static ETCAS4Interface getMEMAS4Interface() {
-    final String sID = getConfigFile().getAsString("toop.mem.as4.interface", ETCAS4Interface.DEFAULT.getID());
-    final ETCAS4Interface eProtocol = ETCAS4Interface.getFromIDOrNull(sID);
-    if (eProtocol == null) {
-      throw new IllegalStateException("Failed to resolve AS4 interface with ID '" + sID + "'");
-    }
-    return eProtocol;
-  }
-
   // GW_URL
   @Nullable
   public static String getMEMAS4Endpoint() {

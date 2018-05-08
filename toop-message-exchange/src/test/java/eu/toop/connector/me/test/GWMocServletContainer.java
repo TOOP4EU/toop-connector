@@ -10,7 +10,7 @@ public class GWMocServletContainer {
 
   private static Server server;
 
-  public static void init(final int port) {
+  public static void createServletOn(final int port, final String localPath) {
     new Thread(() -> {
       try {
         server = new Server(port);
@@ -18,7 +18,7 @@ public class GWMocServletContainer {
         ServletHandler servletHandler = new ServletHandler();
         server.setHandler(servletHandler);
 
-        servletHandler.addServletWithMapping(SampleGWServlet.class, "/gw");
+        servletHandler.addServletWithMapping(SampleGWServlet.class, localPath);
 
         server.start();
         server.join();

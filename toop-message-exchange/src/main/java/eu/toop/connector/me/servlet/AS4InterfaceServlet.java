@@ -44,8 +44,6 @@ public class AS4InterfaceServlet extends HttpServlet {
 
   private static final Logger LOG = LoggerFactory.getLogger(AS4InterfaceServlet.class);
 
-  // No need to overwrite doGet - returns HTTP 405 by default
-
   @Override
   protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
 
@@ -85,7 +83,7 @@ public class AS4InterfaceServlet extends HttpServlet {
           break;
 
         case EBMSActions.ACTION_RELAY:
-          processNotification(receivedMessage);
+          processRelayResult(receivedMessage);
           break;
 
         //does not exist in the standard CIT interface.
@@ -108,9 +106,16 @@ public class AS4InterfaceServlet extends HttpServlet {
       resp.setStatus(HttpServletResponse.SC_OK);
       resp.getOutputStream().write(successReceipt);
       resp.getOutputStream().flush();
+
+      LOG.info("Done processing inbound AS4 message");
     } catch (final Throwable th) {
+      LOG.error("Error processing the message", th);
       sendBackFault(resp, receivedMessage, th);
+    } finally {
+      LOG.info("End doPost");
     }
+
+    resp.getOutputStream().close();
   }
 
   /**
@@ -134,36 +139,27 @@ public class AS4InterfaceServlet extends HttpServlet {
     if (LOG.isDebugEnabled()) {
       LOG.debug("------->> Received SubmissionResult <<-------");
       LOG.debug("Dispatch SubmissionResult");
-    }
-
-    if (LOG.isTraceEnabled()) {
-      LOG.debug(SoapUtil.describe(submissionResult));
+      LOG.debug("\n" + SoapUtil.describe(submissionResult));
     }
 
     MEMDelegate.getInstance().dispatchSubmissionResult(submissionResult);
   }
 
-  protected void processNotification(final SOAPMessage notification) {
+  protected void processRelayResult(final SOAPMessage notification) {
     if (LOG.isDebugEnabled()) {
-      LOG.debug("------->> Received notification <<-------");
+      LOG.debug("------->> Received RelayResult <<-------");
       LOG.debug("Dispatch notification");
+      LOG.debug("\n" + SoapUtil.describe(notification));
     }
 
-    if (LOG.isTraceEnabled()) {
-      LOG.debug(SoapUtil.describe(notification));
-    }
-
-    MEMDelegate.getInstance().dispatchNotification(notification);
+    MEMDelegate.getInstance().dispatchRelayResult(notification);
   }
 
   protected void processDelivery(final SOAPMessage receivedMessage) {
     if (LOG.isDebugEnabled()) {
-      LOG.debug("------->> Received notification <<-------");
+      LOG.debug("------->> Received Delivery <<-------");
       LOG.debug("Dispatch inbound message");
-    }
-
-    if (LOG.isTraceEnabled()) {
-      LOG.debug(SoapUtil.describe(receivedMessage));
+      LOG.debug("\n" + SoapUtil.describe(receivedMessage));
     }
 
     MEMDelegate.getInstance().dispatchInboundMessage(receivedMessage);
