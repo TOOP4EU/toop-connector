@@ -48,7 +48,7 @@ public class SampleDataProvider {
       String receivingGWURL) {
     final GatewayRoutingMetadata metadata = new GatewayRoutingMetadata("iso6523-actorid-upis::0088:123456",
         EToopDocumentType.DOCTYPE_REGISTERED_ORGANIZATION_REQUEST.getURIEncoded(),
-        EToopProcess.PROCESS_REQUEST_RESPONSE.getURIEncoded(), createSampleEndpoint(actingSide, receivingGWURL), actingSide);
+        EToopProcess.REQUEST_RESPONSE_DATA.getURIEncoded(), createSampleEndpoint(actingSide, receivingGWURL), actingSide);
 
     return metadata;
   }
