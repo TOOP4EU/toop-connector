@@ -1,11 +1,16 @@
 package eu.toop.connector.me.notifications;
 
-import com.helger.commons.ValueEnforcer;
-import eu.toop.connector.me.MEException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import com.helger.commons.CGlobal;
+import com.helger.commons.ValueEnforcer;
+import com.helger.commons.wrapper.Wrapper;
+
+import eu.toop.connector.me.MEException;
 
 /**
  * @author yerlibilgin
@@ -14,19 +19,19 @@ public class InternalNotificationHandler {
 
   private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InternalNotificationHandler.class);
 
-  private final HashMap<String, LockableObjectCarrier<Notification>> messageQueue = new HashMap<>();
+  private final Map<String, Wrapper<Notification>> messageQueue = new HashMap<>();
   private final String targetTypeName;
 
-  public InternalNotificationHandler(Class<? extends Notification> targetType) {
+  public InternalNotificationHandler(final Class<? extends Notification> targetType) {
     this.targetTypeName = targetType.getSimpleName();
 
     //create a timer to periodically purge the expired notification and submission result
     //messages
 
-    Timer timer = new Timer(targetTypeName + "-purgatory-timer");
+    final Timer timer = new Timer(targetTypeName + "-purgatory-timer");
 
-    long delay = 5 * 60 * 1000; //5 minutes
-    long period = 5 * 60 * 1000; //5 minutes
+    final long delay = 5 * CGlobal.MILLISECONDS_PER_MINUTE; //5 minutes
+    final long period = 5 * CGlobal.MILLISECONDS_PER_MINUTE; //5 minutes
 
     timer.scheduleAtFixedRate(new TimerTask() {
       @Override
@@ -37,23 +42,23 @@ public class InternalNotificationHandler {
   }
 
 
-  protected void handleNotification(Notification notification) {
-    LockableObjectCarrier carrier;
+  protected void handleNotification(final Notification notification) {
+    Wrapper<Notification> carrier;
 
     //check the message quee and see if the new object is already there
     synchronized (messageQueue) {
-      String submitMessageID = notification.getRefToMessageID();
+      final String submitMessageID = notification.getRefToMessageID();
       if (messageQueue.containsKey(submitMessageID)) {
         carrier = messageQueue.get(submitMessageID);
       } else {
-        carrier = new LockableObjectCarrier();
+        carrier = new Wrapper<>();
         messageQueue.put(submitMessageID, carrier);
       }
     }
 
     //now that we have a carrier, notify anyone who waits for it
     synchronized (carrier) {
-      carrier.setActualObject(notification);
+      carrier.set(notification);
       carrier.notifyAll();
     }
   }
@@ -67,11 +72,11 @@ public class InternalNotificationHandler {
    * @param timeout maximum amount to wait for the object. 0 means forever
    * @return the obtained {@link Notification}
    */
-  public Notification obtainNotification(String submitMessageID, long timeout) {
+  public Notification obtainNotification(final String submitMessageID, final long timeout) {
     ValueEnforcer.isGE0(timeout, "timeout");
     ValueEnforcer.notNull(submitMessageID, "MessageId");
 
-    LockableObjectCarrier<Notification> carrier = null;
+    Wrapper<Notification> carrier = null;
 
     LOG.debug("Wait for a " + targetTypeName + " with a messageID: " + submitMessageID);
 
@@ -83,29 +88,29 @@ public class InternalNotificationHandler {
         //we don't have a carrier yet. Create one
         LOG.debug("We don't have a " + targetTypeName + " waiter for " + submitMessageID + ". Create a waiter for it");
 
-        carrier = new LockableObjectCarrier();
+        carrier = new Wrapper<>();
         messageQueue.put(submitMessageID, carrier);
       }
     }
 
     //we have a nunnull carrier here
-    if (carrier.getActualObject() == null) {
+    if (carrier.get() == null) {
       //we haven't received the actual object yet. So wait for it
       synchronized (carrier) {
         try {
           carrier.wait(timeout);
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
           LOG.warn("Wait for message " + submitMessageID + " was interrupted.");
           throw new MEException("Wait for message " + submitMessageID + " was interrupted.", e);
         }
       }
     }
 
-    if (carrier.getActualObject() == null) {
+    if (carrier.get() == null) {
       throw new MEException("Couldn't obtain a " + targetTypeName + " with a messageID " + submitMessageID);
     }
 
-    return carrier.getActualObject();
+    return carrier.get();
   }
 
 
@@ -113,17 +118,17 @@ public class InternalNotificationHandler {
    * Check the notification and subm.result queue and purge the expired messages
    */
   private void purgeExpiredNotifications() {
-    long currentTime = System.currentTimeMillis();
+    final long currentTime = System.currentTimeMillis();
     synchronized (messageQueue) {
-      ArrayList<String> trash = new ArrayList<>();
+      final ArrayList<String> trash = new ArrayList<>();
 
-      for (String messageID : messageQueue.keySet()) {
-        LockableObjectCarrier<Notification> carrier = messageQueue.get(messageID);
-        if (carrier != null && carrier.getActualObject() != null && carrier.getActualObject().isExpired(currentTime)) {
+      for (final String messageID : messageQueue.keySet()) {
+        final Wrapper<Notification> carrier = messageQueue.get(messageID);
+        if (carrier != null && carrier.get() != null && carrier.get().isExpired(currentTime)) {
           trash.add(messageID);
         }
       }
-      for (String messageID : trash) {
+      for (final String messageID : trash) {
         messageQueue.remove(messageID);
       }
     }

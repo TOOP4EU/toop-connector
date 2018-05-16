@@ -12,6 +12,32 @@
  */
 package eu.toop.connector.me;
 
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
+import java.util.Locale;
+import java.util.UUID;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.naming.InvalidNameException;
+import javax.naming.ldap.LdapName;
+import javax.naming.ldap.Rdn;
+import javax.xml.XMLConstants;
+import javax.xml.bind.DatatypeConverter;
+import javax.xml.soap.AttachmentPart;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPMessage;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
+
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.charset.CharsetHelper;
 import com.helger.commons.error.level.EErrorLevel;
@@ -31,34 +57,12 @@ import com.helger.xml.namespace.MapBasedNamespaceContext;
 import com.helger.xml.serialize.read.DOMReader;
 import com.helger.xml.serialize.write.XMLWriterSettings;
 import com.helger.xml.transform.TransformSourceFactory;
+
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.me.notifications.RelayResult;
 import eu.toop.connector.me.notifications.SubmissionResult;
 import eu.toop.connector.r2d2client.IR2D2Endpoint;
 import eu.toop.kafkaclient.ToopKafkaClient;
-import java.net.URL;
-import java.nio.charset.Charset;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
-import java.util.Locale;
-import java.util.UUID;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.naming.InvalidNameException;
-import javax.naming.ldap.LdapName;
-import javax.naming.ldap.Rdn;
-import javax.xml.XMLConstants;
-import javax.xml.bind.DatatypeConverter;
-import javax.xml.soap.AttachmentPart;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPMessage;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 
 public final class EBMSUtils {
 
@@ -439,26 +443,26 @@ public final class EBMSUtils {
     }
   }
 
-  public static SubmissionResult soap2SubmissionResult(SOAPMessage sSubmissionResult) {
+  public static SubmissionResult soap2SubmissionResult(final SOAPMessage sSubmissionResult) {
     ValueEnforcer.notNull(sSubmissionResult, "SubmissionResult");
 
-    SubmissionResult submissionResult = new SubmissionResult();
+    final SubmissionResult submissionResult = new SubmissionResult();
 
     try {
-      Node messagePropsNode = SoapXPathUtil
+      final Node messagePropsNode = SoapXPathUtil
           .safeFindSingleNode(sSubmissionResult.getSOAPHeader(), "//:MessageProperties");
 
-      String refToMessageID = SoapXPathUtil
+      final String refToMessageID = SoapXPathUtil
           .safeFindSingleNode(messagePropsNode, ".//:Property[@name='RefToMessageId']/text()").getTextContent();
       submissionResult.setRefToMessageID(refToMessageID);
 
-      String sSignalType = SoapXPathUtil.safeFindSingleNode(messagePropsNode, ".//:Property[@name='Result']")
+      final String sSignalType = SoapXPathUtil.safeFindSingleNode(messagePropsNode, ".//:Property[@name='Result']")
           .getTextContent();
       if ("ERROR".equalsIgnoreCase(sSignalType)) {
         submissionResult.setResult(ResultType.ERROR);
 
         //description must be there when there is an error
-        String description = SoapXPathUtil.safeFindSingleNode(messagePropsNode, ".//:Property[@name='Description']")
+        final String description = SoapXPathUtil.safeFindSingleNode(messagePropsNode, ".//:Property[@name='Description']")
             .getTextContent();
         submissionResult.setDescription(description);
 
@@ -466,15 +470,15 @@ public final class EBMSUtils {
         submissionResult.setResult(ResultType.RECEIPT);
 
         //message id is conditional, it must be there only in case of receipt
-        String messageID = SoapXPathUtil
+        final String messageID = SoapXPathUtil
             .safeFindSingleNode(messagePropsNode, ".//:Property[@name='MessageId']/text()").getTextContent();
         submissionResult.setMessageID(messageID);
       }
 
       return submissionResult;
-    } catch (RuntimeException ex) {
+    } catch (final RuntimeException ex) {
       throw ex;
-    } catch (Exception ex) {
+    } catch (final Exception ex) {
       throw new MEException(ex);
     }
   }
@@ -590,14 +594,16 @@ public final class EBMSUtils {
   /**
    * Find the //:MessageInfo/eb:MessageId.text and return it.
    *
-   * @throws IllegalArgumentException if the message header does not contain an ebms message id
+   * @param soapMessage SOAP message to extract data from
+   * @return The message ID
+   * @throws MEException if the message header does not contain an ebms message id
    */
-  public static String getMessageId(SOAPMessage soapMessage) {
+  public static String getMessageId(final SOAPMessage soapMessage) {
     final Node element;
     try {
       element = SoapXPathUtil.safeFindSingleNode(soapMessage.getSOAPHeader(),
           "//:MessageInfo/:MessageId");
-    } catch (SOAPException e) {
+    } catch (final SOAPException e) {
       throw new MEException(e.getMessage(), e);
     }
 

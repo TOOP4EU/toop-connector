@@ -12,14 +12,11 @@
  */
 package eu.toop.connector.me;
 
-import com.helger.commons.ValueEnforcer;
-import com.helger.commons.error.level.EErrorLevel;
-import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
-import eu.toop.kafkaclient.ToopKafkaClient;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.MimeHeaders;
@@ -28,11 +25,14 @@ import javax.xml.soap.SOAPConnectionFactory;
 import javax.xml.soap.SOAPConstants;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
-import org.w3c.dom.Node;
+
+import com.helger.commons.error.level.EErrorLevel;
+import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
+
+import eu.toop.kafkaclient.ToopKafkaClient;
 
 /**
- * @author: myildiz
- * @date: 12.02.2018.
+ * @author myildiz at 12.02.2018.
  */
 public class SoapUtil {
 

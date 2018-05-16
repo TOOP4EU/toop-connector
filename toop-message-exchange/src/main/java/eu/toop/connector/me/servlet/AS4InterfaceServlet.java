@@ -12,7 +12,6 @@
  */
 package eu.toop.connector.me.servlet;
 
-import eu.toop.connector.me.MEMConstants;
 import java.io.IOException;
 import java.util.Enumeration;
 
@@ -31,13 +30,13 @@ import com.helger.commons.io.stream.NonBlockingByteArrayInputStream;
 import com.helger.commons.io.stream.StreamHelper;
 
 import eu.toop.connector.me.EBMSUtils;
+import eu.toop.connector.me.MEMConstants;
 import eu.toop.connector.me.MEMDelegate;
 import eu.toop.connector.me.SoapUtil;
 import eu.toop.connector.me.SoapXPathUtil;
 
 /**
- * @author: myildiz
- * @date: 15.02.2018.
+ * @author myildiz at 15.02.2018.
  */
 @WebServlet("/from-as4")
 public class AS4InterfaceServlet extends HttpServlet {
@@ -120,8 +119,12 @@ public class AS4InterfaceServlet extends HttpServlet {
 
   /**
    * Create a fault message from the given input data and send it back to the client
+   * @param resp HTTP Servlet response
+   * @param receivedMessage Received SOAP message
+   * @param th Exception that occurred
+   * @throws IOException In case of IO error
    */
-  protected void sendBackFault(HttpServletResponse resp, SOAPMessage receivedMessage, Throwable th) throws IOException {
+  protected void sendBackFault(final HttpServletResponse resp, final SOAPMessage receivedMessage, final Throwable th) throws IOException {
     LOG.error("Failed to process incoming AS4 message", th);
     if (LOG.isDebugEnabled()) {
       LOG.debug("Create fault");

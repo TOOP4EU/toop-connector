@@ -34,8 +34,7 @@ import eu.toop.connector.me.notifications.IMessageHandler;
 /**
  * This test suite tests the whole sending/receiving of a simple MEMessage by mocking the as4 gateway
  *
- * @author: myildiz
- * @date: 16.02.2018.
+ * @author myildiz at 16.02.2018.
  */
 public class TestSendReceive {
 
@@ -90,7 +89,7 @@ public class TestSendReceive {
         .createGatewayRoutingMetadata(EActingSide.DC, TCConfig.getMEMAS4Endpoint());
     final MEMessage meMessage = SampleDataProvider.createSampleMessage();
 
-    boolean result = MEMDelegate.getInstance().sendMessage(metadata, meMessage);
+    final boolean result = MEMDelegate.getInstance().sendMessage(metadata, meMessage);
 
     Assertions.assertTrue(result, "Message sending result must be true");
 

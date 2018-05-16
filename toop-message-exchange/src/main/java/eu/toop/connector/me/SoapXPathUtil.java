@@ -31,8 +31,7 @@ import org.w3c.dom.NodeList;
 import com.helger.xml.namespace.MapBasedNamespaceContext;
 
 /**
- * @author: myildiz
- * @date: 15.02.2018.
+ * @author myildiz at 15.02.2018.
  */
 public class SoapXPathUtil {
 
@@ -47,9 +46,9 @@ public class SoapXPathUtil {
 
   /**
    * Tries to find a single not wrt the provided XPATH and returns null if not found
-   * @param node
-   * @param xpath
-   * @return
+   * @param node source node
+   * @param xpath XPath to evaluate
+   * @return The resolved {@link Node}. May be <code>null</code>.
    */
   @Nullable
   public static Node findSingleNode(@Nonnull final Node node,
@@ -64,10 +63,10 @@ public class SoapXPathUtil {
 
   /**
    * Tries to find a single not wrt the provided XPATH. Throws an exception if no value is found
-   * @param node
-   * @param xpath
-   * @return
-   * @throws MEException
+   * @param node Source node
+   * @param xpath XPath to evaluate
+   * @return A non-<code>null</code> {@link Node}.
+   * @throws MEException If no result was found (for whatever reason)
    */
   @Nonnull
   public static Node safeFindSingleNode(@Nonnull final Node node,

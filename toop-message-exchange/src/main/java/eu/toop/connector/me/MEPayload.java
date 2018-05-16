@@ -12,21 +12,22 @@
  */
 package eu.toop.connector.me;
 
+import java.io.InputStream;
+import java.util.UUID;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.annotation.concurrent.Immutable;
+
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.Nonempty;
 import com.helger.commons.annotation.ReturnsMutableObject;
 import com.helger.commons.io.stream.NonBlockingByteArrayInputStream;
 import com.helger.commons.mime.IMimeType;
 import com.helger.commons.string.StringHelper;
-import java.io.InputStream;
-import java.util.UUID;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.concurrent.Immutable;
 
 /**
- * @author: myildiz
- * @date: 15.02.2018.
+ * @author myildiz at 15.02.2018.
  */
 @Immutable
 public final class MEPayload {

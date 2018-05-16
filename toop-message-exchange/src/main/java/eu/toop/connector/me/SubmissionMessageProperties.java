@@ -18,13 +18,15 @@ package eu.toop.connector.me;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 /**
  * This class represents a the message properties that will take place in the
  * outbound submission message
  *
- * @author: myildiz
- * @date: 15.02.2018.
+ * @author myildiz at 15.02.2018.
  */
+@SuppressFBWarnings("NP_NONNULL_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR")
 public class SubmissionMessageProperties {
 
   /**

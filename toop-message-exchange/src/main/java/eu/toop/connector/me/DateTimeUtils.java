@@ -27,8 +27,7 @@ import com.helger.commons.annotation.Nonempty;
 /**
  * Utilities related to date-time formatting, parsing etc..
  *
- * @author: myildiz
- * @date: 16.02.2018.
+ * @author myildiz on 16.02.2018.
  */
 public final class DateTimeUtils {
   private DateTimeUtils () {}

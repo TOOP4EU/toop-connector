@@ -32,8 +32,7 @@ import eu.toop.connector.me.servlet.AS4InterfaceServlet;
 /**
  * A moc gateway.
  *
- * @author: myildiz
- * @date: 06.05.2018.
+ * @author myildiz at 06.05.2018.
  */
 public class SampleGWServlet extends AS4InterfaceServlet {
 

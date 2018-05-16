@@ -23,8 +23,7 @@ import com.helger.commons.annotation.Nonempty;
 import eu.toop.connector.r2d2client.IR2D2Endpoint;
 
 /**
- * @author: myildiz
- * @date: 15.02.2018.
+ * @author myildiz at 15.02.2018.
  */
 @Immutable
 public class GatewayRoutingMetadata implements Serializable {

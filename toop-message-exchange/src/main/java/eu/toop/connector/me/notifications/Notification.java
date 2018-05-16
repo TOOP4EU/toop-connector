@@ -1,20 +1,23 @@
 package eu.toop.connector.me.notifications;
 
-import eu.toop.connector.me.ResultType;
 import java.io.Serializable;
+
+import com.helger.commons.CGlobal;
+
+import eu.toop.connector.me.ResultType;
 
 /**
  * @author yerlibilgin
  */
 public class Notification implements Serializable {
 
-  private static final long EXPIRATION_PERIOD = 5 * 60 * 1000;
+  private static final long EXPIRATION_PERIOD = 5 * CGlobal.MILLISECONDS_PER_MINUTE;
   /**
-   * The message id of the SUBMIT message (C1 --> C2)
+   * The message id of the SUBMIT message (C1 --&gt; C2)
    */
   private String messageID;
   /**
-   * The message id of the outbound message (C2 --> C3)
+   * The message id of the outbound message (C2 --&gt; C3)
    */
   private String refToMessageID;
   /**
@@ -33,7 +36,7 @@ public class Notification implements Serializable {
   /**
    * The local milliseconds time when this object was created
    */
-  private long creationTime;
+  private final long creationTime;
 
   Notification(){
     creationTime = System.currentTimeMillis();
@@ -43,7 +46,7 @@ public class Notification implements Serializable {
     return refToMessageID;
   }
 
-  public void setRefToMessageID(String refToMessageID) {
+  public void setRefToMessageID(final String refToMessageID) {
     this.refToMessageID = refToMessageID;
   }
 
@@ -51,7 +54,7 @@ public class Notification implements Serializable {
     return result;
   }
 
-  public void setResult(ResultType result) {
+  public void setResult(final ResultType result) {
     this.result = result;
   }
 
@@ -59,7 +62,7 @@ public class Notification implements Serializable {
     return errorCode;
   }
 
-  public void setErrorCode(String errorCode) {
+  public void setErrorCode(final String errorCode) {
     this.errorCode = errorCode;
   }
 
@@ -67,7 +70,7 @@ public class Notification implements Serializable {
     return description;
   }
 
-  public void setDescription(String description) {
+  public void setDescription(final String description) {
     this.description = description;
   }
 
@@ -80,12 +83,12 @@ public class Notification implements Serializable {
     return messageID;
   }
 
-  public void setMessageID(String messageID) {
+  public void setMessageID(final String messageID) {
     this.messageID = messageID;
   }
 
 
-  public boolean isExpired(long currentTime){
+  public boolean isExpired(final long currentTime){
     return (currentTime - creationTime) > EXPIRATION_PERIOD;
   }
 }

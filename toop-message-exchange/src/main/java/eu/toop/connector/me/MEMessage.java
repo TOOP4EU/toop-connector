@@ -15,15 +15,16 @@
  */
 package eu.toop.connector.me;
 
-import com.helger.commons.ValueEnforcer;
-import com.helger.commons.annotation.ReturnsMutableObject;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.annotation.Nonnull;
 
+import com.helger.commons.ValueEnforcer;
+import com.helger.commons.annotation.ReturnsMutableObject;
+
 /**
- * @author: myildiz
- * @date: 12.02.2018.
+ * @author myildiz at 12.02.2018.
  */
 public class MEMessage {
   private final List<MEPayload> payloads = new ArrayList<> ();

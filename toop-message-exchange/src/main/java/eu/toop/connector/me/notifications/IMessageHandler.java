@@ -15,12 +15,12 @@
  */
 package eu.toop.connector.me.notifications;
 
-import eu.toop.connector.me.MEMessage;
 import javax.annotation.Nonnull;
 
+import eu.toop.connector.me.MEMessage;
+
 /**
- * @author: myildiz
- * @date: 15.02.2018.
+ * @author myildiz at 15.02.2018.
  */
 public interface IMessageHandler {
   /**

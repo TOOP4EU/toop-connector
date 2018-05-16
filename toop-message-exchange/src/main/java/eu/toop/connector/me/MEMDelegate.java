@@ -12,31 +12,32 @@
  */
 package eu.toop.connector.me;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.Nonnull;
+import javax.annotation.concurrent.NotThreadSafe;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPMessage;
+
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.UsedViaReflection;
 import com.helger.commons.url.URLHelper;
 import com.helger.scope.singleton.AbstractGlobalSingleton;
+
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.me.notifications.IMessageHandler;
 import eu.toop.connector.me.notifications.IRelayResultHandler;
 import eu.toop.connector.me.notifications.ISubmissionResultHandler;
 import eu.toop.connector.me.notifications.InternalRelayResultHandler;
 import eu.toop.connector.me.notifications.InternalSubmissionResultHandler;
-import eu.toop.connector.me.notifications.Notification;
 import eu.toop.connector.me.notifications.RelayResult;
 import eu.toop.connector.me.notifications.SubmissionResult;
-import java.util.ArrayList;
-import java.util.List;
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.NotThreadSafe;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPMessage;
 
 /**
  * The API Entry class for the Message Exchange API.
  *
- * @author: myildiz
- * @date: 15.02.2018.
+ * @author myildiz at 15.02.2018.
  */
 @NotThreadSafe
 public class MEMDelegate extends AbstractGlobalSingleton {
@@ -73,6 +74,7 @@ public class MEMDelegate extends AbstractGlobalSingleton {
    *
    * @param gatewayRoutingMetadata The container for the endpoint information and docid/procid
    * @param meMessage the payloads and their metadata to be sent to the gateway.
+   * @return <code>true</code> if sending was successful, <code>false</code> if not
    */
   public boolean sendMessage(final GatewayRoutingMetadata gatewayRoutingMetadata, final MEMessage meMessage) {
     LOG.debug(
@@ -90,7 +92,7 @@ public class MEMDelegate extends AbstractGlobalSingleton {
     try {
       messageID = SoapXPathUtil.safeFindSingleNode(soapMessage.getSOAPHeader(), "//:MessageInfo/:MessageId")
           .getTextContent();
-    } catch (SOAPException e) {
+    } catch (final SOAPException e) {
       throw new MEException(e);
     }
 
@@ -104,10 +106,10 @@ public class MEMDelegate extends AbstractGlobalSingleton {
     EBMSUtils.sendSOAPMessage(soapMessage, URLHelper.getAsURL(TCConfig.getMEMAS4Endpoint()));
     LOG.debug("SOAP Message " + messageID + " sent");
 
-    long timeout = TCConfig.getGatewayNotificationWaitTimeout();
+    final long timeout = TCConfig.getGatewayNotificationWaitTimeout();
     //now that we have sent the object, first wait for the submission result
     LOG.debug("Wait for SubmissionResult for " + messageID);
-    SubmissionResult submissionResult = (SubmissionResult) internalSRHandler.obtainNotification(messageID, timeout);
+    final SubmissionResult submissionResult = (SubmissionResult) internalSRHandler.obtainNotification(messageID, timeout);
 
     LOG.info("SubmissionResult " + submissionResult.getResult());
     if (submissionResult.getResult() != ResultType.RECEIPT) {
@@ -119,7 +121,7 @@ public class MEMDelegate extends AbstractGlobalSingleton {
     }
 
     LOG.debug("Wait for RelayResult for " + messageID);
-    RelayResult relayResult = (RelayResult) internalRelayResultHandler
+    final RelayResult relayResult = (RelayResult) internalRelayResultHandler
         .obtainNotification(submissionResult.getMessageID(), timeout);
 
     LOG.info("RelayResult " + relayResult.getResult());
@@ -220,11 +222,12 @@ public class MEMDelegate extends AbstractGlobalSingleton {
 
   /**
    * Dispatch the received RelayResult to the registered listeners
+   * @param notification Relay result
    */
-  public void dispatchRelayResult(SOAPMessage sNotification) {
+  public void dispatchRelayResult(final SOAPMessage notification) {
     try {
       // Do it only once
-      final RelayResult relayResult = EBMSUtils.soap2RelayResult(sNotification);
+      final RelayResult relayResult = EBMSUtils.soap2RelayResult(notification);
 
       LOG.info("RelayResult for \n" + //
           "   Outbound AS4  Message ID: " + relayResult.getRefToMessageID() + "\n" + //
@@ -234,20 +237,21 @@ public class MEMDelegate extends AbstractGlobalSingleton {
         notificationHandler.handleNotification(relayResult);
       }
     } catch (final Exception e) {
-      throw new MEException("Error handling message " + sNotification, e);
+      throw new MEException("Error handling message " + notification, e);
     }
   }
 
   /**
    * Dispatch the received SubmissioNResult to the registered listeners
+   * @param submissionResult Submission result SOAP message
    */
-  public void dispatchSubmissionResult(SOAPMessage submissionResult) {
+  public void dispatchSubmissionResult(final SOAPMessage submissionResult) {
     try {
       // Do it only once
       final SubmissionResult sSubmissionResult = EBMSUtils.soap2SubmissionResult(submissionResult);
 
       LOG.info("SubmissionResult for \n" + //
-          "   SubmitMessage Message ID: " + sSubmissionResult.getRefToMessageID() + "\n" + //
+          "   SubmitMessage Message ID: " + sSubmissionResult.getRefToMessageID() + "\n" +
           "   Outbound AS4  Message ID: " + sSubmissionResult.getMessageID());
 
       for (final ISubmissionResultHandler submissionResultHandler : submissionResultHandlers) {
