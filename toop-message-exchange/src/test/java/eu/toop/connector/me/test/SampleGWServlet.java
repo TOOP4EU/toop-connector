@@ -12,18 +12,22 @@
  */
 package eu.toop.connector.me.test;
 
-import com.helger.commons.io.stream.NonBlockingByteArrayInputStream;
-import com.helger.commons.io.stream.StreamHelper;
-import eu.toop.connector.me.EBMSUtils;
-import eu.toop.connector.me.SoapUtil;
-import eu.toop.connector.me.servlet.AS4InterfaceServlet;
 import java.io.IOException;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.soap.MimeHeaders;
 import javax.xml.soap.SOAPMessage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.helger.commons.io.stream.NonBlockingByteArrayInputStream;
+import com.helger.commons.io.stream.StreamHelper;
+
+import eu.toop.connector.me.EBMSUtils;
+import eu.toop.connector.me.SoapUtil;
+import eu.toop.connector.me.servlet.AS4InterfaceServlet;
 
 /**
  * A moc gateway.

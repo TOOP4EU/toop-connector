@@ -1,20 +1,24 @@
 package eu.toop.connector.me.test;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
+import javax.annotation.Nonnull;
+
+import org.apache.log4j.PropertyConfigurator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.helger.scope.mock.ScopeAwareTestSetup;
+
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.me.EActingSide;
 import eu.toop.connector.me.GatewayRoutingMetadata;
 import eu.toop.connector.me.MEMDelegate;
 import eu.toop.connector.me.MEMessage;
 import eu.toop.connector.me.notifications.IMessageHandler;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import javax.annotation.Nonnull;
-import org.apache.log4j.PropertyConfigurator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This class runs an and to end integration test with a locally running Toop Compatible gateway. The simulation is from

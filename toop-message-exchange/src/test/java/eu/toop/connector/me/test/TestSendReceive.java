@@ -12,22 +12,24 @@
  */
 package eu.toop.connector.me.test;
 
-import com.helger.commons.url.URLHelper;
-import com.helger.scope.mock.ScopeAwareTestSetup;
-import eu.toop.connector.api.TCConfig;
-import eu.toop.connector.me.EActingSide;
-import eu.toop.connector.me.GatewayRoutingMetadata;
-import eu.toop.connector.me.MEMDelegate;
-import eu.toop.connector.me.MEMessage;
-import eu.toop.connector.me.notifications.IMessageHandler;
-import eu.toop.connector.me.notifications.IRelayResultHandler;
 import java.net.URL;
+
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.helger.commons.url.URLHelper;
+import com.helger.scope.mock.ScopeAwareTestSetup;
+
+import eu.toop.connector.api.TCConfig;
+import eu.toop.connector.me.EActingSide;
+import eu.toop.connector.me.GatewayRoutingMetadata;
+import eu.toop.connector.me.MEMDelegate;
+import eu.toop.connector.me.MEMessage;
+import eu.toop.connector.me.notifications.IMessageHandler;
 
 /**
  * This test suite tests the whole sending/receiving of a simple MEMessage by mocking the as4 gateway

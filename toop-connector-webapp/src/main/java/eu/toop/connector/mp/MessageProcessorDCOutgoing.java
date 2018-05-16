@@ -43,13 +43,14 @@ import com.helger.peppol.identifier.generic.process.IProcessIdentifier;
 import com.helger.scope.IScope;
 import com.helger.web.scope.singleton.AbstractGlobalWebSingleton;
 
+import eu.toop.commons.codelist.EPredefinedDocumentTypeIdentifier;
+import eu.toop.commons.codelist.SMMDocumentTypeMapping;
 import eu.toop.commons.concept.ConceptValue;
 import eu.toop.commons.dataexchange.TDEConceptRequestType;
 import eu.toop.commons.dataexchange.TDEDataElementRequestType;
 import eu.toop.commons.dataexchange.TDELegalEntityType;
 import eu.toop.commons.dataexchange.TDENaturalPersonType;
 import eu.toop.commons.dataexchange.TDETOOPRequestType;
-import eu.toop.commons.doctype.EToopDocumentType;
 import eu.toop.commons.exchange.ToopMessageBuilder;
 import eu.toop.commons.jaxb.ToopXSDHelper;
 import eu.toop.connector.api.TCConfig;
@@ -83,10 +84,10 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
     private static final Logger s_aLogger = LoggerFactory.getLogger (MessageProcessorDCOutgoing.Performer.class);
 
     public void runAsync (@Nonnull final TDETOOPRequestType aRequest) throws Exception {
-      final EToopDocumentType eDocType = EToopDocumentType.getFromIDOrNull (aRequest.getDocumentTypeIdentifier ()
-                                                                                    .getSchemeID (),
-                                                                            aRequest.getDocumentTypeIdentifier ()
-                                                                                    .getValue ());
+      final EPredefinedDocumentTypeIdentifier eDocType = EPredefinedDocumentTypeIdentifier.getFromDocumentTypeIdentifierOrNull (aRequest.getDocumentTypeIdentifier ()
+                                                                                                                                        .getSchemeID (),
+                                                                                                                                aRequest.getDocumentTypeIdentifier ()
+                                                                                                                                        .getValue ());
       if (eDocType == null) {
         throw new IllegalStateException ("Failed to resolve document type "
                                          + aRequest.getDocumentTypeIdentifier ().getSchemeID () + "::"
@@ -117,7 +118,7 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
 
         // Main mapping
         final IMappedValueList aMappedValues = aClient.performMapping (sLogPrefix,
-                                                                       eDocType.getSharedToopSMMNamespace ());
+                                                                       SMMDocumentTypeMapping.getToopSMNamespace (eDocType));
 
         // add all the mapped values in the request
         for (final TDEDataElementRequestType aDER : aRequest.getDataElementRequest ()) {

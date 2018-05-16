@@ -17,10 +17,6 @@ package eu.toop.connector.me.test;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import eu.toop.connector.me.EBMSUtils;
-import eu.toop.connector.me.MEMessage;
-import eu.toop.connector.me.MEPayload;
-import eu.toop.connector.me.SubmissionMessageProperties;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
@@ -33,6 +29,11 @@ import org.slf4j.LoggerFactory;
 
 import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 import com.helger.commons.mime.CMimeType;
+
+import eu.toop.connector.me.EBMSUtils;
+import eu.toop.connector.me.MEMessage;
+import eu.toop.connector.me.MEPayload;
+import eu.toop.connector.me.SubmissionMessageProperties;
 
 public final class EBSMUtilsTest {
   private static final Logger LOG = LoggerFactory.getLogger (EBSMUtilsTest.class);

@@ -1,9 +1,10 @@
 package eu.toop.connector.me.test;
 
-import eu.toop.connector.me.servlet.AS4InterfaceServlet;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+
+import eu.toop.connector.me.servlet.AS4InterfaceServlet;
 
 /**
  * @author yerlibilgin

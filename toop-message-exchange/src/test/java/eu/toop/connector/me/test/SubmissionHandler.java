@@ -1,11 +1,15 @@
 package eu.toop.connector.me.test;
 
-import com.helger.commons.url.URLHelper;
-import eu.toop.connector.me.EBMSUtils;
 import java.net.URL;
+
 import javax.xml.soap.SOAPMessage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.helger.commons.url.URLHelper;
+
+import eu.toop.connector.me.EBMSUtils;
 
 /**
  * An internal representation of a simple gateway that handles a submitted message.

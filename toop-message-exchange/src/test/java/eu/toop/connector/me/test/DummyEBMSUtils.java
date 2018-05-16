@@ -1,15 +1,17 @@
 package eu.toop.connector.me.test;
 
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
+
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPMessage;
+
 import eu.toop.connector.me.DateTimeUtils;
 import eu.toop.connector.me.EBMSUtils;
 import eu.toop.connector.me.MEException;
 import eu.toop.connector.me.MEMConstants;
 import eu.toop.connector.me.SoapUtil;
 import eu.toop.connector.me.SoapXPathUtil;
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPMessage;
 
 /**
  * @author myildiz
