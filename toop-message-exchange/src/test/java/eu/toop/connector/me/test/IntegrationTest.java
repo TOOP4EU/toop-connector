@@ -46,7 +46,7 @@ public class IntegrationTest {
     BackendServletContainer.createServletOn(8585, "/msh");
     //initialize c4
     LOG.info("Initialize corner4");
-    BackendServletContainer.createServletOn(8586, "/msh");
+    BackendServletContainer.createServletOn(8686, "/msh");
 
     BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
 

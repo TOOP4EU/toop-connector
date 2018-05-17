@@ -35,7 +35,7 @@ public class SampleDataProvider {
     final X509Certificate x509;
     try {
       //If I am DC, use dp certificate or vice versa
-      final String certName = actingSide == EActingSide.DC ? "/partyB.cert" : "/partyA.cert" ;
+      final String certName = actingSide == EActingSide.DC ? "/freedonia.crt" : "/elonia.crt" ;
       x509 = (X509Certificate) CertificateFactory.getInstance("X509")
           .generateCertificate(SampleDataProvider.class
               .getResourceAsStream(certName));

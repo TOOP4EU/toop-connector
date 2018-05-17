@@ -15,5 +15,5 @@ public class MEMConstants {
   //but its kept like this for a while
   public static final String ACTION_RELAY = "Notify";
   public static final String ACTION_SUBMISSION_RESULT = "SubmissionResult";
-  public static final String SERVICE = "http://www.toop.eu/as4/backend";
+  public static final String SERVICE = "http://www.toop.eu/edelivery/bit";
 }
