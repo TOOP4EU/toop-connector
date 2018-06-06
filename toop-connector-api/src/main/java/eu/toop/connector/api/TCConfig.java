@@ -109,7 +109,7 @@ public final class TCConfig {
 
   public static final boolean DEFAULT_TOOP_TRACKER_ENABLED = false;
   public static final String DEFAULT_DIRECTORY_BASE_URL = "http://193.10.8.211:7071";
-  public static final boolean DEFAULT_USE_SML = false;
+  public static final boolean DEFAULT_USE_SML = true;
   public static final String DEFAULT_SMP_URI = "http://193.10.8.211:80";
 
   private TCConfig () {
@@ -204,7 +204,7 @@ public final class TCConfig {
         ret = eSML;
       } else {
         // Custom SML
-        final String sDisplayName = getConfigFile ().getAsString ("toop.r2d2.sml.name", "MP SML");
+        final String sDisplayName = getConfigFile ().getAsString ("toop.r2d2.sml.name", "TOOP SML");
         // E.g. edelivery.tech.ec.europa.eu.
         final String sDNSZone = getConfigFile ().getAsString ("toop.r2d2.sml.dnszone");
         // E.g. https://edelivery.tech.ec.europa.eu/edelivery-sml
