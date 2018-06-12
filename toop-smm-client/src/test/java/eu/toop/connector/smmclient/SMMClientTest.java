@@ -44,72 +44,84 @@ public final class SMMClientTest {
   private static final ConceptValue CONCEPT_TOOP_1 = new ConceptValue (NS_TOOP, "CompanyCode");
   private static final ConceptValue CONCEPT_FR_1 = new ConceptValue (NS_FREEDONIA, "FreedoniaBusinessCode");
 
+  // Use with cache and remote
+  private static final ISMMConceptProvider[] CP = new ISMMConceptProvider[] { SMMConceptProviderGRLCRemote::getAllMappedValues,
+                                                                              SMMConceptProviderGRLCRemote::remoteQueryAllMappedValues };
+
   @Test
   public void testEmpty () throws IOException {
-    s_aLogger.info ("Starting testEmpty");
-    final SMMClient aClient = new SMMClient ();
-    final IMappedValueList ret = aClient.performMapping (LOG_PREFIX, NS_FREEDONIA);
-    assertNotNull (ret);
-    assertTrue (ret.isEmpty ());
-    assertEquals (0, ret.size ());
+    for (final ISMMConceptProvider aCP : CP) {
+      s_aLogger.info ("Starting testEmpty");
+      final SMMClient aClient = new SMMClient ();
+      final IMappedValueList ret = aClient.performMapping (LOG_PREFIX, NS_FREEDONIA, aCP);
+      assertNotNull (ret);
+      assertTrue (ret.isEmpty ());
+      assertEquals (0, ret.size ());
+    }
   }
 
   @Test
   public void testOneMatch () throws IOException {
-    s_aLogger.info ("Starting testOneMatch");
-    final SMMClient aClient = new SMMClient ();
-    aClient.addConceptToBeMapped (CONCEPT_TOOP_1);
-    final IMappedValueList ret = aClient.performMapping (LOG_PREFIX, NS_FREEDONIA);
-    assertNotNull (ret);
-    assertEquals (1, ret.size ());
+    for (final ISMMConceptProvider aCP : CP) {
+      s_aLogger.info ("Starting testOneMatch");
+      final SMMClient aClient = new SMMClient ();
+      aClient.addConceptToBeMapped (CONCEPT_TOOP_1);
+      final IMappedValueList ret = aClient.performMapping (LOG_PREFIX, NS_FREEDONIA, aCP);
+      assertNotNull (ret);
+      assertEquals (1, ret.size ());
 
-    // Check concept has a 1:1 mapping
-    final IMappedValueList aMapped = ret.getAllBySource (x -> x.equals (CONCEPT_TOOP_1));
-    assertNotNull (aMapped);
-    assertEquals (1, aMapped.size ());
-    final MappedValue aValue = aMapped.getFirst ();
-    assertNotNull (aValue);
-    assertEquals (CONCEPT_TOOP_1, aValue.getSource ());
-    assertEquals (CONCEPT_FR_1, aValue.getDestination ());
+      // Check concept has a 1:1 mapping
+      final IMappedValueList aMapped = ret.getAllBySource (x -> x.equals (CONCEPT_TOOP_1));
+      assertNotNull (aMapped);
+      assertEquals (1, aMapped.size ());
+      final MappedValue aValue = aMapped.getFirst ();
+      assertNotNull (aValue);
+      assertEquals (CONCEPT_TOOP_1, aValue.getSource ());
+      assertEquals (CONCEPT_FR_1, aValue.getDestination ());
+    }
   }
 
   @Test
   public void testOneMatchOneNotFound () throws IOException {
-    s_aLogger.info ("Starting testOneMatchOneNotFound");
-    final SMMClient aClient = new SMMClient ();
-    aClient.addConceptToBeMapped (CONCEPT_TOOP_1);
-    aClient.addConceptToBeMapped (NS_TOOP, "NonExistingField");
-    aClient.addConceptToBeMapped ("SourceNamespace", "NonExistingField");
-    final IMappedValueList ret = aClient.performMapping (LOG_PREFIX, NS_FREEDONIA);
-    assertNotNull (ret);
-    assertEquals (1, ret.size ());
+    for (final ISMMConceptProvider aCP : CP) {
+      s_aLogger.info ("Starting testOneMatchOneNotFound");
+      final SMMClient aClient = new SMMClient ();
+      aClient.addConceptToBeMapped (CONCEPT_TOOP_1);
+      aClient.addConceptToBeMapped (NS_TOOP, "NonExistingField");
+      aClient.addConceptToBeMapped ("SourceNamespace", "NonExistingField");
+      final IMappedValueList ret = aClient.performMapping (LOG_PREFIX, NS_FREEDONIA, aCP);
+      assertNotNull (ret);
+      assertEquals (1, ret.size ());
 
-    // Check concept has a 1:1 mapping
-    final IMappedValueList aMapped = ret.getAllBySource (x -> x.equals (CONCEPT_TOOP_1));
-    assertNotNull (aMapped);
-    assertEquals (1, aMapped.size ());
-    final MappedValue aValue = aMapped.getFirst ();
-    assertNotNull (aValue);
-    assertEquals (CONCEPT_TOOP_1, aValue.getSource ());
-    assertEquals (CONCEPT_FR_1, aValue.getDestination ());
+      // Check concept has a 1:1 mapping
+      final IMappedValueList aMapped = ret.getAllBySource (x -> x.equals (CONCEPT_TOOP_1));
+      assertNotNull (aMapped);
+      assertEquals (1, aMapped.size ());
+      final MappedValue aValue = aMapped.getFirst ();
+      assertNotNull (aValue);
+      assertEquals (CONCEPT_TOOP_1, aValue.getSource ());
+      assertEquals (CONCEPT_FR_1, aValue.getDestination ());
+    }
   }
 
   @Test
   public void testNoMappingNeeded () throws IOException {
-    s_aLogger.info ("Starting testNoMappingNeeded");
-    final SMMClient aClient = new SMMClient ();
-    aClient.addConceptToBeMapped (CONCEPT_FR_1);
-    final IMappedValueList ret = aClient.performMapping (LOG_PREFIX, NS_FREEDONIA);
-    assertNotNull (ret);
-    assertEquals (1, ret.size ());
+    for (final ISMMConceptProvider aCP : CP) {
+      s_aLogger.info ("Starting testNoMappingNeeded");
+      final SMMClient aClient = new SMMClient ();
+      aClient.addConceptToBeMapped (CONCEPT_FR_1);
+      final IMappedValueList ret = aClient.performMapping (LOG_PREFIX, NS_FREEDONIA, aCP);
+      assertNotNull (ret);
+      assertEquals (1, ret.size ());
 
-    // Check concept has a 1:1 mapping
-    final IMappedValueList aMapped = ret.getAllBySource (x -> x.equals (CONCEPT_FR_1));
-    assertNotNull (aMapped);
-    assertEquals (1, aMapped.size ());
-    final MappedValue aValue = aMapped.getFirst ();
-    assertNotNull (aValue);
-    assertEquals (CONCEPT_FR_1, aValue.getSource ());
-    assertEquals (CONCEPT_FR_1, aValue.getDestination ());
+      // Check concept has a 1:1 mapping
+      final IMappedValueList aMapped = ret.getAllBySource (x -> x.equals (CONCEPT_FR_1));
+      assertNotNull (aMapped);
+      assertEquals (1, aMapped.size ());
+      final MappedValue aValue = aMapped.getFirst ();
+      assertNotNull (aValue);
+      assertEquals (CONCEPT_FR_1, aValue.getSource ());
+      assertEquals (CONCEPT_FR_1, aValue.getDestination ());
+    }
   }
 }

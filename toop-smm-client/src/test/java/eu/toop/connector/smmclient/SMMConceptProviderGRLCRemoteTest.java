@@ -33,8 +33,8 @@ import eu.toop.commons.codelist.SMMDocumentTypeMapping;
  *
  * @author Philip Helger
  */
-public final class SMMConceptCacheTest {
-  private static final Logger s_aLogger = LoggerFactory.getLogger (SMMConceptCacheTest.class);
+public final class SMMConceptProviderGRLCRemoteTest {
+  private static final Logger s_aLogger = LoggerFactory.getLogger (SMMConceptProviderGRLCRemoteTest.class);
   private static final String LOG_PREFIX = "[unit test] ";
   private static final String NS_TOOP = SMMDocumentTypeMapping.getToopSMNamespace (EPredefinedDocumentTypeIdentifier.REQUEST_REGISTEREDORGANIZATION);
   private static final String NS_ELONIA = "http://example.register.elo/elonia-business-register";
@@ -42,12 +42,12 @@ public final class SMMConceptCacheTest {
 
   @BeforeEach
   public void reset () {
-    SMMConceptCache.clearCache ();
+    SMMConceptProviderGRLCRemote.clearCache ();
   }
 
   @Test
   public void testRemoteQueryToopFreedonia () throws IOException {
-    final MappedValueList aMVL = SMMConceptCache.remoteQueryAllMappedValues (LOG_PREFIX, NS_TOOP, NS_FREEDONIA);
+    final MappedValueList aMVL = SMMConceptProviderGRLCRemote.remoteQueryAllMappedValues (LOG_PREFIX, NS_TOOP, NS_FREEDONIA);
     assertNotNull (aMVL);
     assertFalse (aMVL.isEmpty ());
     if (false)
@@ -56,7 +56,7 @@ public final class SMMConceptCacheTest {
 
   @Test
   public void testRemoteQueryFreedoniaToop () throws IOException {
-    final MappedValueList aMVL = SMMConceptCache.remoteQueryAllMappedValues (LOG_PREFIX, NS_FREEDONIA, NS_TOOP);
+    final MappedValueList aMVL = SMMConceptProviderGRLCRemote.remoteQueryAllMappedValues (LOG_PREFIX, NS_FREEDONIA, NS_TOOP);
     assertNotNull (aMVL);
     assertFalse (aMVL.isEmpty ());
     if (false)
@@ -65,7 +65,7 @@ public final class SMMConceptCacheTest {
 
   @Test
   public void testRemoteQueryToopElonia () throws IOException {
-    final MappedValueList aMVL = SMMConceptCache.remoteQueryAllMappedValues (LOG_PREFIX, NS_TOOP, NS_ELONIA);
+    final MappedValueList aMVL = SMMConceptProviderGRLCRemote.remoteQueryAllMappedValues (LOG_PREFIX, NS_TOOP, NS_ELONIA);
     assertNotNull (aMVL);
     assertFalse (aMVL.isEmpty ());
     if (false)
@@ -74,7 +74,7 @@ public final class SMMConceptCacheTest {
 
   @Test
   public void testRemoteQueryEloniaToop () throws IOException {
-    final MappedValueList aMVL = SMMConceptCache.remoteQueryAllMappedValues (LOG_PREFIX, NS_ELONIA, NS_TOOP);
+    final MappedValueList aMVL = SMMConceptProviderGRLCRemote.remoteQueryAllMappedValues (LOG_PREFIX, NS_ELONIA, NS_TOOP);
     assertNotNull (aMVL);
     assertFalse (aMVL.isEmpty ());
     if (false)

@@ -18,6 +18,7 @@ package eu.toop.connector.smmclient;
 import java.io.IOException;
 import java.util.Map;
 
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.NotThreadSafe;
 
@@ -73,7 +74,7 @@ public class SMMClient {
     return addConceptToBeMapped (aConceptValue.getNamespace (), aConceptValue.getValue ());
   }
 
-  @Nonnull
+  @Nonnegative
   private int _getTotalCount () {
     int ret = 0;
     for (final ICommonsList<?> aList : m_aSrcMap.values ())
@@ -91,14 +92,22 @@ public class SMMClient {
    * @param sDestNamespace
    *          Destination namespace to map the concepts to. May neither be
    *          <code>null</code> nor empty.
+   * @param aConceptProvider
+   *          The concept provider implementation to use. May not be
+   *          <code>null</code>.
    * @return A non-<code>null</code> but maybe empty list of mappings.
    * @throws IOException
    *           in case of HTTP IO error
    */
   @Nonnull
   @ReturnsMutableCopy
-  public IMappedValueList performMapping (@Nonnull final String sLogPrefix,
-                                          @Nonnull final String sDestNamespace) throws IOException {
+  public IMappedValueList performMapping (@Nonnull final String sLogPrefix, @Nonnull final String sDestNamespace,
+                                          @Nonnull final ISMMConceptProvider aConceptProvider) throws IOException {
+
+    ValueEnforcer.notNull (sLogPrefix, "LogPrefix");
+    ValueEnforcer.notNull (sDestNamespace, "DestNamespace");
+    ValueEnforcer.notNull (aConceptProvider, "ConceptProvider");
+
     ToopKafkaClient.send (EErrorLevel.INFO,
                           () -> sLogPrefix + "SMM client mapping " + _getTotalCount () + " concept(s) from "
                                 + m_aSrcMap.size () + " source namespace(s) to '" + sDestNamespace + "'");
@@ -116,8 +125,8 @@ public class SMMClient {
       } else {
         // Namespace are different - get the mapping list
         // This eventually performs a remote call!
-        final MappedValueList aValueList = SMMConceptCache.getAllMappedValues (sLogPrefix, sSourceNamespace,
-                                                                               sDestNamespace);
+        final MappedValueList aValueList = aConceptProvider.getAllMappedValues (sLogPrefix, sSourceNamespace,
+                                                                                sDestNamespace);
 
         // Map all source values
         for (final String sSourceValue : aEntry.getValue ()) {

@@ -52,13 +52,13 @@ import eu.toop.kafkaclient.ToopKafkaClient;
  * @author Philip Helger
  */
 @ThreadSafe
-public final class SMMConceptCache {
+public final class SMMConceptProviderGRLCRemote {
   // Static cache
   private static final SimpleReadWriteLock s_aRWLock = new SimpleReadWriteLock ();
   @GuardedBy ("s_aRWLock")
   private static final ICommonsMap<String, ICommonsMap<String, MappedValueList>> s_aCache = new CommonsHashMap<> ();
 
-  private SMMConceptCache () {
+  private SMMConceptProviderGRLCRemote () {
   }
 
   /**
@@ -84,19 +84,18 @@ public final class SMMConceptCache {
    * @param sLogPrefix
    *          Log prefix. May not be <code>null</code> but may be empty.
    * @param sSourceNamespace
-   *          Source namespace to map from. May neither be <code>null</code> nor
-   *          empty.
+   *          Source namespace to map from. May not be <code>null</code>.
    * @param sDestNamespace
-   *          Target namespace to map to. May neither be <code>null</code> nor
-   *          empty.
+   *          Target namespace to map to. May not be <code>null</code>.
    * @return The non-<code>null</code> but maybe empty list of mapped values.
    * @throws IOException
    *           In case fetching from server failed
    */
   @Nonnull
   public static MappedValueList getAllMappedValues (@Nonnull final String sLogPrefix,
-                                                    @Nonnull @Nonempty final String sSourceNamespace,
-                                                    @Nonnull @Nonempty final String sDestNamespace) throws IOException {
+                                                    @Nonnull final String sSourceNamespace,
+                                                    @Nonnull final String sDestNamespace) throws IOException {
+    ValueEnforcer.notNull (sLogPrefix, "LogPrefix");
     ValueEnforcer.notNull (sSourceNamespace, "SourceNamespace");
     ValueEnforcer.notNull (sDestNamespace, "DestNamespace");
 
@@ -165,19 +164,19 @@ public final class SMMConceptCache {
    * @param sLogPrefix
    *          Log prefix. May not be <code>null</code> but may be empty.
    * @param sSourceNamespace
-   *          Source namespace. May neither be <code>null</code> nor empty.
+   *          Source namespace. May not be <code>null</code>.
    * @param sDestNamespace
-   *          Target namespace. May neither be <code>null</code> nor empty.
+   *          Target namespace. May not be <code>null</code>.
    * @return A list with all mapped values. Never <code>null</code>.
    * @throws IOException
    *           In case the HTTP connection has a problem
    */
   @Nonnull
   public static MappedValueList remoteQueryAllMappedValues (@Nonnull final String sLogPrefix,
-                                                            @Nonnull @Nonempty final String sSourceNamespace,
-                                                            @Nonnull @Nonempty final String sDestNamespace) throws IOException {
-    ValueEnforcer.notEmpty (sSourceNamespace, "SourceNamespace");
-    ValueEnforcer.notEmpty (sDestNamespace, "DestinationNamespace");
+                                                            @Nonnull final String sSourceNamespace,
+                                                            @Nonnull final String sDestNamespace) throws IOException {
+    ValueEnforcer.notNull (sSourceNamespace, "SourceNamespace");
+    ValueEnforcer.notNull (sDestNamespace, "DestinationNamespace");
 
     ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "Remote querying SMM mappings from '" + sSourceNamespace
                                                   + "' to '" + sDestNamespace + "'");
