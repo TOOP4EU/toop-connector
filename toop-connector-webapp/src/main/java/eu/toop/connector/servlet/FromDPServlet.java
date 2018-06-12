@@ -17,6 +17,7 @@ package eu.toop.connector.servlet;
 
 import java.io.IOException;
 
+import javax.annotation.Nonnull;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -45,8 +46,8 @@ import eu.toop.kafkaclient.ToopKafkaClient;
 @WebServlet ("/from-dp")
 public class FromDPServlet extends HttpServlet {
   @Override
-  protected void doPost (final HttpServletRequest aHttpServletRequest,
-                         final HttpServletResponse aHttpServletResponse) throws ServletException, IOException {
+  protected void doPost (@Nonnull final HttpServletRequest aHttpServletRequest,
+                         @Nonnull final HttpServletResponse aHttpServletResponse) throws ServletException, IOException {
     ToopKafkaClient.send (EErrorLevel.INFO, "MP got /from-dp request (3/4)");
 
     final UnifiedResponse aUR = UnifiedResponse.createSimple (aHttpServletRequest);

@@ -17,6 +17,7 @@ package eu.toop.connector.servlet;
 
 import java.io.IOException;
 
+import javax.annotation.Nonnull;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -34,8 +35,8 @@ import com.helger.commons.string.StringHelper;
 @WebServlet ("")
 public class MPRootServlet extends HttpServlet {
   @Override
-  protected void doGet (final HttpServletRequest req,
-                        final HttpServletResponse resp) throws ServletException, IOException {
+  protected void doGet (@Nonnull final HttpServletRequest req,
+                        @Nonnull final HttpServletResponse resp) throws ServletException, IOException {
     String sRedirectURL = req.getContextPath () + "/index.html";
 
     final String sQueryString = req.getQueryString ();

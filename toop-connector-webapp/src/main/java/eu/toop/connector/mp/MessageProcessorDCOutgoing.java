@@ -160,7 +160,6 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
                                                                                 aRequest.getProcessIdentifier ()
                                                                                         .getValue ());
       {
-
         String sDestinationCountryCode = null;
         final TDELegalEntityType aLegalEntity = aRequest.getDataRequestSubject ().getLegalEntity ();
         if (aLegalEntity != null)

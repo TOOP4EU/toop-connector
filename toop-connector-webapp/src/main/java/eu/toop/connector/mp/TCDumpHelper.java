@@ -23,6 +23,7 @@ import java.io.InputStream;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.concurrent.Immutable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,8 +36,8 @@ import com.helger.commons.io.file.FileHelper;
  * Dump helper function.
  *
  * @author Philip Helger
- *
  */
+@Immutable
 public final class TCDumpHelper {
   private static final Logger s_aLogger = LoggerFactory.getLogger (TCDumpHelper.class);
 
