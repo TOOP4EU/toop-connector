@@ -16,6 +16,7 @@
 package eu.toop.connector.servlet;
 
 import java.net.InetAddress;
+import java.net.URI;
 import java.net.UnknownHostException;
 
 import javax.annotation.Nonnull;
@@ -81,6 +82,19 @@ public class MPWebAppListener extends WebScopeListener {
       if (StringHelper.hasNoText (sToopTrackerUrl))
         throw new InitializationException ("If the tracker is enabled, the tracker URL MUST be provided in the configuration file!");
       ToopKafkaClient.defaultProperties ().put ("bootstrap.servers", sToopTrackerUrl);
+    }
+
+    {
+      // Check R2D2 configuration
+      final String sDirectoryURL = TCConfig.getR2D2DirectoryBaseUrl ();
+      if (StringHelper.hasNoText (sDirectoryURL))
+        throw new InitializationException ("The URL of the TOOP Directory is missing in the configuration file!");
+
+      if (!TCConfig.isR2D2UseDNS ()) {
+        final URI aSMPURI = TCConfig.getR2D2SMPUrl ();
+        if (aSMPURI == null)
+          throw new InitializationException ("Since the usage of SML/DNS is disabled, the fixed URL of the SMP to be used must be provided in the configuration file!");
+      }
     }
 
     ToopKafkaClient.send (EErrorLevel.INFO, () -> m_sLogPrefix + "TOOP Connector WebApp startup");

@@ -26,7 +26,6 @@ import javax.annotation.concurrent.Immutable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.helger.commons.annotation.Nonempty;
 import com.helger.commons.concurrent.SimpleReadWriteLock;
 import com.helger.commons.debug.GlobalDebug;
 import com.helger.commons.io.file.FileOperationManager;
@@ -45,7 +44,6 @@ import com.helger.settings.exchange.configfile.ConfigFileBuilder;
  */
 @Immutable
 public final class TCConfig {
-
   private static final Logger s_aLogger = LoggerFactory.getLogger (TCConfig.class);
   private static final SimpleReadWriteLock s_aRWLock = new SimpleReadWriteLock ();
   @GuardedBy ("s_aRWLock")
@@ -111,9 +109,7 @@ public final class TCConfig {
   }
 
   public static final boolean DEFAULT_TOOP_TRACKER_ENABLED = false;
-  public static final String DEFAULT_DIRECTORY_BASE_URL = "http://193.10.8.211:7071";
   public static final boolean DEFAULT_USE_SML = true;
-  public static final String DEFAULT_SMP_URI = "http://193.10.8.211:80";
 
   private TCConfig () {
   }
@@ -173,13 +169,11 @@ public final class TCConfig {
   }
 
   /**
-   * @return The PEPPOL Directory base URL for R2D2.Should never end with a slash.
-   *         Example: {@link #DEFAULT_DIRECTORY_BASE_URL}.
+   * @return The TOOP Directory base URL for R2D2. Should never end with a slash.
    */
-  @Nonnull
-  @Nonempty
+  @Nullable
   public static String getR2D2DirectoryBaseUrl () {
-    return getConfigFile ().getAsString ("toop.r2d2.directory.baseurl", DEFAULT_DIRECTORY_BASE_URL);
+    return getConfigFile ().getAsString ("toop.r2d2.directory.baseurl");
   }
 
   /**
@@ -228,7 +222,7 @@ public final class TCConfig {
   @Nullable
   public static URI getR2D2SMPUrl () {
     // E.g. http://smp.central.toop
-    final String sURI = getConfigFile ().getAsString ("toop.r2d2.smp.url", DEFAULT_SMP_URI);
+    final String sURI = getConfigFile ().getAsString ("toop.r2d2.smp.url");
     return URLHelper.getAsURI (sURI);
   }
 
