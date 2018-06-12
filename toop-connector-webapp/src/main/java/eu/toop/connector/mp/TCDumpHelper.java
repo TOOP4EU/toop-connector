@@ -17,9 +17,9 @@ package eu.toop.connector.mp;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -31,6 +31,8 @@ import org.slf4j.LoggerFactory;
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.Nonempty;
 import com.helger.commons.io.file.FileHelper;
+import com.helger.commons.io.stream.WrappedInputStream;
+import com.helger.commons.io.stream.WrappedOutputStream;
 
 /**
  * Dump helper function.
@@ -58,17 +60,7 @@ public final class TCDumpHelper {
       // Open log file
       final FileOutputStream aDebugFOS = FileHelper.getOutputStream (aDumpFile);
       if (aDebugFOS != null) {
-        return new FilterInputStream (aSrcIS) {
-          @Override
-          public void close () throws IOException {
-            try {
-              // Close dump file as well
-              aDebugFOS.close ();
-            } finally {
-              super.close ();
-            }
-          }
-
+        return new WrappedInputStream (aSrcIS) {
           @Override
           public int read () throws IOException {
             final int ret = super.read ();
@@ -84,6 +76,16 @@ public final class TCDumpHelper {
               aDebugFOS.write (aBuf, nOfs, ret);
             return ret;
           }
+
+          @Override
+          public void close () throws IOException {
+            try {
+              // Close dump file as well
+              aDebugFOS.close ();
+            } finally {
+              super.close ();
+            }
+          }
         };
       }
 
@@ -91,5 +93,60 @@ public final class TCDumpHelper {
     }
 
     return aSrcIS;
+  }
+
+  @Nonnull
+  public static OutputStream getDumpOutputStream (@Nonnull final OutputStream aSrcOS,
+                                                  @Nullable final File aDumpDirectory,
+                                                  @Nonnull @Nonempty final String sContextAndExtension) {
+    ValueEnforcer.notNull (aSrcOS, "SrcOS");
+    ValueEnforcer.notEmpty (sContextAndExtension, "ContextAndExtension");
+
+    if (aDumpDirectory != null && aDumpDirectory.exists ()) {
+      // Only if the dump directory is present and existing
+      final String sFilename = Long.toString (System.nanoTime ()) + sContextAndExtension;
+      final File aDumpFile = new File (aDumpDirectory, sFilename);
+
+      // Open log file
+      final FileOutputStream aDebugFOS = FileHelper.getOutputStream (aDumpFile);
+      if (aDebugFOS != null) {
+        return new WrappedOutputStream (aSrcOS) {
+          @Override
+          public void write (final int b) throws IOException {
+            super.write (b);
+            aDebugFOS.write (b);
+          }
+
+          @Override
+          public void write (final byte[] aBuf, final int nOfs, final int nLen) throws IOException {
+            super.write (aBuf, nOfs, nLen);
+            aDebugFOS.write (aBuf, nOfs, nLen);
+          }
+
+          @Override
+          public void flush () throws IOException {
+            try {
+              aDebugFOS.flush ();
+            } finally {
+              super.flush ();
+            }
+          }
+
+          @Override
+          public void close () throws IOException {
+            try {
+              // Close dump file as well
+              aDebugFOS.close ();
+            } finally {
+              super.close ();
+            }
+          }
+        };
+      }
+
+      s_aLogger.warn ("Failed to open dump file '" + aDumpFile.getAbsolutePath () + "' for writing");
+    }
+
+    return aSrcOS;
   }
 }

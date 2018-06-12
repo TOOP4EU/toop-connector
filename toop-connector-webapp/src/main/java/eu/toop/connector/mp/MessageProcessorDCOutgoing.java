@@ -15,6 +15,7 @@
  */
 package eu.toop.connector.mp;
 
+import java.io.OutputStream;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -192,7 +193,12 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
         // Do this only once and not for every endpoint
         MEMessage meMessage;
         try (final NonBlockingByteArrayOutputStream aBAOS = new NonBlockingByteArrayOutputStream ()) {
-          ToopMessageBuilder.createRequestMessage (aRequest, aBAOS, MPWebAppConfig.getSignatureHelper ());
+          // Ensure flush/close of DumpOS!
+          try (final OutputStream aDumpOS = TCDumpHelper.getDumpOutputStream (aBAOS,
+                                                                              TCConfig.getDebugToDPDumpPathIfEnabled (),
+                                                                              "to-dp.asic")) {
+            ToopMessageBuilder.createRequestMessage (aRequest, aBAOS, MPWebAppConfig.getSignatureHelper ());
+          }
 
           // build MEM once
           final MEPayload aPayload = new MEPayload (AsicUtils.MIMETYPE_ASICE, sRequestID, aBAOS.toByteArray ());

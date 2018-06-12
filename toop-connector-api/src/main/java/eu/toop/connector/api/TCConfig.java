@@ -333,4 +333,33 @@ public final class TCConfig {
     return isDebugFromDPDumpEnabled () ? getDebugFromDPDumpPath () : null;
   }
 
+  public static boolean isDebugToDCDumpEnabled () {
+    return getConfigFile ().getAsBoolean ("toop.debug.to-dc.dump.enabled", false);
+  }
+
+  @Nullable
+  public static File getDebugToDCDumpPath () {
+    final String sPath = getConfigFile ().getAsString ("toop.debug.to-dc.dump.path");
+    return sPath == null ? null : new File (sPath);
+  }
+
+  @Nullable
+  public static File getDebugToDCDumpPathIfEnabled () {
+    return isDebugToDCDumpEnabled () ? getDebugToDCDumpPath () : null;
+  }
+
+  public static boolean isDebugToDPDumpEnabled () {
+    return getConfigFile ().getAsBoolean ("toop.debug.to-dp.dump.enabled", false);
+  }
+
+  @Nullable
+  public static File getDebugToDPDumpPath () {
+    final String sPath = getConfigFile ().getAsString ("toop.debug.to-dp.dump.path");
+    return sPath == null ? null : new File (sPath);
+  }
+
+  @Nullable
+  public static File getDebugToDPDumpPathIfEnabled () {
+    return isDebugToDPDumpEnabled () ? getDebugToDPDumpPath () : null;
+  }
 }

@@ -105,6 +105,16 @@ public class MPWebAppListener extends WebScopeListener {
         ToopKafkaClient.send (EErrorLevel.WARN, () -> m_sLogPrefix + "MEMessage contains no payload: " + aMEMessage);
     });
 
+    MEMDelegate.getInstance ().registerNotificationHandler (aRelayResult -> {
+      ToopKafkaClient.send (EErrorLevel.INFO, () -> m_sLogPrefix + "Notification[" + aRelayResult.getErrorCode ()
+                                                    + "]: " + aRelayResult.getDescription ());
+    });
+
+    MEMDelegate.getInstance ().registerSubmissionResultHandler (aRelayResult -> {
+      ToopKafkaClient.send (EErrorLevel.INFO, () -> m_sLogPrefix + "SubmissionResult[" + aRelayResult.getErrorCode ()
+                                                    + "]: " + aRelayResult.getDescription ());
+    });
+
     ToopKafkaClient.send (EErrorLevel.INFO, m_sLogPrefix + "TOOP Connector started");
   }
 

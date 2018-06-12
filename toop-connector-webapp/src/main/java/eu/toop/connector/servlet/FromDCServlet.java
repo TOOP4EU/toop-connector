@@ -53,7 +53,6 @@ public class FromDCServlet extends HttpServlet {
     final UnifiedResponse aUR = UnifiedResponse.createSimple (aHttpServletRequest);
 
     // Parse POST data
-    // No IToopDataRequest contained here
     final TDETOOPRequestType aRequestMsg = ToopMessageBuilder.parseRequestMessage (TCDumpHelper.getDumpInputStream (aHttpServletRequest.getInputStream (),
                                                                                                                     TCConfig.getDebugFromDCDumpPathIfEnabled (),
                                                                                                                     "from-dc.asic"));
