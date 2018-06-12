@@ -180,7 +180,7 @@ public class MEMDelegate extends AbstractGlobalSingleton {
    */
   public void deregisterNotificationHandler(@Nonnull final IRelayResultHandler notificationHandler) {
     ValueEnforcer.notNull(notificationHandler, "NotificationHandler");
-    relayResultHandlers.add(notificationHandler);
+    relayResultHandlers.remove(notificationHandler);
   }
 
   /**
