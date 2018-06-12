@@ -90,7 +90,8 @@ public final class MessageProcessorDPIncoming extends AbstractGlobalWebSingleton
         }
 
         // Main mapping
-        final IMappedValueList aMappedValues = aClient.performMapping (sLogPrefix, sDestinationMappingURI);
+        final IMappedValueList aMappedValues = aClient.performMapping (sLogPrefix, sDestinationMappingURI,
+                                                                       MPWebAppConfig.getSMMConceptProvider ());
 
         // add all the mapped values in the request
         for (final TDEDataElementRequestType aDER : aRequest.getDataElementRequest ()) {

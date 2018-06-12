@@ -119,7 +119,8 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
 
         // Main mapping
         final IMappedValueList aMappedValues = aClient.performMapping (sLogPrefix,
-                                                                       SMMDocumentTypeMapping.getToopSMNamespace (eDocType));
+                                                                       SMMDocumentTypeMapping.getToopSMNamespace (eDocType),
+                                                                       MPWebAppConfig.getSMMConceptProvider ());
 
         // add all the mapped values in the request
         for (final TDEDataElementRequestType aDER : aRequest.getDataElementRequest ()) {

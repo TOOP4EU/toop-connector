@@ -22,6 +22,8 @@ import com.helger.asic.SignatureHelper;
 import com.helger.commons.io.resource.ClassPathResource;
 
 import eu.toop.connector.api.TCConfig;
+import eu.toop.connector.smmclient.ISMMConceptProvider;
+import eu.toop.connector.smmclient.SMMConceptProviderGRLCRemote;
 
 /**
  * Message Processor WebApp configuration
@@ -34,15 +36,25 @@ public final class MPWebAppConfig {
                                                                  TCConfig.getKeystorePassword (),
                                                                  TCConfig.getKeystoreKeyAlias (),
                                                                  TCConfig.getKeystoreKeyPassword ());
+  private static final ISMMConceptProvider CP = SMMConceptProviderGRLCRemote::getAllMappedValues;
 
   private MPWebAppConfig () {
   }
 
   /**
-   * @return The {@link SignatureHelper} singleton.
+   * @return The {@link SignatureHelper} singleton. Never <code>null</code>.
    */
   @Nonnull
   public static SignatureHelper getSignatureHelper () {
     return SH;
   }
+
+  /**
+   * @return The {@link ISMMConceptProvider} singleton. Never <code>null</code>.
+   */
+  @Nonnull
+  public static ISMMConceptProvider getSMMConceptProvider () {
+    return CP;
+  }
+
 }
