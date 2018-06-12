@@ -24,6 +24,7 @@ import javax.servlet.annotation.WebListener;
 
 import com.helger.commons.debug.GlobalDebug;
 import com.helger.commons.error.level.EErrorLevel;
+import com.helger.commons.exception.InitializationException;
 import com.helger.commons.id.factory.GlobalIDFactory;
 import com.helger.commons.id.factory.StringIDFromGlobalLongIDFactory;
 import com.helger.commons.string.StringHelper;
@@ -77,8 +78,9 @@ public class MPWebAppListener extends WebScopeListener {
       // Init tracker client
       ToopKafkaClient.setKafkaEnabled (TCConfig.isToopTrackerEnabled ());
       final String sToopTrackerUrl = TCConfig.getToopTrackerUrl ();
-      if (StringHelper.hasText (sToopTrackerUrl))
-        ToopKafkaClient.defaultProperties ().put ("bootstrap.servers", sToopTrackerUrl);
+      if (StringHelper.hasNoText (sToopTrackerUrl))
+        throw new InitializationException ("If the tracker is enabled, the tracker URL MUST be provided in the configuration file!");
+      ToopKafkaClient.defaultProperties ().put ("bootstrap.servers", sToopTrackerUrl);
     }
 
     ToopKafkaClient.send (EErrorLevel.INFO, () -> m_sLogPrefix + "TOOP Connector WebApp startup");
