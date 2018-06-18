@@ -93,15 +93,18 @@ public class InternalNotificationHandler {
 
     Wrapper<Notification> carrier = null;
 
+    if (LOG.isDebugEnabled ())
     LOG.debug("Wait for a " + targetTypeName + " with a messageID: " + submitMessageID);
 
     synchronized (messageQueue) {
       if (messageQueue.containsKey(submitMessageID)) {
-        LOG.debug("we already have a " + targetTypeName + " message for " + submitMessageID);
+        if (LOG.isDebugEnabled ())
+          LOG.debug("we already have a " + targetTypeName + " message for " + submitMessageID);
         carrier = messageQueue.remove(submitMessageID);
       } else {
         //we don't have a carrier yet. Create one
-        LOG.debug("We don't have a " + targetTypeName + " waiter for " + submitMessageID + ". Create a waiter for it");
+        if (LOG.isDebugEnabled ())
+          LOG.debug("We don't have a " + targetTypeName + " waiter for " + submitMessageID + ". Create a waiter for it");
 
         carrier = new Wrapper<>();
         messageQueue.put(submitMessageID, carrier);
@@ -115,7 +118,8 @@ public class InternalNotificationHandler {
         try {
           carrier.wait(timeout);
         } catch (final InterruptedException e) {
-          LOG.warn("Wait for message " + submitMessageID + " was interrupted.");
+          if (LOG.isWarnEnabled ())
+            LOG.warn("Wait for message " + submitMessageID + " was interrupted.");
           throw new MEException("Wait for message " + submitMessageID + " was interrupted.", e);
         }
       }
@@ -137,8 +141,9 @@ public class InternalNotificationHandler {
     synchronized (messageQueue) {
       final ArrayList<String> trash = new ArrayList<>();
 
-      for (final String messageID : messageQueue.keySet()) {
-        final Wrapper<Notification> carrier = messageQueue.get(messageID);
+      for (final Map.Entry<String, Wrapper<Notification>> entry : messageQueue.entrySet()) {
+        final String messageID = entry.getKey ();
+        final Wrapper<Notification> carrier =entry.getValue ();
         if (carrier != null && carrier.get() != null && carrier.get().isExpired(currentTime)) {
           trash.add(messageID);
         }

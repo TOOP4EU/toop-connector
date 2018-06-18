@@ -87,7 +87,9 @@ public final class EBMSUtils {
 
     try {
       final StreamSource stylesource = TransformSourceFactory.create(new ClassPathResource("/receipt-generator.xslt"));
-      final Transformer transformer = TransformerFactory.newInstance().newTransformer(stylesource);
+      final TransformerFactory transformerFactory = TransformerFactory.newInstance ();
+      transformerFactory.setFeature (XMLConstants.FEATURE_SECURE_PROCESSING, true);
+      final Transformer transformer = transformerFactory.newTransformer(stylesource);
       transformer.setParameter("messageid", genereateEbmsMessageId(MEMConstants.MEM_AS4_SUFFIX));
       transformer.setParameter("timestamp", DateTimeUtils.getCurrentTimestamp());
       try (final NonBlockingByteArrayOutputStream baos = new NonBlockingByteArrayOutputStream()) {
@@ -588,10 +590,10 @@ public final class EBMSUtils {
       ToopKafkaClient.send(EErrorLevel.ERROR, () -> "Error from AS4 transmission:" + errBuff.toString());
       throw new MEException(errBuff.toString());
 
-    } else {
-      // Short info that it worked
-      ToopKafkaClient.send(EErrorLevel.INFO, () -> "AS4 transmission seemed to have worked out fine");
     }
+
+    // Short info that it worked
+    ToopKafkaClient.send(EErrorLevel.INFO, () -> "AS4 transmission seemed to have worked out fine");
   }
 
   /**

@@ -43,15 +43,15 @@ import eu.toop.connector.me.notifications.IMessageHandler;
  *
  * @author myildiz83
  */
-public class IntegrationTest {
+public class IntegrationTestMain {
 
   static {
     System.setProperty(TCConfig.SYSTEM_PROPERTY_TOOP_CONNECTOR_SERVER_PROPERTIES_PATH,
         "toop-connector.elonia.integrationTest.properties");
-    PropertyConfigurator.configure(IntegrationTest.class.getResourceAsStream("/log4j.properties"));
+    PropertyConfigurator.configure(IntegrationTestMain.class.getResourceAsStream("/log4j.properties"));
   }
 
-  private static final Logger LOG = LoggerFactory.getLogger(IntegrationTest.class);
+  private static final Logger LOG = LoggerFactory.getLogger(IntegrationTestMain.class);
 
   public static void main(String[] args) throws Exception {
 
