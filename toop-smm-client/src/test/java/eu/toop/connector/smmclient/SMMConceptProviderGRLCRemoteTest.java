@@ -25,6 +25,8 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.helger.commons.collection.impl.ICommonsOrderedSet;
+
 import eu.toop.commons.codelist.EPredefinedDocumentTypeIdentifier;
 import eu.toop.commons.codelist.SMMDocumentTypeMapping;
 
@@ -47,7 +49,8 @@ public final class SMMConceptProviderGRLCRemoteTest {
 
   @Test
   public void testRemoteQueryToopFreedonia () throws IOException {
-    final MappedValueList aMVL = SMMConceptProviderGRLCRemote.remoteQueryAllMappedValues (LOG_PREFIX, NS_TOOP, NS_FREEDONIA);
+    final MappedValueList aMVL = SMMConceptProviderGRLCRemote.remoteQueryAllMappedValues (LOG_PREFIX, NS_TOOP,
+                                                                                          NS_FREEDONIA);
     assertNotNull (aMVL);
     assertFalse (aMVL.isEmpty ());
     if (false)
@@ -56,7 +59,8 @@ public final class SMMConceptProviderGRLCRemoteTest {
 
   @Test
   public void testRemoteQueryFreedoniaToop () throws IOException {
-    final MappedValueList aMVL = SMMConceptProviderGRLCRemote.remoteQueryAllMappedValues (LOG_PREFIX, NS_FREEDONIA, NS_TOOP);
+    final MappedValueList aMVL = SMMConceptProviderGRLCRemote.remoteQueryAllMappedValues (LOG_PREFIX, NS_FREEDONIA,
+                                                                                          NS_TOOP);
     assertNotNull (aMVL);
     assertFalse (aMVL.isEmpty ());
     if (false)
@@ -65,7 +69,8 @@ public final class SMMConceptProviderGRLCRemoteTest {
 
   @Test
   public void testRemoteQueryToopElonia () throws IOException {
-    final MappedValueList aMVL = SMMConceptProviderGRLCRemote.remoteQueryAllMappedValues (LOG_PREFIX, NS_TOOP, NS_ELONIA);
+    final MappedValueList aMVL = SMMConceptProviderGRLCRemote.remoteQueryAllMappedValues (LOG_PREFIX, NS_TOOP,
+                                                                                          NS_ELONIA);
     assertNotNull (aMVL);
     assertFalse (aMVL.isEmpty ());
     if (false)
@@ -74,10 +79,20 @@ public final class SMMConceptProviderGRLCRemoteTest {
 
   @Test
   public void testRemoteQueryEloniaToop () throws IOException {
-    final MappedValueList aMVL = SMMConceptProviderGRLCRemote.remoteQueryAllMappedValues (LOG_PREFIX, NS_ELONIA, NS_TOOP);
+    final MappedValueList aMVL = SMMConceptProviderGRLCRemote.remoteQueryAllMappedValues (LOG_PREFIX, NS_ELONIA,
+                                                                                          NS_TOOP);
     assertNotNull (aMVL);
     assertFalse (aMVL.isEmpty ());
     if (false)
       aMVL.forEach (x -> s_aLogger.info (x.getSource ().getValue ()));
+  }
+
+  @Test
+  public void testGetAllNamespaces () throws IOException {
+    final ICommonsOrderedSet<String> aNSs = SMMConceptProviderGRLCRemote.remoteQueryAllNamespaces (LOG_PREFIX);
+    assertNotNull (aNSs);
+    assertFalse (aNSs.isEmpty ());
+    if (false)
+      aNSs.forEach (s_aLogger::info);
   }
 }

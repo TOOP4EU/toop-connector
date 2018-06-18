@@ -29,7 +29,9 @@ import org.apache.http.client.methods.HttpGet;
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.Nonempty;
 import com.helger.commons.collection.impl.CommonsHashMap;
+import com.helger.commons.collection.impl.CommonsLinkedHashSet;
 import com.helger.commons.collection.impl.ICommonsMap;
+import com.helger.commons.collection.impl.ICommonsOrderedSet;
 import com.helger.commons.concurrent.SimpleReadWriteLock;
 import com.helger.commons.error.level.EErrorLevel;
 import com.helger.commons.string.StringHelper;
@@ -217,6 +219,49 @@ public final class SMMConceptProviderGRLCRemote {
 
               // Add result entry into list
               ret.addMappedValue (sSourceNamespace, sSourceValue, sDestNamespace, sDestValue);
+            }
+        }
+      }
+    });
+
+    ToopKafkaClient.send (EErrorLevel.INFO,
+                          () -> sLogPrefix + "SMM remote call returned " + ret.size () + " mapped values");
+
+    return ret;
+  }
+
+  @Nonnull
+  public static ICommonsOrderedSet<String> remoteQueryAllNamespaces (@Nonnull final String sLogPrefix) throws IOException {
+    ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "Remote querying all SMM namespaces");
+
+    // Build URL with params etc.
+    String sBaseURL = TCConfig.getSMMGRLCURL ();
+    if (StringHelper.hasNoText (sBaseURL))
+      throw new IllegalArgumentException ("SMM GRLC URL is missing!");
+    if (!sBaseURL.endsWith ("/"))
+      sBaseURL += "/";
+    final ISimpleURL aDestinationURL = new SimpleURL (sBaseURL + "api/JackJackie/toop-sparql/get-all-namespaces");
+    // Always no-debug
+    final ResponseHandlerJson aJsonHandler = new ResponseHandlerJson (false);
+
+    // Result object to be filled
+    final ICommonsOrderedSet<String> ret = new CommonsLinkedHashSet<> ();
+
+    // Execute HTTP request
+    _httpClientGetJson (aDestinationURL, aJsonHandler, aJson -> {
+      // Interpret result
+      if (aJson.isObject ()) {
+        final IJsonObject aResults = aJson.getAsObject ().getAsObject ("results");
+        if (aResults != null) {
+          final IJsonArray aBindings = aResults.getAsArray ("bindings");
+          if (aBindings != null)
+            for (final IJson aBinding : aBindings) {
+              final IJsonObject aNSObj = aBinding.getAsObject ().getAsObject ("ns");
+              if (aNSObj != null) {
+                final String sURL = aNSObj.getAsString ("value");
+                if (StringHelper.hasText (sURL))
+                  ret.add (sURL);
+              }
             }
         }
       }
