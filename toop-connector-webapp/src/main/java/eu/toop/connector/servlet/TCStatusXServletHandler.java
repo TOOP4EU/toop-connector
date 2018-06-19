@@ -1,6 +1,5 @@
 /**
- * Copyright (C) 2014-2018 Philip Helger (www.helger.com)
- * philip[at]helger[dot]com
+ * Copyright (C) 2018 toop.eu
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
