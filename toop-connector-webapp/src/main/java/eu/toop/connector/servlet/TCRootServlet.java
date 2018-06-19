@@ -33,7 +33,7 @@ import com.helger.commons.string.StringHelper;
  * @author Philip Helger
  */
 @WebServlet ("")
-public class MPRootServlet extends HttpServlet {
+public class TCRootServlet extends HttpServlet {
   @Override
   protected void doGet (@Nonnull final HttpServletRequest req,
                         @Nonnull final HttpServletResponse resp) throws ServletException, IOException {

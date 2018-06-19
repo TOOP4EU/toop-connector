@@ -297,6 +297,15 @@ public final class TCConfig {
     return getConfigFile ().getAsString ("toop.keystore.key.password");
   }
 
+  /**
+   * @return <code>true</code> if the status servlet at <code>/tc-status/</code>
+   *         is enabled, <code>false</code> if it is disabled. By default it is
+   *         enabled.
+   */
+  public static boolean isStatusEnabled () {
+    return getConfigFile ().getAsBoolean ("toop.status.enabled", true);
+  }
+
   public static boolean isDebugFromDCDumpEnabled () {
     return getConfigFile ().getAsBoolean ("toop.debug.from-dc.dump.enabled", false);
   }

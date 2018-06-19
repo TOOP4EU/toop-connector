@@ -35,6 +35,7 @@ import eu.toop.commons.dataexchange.TDETOOPRequestType;
 import eu.toop.commons.dataexchange.TDETOOPResponseType;
 import eu.toop.commons.exchange.ToopMessageBuilder;
 import eu.toop.connector.api.TCConfig;
+import eu.toop.connector.app.CTC;
 import eu.toop.connector.me.MEMDelegate;
 import eu.toop.connector.me.MEPayload;
 import eu.toop.connector.mp.MessageProcessorDCIncoming;
@@ -48,7 +49,7 @@ import eu.toop.kafkaclient.ToopKafkaClient;
  * @author Philip Helger
  */
 @WebListener
-public class MPWebAppListener extends WebScopeListener {
+public class TCWebAppListener extends WebScopeListener {
   private String m_sLogPrefix;
 
   @Override
@@ -97,7 +98,8 @@ public class MPWebAppListener extends WebScopeListener {
       }
     }
 
-    ToopKafkaClient.send (EErrorLevel.INFO, () -> m_sLogPrefix + "TOOP Connector WebApp startup");
+    ToopKafkaClient.send (EErrorLevel.INFO,
+                          () -> m_sLogPrefix + "TOOP Connector WebApp " + CTC.getVersionNumber () + " startup");
 
     // Register the AS4 handler needed
     MEMDelegate.getInstance ().registerMessageHandler (aMEMessage -> {
