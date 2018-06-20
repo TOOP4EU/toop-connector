@@ -18,7 +18,7 @@ package eu.toop.connector.me;
 /**
  * @author myildiz
  */
-public class MEMConstants {
+public final class MEMConstants {
 
   public static final String MEM_AS4_SUFFIX = "message-exchange.toop.eu";
   public static final String MEM_PARTY_ROLE = "http://www.toop.eu/edelivery/backend";
@@ -31,4 +31,6 @@ public class MEMConstants {
   public static final String ACTION_RELAY = "Notify";
   public static final String ACTION_SUBMISSION_RESULT = "SubmissionResult";
   public static final String SERVICE = "http://www.toop.eu/edelivery/bit";
+
+  private MEMConstants () {}
 }

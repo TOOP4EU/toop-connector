@@ -27,10 +27,10 @@ import javax.xml.soap.SOAPMessage;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Node;
 
 import com.helger.commons.io.stream.NonBlockingByteArrayInputStream;
 import com.helger.commons.io.stream.StreamHelper;
+import com.helger.commons.mime.CMimeType;
 
 import eu.toop.connector.me.EBMSUtils;
 import eu.toop.connector.me.MEMConstants;
@@ -55,7 +55,7 @@ public class AS4InterfaceServlet extends HttpServlet {
     final MimeHeaders mimeHeaders = readMimeHeaders(req);
 
     // no matter what happens, we will return either a receipt or a fault
-    resp.setContentType("text/xml");
+    resp.setContentType(CMimeType.TEXT_XML.getAsString ());
 
     SOAPMessage receivedMessage = null;
     try {
@@ -75,9 +75,8 @@ public class AS4InterfaceServlet extends HttpServlet {
       }
 
       // get the action from the soap message
-      final Node node = SoapXPathUtil
-          .safeFindSingleNode(receivedMessage.getSOAPHeader(), "//:CollaborationInfo/:Action");
-      final String action = node.getTextContent();
+      final String action = SoapXPathUtil
+          .getSingleNodeTextContent(receivedMessage.getSOAPHeader(), "//:CollaborationInfo/:Action");
 
       switch (action) {
         case MEMConstants.ACTION_DELIVER:
@@ -109,15 +108,18 @@ public class AS4InterfaceServlet extends HttpServlet {
       resp.getOutputStream().write(successReceipt);
       resp.getOutputStream().flush();
 
-      LOG.debug("Done processing inbound AS4 message");
+      if (LOG.isDebugEnabled ())
+        LOG.debug("Done processing inbound AS4 message");
     } catch (final Throwable th) {
       LOG.error("Error processing the message", th);
       sendBackFault(resp, receivedMessage, th);
     } finally {
-      LOG.debug("End doPost");
+      if (LOG.isDebugEnabled ())
+        LOG.debug("End doPost");
     }
 
-    resp.getOutputStream().close();
+    // Don't close output stream
+    // resp.getOutputStream().close();
   }
 
   /**

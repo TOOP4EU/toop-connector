@@ -120,6 +120,7 @@ public class InternalNotificationHandler {
         } catch (final InterruptedException e) {
           if (LOG.isWarnEnabled ())
             LOG.warn("Wait for message " + submitMessageID + " was interrupted.");
+          Thread.currentThread ().interrupt ();
           throw new MEException("Wait for message " + submitMessageID + " was interrupted.", e);
         }
       }

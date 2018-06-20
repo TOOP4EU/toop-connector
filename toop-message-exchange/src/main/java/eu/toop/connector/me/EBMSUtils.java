@@ -49,6 +49,7 @@ import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 import com.helger.commons.mime.CMimeType;
 import com.helger.commons.mime.MimeType;
 import com.helger.commons.mime.MimeTypeParser;
+import com.helger.commons.mime.MimeTypeParserException;
 import com.helger.commons.regex.RegExHelper;
 import com.helger.commons.string.StringHelper;
 import com.helger.xml.microdom.IMicroDocument;
@@ -305,9 +306,9 @@ public final class EBMSUtils {
    *
    * @param message the soap message to be converted to a MEMessage. Cannot be null
    * @return the MEMessage object created from the supplied SOAPMessage
-   * @throws Exception in case of error
+   * @throws MEException in case of error
    */
-  public static MEMessage soap2MEMessage(@Nonnull final SOAPMessage message) throws Exception {
+  public static MEMessage soap2MEMessage(@Nonnull final SOAPMessage message) throws MEException {
     ValueEnforcer.notNull(message, "SOAPMessage");
 
     if (LOG.isDebugEnabled()) {
@@ -332,15 +333,14 @@ public final class EBMSUtils {
 
         MimeType mimeType;
         try {
-          final Node singleNode = SoapXPathUtil.safeFindSingleNode(partInfo,
-              ".//:PartProperties/:Property[@name='MimeType']/text()");
-          String sMimeType = singleNode.getNodeValue();
+          String sMimeType = SoapXPathUtil.getSingleNodeTextContent(partInfo,
+              ".//:PartProperties/:Property[@name='MimeType']");
           if (sMimeType.startsWith("cid:")) {
             sMimeType = sMimeType.substring(4);
           }
 
           mimeType = MimeTypeParser.parseMimeType(sMimeType);
-        } catch (final Exception ex) {
+        } catch (final MimeTypeParserException ex) {
           LOG.warn("Error parsing MIME type: " + ex.getMessage());
           // if there is a problem wrt the processing of the mimetype, simply grab the
           // content type
@@ -390,60 +390,55 @@ public final class EBMSUtils {
       final Node messagePropsNode = SoapXPathUtil.safeFindSingleNode(sNotification.getSOAPHeader(),
           "//:MessageProperties");
 
-      final String messageId = SoapXPathUtil.safeFindSingleNode(messagePropsNode,
-          ".//:Property[@name='MessageId']/text()")
-          .getTextContent();
+      final String messageId = SoapXPathUtil.getSingleNodeTextContent(messagePropsNode,
+          ".//:Property[@name='MessageId']/text()");
       notification.setMessageID(messageId);
 
-      final String refToMessageId = SoapXPathUtil.safeFindSingleNode(messagePropsNode,
-          ".//:Property[@name='RefToMessageId']/text()")
-          .getTextContent();
+      final String refToMessageId = SoapXPathUtil.getSingleNodeTextContent(messagePropsNode,
+          ".//:Property[@name='RefToMessageId']/text()");
       notification.setRefToMessageID(refToMessageId);
 
-      final String sSignalType = SoapXPathUtil.safeFindSingleNode(messagePropsNode, ".//:Property[@name='Result']")
-          .getTextContent();
+      final String sSignalType = SoapXPathUtil.getSingleNodeTextContent(messagePropsNode, ".//:Property[@name='Result']");
       if (!"ERROR".equalsIgnoreCase(sSignalType)) {
         notification.setResult(ResultType.RECEIPT);
       } else {
         notification.setResult(ResultType.ERROR);
 
         try {
-          final String errorCode = SoapXPathUtil.safeFindSingleNode(messagePropsNode,
-              ".//:Property[@name='ErrorCode']")
-              .getTextContent();
+          final String errorCode = SoapXPathUtil.getSingleNodeTextContent(messagePropsNode,
+              ".//:Property[@name='ErrorCode']");
           notification.setErrorCode(errorCode);
-        } catch (final Exception e) {
+        } catch (final MEException e) {
           throw new IllegalStateException("ErrorCode is mandatory for relay result errors.");
         }
 
         try {
-          final String severity = SoapXPathUtil.safeFindSingleNode(messagePropsNode, ".//:Property[@name='severity']")
-              .getTextContent();
+          final String severity = SoapXPathUtil.getSingleNodeTextContent(messagePropsNode, ".//:Property[@name='severity']");
           notification.setSeverity(severity);
-        } catch (final Exception e) {
-
+        } catch (final MEException e) {
+          // TODO so what?
         }
 
         try {
-          final String shortDesc = SoapXPathUtil.safeFindSingleNode(messagePropsNode,
-              ".//:Property[@name='ShortDescription']")
-              .getTextContent();
+          final String shortDesc = SoapXPathUtil.getSingleNodeTextContent(messagePropsNode,
+              ".//:Property[@name='ShortDescription']");
           notification.setShortDescription(shortDesc);
-        } catch (final Exception ignored) {
+        } catch (final MEException ignored) {
+          // TODO so what?
         }
 
         try {
-          final String desc = SoapXPathUtil.safeFindSingleNode(messagePropsNode, ".//:Property[@name='Description']")
-              .getTextContent();
+          final String desc = SoapXPathUtil.getSingleNodeTextContent(messagePropsNode, ".//:Property[@name='Description']");
           notification.setDescription(desc);
-        } catch (final Exception ignored) {
+        } catch (final MEException ignored) {
+          // TODO so what?
         }
       }
 
       return notification;
     } catch (final RuntimeException ex) {
       throw ex;
-    } catch (final Exception ex) {
+    } catch (final SOAPException ex) {
       throw new MEException(ex);
     }
   }
@@ -458,17 +453,15 @@ public final class EBMSUtils {
           .safeFindSingleNode(sSubmissionResult.getSOAPHeader(), "//:MessageProperties");
 
       final String refToMessageID = SoapXPathUtil
-          .safeFindSingleNode(messagePropsNode, ".//:Property[@name='RefToMessageId']/text()").getTextContent();
+          .getSingleNodeTextContent(messagePropsNode, ".//:Property[@name='RefToMessageId']/text()");
       submissionResult.setRefToMessageID(refToMessageID);
 
-      final String sSignalType = SoapXPathUtil.safeFindSingleNode(messagePropsNode, ".//:Property[@name='Result']")
-          .getTextContent();
+      final String sSignalType = SoapXPathUtil.getSingleNodeTextContent(messagePropsNode, ".//:Property[@name='Result']");
       if ("ERROR".equalsIgnoreCase(sSignalType)) {
         submissionResult.setResult(ResultType.ERROR);
 
         //description must be there when there is an error
-        final String description = SoapXPathUtil.safeFindSingleNode(messagePropsNode, ".//:Property[@name='Description']")
-            .getTextContent();
+        final String description = SoapXPathUtil.getSingleNodeTextContent(messagePropsNode, ".//:Property[@name='Description']");
         submissionResult.setDescription(description);
 
       } else {
@@ -476,7 +469,7 @@ public final class EBMSUtils {
 
         //message id is conditional, it must be there only in case of receipt
         final String messageID = SoapXPathUtil
-            .safeFindSingleNode(messagePropsNode, ".//:Property[@name='MessageId']/text()").getTextContent();
+            .getSingleNodeTextContent(messagePropsNode, ".//:Property[@name='MessageId']/text()");
         submissionResult.setMessageID(messageID);
       }
 
@@ -604,14 +597,11 @@ public final class EBMSUtils {
    * @throws MEException if the message header does not contain an ebms message id
    */
   public static String getMessageId(final SOAPMessage soapMessage) {
-    final Node element;
     try {
-      element = SoapXPathUtil.safeFindSingleNode(soapMessage.getSOAPHeader(),
+      return SoapXPathUtil.getSingleNodeTextContent(soapMessage.getSOAPHeader(),
           "//:MessageInfo/:MessageId");
     } catch (final SOAPException e) {
-      throw new MEException(e.getMessage(), e);
+      throw new MEException(e);
     }
-
-    return element.getTextContent();
   }
 }

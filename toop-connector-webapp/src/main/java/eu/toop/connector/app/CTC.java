@@ -18,7 +18,6 @@ package eu.toop.connector.app;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
-import com.helger.commons.annotation.UsedViaReflection;
 import com.helger.commons.exception.InitializationException;
 import com.helger.commons.io.resource.ClassPathResource;
 import com.helger.settings.ISettings;
@@ -33,19 +32,17 @@ import com.helger.settings.exchange.properties.SettingsPersistenceProperties;
 public final class CTC {
   public static final String TOOP_CONNECTOR_VERSION_FILENAME = "toop-connector-version.properties";
 
-  private static final String s_sVersionNumber;
+  private static final String VERSION_NUMBER;
 
   static {
     // Read version number
     final SettingsPersistenceProperties aSPP = new SettingsPersistenceProperties ();
     final ISettings aVersionProps = aSPP.readSettings (new ClassPathResource (TOOP_CONNECTOR_VERSION_FILENAME));
-    s_sVersionNumber = aVersionProps.getAsString ("tc.version");
-    if (s_sVersionNumber == null)
+    VERSION_NUMBER = aVersionProps.getAsString ("tc.version");
+    if (VERSION_NUMBER == null)
       throw new InitializationException ("Error determining TOOP Connector version number!");
   }
 
-  @Deprecated
-  @UsedViaReflection
   private CTC () {
   }
 
@@ -55,6 +52,6 @@ public final class CTC {
    */
   @Nonnull
   public static String getVersionNumber () {
-    return s_sVersionNumber;
+    return VERSION_NUMBER;
   }
 }
