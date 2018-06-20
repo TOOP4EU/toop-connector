@@ -24,28 +24,31 @@ import javax.annotation.concurrent.Immutable;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
 
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.helger.commons.annotation.ReturnsMutableCopy;
 import com.helger.xml.namespace.MapBasedNamespaceContext;
+import com.helger.xml.xpath.XPathHelper;
 
 /**
  * @author myildiz at 15.02.2018.
  */
 @Immutable
 public final class SoapXPathUtil {
-  private static final XPath XPATH;
-
-  static {
-    XPATH = XPathFactory.newInstance().newXPath();
-    final MapBasedNamespaceContext aNamespaceCtx = new MapBasedNamespaceContext();
-    aNamespaceCtx.addDefaultNamespaceURI(EBMSUtils.NS_EBMS);
-    XPATH.setNamespaceContext(aNamespaceCtx);
+  private SoapXPathUtil () {
   }
 
-  private SoapXPathUtil () {
+  @Nonnull
+  @ReturnsMutableCopy
+  private static XPath _createXPath () {
+    // XPath instances are not thread safe!
+    final XPath ret = XPathHelper.createNewXPath ();
+    final MapBasedNamespaceContext aNamespaceCtx = new MapBasedNamespaceContext();
+    aNamespaceCtx.addDefaultNamespaceURI(EBMSUtils.NS_EBMS);
+    ret.setNamespaceContext(aNamespaceCtx);
+    return ret;
   }
 
   /**
@@ -58,7 +61,7 @@ public final class SoapXPathUtil {
   public static Node findSingleNode(@Nonnull final Node node,
       @Nonnull final String xpath) {
     try {
-      return (Node) XPATH.evaluate(xpath, node, XPathConstants.NODE);
+      return (Node) _createXPath ().evaluate(xpath, node, XPathConstants.NODE);
     } catch (final XPathExpressionException e) {
       throw new MEException(e);
     }
@@ -96,7 +99,7 @@ public final class SoapXPathUtil {
   public static List<Node> listNodes(@Nonnull final Node node,
       @Nonnull final String xpath) {
     try {
-      final NodeList o = (NodeList) XPATH.evaluate(xpath, node, XPathConstants.NODESET);
+      final NodeList o = (NodeList) _createXPath ().evaluate(xpath, node, XPathConstants.NODESET);
       if (o == null) {
         throw new MEException("No match for [" + xpath + "]");
       }
