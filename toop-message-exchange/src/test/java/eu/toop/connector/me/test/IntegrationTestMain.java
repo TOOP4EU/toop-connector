@@ -16,6 +16,7 @@
 package eu.toop.connector.me.test;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -26,6 +27,7 @@ import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.helger.commons.concurrent.ThreadHelper;
 import com.helger.scope.mock.ScopeAwareTestSetup;
 
 import eu.toop.connector.api.TCConfig;
@@ -53,7 +55,7 @@ public class IntegrationTestMain {
 
   private static final Logger LOG = LoggerFactory.getLogger(IntegrationTestMain.class);
 
-  public static void main(String[] args) throws Exception {
+  public static void main(final String[] args) throws IOException {
 
     ScopeAwareTestSetup.setupScopeTests();
     //initialize c1
@@ -63,17 +65,17 @@ public class IntegrationTestMain {
     LOG.info("Initialize corner4");
     BackendServletContainer.createServletOn(8686, "/msh");
 
-    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+    final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
 
     //wait for the other side to receive the message
     final DeliveryWatcher deliveryWatcher = new DeliveryWatcher();
     MEMDelegate.getInstance().registerMessageHandler(deliveryWatcher);
 
-    Thread.sleep(1000);
+    ThreadHelper.sleep(1000);
 
     //the URL of both C2 and C3 were set to the same endpoint
     //for this test.
-    String recivingSideURL = TCConfig.getMEMAS4Endpoint();
+    final String recivingSideURL = TCConfig.getMEMAS4Endpoint();
 
     String command;
     inputLoop:
@@ -101,7 +103,7 @@ public class IntegrationTestMain {
     }
   }
 
-  private static void updateConfig(String line) {
+  private static void updateConfig(final String line) {
     String targetConfiguration = "toop-connector.elonia.integrationTest.properties";
 
     switch (line) {
@@ -123,8 +125,8 @@ public class IntegrationTestMain {
   /**
    * Send a message from one side to the other
    */
-  private static void sendMessage(DeliveryWatcher deliveryWatcher, EActingSide actingSide,
-      String recivingSideURL) {
+  private static void sendMessage(final DeliveryWatcher deliveryWatcher, final EActingSide actingSide,
+      final String recivingSideURL) {
     deliveryWatcher.reset();
 
     //set the address of the receiving gateway to t
@@ -132,7 +134,7 @@ public class IntegrationTestMain {
         recivingSideURL);
     final MEMessage meMessage = SampleDataProvider.createSampleMessage();
 
-    boolean result = MEMDelegate.getInstance().sendMessage(gatewayRoutingMetadata, meMessage);
+    final boolean result = MEMDelegate.getInstance().sendMessage(gatewayRoutingMetadata, meMessage);
 
     if (!result) {
       LOG.info("TEST for " + actingSide + " FAILED");
@@ -142,7 +144,7 @@ public class IntegrationTestMain {
     }
 
     LOG.info("Wait for the delivery");
-    MEMessage obtainedMessage = deliveryWatcher.obtainMessage(60, TimeUnit.SECONDS);
+    final MEMessage obtainedMessage = deliveryWatcher.obtainMessage(60, TimeUnit.SECONDS);
     if (obtainedMessage == null) {
       LOG.error("Failed to receive a message from the other side within 20 seconds timeout");
       LOG.info("TEST for " + actingSide + " FAILED");
@@ -152,7 +154,7 @@ public class IntegrationTestMain {
     }
   }
 
-  private static String waitForUserInput(BufferedReader bufferedReader) throws Exception {
+  private static String waitForUserInput(final BufferedReader bufferedReader) throws IOException {
     LOG.info("Wait for user input.");
     LOG.info("e2f: send a message from elonia to freedonia");
     LOG.info("f2e: send a message from freedonia to elonia");
@@ -178,7 +180,7 @@ public class IntegrationTestMain {
      * @throws Exception in case of error
      */
     @Override
-    public void handleMessage(@Nonnull MEMessage meMessage) throws Exception {
+    public void handleMessage(@Nonnull final MEMessage meMessage) throws Exception {
       synchronized (this) {
         this.meMessage = meMessage;
       }
@@ -186,7 +188,7 @@ public class IntegrationTestMain {
       latch.countDown();
     }
 
-    public MEMessage obtainMessage(long timeout, TimeUnit timeUnit) {
+    public MEMessage obtainMessage(final long timeout, final TimeUnit timeUnit) {
 
       if (this.meMessage != null) {
         return meMessage;
@@ -194,7 +196,7 @@ public class IntegrationTestMain {
 
       try {
         latch.await(timeout, timeUnit);
-      } catch (InterruptedException e) {
+      } catch (final InterruptedException e) {
         LOG.error("wait interrupted", e);
       }
       synchronized (this) {

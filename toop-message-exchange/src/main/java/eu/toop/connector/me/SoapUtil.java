@@ -55,6 +55,8 @@ public class SoapUtil {
     factory.setNamespaceAware(true);
   }
 
+  private SoapUtil () {}
+
   /**
    * A utility method to create a SOAP1.2 With Attachments message
    *

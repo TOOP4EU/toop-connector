@@ -124,11 +124,13 @@ public class TCWebAppListener extends WebScopeListener {
     });
 
     MEMDelegate.getInstance ().registerNotificationHandler (aRelayResult -> {
+      // more to come
       ToopKafkaClient.send (EErrorLevel.INFO, () -> m_sLogPrefix + "Notification[" + aRelayResult.getErrorCode ()
                                                     + "]: " + aRelayResult.getDescription ());
     });
 
     MEMDelegate.getInstance ().registerSubmissionResultHandler (aRelayResult -> {
+      // more to come
       ToopKafkaClient.send (EErrorLevel.INFO, () -> m_sLogPrefix + "SubmissionResult[" + aRelayResult.getErrorCode ()
                                                     + "]: " + aRelayResult.getDescription ());
     });

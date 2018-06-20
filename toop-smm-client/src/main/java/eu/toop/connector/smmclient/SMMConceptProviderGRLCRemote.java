@@ -67,7 +67,7 @@ public final class SMMConceptProviderGRLCRemote {
    * Remove all cache values.
    */
   public static void clearCache () {
-    s_aRWLock.writeLocked ( () -> s_aCache.clear ());
+    s_aRWLock.writeLocked (s_aCache::clear);
   }
 
   @Nullable

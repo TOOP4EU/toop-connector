@@ -87,11 +87,8 @@ public final class SoapXPathUtil {
   @Nullable
   public static String getSingleNodeTextContent(@Nullable final Node node,
       @Nonnull final String xpath) {
-    if (node != null) {
-      final Node aResultNode = safeFindSingleNode (node, xpath);
-      if (aResultNode != null)
-        return aResultNode.getTextContent ();
-    }
+    if (node != null)
+      return safeFindSingleNode (node, xpath).getTextContent ();
     return null;
   }
 

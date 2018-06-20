@@ -308,7 +308,7 @@ public final class EBMSUtils {
    * @return the MEMessage object created from the supplied SOAPMessage
    * @throws MEException in case of error
    */
-  public static MEMessage soap2MEMessage(@Nonnull final SOAPMessage message) throws MEException {
+  public static MEMessage soap2MEMessage(@Nonnull final SOAPMessage message) {
     ValueEnforcer.notNull(message, "SOAPMessage");
 
     if (LOG.isDebugEnabled()) {

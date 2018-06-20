@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.helger.commons.concurrent.ThreadHelper;
 import com.helger.commons.url.URLHelper;
 import com.helger.scope.mock.ScopeAwareTestSetup;
 
@@ -52,21 +53,22 @@ public class TestSendReceive {
 
   /**
    * Create a mock server on localhost that reads and sends back a MEMessage.
-   *
-   * @throws Exception on error
    */
   @BeforeAll
-  public static void prepare() throws Exception {
+  public static void prepare() {
     // Port must match the message-processor.properties
-    LOG.debug("Prepare for the test");
+    if (LOG.isDebugEnabled ())
+      LOG.debug("Prepare for the test");
 
     final URL backendURL = URLHelper.getAsURL("http://localhost:10001/backend");
     final URL gwURL = URLHelper.getAsURL(TCConfig.getMEMAS4Endpoint());
 
-    LOG.info("backend port: " + backendURL.getPort());
-    LOG.info("backend localpath: " + backendURL.getPath());
-    LOG.info("GW port: " + gwURL.getPort());
-    LOG.info("GW localpath: " + gwURL.getPath());
+    if (LOG.isInfoEnabled ()) {
+      LOG.info("backend port: " + backendURL.getPort());
+      LOG.info("backend localpath: " + backendURL.getPath());
+      LOG.info("GW port: " + gwURL.getPort());
+      LOG.info("GW localpath: " + gwURL.getPath());
+    }
 
     BackendServletContainer.createServletOn(backendURL.getPort(), backendURL.getPath());
 
@@ -74,7 +76,7 @@ public class TestSendReceive {
 
     ScopeAwareTestSetup.setupScopeTests();
 
-    Thread.sleep(1000);
+    ThreadHelper.sleep(1000);
 
   }
 
