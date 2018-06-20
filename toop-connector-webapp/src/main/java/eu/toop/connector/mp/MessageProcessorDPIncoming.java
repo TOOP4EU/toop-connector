@@ -41,6 +41,7 @@ import com.helger.scope.IScope;
 import com.helger.web.scope.singleton.AbstractGlobalWebSingleton;
 
 import eu.toop.commons.concept.ConceptValue;
+import eu.toop.commons.concept.EConceptType;
 import eu.toop.commons.dataexchange.TDEConceptRequestType;
 import eu.toop.commons.dataexchange.TDEDataElementRequestType;
 import eu.toop.commons.dataexchange.TDETOOPRequestType;
@@ -106,7 +107,7 @@ public final class MessageProcessorDPIncoming extends AbstractGlobalWebSingleton
                 final ConceptValue aToopCV = ConceptValue.create (aToopConcept);
                 for (final MappedValue aMV : aMappedValues.getAllBySource (x -> x.equals (aToopCV))) {
                   final TDEConceptRequestType aDstConcept = new TDEConceptRequestType ();
-                  aDstConcept.setConceptTypeCode (ToopXSDHelper.createCode ("DP"));
+                  aDstConcept.setConceptTypeCode (ToopXSDHelper.createCode (EConceptType.DP.getID ()));
                   aDstConcept.setSemanticMappingExecutionIndicator (ToopXSDHelper.createIndicator (false));
                   aDstConcept.setConceptNamespace (ToopXSDHelper.createIdentifier (aMV.getDestination ()
                                                                                       .getNamespace ()));
