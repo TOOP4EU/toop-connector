@@ -34,6 +34,8 @@ import com.helger.commons.url.URLHelper;
 import com.helger.peppol.sml.ESML;
 import com.helger.peppol.sml.ISMLInfo;
 import com.helger.peppol.sml.SMLInfo;
+import com.helger.security.keystore.EKeyStoreType;
+import com.helger.security.keystore.IKeyStoreType;
 import com.helger.settings.exchange.configfile.ConfigFile;
 import com.helger.settings.exchange.configfile.ConfigFileBuilder;
 
@@ -275,6 +277,12 @@ public final class TCConfig {
   @Nullable
   public static String getMPToopInterfaceDCUrl () {
     return getConfigFile ().getAsString ("toop.mp.dc.url");
+  }
+
+  @Nullable
+  public static IKeyStoreType getKeystoreType () {
+    // TODO make configurable
+    return EKeyStoreType.JKS;
   }
 
   @Nullable

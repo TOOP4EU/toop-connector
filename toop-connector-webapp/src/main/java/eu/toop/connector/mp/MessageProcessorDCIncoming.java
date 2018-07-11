@@ -32,7 +32,6 @@ import com.helger.commons.concurrent.ExecutorServiceHelper;
 import com.helger.commons.concurrent.collector.ConcurrentCollectorSingle;
 import com.helger.commons.concurrent.collector.IConcurrentPerformer;
 import com.helger.commons.error.level.EErrorLevel;
-import com.helger.commons.io.resourceprovider.DefaultResourceProvider;
 import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 import com.helger.commons.state.ESuccess;
 import com.helger.httpclient.HttpClientManager;
@@ -68,7 +67,7 @@ public final class MessageProcessorDCIncoming extends AbstractGlobalWebSingleton
       final TCHttpClientFactory aHCFactory = new TCHttpClientFactory ();
 
       try (final HttpClientManager aMgr = new HttpClientManager (aHCFactory)) {
-        final SignatureHelper aSH = new SignatureHelper (new DefaultResourceProvider ().getInputStream (TCConfig.getKeystorePath ()),
+        final SignatureHelper aSH = new SignatureHelper (TCConfig.getKeystoreType (), TCConfig.getKeystorePath (),
                                                          TCConfig.getKeystorePassword (),
                                                          TCConfig.getKeystoreKeyAlias (),
                                                          TCConfig.getKeystoreKeyPassword ());

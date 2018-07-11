@@ -19,7 +19,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
 import com.helger.asic.SignatureHelper;
-import com.helger.commons.io.resource.ClassPathResource;
 
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.smmclient.ISMMConceptProvider;
@@ -32,7 +31,8 @@ import eu.toop.connector.smmclient.SMMConceptProviderGRLCRemote;
  */
 @Immutable
 public final class MPWebAppConfig {
-  private static final SignatureHelper SH = new SignatureHelper (ClassPathResource.getInputStream (TCConfig.getKeystorePath ()),
+  private static final SignatureHelper SH = new SignatureHelper (TCConfig.getKeystoreType (),
+                                                                 TCConfig.getKeystorePath (),
                                                                  TCConfig.getKeystorePassword (),
                                                                  TCConfig.getKeystoreKeyAlias (),
                                                                  TCConfig.getKeystoreKeyPassword ());
