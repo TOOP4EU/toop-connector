@@ -222,7 +222,7 @@ public class R2D2Client implements IR2D2Client
 
     final ICommonsList <IR2D2Endpoint> ret = new CommonsArrayList <> ();
 
-    // Query PEPPOL Directory
+    // Query TOOP Directory
     final ICommonsSet <IParticipantIdentifier> aPIs = _getAllRecipientIDsFromDirectory (sLogPrefix,
                                                                                         sCountryCode,
                                                                                         aDocumentTypeID);

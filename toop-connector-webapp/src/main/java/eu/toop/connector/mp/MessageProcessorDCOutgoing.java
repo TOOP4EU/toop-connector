@@ -38,6 +38,7 @@ import com.helger.commons.id.factory.GlobalIDFactory;
 import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 import com.helger.commons.state.ESuccess;
 import com.helger.commons.string.StringHelper;
+import com.helger.peppol.identifier.factory.IIdentifierFactory;
 import com.helger.peppol.identifier.generic.doctype.IDocumentTypeIdentifier;
 import com.helger.peppol.identifier.generic.participant.IParticipantIdentifier;
 import com.helger.peppol.identifier.generic.process.IProcessIdentifier;
@@ -144,24 +145,21 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
       }
 
       // 2. invoke R2D2 client
+      final IIdentifierFactory aIF = TCSettings.getIdentifierFactory ();
       final ICommonsList<IR2D2Endpoint> aEndpoints;
-      final IParticipantIdentifier aSenderID = TCSettings.getIdentifierFactory ()
-                                                         .createParticipantIdentifier (aRequest.getDataConsumer ()
-                                                                                               .getDCElectronicAddressIdentifier ()
-                                                                                               .getSchemeID (),
-                                                                                       aRequest.getDataConsumer ()
-                                                                                               .getDCElectronicAddressIdentifier ()
-                                                                                               .getValue ());
-      final IDocumentTypeIdentifier aDocTypeID = TCSettings.getIdentifierFactory ()
-                                                           .createDocumentTypeIdentifier (aRequest.getDocumentTypeIdentifier ()
-                                                                                                  .getSchemeID (),
-                                                                                          aRequest.getDocumentTypeIdentifier ()
-                                                                                                  .getValue ());
-      final IProcessIdentifier aProcessID = TCSettings.getIdentifierFactory ()
-                                                      .createProcessIdentifier (aRequest.getProcessIdentifier ()
+      final IParticipantIdentifier aSenderID = aIF.createParticipantIdentifier (aRequest.getDataConsumer ()
+                                                                                        .getDCElectronicAddressIdentifier ()
                                                                                         .getSchemeID (),
-                                                                                aRequest.getProcessIdentifier ()
+                                                                                aRequest.getDataConsumer ()
+                                                                                        .getDCElectronicAddressIdentifier ()
                                                                                         .getValue ());
+      final IDocumentTypeIdentifier aDocTypeID = aIF.createDocumentTypeIdentifier (aRequest.getDocumentTypeIdentifier ()
+                                                                                           .getSchemeID (),
+                                                                                   aRequest.getDocumentTypeIdentifier ()
+                                                                                           .getValue ());
+      final IProcessIdentifier aProcessID = aIF.createProcessIdentifier (aRequest.getProcessIdentifier ()
+                                                                                 .getSchemeID (),
+                                                                         aRequest.getProcessIdentifier ().getValue ());
       {
         String sDestinationCountryCode = null;
         final TDELegalEntityType aLegalEntity = aRequest.getDataRequestSubject ().getLegalEntity ();
