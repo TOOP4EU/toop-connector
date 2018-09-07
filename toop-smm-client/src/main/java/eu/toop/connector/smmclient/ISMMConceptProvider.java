@@ -20,8 +20,6 @@ import java.io.Serializable;
 
 import javax.annotation.Nonnull;
 
-import com.helger.commons.annotation.IsSPIInterface;
-
 /**
  * Base interface for a Semantic Mapping Module Concept provider. This is the
  * main abstraction layer for querying mapped namespaces.
@@ -29,7 +27,7 @@ import com.helger.commons.annotation.IsSPIInterface;
  * @author Philip Helger
  * @since 0.9.2
  */
-@IsSPIInterface
+@FunctionalInterface
 public interface ISMMConceptProvider extends Serializable {
   /**
    * Get all mapped values from source to target namespace. If not present (in

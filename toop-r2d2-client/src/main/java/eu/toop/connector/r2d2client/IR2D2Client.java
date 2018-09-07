@@ -15,14 +15,17 @@
  */
 package eu.toop.connector.r2d2client;
 
-import java.util.List;
+import java.io.IOException;
+import java.security.cert.CertificateException;
 
 import javax.annotation.Nonnull;
 
 import com.helger.commons.annotation.Nonempty;
+import com.helger.commons.collection.impl.ICommonsList;
 import com.helger.peppol.identifier.generic.doctype.IDocumentTypeIdentifier;
 import com.helger.peppol.identifier.generic.participant.IParticipantIdentifier;
 import com.helger.peppol.identifier.generic.process.IProcessIdentifier;
+import com.helger.peppol.smpclient.exception.SMPClientException;
 
 /**
  * Resilient Registry-based Dynamic Discovery (R2D2) client interface for
@@ -40,8 +43,8 @@ public interface IR2D2Client
    * Internally country code and document type are queried against the correct
    * PEPPOL Directory instance (depending on the production or test flag). The
    * SMPs of the resulting service group IDs are than queried in a loop for all
-   * matching endpoints (of participant ID and document type ID) which are
-   * parsed and converted to simpler R2D2Endpoint instances.<br>
+   * matching endpoints (of participant ID and document type ID) which are parsed
+   * and converted to simpler R2D2Endpoint instances.<br>
    * Note: this method returns endpoints for all found transport protocols, so
    * this must be filtered externally.
    *
@@ -56,17 +59,25 @@ public interface IR2D2Client
    *        The process ID to be queried. May not be <code>null</code>.
    * @return A non-<code>null</code> but maybe empty list of all matching
    *         endpoints.
+   * @throws CertificateException
+   *         Error parsing the certificate from the SMP response
+   * @throws SMPClientException
+   *         Error invoking the SMP client
+   * @throws IOException
+   *         In case of TOOP Directory communication errors
    */
   @Nonnull
-  List <IR2D2Endpoint> getEndpoints (@Nonnull String sLogPrefix,
-                                     @Nonnull @Nonempty String sCountryCode,
-                                     @Nonnull IDocumentTypeIdentifier aDocumentTypeID,
-                                     @Nonnull IProcessIdentifier aProcessID);
+  ICommonsList <IR2D2Endpoint> getEndpoints (@Nonnull String sLogPrefix,
+                                             @Nonnull @Nonempty String sCountryCode,
+                                             @Nonnull IDocumentTypeIdentifier aDocumentTypeID,
+                                             @Nonnull IProcessIdentifier aProcessID) throws IOException,
+                                                                                     CertificateException,
+                                                                                     SMPClientException;
 
   /**
    * Get a list of all endpoints that match the specified requirements. This is
-   * the API that is to be invoked in the case, where the ServiceGroup IDs of
-   * the receiver is known and NO PEPPOL Directory invocation is needed.<br>
+   * the API that is to be invoked in the case, where the ServiceGroup IDs of the
+   * receiver is known and NO PEPPOL Directory invocation is needed.<br>
    * Internally the SMP of the service group ID is queried and all matching
    * endpoints are parsed and converted to simpler R2D2Endpoint instances.<br>
    * Note: this method returns endpoints for all found transport protocols, so
@@ -83,10 +94,15 @@ public interface IR2D2Client
    *        The process ID to be queried. May not be <code>null</code>.
    * @return A non-<code>null</code> but maybe empty list of all matching
    *         endpoints.
+   * @throws CertificateException
+   *         Error parsing the certificate from the SMP response
+   * @throws SMPClientException
+   *         Error invoking the SMP client
    */
   @Nonnull
-  List <IR2D2Endpoint> getEndpoints (@Nonnull String sLogPrefix,
-                                     @Nonnull IParticipantIdentifier aRecipientID,
-                                     @Nonnull IDocumentTypeIdentifier aDocumentTypeID,
-                                     @Nonnull IProcessIdentifier aProcessID);
+  ICommonsList <IR2D2Endpoint> getEndpoints (@Nonnull String sLogPrefix,
+                                             @Nonnull IParticipantIdentifier aRecipientID,
+                                             @Nonnull IDocumentTypeIdentifier aDocumentTypeID,
+                                             @Nonnull IProcessIdentifier aProcessID) throws CertificateException,
+                                                                                     SMPClientException;
 }

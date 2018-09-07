@@ -25,7 +25,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.helger.commons.error.level.EErrorLevel;
-import com.helger.servlet.response.UnifiedResponse;
 
 import eu.toop.commons.dataexchange.TDETOOPRequestType;
 import eu.toop.commons.exchange.ToopMessageBuilder;
@@ -50,7 +49,7 @@ public class FromDCServlet extends HttpServlet {
                          @Nonnull final HttpServletResponse aHttpServletResponse) throws ServletException, IOException {
     ToopKafkaClient.send (EErrorLevel.INFO, "MP got /from-dc request (1/4)");
 
-    final UnifiedResponse aUR = UnifiedResponse.createSimple (aHttpServletRequest);
+    final TCUnifiedResponse aUR = new TCUnifiedResponse (aHttpServletRequest);
 
     // Parse POST data
     final TDETOOPRequestType aRequestMsg = ToopMessageBuilder.parseRequestMessage (TCDumpHelper.getDumpInputStream (aHttpServletRequest.getInputStream (),
@@ -61,13 +60,15 @@ public class FromDCServlet extends HttpServlet {
       // The message content is invalid
       ToopKafkaClient.send (EErrorLevel.ERROR,
                             "The request does not contain an ASiC archive, or the ASiC archive does not contain a TOOP DataRequest!");
+      aUR.setContentAndCharset ("The provided ASIC container could not be interpreted as a valid TOOP request.",
+                                aUR.getCharset ());
       aUR.setStatus (HttpServletResponse.SC_BAD_REQUEST);
     } else {
       // Enqueue to processor and we're good
       MessageProcessorDCOutgoing.getInstance ().enqueue (aRequestMsg);
 
       // Done - no content
-      aUR.setStatus (HttpServletResponse.SC_NO_CONTENT);
+      aUR.setStatus (HttpServletResponse.SC_ACCEPTED);
     }
 
     // Done
