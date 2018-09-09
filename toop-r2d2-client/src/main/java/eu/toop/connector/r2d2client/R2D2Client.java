@@ -98,11 +98,13 @@ public class R2D2Client implements IR2D2Client
    * @param aDocumentTypeID
    *        Document type ID to query. May not be <code>null</code>.
    * @return A non-<code>null</code> but maybe empty set of Participant IDs.
+   * @throws IOException
+   *         On query exception
    */
   @Nonnull
   private static ICommonsSet <IParticipantIdentifier> _getAllRecipientIDsFromDirectory (@Nonnull final String sLogPrefix,
                                                                                         @Nonnull @Nonempty final String sCountryCode,
-                                                                                        @Nonnull final IDocumentTypeIdentifier aDocumentTypeID)
+                                                                                        @Nonnull final IDocumentTypeIdentifier aDocumentTypeID) throws IOException
   {
     final ICommonsSet <IParticipantIdentifier> ret = new CommonsHashSet <> ();
 
@@ -187,12 +189,13 @@ public class R2D2Client implements IR2D2Client
     {
       ToopKafkaClient.send (EErrorLevel.ERROR,
                             () -> sLogPrefix +
-                                  "Error querying PEPPOL Directory for matches (" +
+                                  "Error querying TOOP Directory for matches (" +
                                   sCountryCode +
                                   ", " +
                                   aDocumentTypeID.getURIEncoded () +
                                   ")",
                             ex);
+      throw ex;
     }
 
     return ret;
@@ -203,7 +206,9 @@ public class R2D2Client implements IR2D2Client
   public ICommonsList <IR2D2Endpoint> getEndpoints (@Nonnull final String sLogPrefix,
                                                     @Nonnull @Nonempty final String sCountryCode,
                                                     @Nonnull final IDocumentTypeIdentifier aDocumentTypeID,
-                                                    @Nonnull final IProcessIdentifier aProcessID)
+                                                    @Nonnull final IProcessIdentifier aProcessID) throws IOException,
+                                                                                                  CertificateException,
+                                                                                                  SMPClientException
   {
     ValueEnforcer.notEmpty (sCountryCode, "CountryCode");
     ValueEnforcer.isTrue (sCountryCode.length () == 2, "CountryCode must have length 2");
@@ -250,7 +255,8 @@ public class R2D2Client implements IR2D2Client
   public ICommonsList <IR2D2Endpoint> getEndpoints (@Nonnull final String sLogPrefix,
                                                     @Nonnull final IParticipantIdentifier aRecipientID,
                                                     @Nonnull final IDocumentTypeIdentifier aDocumentTypeID,
-                                                    @Nonnull final IProcessIdentifier aProcessID)
+                                                    @Nonnull final IProcessIdentifier aProcessID) throws CertificateException,
+                                                                                                  SMPClientException
   {
     ValueEnforcer.notNull (aRecipientID, "Recipient");
     ValueEnforcer.notNull (aDocumentTypeID, "DocumentTypeID");
@@ -337,6 +343,7 @@ public class R2D2Client implements IR2D2Client
                                   "/" +
                                   aProcessID.getURIEncoded (),
                             ex);
+      throw ex;
     }
     return ret;
   }

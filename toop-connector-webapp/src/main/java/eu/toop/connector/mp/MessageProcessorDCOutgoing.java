@@ -15,7 +15,9 @@
  */
 package eu.toop.connector.mp;
 
+import java.io.IOException;
 import java.io.OutputStream;
+import java.security.cert.CertificateException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -42,6 +44,7 @@ import com.helger.peppol.identifier.factory.IIdentifierFactory;
 import com.helger.peppol.identifier.generic.doctype.IDocumentTypeIdentifier;
 import com.helger.peppol.identifier.generic.participant.IParticipantIdentifier;
 import com.helger.peppol.identifier.generic.process.IProcessIdentifier;
+import com.helger.peppol.smpclient.exception.SMPClientException;
 import com.helger.scope.IScope;
 import com.helger.web.scope.singleton.AbstractGlobalWebSingleton;
 
@@ -86,12 +89,16 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
   static final class Performer implements IConcurrentPerformer<TDETOOPRequestType> {
     private static final Logger s_aLogger = LoggerFactory.getLogger (MessageProcessorDCOutgoing.Performer.class);
 
-    public void runAsync (@Nonnull final TDETOOPRequestType aRequest) throws Exception {
+    public void runAsync (@Nonnull final TDETOOPRequestType aRequest) {
+      // TODO Schematrin
+
+      // Select document type
       final EPredefinedDocumentTypeIdentifier eDocType = EPredefinedDocumentTypeIdentifier.getFromDocumentTypeIdentifierOrNull (aRequest.getDocumentTypeIdentifier ()
                                                                                                                                         .getSchemeID (),
                                                                                                                                 aRequest.getDocumentTypeIdentifier ()
                                                                                                                                         .getValue ());
       if (eDocType == null) {
+        // TODO send back async error
         throw new IllegalStateException ("Failed to resolve document type "
                                          + aRequest.getDocumentTypeIdentifier ().getSchemeID () + "::"
                                          + aRequest.getDocumentTypeIdentifier ().getValue ());
@@ -107,6 +114,7 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
 
       ToopKafkaClient.send (EErrorLevel.INFO, () -> "Created new unique request ID [" + sRequestID + "]");
       ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "Received DC Request (1/4)");
+
       // 1. invoke SMM
       {
         // Map to TOOP concepts
@@ -120,9 +128,15 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
         }
 
         // Main mapping
-        final IMappedValueList aMappedValues = aClient.performMapping (sLogPrefix,
-                                                                       SMMDocumentTypeMapping.getToopSMNamespace (eDocType),
-                                                                       MPWebAppConfig.getSMMConceptProvider ());
+        final IMappedValueList aMappedValues;
+        try {
+          // TODO send back error if some value could not be mapped
+          aMappedValues = aClient.performMapping (sLogPrefix, SMMDocumentTypeMapping.getToopSMNamespace (eDocType),
+                                                  MPWebAppConfig.getSMMConceptProvider ());
+        } catch (final IOException ex) {
+          // TODO send back async error
+          throw new IllegalStateException ("Failed to invoke semantic mapping", ex);
+        }
 
         // add all the mapped values in the request
         for (final TDEDataElementRequestType aDER : aRequest.getDataElementRequest ()) {
@@ -173,9 +187,14 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
         if (StringHelper.hasNoText (sDestinationCountryCode))
           throw new IllegalStateException ("Failed to find destination country code to query!");
 
-        final ICommonsList<IR2D2Endpoint> aTotalEndpoints = new R2D2Client ().getEndpoints (sLogPrefix,
-                                                                                            sDestinationCountryCode,
-                                                                                            aDocTypeID, aProcessID);
+        final ICommonsList<IR2D2Endpoint> aTotalEndpoints;
+        try {
+          aTotalEndpoints = new R2D2Client ().getEndpoints (sLogPrefix, sDestinationCountryCode, aDocTypeID,
+                                                            aProcessID);
+        } catch (final CertificateException | IOException | SMPClientException ex) {
+          // TODO send back async error
+          throw new IllegalStateException ("Failed to invoke dynamic discovery", ex);
+        }
 
         // Filter all endpoints with the corresponding transport profile
         final String sTransportProfileID = TCConfig.getMEMProtocol ().getTransportProfileID ();
@@ -185,6 +204,8 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
                                                 + aTotalEndpoints.size () + "] endpoints");
         if (s_aLogger.isDebugEnabled ())
           s_aLogger.info (sLogPrefix + "Endpoint details: " + aEndpoints);
+
+        // TODO if no endpoint, send back async error
       }
 
       // 3. start message exchange to DC
@@ -198,6 +219,9 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
                                                                               TCConfig.getDebugToDPDumpPathIfEnabled (),
                                                                               "to-dp.asic")) {
             ToopMessageBuilder.createRequestMessage (aRequest, aBAOS, MPWebAppConfig.getSignatureHelper ());
+          } catch (final IOException ex) {
+            // TODO send back async error
+            throw new IllegalStateException ("Error signing the ASIC container", ex);
           }
 
           // build MEM once

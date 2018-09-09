@@ -25,7 +25,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.helger.commons.error.level.EErrorLevel;
-import com.helger.servlet.response.UnifiedResponse;
 
 import eu.toop.commons.dataexchange.TDETOOPResponseType;
 import eu.toop.commons.exchange.ToopMessageBuilder;
@@ -50,7 +49,7 @@ public class FromDPServlet extends HttpServlet {
                          @Nonnull final HttpServletResponse aHttpServletResponse) throws ServletException, IOException {
     ToopKafkaClient.send (EErrorLevel.INFO, "MP got /from-dp request (3/4)");
 
-    final UnifiedResponse aUR = UnifiedResponse.createSimple (aHttpServletRequest);
+    final TCUnifiedResponse aUR = new TCUnifiedResponse (aHttpServletRequest);
 
     // Parse POST data
     // No IToopDataResponse contained here
