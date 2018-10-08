@@ -15,11 +15,9 @@
  */
 package eu.toop.connector.api;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.Assert.assertNotNull;
 
-import org.junit.jupiter.api.Test;
-
-import eu.toop.connector.api.TCSettings;
+import org.junit.Test;
 
 /**
  * Test class for class {@link TCSettings}.

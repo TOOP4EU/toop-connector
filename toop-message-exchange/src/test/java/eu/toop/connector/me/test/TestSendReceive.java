@@ -15,12 +15,13 @@
  */
 package eu.toop.connector.me.test;
 
+import static org.junit.Assert.assertTrue;
+
 import java.net.URL;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +55,7 @@ public class TestSendReceive {
   /**
    * Create a mock server on localhost that reads and sends back a MEMessage.
    */
-  @BeforeAll
+  @BeforeClass
   public static void prepare() {
     // Port must match the message-processor.properties
     if (LOG.isDebugEnabled ())
@@ -80,7 +81,7 @@ public class TestSendReceive {
 
   }
 
-  @AfterAll
+  @AfterClass
   public static void shutdown() {
     ScopeAwareTestSetup.shutdownScopeTests();
 
@@ -96,7 +97,7 @@ public class TestSendReceive {
 
     final boolean result = MEMDelegate.getInstance().sendMessage(metadata, meMessage);
 
-    Assertions.assertTrue(result, "Message sending result must be true");
+    assertTrue("Message sending result must be true", result );
 
     final IMessageHandler handler = meMessage1 -> LOG.info("hooray! I Got a message");
 

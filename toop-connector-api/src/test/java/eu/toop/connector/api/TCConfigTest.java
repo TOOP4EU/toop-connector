@@ -15,12 +15,10 @@
  */
 package eu.toop.connector.api;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
-import org.junit.jupiter.api.Test;
-
-import eu.toop.connector.api.TCConfig;
+import org.junit.Test;
 
 /**
  * Test class for class {@link TCConfig}.

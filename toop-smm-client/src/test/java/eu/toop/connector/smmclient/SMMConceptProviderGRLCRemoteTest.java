@@ -15,13 +15,13 @@
  */
 package eu.toop.connector.smmclient;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.IOException;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +42,7 @@ public final class SMMConceptProviderGRLCRemoteTest {
   private static final String NS_ELONIA = "http://example.register.elo/elonia-business-register";
   private static final String NS_FREEDONIA = "http://example.register.fre/freedonia-business-register";
 
-  @BeforeEach
+  @Before
   public void reset () {
     SMMConceptProviderGRLCRemote.clearCache ();
   }
