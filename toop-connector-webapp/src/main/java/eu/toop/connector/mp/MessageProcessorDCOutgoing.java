@@ -175,6 +175,7 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
                                                                                  .getSchemeID (),
                                                                          aRequest.getProcessIdentifier ().getValue ());
       {
+        // Find destination country code
         String sDestinationCountryCode = null;
         final TDELegalEntityType aLegalEntity = aRequest.getDataRequestSubject ().getLegalEntity ();
         if (aLegalEntity != null)
@@ -184,9 +185,12 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
           if (aNaturalPerson != null)
             sDestinationCountryCode = aNaturalPerson.getNaturalPersonLegalAddress ().getCountryCode ().getValue ();
         }
-        if (StringHelper.hasNoText (sDestinationCountryCode))
+        if (StringHelper.hasNoText (sDestinationCountryCode)) {
+          // TODO send back async error
           throw new IllegalStateException ("Failed to find destination country code to query!");
+        }
 
+        // Find all endpoints by country
         final ICommonsList<IR2D2Endpoint> aTotalEndpoints;
         try {
           aTotalEndpoints = new R2D2Client ().getEndpoints (sLogPrefix, sDestinationCountryCode, aDocTypeID,
