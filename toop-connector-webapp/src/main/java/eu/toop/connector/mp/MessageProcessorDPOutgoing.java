@@ -62,16 +62,19 @@ import eu.toop.kafkaclient.ToopKafkaClient;
  *
  * @author Philip Helger
  */
-public final class MessageProcessorDPOutgoing extends AbstractGlobalWebSingleton {
+public final class MessageProcessorDPOutgoing extends AbstractGlobalWebSingleton
+{
   /**
    * The nested performer class that does the hard work.
    *
    * @author Philip Helger
    */
-  static final class Performer implements IConcurrentPerformer<TDETOOPResponseType> {
+  static final class Performer implements IConcurrentPerformer <TDETOOPResponseType>
+  {
     private static final Logger s_aLogger = LoggerFactory.getLogger (MessageProcessorDPOutgoing.Performer.class);
 
-    public void runAsync (@Nonnull final TDETOOPResponseType aResponse) throws Exception {
+    public void runAsync (@Nonnull final TDETOOPResponseType aResponse) throws Exception
+    {
       final String sRequestID = aResponse.getDataRequestIdentifier ().getValue ();
       final String sLogPrefix = "[" + sRequestID + "] ";
       ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "Received DP outgoing response (3/4)");
@@ -98,11 +101,12 @@ public final class MessageProcessorDPOutgoing extends AbstractGlobalWebSingleton
                                                                                 aResponse.getProcessIdentifier ()
                                                                                          .getValue ());
 
-      ICommonsList<IR2D2Endpoint> aEndpoints;
+      ICommonsList <IR2D2Endpoint> aEndpoints;
       {
-        final ICommonsList<IR2D2Endpoint> aTotalEndpoints = new R2D2Client ().getEndpoints (sLogPrefix,
-                                                                                            aDCParticipantID,
-                                                                                            aDocTypeID, aProcessID);
+        final ICommonsList <IR2D2Endpoint> aTotalEndpoints = new R2D2Client ().getEndpoints (sLogPrefix,
+                                                                                             aDCParticipantID,
+                                                                                             aDocTypeID,
+                                                                                             aProcessID);
 
         // Filter all endpoints with the corresponding transport profile
         final String sTransportProfileID = TCConfig.getMEMProtocol ().getTransportProfileID ();
@@ -110,8 +114,12 @@ public final class MessageProcessorDPOutgoing extends AbstractGlobalWebSingleton
 
         // Expecting exactly one endpoint!
         ToopKafkaClient.send (aEndpoints.size () == 1 ? EErrorLevel.INFO : EErrorLevel.ERROR,
-                              () -> sLogPrefix + "R2D2 found [" + aEndpoints.size () + "/" + aTotalEndpoints.size ()
-                                    + "] endpoints");
+                              () -> sLogPrefix +
+                                    "R2D2 found [" +
+                                    aEndpoints.size () +
+                                    "/" +
+                                    aTotalEndpoints.size () +
+                                    "] endpoints");
         if (s_aLogger.isDebugEnabled ())
           s_aLogger.info (sLogPrefix + "Endpoint details: " + aEndpoints);
       }
@@ -126,15 +134,18 @@ public final class MessageProcessorDPOutgoing extends AbstractGlobalWebSingleton
                                                                                                        .getDPElectronicAddressIdentifier ()
                                                                                                        .getValue ());
 
-      if (aEndpoints.isNotEmpty ()) {
+      if (aEndpoints.isNotEmpty ())
+      {
         // Combine MS data and TOOP data into a single ASiC message
         // Do this only once and not for every endpoint
         MEMessage aMEMessage;
-        try (final NonBlockingByteArrayOutputStream aBAOS = new NonBlockingByteArrayOutputStream ()) {
+        try (final NonBlockingByteArrayOutputStream aBAOS = new NonBlockingByteArrayOutputStream ())
+        {
           // Ensure flush/close of DumpOS!
           try (final OutputStream aDumpOS = TCDumpHelper.getDumpOutputStream (aBAOS,
                                                                               TCConfig.getDebugToDCDumpPathIfEnabled (),
-                                                                              "to-dc.asic")) {
+                                                                              "to-dc.asic"))
+          {
             ToopMessageBuilder.createResponseMessage (aResponse, aDumpOS, MPWebAppConfig.getSignatureHelper ());
           }
 
@@ -143,34 +154,42 @@ public final class MessageProcessorDPOutgoing extends AbstractGlobalWebSingleton
           aMEMessage = new MEMessage (aPayload);
         }
 
-        for (final IR2D2Endpoint aEP : aEndpoints) {
+        for (final IR2D2Endpoint aEP : aEndpoints)
+        {
           // routing metadata - sender ID!
           final GatewayRoutingMetadata aGWM = new GatewayRoutingMetadata (aDPParticipantID.getURIEncoded (),
                                                                           aDocTypeID.getURIEncoded (),
-                                                                          aProcessID.getURIEncoded (), aEP,
+                                                                          aProcessID.getURIEncoded (),
+                                                                          aEP,
                                                                           EActingSide.DP);
           // Reuse the same MEMessage for each endpoint
           MEMDelegate.getInstance ().sendMessage (aGWM, aMEMessage);
         }
-      } else {
+      }
+      else
+      {
         // No endpoint - ooops
         ToopKafkaClient.send (EErrorLevel.ERROR,
-                              () -> "Found no matching DC endpoint - not transmitting response from DP '"
-                                    + aDPParticipantID.getURIEncoded () + "' to DC '"
-                                    + aDCParticipantID.getURIEncoded () + "'!");
+                              () -> "Found no matching DC endpoint - not transmitting response from DP '" +
+                                    aDPParticipantID.getURIEncoded () +
+                                    "' to DC '" +
+                                    aDCParticipantID.getURIEncoded () +
+                                    "'!");
       }
     }
   }
 
   // Just to have custom named threads....
   private static final ThreadFactory s_aThreadFactory = new BasicThreadFactory.Builder ().setNamingPattern ("MP-DP-Out-%d")
-                                                                                         .setDaemon (true).build ();
-  private final ConcurrentCollectorSingle<TDETOOPResponseType> m_aCollector = new ConcurrentCollectorSingle<> ();
+                                                                                         .setDaemon (true)
+                                                                                         .build ();
+  private final ConcurrentCollectorSingle <TDETOOPResponseType> m_aCollector = new ConcurrentCollectorSingle <> ();
   private final ExecutorService m_aExecutorPool;
 
   @Deprecated
   @UsedViaReflection
-  public MessageProcessorDPOutgoing () {
+  public MessageProcessorDPOutgoing ()
+  {
     m_aCollector.setPerformer (new Performer ());
     m_aExecutorPool = Executors.newSingleThreadExecutor (s_aThreadFactory);
     m_aExecutorPool.submit (m_aCollector::collect);
@@ -182,12 +201,14 @@ public final class MessageProcessorDPOutgoing extends AbstractGlobalWebSingleton
    * @return The one and only {@link MessageProcessorDPOutgoing} instance.
    */
   @Nonnull
-  public static MessageProcessorDPOutgoing getInstance () {
+  public static MessageProcessorDPOutgoing getInstance ()
+  {
     return getGlobalSingleton (MessageProcessorDPOutgoing.class);
   }
 
   @Override
-  protected void onDestroy (@Nonnull final IScope aScopeInDestruction) throws Exception {
+  protected void onDestroy (@Nonnull final IScope aScopeInDestruction) throws Exception
+  {
     // Avoid another enqueue call
     m_aCollector.stopQueuingNewObjects ();
 
@@ -199,16 +220,20 @@ public final class MessageProcessorDPOutgoing extends AbstractGlobalWebSingleton
    * Queue a new Toop Response.
    *
    * @param aMsg
-   *          The data to be queued. May not be <code>null</code>.
+   *        The data to be queued. May not be <code>null</code>.
    * @return {@link ESuccess}. Never <code>null</code>.
    */
   @Nonnull
-  public ESuccess enqueue (@Nonnull final TDETOOPResponseType aMsg) {
+  public ESuccess enqueue (@Nonnull final TDETOOPResponseType aMsg)
+  {
     ValueEnforcer.notNull (aMsg, "Msg");
-    try {
+    try
+    {
       m_aCollector.queueObject (aMsg);
       return ESuccess.SUCCESS;
-    } catch (final IllegalStateException ex) {
+    }
+    catch (final IllegalStateException ex)
+    {
       // Queue is stopped!
       ToopKafkaClient.send (EErrorLevel.WARN, () -> "Cannot enqueue " + aMsg, ex);
       return ESuccess.FAILURE;

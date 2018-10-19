@@ -34,7 +34,8 @@ import eu.toop.commons.concept.ConceptValue;
  *
  * @author Philip Helger
  */
-public final class SMMClientTest {
+public final class SMMClientTest
+{
   private static final Logger s_aLogger = LoggerFactory.getLogger (SMMClientTest.class);
 
   private static final String NS_FREEDONIA = "http://example.register.fre/freedonia-business-register";
@@ -45,12 +46,14 @@ public final class SMMClientTest {
   private static final ConceptValue CONCEPT_FR_1 = new ConceptValue (NS_FREEDONIA, "FreedoniaBusinessCode");
 
   // Use with cache and remote
-  private static final ISMMConceptProvider[] CP = new ISMMConceptProvider[] { SMMConceptProviderGRLCRemote::getAllMappedValues,
-                                                                              SMMConceptProviderGRLCRemote::remoteQueryAllMappedValues };
+  private static final ISMMConceptProvider [] CP = new ISMMConceptProvider [] { SMMConceptProviderGRLCRemote::getAllMappedValues,
+                                                                                SMMConceptProviderGRLCRemote::remoteQueryAllMappedValues };
 
   @Test
-  public void testEmpty () throws IOException {
-    for (final ISMMConceptProvider aCP : CP) {
+  public void testEmpty () throws IOException
+  {
+    for (final ISMMConceptProvider aCP : CP)
+    {
       s_aLogger.info ("Starting testEmpty");
       final SMMClient aClient = new SMMClient ();
       final IMappedValueList ret = aClient.performMapping (LOG_PREFIX, NS_FREEDONIA, aCP);
@@ -61,8 +64,10 @@ public final class SMMClientTest {
   }
 
   @Test
-  public void testOneMatch () throws IOException {
-    for (final ISMMConceptProvider aCP : CP) {
+  public void testOneMatch () throws IOException
+  {
+    for (final ISMMConceptProvider aCP : CP)
+    {
       s_aLogger.info ("Starting testOneMatch");
       final SMMClient aClient = new SMMClient ();
       aClient.addConceptToBeMapped (CONCEPT_TOOP_1);
@@ -82,8 +87,10 @@ public final class SMMClientTest {
   }
 
   @Test
-  public void testOneMatchOneNotFound () throws IOException {
-    for (final ISMMConceptProvider aCP : CP) {
+  public void testOneMatchOneNotFound () throws IOException
+  {
+    for (final ISMMConceptProvider aCP : CP)
+    {
       s_aLogger.info ("Starting testOneMatchOneNotFound");
       final SMMClient aClient = new SMMClient ();
       aClient.addConceptToBeMapped (CONCEPT_TOOP_1);
@@ -105,8 +112,10 @@ public final class SMMClientTest {
   }
 
   @Test
-  public void testNoMappingNeeded () throws IOException {
-    for (final ISMMConceptProvider aCP : CP) {
+  public void testNoMappingNeeded () throws IOException
+  {
+    for (final ISMMConceptProvider aCP : CP)
+    {
       s_aLogger.info ("Starting testNoMappingNeeded");
       final SMMClient aClient = new SMMClient ();
       aClient.addConceptToBeMapped (CONCEPT_FR_1);

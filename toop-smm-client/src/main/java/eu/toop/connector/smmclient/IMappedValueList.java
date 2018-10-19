@@ -32,20 +32,22 @@ import eu.toop.commons.concept.ConceptValue;
  *
  * @author Philip Helger
  */
-public interface IMappedValueList extends IHasSize, ICommonsIterable<MappedValue> {
+public interface IMappedValueList extends IHasSize, ICommonsIterable <MappedValue>
+{
   @Nullable
   MappedValue getAtIndex (@Nonnegative int nIndex);
 
   @Nullable
-  default MappedValue getFirst () {
+  default MappedValue getFirst ()
+  {
     return getAtIndex (0);
   }
 
   @Nonnull
   @ReturnsMutableObject
-  IMappedValueList getAllBySource (@Nonnull final Predicate<? super ConceptValue> aFilter);
+  IMappedValueList getAllBySource (@Nonnull final Predicate <? super ConceptValue> aFilter);
 
   @Nonnull
   @ReturnsMutableObject
-  IMappedValueList getAllByDestination (@Nonnull final Predicate<? super ConceptValue> aFilter);
+  IMappedValueList getAllByDestination (@Nonnull final Predicate <? super ConceptValue> aFilter);
 }

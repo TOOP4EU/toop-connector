@@ -51,14 +51,17 @@ import eu.toop.kafkaclient.ToopKafkaClient;
  *
  * @author Philip Helger
  */
-public final class MessageProcessorDCIncoming extends AbstractGlobalWebSingleton {
+public final class MessageProcessorDCIncoming extends AbstractGlobalWebSingleton
+{
   /**
    * The nested performer class that does the hard work.
    *
    * @author Philip Helger
    */
-  static final class Performer implements IConcurrentPerformer<TDETOOPResponseType> {
-    public void runAsync (@Nonnull final TDETOOPResponseType aResponse) throws Exception {
+  static final class Performer implements IConcurrentPerformer <TDETOOPResponseType>
+  {
+    public void runAsync (@Nonnull final TDETOOPResponseType aResponse) throws Exception
+    {
       final String sRequestID = aResponse.getDataRequestIdentifier ().getValue ();
       final String sLogPrefix = "[" + sRequestID + "] ";
       ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "Received DC Incoming Request (4/4)");
@@ -66,13 +69,16 @@ public final class MessageProcessorDCIncoming extends AbstractGlobalWebSingleton
       // Forward to the DC at /to-dc interface
       final TCHttpClientFactory aHCFactory = new TCHttpClientFactory ();
 
-      try (final HttpClientManager aMgr = new HttpClientManager (aHCFactory)) {
-        final SignatureHelper aSH = new SignatureHelper (TCConfig.getKeystoreType (), TCConfig.getKeystorePath (),
+      try (final HttpClientManager aMgr = new HttpClientManager (aHCFactory))
+      {
+        final SignatureHelper aSH = new SignatureHelper (TCConfig.getKeystoreType (),
+                                                         TCConfig.getKeystorePath (),
                                                          TCConfig.getKeystorePassword (),
                                                          TCConfig.getKeystoreKeyAlias (),
                                                          TCConfig.getKeystoreKeyPassword ());
 
-        try (final NonBlockingByteArrayOutputStream aBAOS = new NonBlockingByteArrayOutputStream ()) {
+        try (final NonBlockingByteArrayOutputStream aBAOS = new NonBlockingByteArrayOutputStream ())
+        {
           ToopMessageBuilder.createResponseMessage (aResponse, aBAOS, aSH);
 
           // Send to DC (see ToDCServlet in toop-interface)
@@ -90,13 +96,15 @@ public final class MessageProcessorDCIncoming extends AbstractGlobalWebSingleton
 
   // Just to have custom named threads....
   private static final ThreadFactory s_aThreadFactory = new BasicThreadFactory.Builder ().setNamingPattern ("MP-DC-In-%d")
-                                                                                         .setDaemon (true).build ();
-  private final ConcurrentCollectorSingle<TDETOOPResponseType> m_aCollector = new ConcurrentCollectorSingle<> ();
+                                                                                         .setDaemon (true)
+                                                                                         .build ();
+  private final ConcurrentCollectorSingle <TDETOOPResponseType> m_aCollector = new ConcurrentCollectorSingle <> ();
   private final ExecutorService m_aExecutorPool;
 
   @Deprecated
   @UsedViaReflection
-  public MessageProcessorDCIncoming () {
+  public MessageProcessorDCIncoming ()
+  {
     m_aCollector.setPerformer (new Performer ());
     m_aExecutorPool = Executors.newSingleThreadExecutor (s_aThreadFactory);
     m_aExecutorPool.submit (m_aCollector::collect);
@@ -108,12 +116,14 @@ public final class MessageProcessorDCIncoming extends AbstractGlobalWebSingleton
    * @return The one and only {@link MessageProcessorDCIncoming} instance.
    */
   @Nonnull
-  public static MessageProcessorDCIncoming getInstance () {
+  public static MessageProcessorDCIncoming getInstance ()
+  {
     return getGlobalSingleton (MessageProcessorDCIncoming.class);
   }
 
   @Override
-  protected void onDestroy (@Nonnull final IScope aScopeInDestruction) throws Exception {
+  protected void onDestroy (@Nonnull final IScope aScopeInDestruction) throws Exception
+  {
     // Avoid another enqueue call
     m_aCollector.stopQueuingNewObjects ();
 
@@ -125,16 +135,20 @@ public final class MessageProcessorDCIncoming extends AbstractGlobalWebSingleton
    * Queue a new Toop Response.
    *
    * @param aMsg
-   *          The data to be queued. May not be <code>null</code>.
+   *        The data to be queued. May not be <code>null</code>.
    * @return {@link ESuccess}. Never <code>null</code>.
    */
   @Nonnull
-  public ESuccess enqueue (@Nonnull final TDETOOPResponseType aMsg) {
+  public ESuccess enqueue (@Nonnull final TDETOOPResponseType aMsg)
+  {
     ValueEnforcer.notNull (aMsg, "Msg");
-    try {
+    try
+    {
       m_aCollector.queueObject (aMsg);
       return ESuccess.SUCCESS;
-    } catch (final IllegalStateException ex) {
+    }
+    catch (final IllegalStateException ex)
+    {
       // Queue is stopped!
       ToopKafkaClient.send (EErrorLevel.WARN, () -> "Cannot enqueue " + aMsg, ex);
       return ESuccess.FAILURE;

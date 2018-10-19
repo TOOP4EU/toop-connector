@@ -33,10 +33,12 @@ import com.helger.commons.string.StringHelper;
  * @author Philip Helger
  */
 @WebServlet ("")
-public class TCRootServlet extends HttpServlet {
+public class TCRootServlet extends HttpServlet
+{
   @Override
   protected void doGet (@Nonnull final HttpServletRequest req,
-                        @Nonnull final HttpServletResponse resp) throws ServletException, IOException {
+                        @Nonnull final HttpServletResponse resp) throws ServletException, IOException
+  {
     String sRedirectURL = req.getContextPath () + "/index.html";
 
     final String sQueryString = req.getQueryString ();

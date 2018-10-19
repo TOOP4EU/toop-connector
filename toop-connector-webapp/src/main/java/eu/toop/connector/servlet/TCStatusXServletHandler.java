@@ -41,13 +41,15 @@ import com.helger.xservlet.handler.simple.IXServletSimpleHandler;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.app.CTC;
 
-public class TCStatusXServletHandler implements IXServletSimpleHandler {
+public class TCStatusXServletHandler implements IXServletSimpleHandler
+{
   private static final Logger s_aLogger = LoggerFactory.getLogger (TCStatusXServletHandler.class);
   private static final Charset CHARSET = StandardCharsets.UTF_8;
 
   @Nonnull
   @ReturnsMutableCopy
-  public static IJsonObject getDefaultStatusData () {
+  public static IJsonObject getDefaultStatusData ()
+  {
     final ISettings aSettings = TCConfig.getConfigFile ().getSettings ();
 
     final IJsonObject aStatusData = new JsonObject ();
@@ -58,7 +60,8 @@ public class TCStatusXServletHandler implements IXServletSimpleHandler {
     aStatusData.add ("global.production", GlobalDebug.isProductionMode ());
 
     // Add all entries except the password entries
-    for (final Map.Entry<String, Object> aEntry : aSettings.entrySet ()) {
+    for (final Map.Entry <String, Object> aEntry : aSettings.entrySet ())
+    {
       final String sKey = aEntry.getKey ();
       if (!sKey.contains ("password"))
         aStatusData.add (sKey, aEntry.getValue ());
@@ -68,7 +71,8 @@ public class TCStatusXServletHandler implements IXServletSimpleHandler {
   }
 
   public void handleRequest (@Nonnull final IRequestWebScopeWithoutResponse aRequestScope,
-                             @Nonnull final UnifiedResponse aUnifiedResponse) throws Exception {
+                             @Nonnull final UnifiedResponse aUnifiedResponse) throws Exception
+  {
     if (s_aLogger.isDebugEnabled ())
       s_aLogger.debug ("Status information requested");
 
@@ -76,7 +80,8 @@ public class TCStatusXServletHandler implements IXServletSimpleHandler {
     IJsonObject aStatusData;
     if (TCConfig.isStatusEnabled ())
       aStatusData = getDefaultStatusData ();
-    else {
+    else
+    {
       // Status is disabled in the configuration
       aStatusData = new JsonObject ();
       aStatusData.add ("status.enabled", false);

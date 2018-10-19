@@ -29,13 +29,15 @@ import com.helger.settings.exchange.properties.SettingsPersistenceProperties;
  * @author Philip Helger
  */
 @Immutable
-public final class CTC {
+public final class CTC
+{
   public static final String TOOP_CONNECTOR_VERSION_FILENAME = "toop-connector-version.properties";
 
   private static final String VERSION_NUMBER;
   private static final String TIMESTAMP;
 
-  static {
+  static
+  {
     // Read version number
     final SettingsPersistenceProperties aSPP = new SettingsPersistenceProperties ();
     final ISettings aVersionProps = aSPP.readSettings (new ClassPathResource (TOOP_CONNECTOR_VERSION_FILENAME));
@@ -47,16 +49,17 @@ public final class CTC {
       throw new InitializationException ("Error determining TOOP Connector ´timestamp!");
   }
 
-  private CTC () {
-  }
+  private CTC ()
+  {}
 
   /**
-   * @return The version number of the TC server read from the internal properties
-   *         file. Never <code>null</code>. This is the same as the Maven project
-   *         version.
+   * @return The version number of the TC server read from the internal
+   *         properties file. Never <code>null</code>. This is the same as the
+   *         Maven project version.
    */
   @Nonnull
-  public static String getVersionNumber () {
+  public static String getVersionNumber ()
+  {
     return VERSION_NUMBER;
   }
 
@@ -65,7 +68,8 @@ public final class CTC {
    *         properties file. Never <code>null</code>.
    */
   @Nonnull
-  public static String getBuildTimestamp () {
+  public static String getBuildTimestamp ()
+  {
     return TIMESTAMP;
   }
 }

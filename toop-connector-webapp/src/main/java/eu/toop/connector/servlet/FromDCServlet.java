@@ -43,10 +43,12 @@ import eu.toop.kafkaclient.ToopKafkaClient;
  * @author Philip Helger
  */
 @WebServlet ("/from-dc")
-public class FromDCServlet extends HttpServlet {
+public class FromDCServlet extends HttpServlet
+{
   @Override
   protected void doPost (@Nonnull final HttpServletRequest aHttpServletRequest,
-                         @Nonnull final HttpServletResponse aHttpServletResponse) throws ServletException, IOException {
+                         @Nonnull final HttpServletResponse aHttpServletResponse) throws ServletException, IOException
+  {
     ToopKafkaClient.send (EErrorLevel.INFO, "MP got /from-dc request (1/4)");
 
     final TCUnifiedResponse aUR = new TCUnifiedResponse (aHttpServletRequest);
@@ -56,7 +58,8 @@ public class FromDCServlet extends HttpServlet {
                                                                                                                     TCConfig.getDebugFromDCDumpPathIfEnabled (),
                                                                                                                     "from-dc.asic"));
 
-    if (aRequestMsg == null) {
+    if (aRequestMsg == null)
+    {
       // The message content is invalid
       // Synchronous error
       ToopKafkaClient.send (EErrorLevel.ERROR,
@@ -64,7 +67,9 @@ public class FromDCServlet extends HttpServlet {
       aUR.setContentAndCharset ("The provided ASIC container could not be interpreted as a valid TOOP request.",
                                 aUR.getCharset ());
       aUR.setStatus (HttpServletResponse.SC_BAD_REQUEST);
-    } else {
+    }
+    else
+    {
       // Enqueue to processor and we're good
       MessageProcessorDCOutgoing.getInstance ().enqueue (aRequestMsg);
 

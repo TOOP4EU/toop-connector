@@ -32,15 +32,16 @@ import eu.toop.commons.concept.ConceptValue;
  * This class contains a source schemed value and destination mapped value.
  *
  * @author Philip Helger
- *
  */
 @Immutable
 @MustImplementEqualsAndHashcode
-public final class MappedValue implements Serializable {
+public final class MappedValue implements Serializable
+{
   private final ConceptValue m_aSource;
   private final ConceptValue m_aDest;
 
-  public MappedValue (@Nonnull final ConceptValue aSource, @Nonnull final ConceptValue aDest) {
+  public MappedValue (@Nonnull final ConceptValue aSource, @Nonnull final ConceptValue aDest)
+  {
     ValueEnforcer.notNull (aSource, "Source");
     ValueEnforcer.notNull (aDest, "Destination");
     m_aSource = aSource;
@@ -48,24 +49,28 @@ public final class MappedValue implements Serializable {
   }
 
   @Nonnull
-  public ConceptValue getSource () {
+  public ConceptValue getSource ()
+  {
     return m_aSource;
   }
 
   @Nonnull
-  public ConceptValue getDestination () {
+  public ConceptValue getDestination ()
+  {
     return m_aDest;
   }
 
   @Nonnull
   @ReturnsImmutableObject
-  public MappedValue getSwappedSourceAndDest () {
+  public MappedValue getSwappedSourceAndDest ()
+  {
     // Swap source and dest
     return new MappedValue (m_aDest, m_aSource);
   }
 
   @Override
-  public boolean equals (final Object o) {
+  public boolean equals (final Object o)
+  {
     if (o == this)
       return true;
     if (o == null || !getClass ().equals (o.getClass ()))
@@ -75,12 +80,14 @@ public final class MappedValue implements Serializable {
   }
 
   @Override
-  public int hashCode () {
+  public int hashCode ()
+  {
     return new HashCodeGenerator (this).append (m_aSource).append (m_aDest).getHashCode ();
   }
 
   @Override
-  public String toString () {
+  public String toString ()
+  {
     return new ToStringGenerator (null).append ("Source", m_aSource).append ("Destination", m_aDest).getToString ();
   }
 }

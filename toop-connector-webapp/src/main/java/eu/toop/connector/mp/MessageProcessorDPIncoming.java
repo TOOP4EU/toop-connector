@@ -60,14 +60,17 @@ import eu.toop.kafkaclient.ToopKafkaClient;
  *
  * @author Philip Helger
  */
-public final class MessageProcessorDPIncoming extends AbstractGlobalWebSingleton {
+public final class MessageProcessorDPIncoming extends AbstractGlobalWebSingleton
+{
   /**
    * The nested performer class that does the hard work.
    *
    * @author Philip Helger
    */
-  static final class Performer implements IConcurrentPerformer<TDETOOPRequestType> {
-    public void runAsync (@Nonnull final TDETOOPRequestType aRequest) throws Exception {
+  static final class Performer implements IConcurrentPerformer <TDETOOPRequestType>
+  {
+    public void runAsync (@Nonnull final TDETOOPRequestType aRequest) throws Exception
+    {
       final String sRequestID = aRequest.getDataRequestIdentifier ().getValue ();
       final String sLogPrefix = "[" + sRequestID + "] ";
       ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "Received DP Incoming Request (2/4)");
@@ -75,36 +78,45 @@ public final class MessageProcessorDPIncoming extends AbstractGlobalWebSingleton
       // Map to DP concepts
       // TODO make it dependent on requested document type
       final String sDestinationMappingURI = TCConfig.getSMMMappingNamespaceURIForDP ();
-      if (StringHelper.hasText (sDestinationMappingURI)) {
+      if (StringHelper.hasText (sDestinationMappingURI))
+      {
         final SMMClient aClient = new SMMClient ();
-        for (final TDEDataElementRequestType aDER : aRequest.getDataElementRequest ()) {
+        for (final TDEDataElementRequestType aDER : aRequest.getDataElementRequest ())
+        {
           final TDEConceptRequestType aSrcConcept = aDER.getConceptRequest ();
           // ignore all DC source concepts
-          if (aSrcConcept.getSemanticMappingExecutionIndicator ().isValue ()) {
+          if (aSrcConcept.getSemanticMappingExecutionIndicator ().isValue ())
+          {
             for (final TDEConceptRequestType aToopConcept : aSrcConcept.getConceptRequest ())
               // Only if not yet mapped
-              if (!aToopConcept.getSemanticMappingExecutionIndicator ().isValue ()) {
+              if (!aToopConcept.getSemanticMappingExecutionIndicator ().isValue ())
+              {
                 aClient.addConceptToBeMapped (ConceptValue.create (aToopConcept));
               }
           }
         }
 
         // Main mapping
-        final IMappedValueList aMappedValues = aClient.performMapping (sLogPrefix, sDestinationMappingURI,
+        final IMappedValueList aMappedValues = aClient.performMapping (sLogPrefix,
+                                                                       sDestinationMappingURI,
                                                                        MPWebAppConfig.getSMMConceptProvider ());
 
         // add all the mapped values in the request
-        for (final TDEDataElementRequestType aDER : aRequest.getDataElementRequest ()) {
+        for (final TDEDataElementRequestType aDER : aRequest.getDataElementRequest ())
+        {
           final TDEConceptRequestType aSrcConcept = aDER.getConceptRequest ();
-          if (aSrcConcept.getSemanticMappingExecutionIndicator ().isValue ()) {
+          if (aSrcConcept.getSemanticMappingExecutionIndicator ().isValue ())
+          {
             for (final TDEConceptRequestType aToopConcept : aSrcConcept.getConceptRequest ())
               // Only if not yet mapped
-              if (!aToopConcept.getSemanticMappingExecutionIndicator ().isValue ()) {
+              if (!aToopConcept.getSemanticMappingExecutionIndicator ().isValue ())
+              {
                 // Now the toop concept was mapped
                 aToopConcept.getSemanticMappingExecutionIndicator ().setValue (true);
 
                 final ConceptValue aToopCV = ConceptValue.create (aToopConcept);
-                for (final MappedValue aMV : aMappedValues.getAllBySource (x -> x.equals (aToopCV))) {
+                for (final MappedValue aMV : aMappedValues.getAllBySource (x -> x.equals (aToopCV)))
+                {
                   final TDEConceptRequestType aDstConcept = new TDEConceptRequestType ();
                   aDstConcept.setConceptTypeCode (ToopXSDHelper.createCode (EConceptType.DP.getID ()));
                   aDstConcept.setSemanticMappingExecutionIndicator (ToopXSDHelper.createIndicator (false));
@@ -116,9 +128,14 @@ public final class MessageProcessorDPIncoming extends AbstractGlobalWebSingleton
               }
           }
         }
-        ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "Finished mapping concepts to namespace '"
-                                                      + sDestinationMappingURI + "'.");
-      } else {
+        ToopKafkaClient.send (EErrorLevel.INFO,
+                              () -> sLogPrefix +
+                                    "Finished mapping concepts to namespace '" +
+                                    sDestinationMappingURI +
+                                    "'.");
+      }
+      else
+      {
         ToopKafkaClient.send (EErrorLevel.INFO,
                               () -> sLogPrefix + "No destination mapping URI provided, so no mapping executed.");
       }
@@ -126,13 +143,16 @@ public final class MessageProcessorDPIncoming extends AbstractGlobalWebSingleton
       // Forward to the DP at /to-dp interface
       final TCHttpClientFactory aHCFactory = new TCHttpClientFactory ();
 
-      try (final HttpClientManager aMgr = new HttpClientManager (aHCFactory)) {
-        final SignatureHelper aSH = new SignatureHelper (TCConfig.getKeystoreType (), TCConfig.getKeystorePath (),
+      try (final HttpClientManager aMgr = new HttpClientManager (aHCFactory))
+      {
+        final SignatureHelper aSH = new SignatureHelper (TCConfig.getKeystoreType (),
+                                                         TCConfig.getKeystorePath (),
                                                          TCConfig.getKeystorePassword (),
                                                          TCConfig.getKeystoreKeyAlias (),
                                                          TCConfig.getKeystoreKeyPassword ());
 
-        try (final NonBlockingByteArrayOutputStream aBAOS = new NonBlockingByteArrayOutputStream ()) {
+        try (final NonBlockingByteArrayOutputStream aBAOS = new NonBlockingByteArrayOutputStream ())
+        {
           ToopMessageBuilder.createRequestMessage (aRequest, aBAOS, aSH);
 
           // Send to DP (see ToDPServlet in toop-interface)
@@ -150,13 +170,15 @@ public final class MessageProcessorDPIncoming extends AbstractGlobalWebSingleton
 
   // Just to have custom named threads....
   private static final ThreadFactory s_aThreadFactory = new BasicThreadFactory.Builder ().setNamingPattern ("MP-DP-In-%d")
-                                                                                         .setDaemon (true).build ();
-  private final ConcurrentCollectorSingle<TDETOOPRequestType> m_aCollector = new ConcurrentCollectorSingle<> ();
+                                                                                         .setDaemon (true)
+                                                                                         .build ();
+  private final ConcurrentCollectorSingle <TDETOOPRequestType> m_aCollector = new ConcurrentCollectorSingle <> ();
   private final ExecutorService m_aExecutorPool;
 
   @Deprecated
   @UsedViaReflection
-  public MessageProcessorDPIncoming () {
+  public MessageProcessorDPIncoming ()
+  {
     m_aCollector.setPerformer (new Performer ());
     m_aExecutorPool = Executors.newSingleThreadExecutor (s_aThreadFactory);
     m_aExecutorPool.submit (m_aCollector::collect);
@@ -168,12 +190,14 @@ public final class MessageProcessorDPIncoming extends AbstractGlobalWebSingleton
    * @return The one and only {@link MessageProcessorDPIncoming} instance.
    */
   @Nonnull
-  public static MessageProcessorDPIncoming getInstance () {
+  public static MessageProcessorDPIncoming getInstance ()
+  {
     return getGlobalSingleton (MessageProcessorDPIncoming.class);
   }
 
   @Override
-  protected void onDestroy (@Nonnull final IScope aScopeInDestruction) throws Exception {
+  protected void onDestroy (@Nonnull final IScope aScopeInDestruction) throws Exception
+  {
     // Avoid another enqueue call
     m_aCollector.stopQueuingNewObjects ();
 
@@ -185,16 +209,20 @@ public final class MessageProcessorDPIncoming extends AbstractGlobalWebSingleton
    * Queue a new Toop Response.
    *
    * @param aMsg
-   *          The data to be queued. May not be <code>null</code>.
+   *        The data to be queued. May not be <code>null</code>.
    * @return {@link ESuccess}. Never <code>null</code>.
    */
   @Nonnull
-  public ESuccess enqueue (@Nonnull final TDETOOPRequestType aMsg) {
+  public ESuccess enqueue (@Nonnull final TDETOOPRequestType aMsg)
+  {
     ValueEnforcer.notNull (aMsg, "Msg");
-    try {
+    try
+    {
       m_aCollector.queueObject (aMsg);
       return ESuccess.SUCCESS;
-    } catch (final IllegalStateException ex) {
+    }
+    catch (final IllegalStateException ex)
+    {
       // Queue is stopped!
       ToopKafkaClient.send (EErrorLevel.WARN, () -> "Cannot enqueue " + aMsg, ex);
       return ESuccess.FAILURE;

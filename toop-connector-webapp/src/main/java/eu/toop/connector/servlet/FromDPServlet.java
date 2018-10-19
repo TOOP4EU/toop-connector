@@ -43,10 +43,12 @@ import eu.toop.kafkaclient.ToopKafkaClient;
  * @author Philip Helger
  */
 @WebServlet ("/from-dp")
-public class FromDPServlet extends HttpServlet {
+public class FromDPServlet extends HttpServlet
+{
   @Override
   protected void doPost (@Nonnull final HttpServletRequest aHttpServletRequest,
-                         @Nonnull final HttpServletResponse aHttpServletResponse) throws ServletException, IOException {
+                         @Nonnull final HttpServletResponse aHttpServletResponse) throws ServletException, IOException
+  {
     ToopKafkaClient.send (EErrorLevel.INFO, "MP got /from-dp request (3/4)");
 
     final TCUnifiedResponse aUR = new TCUnifiedResponse (aHttpServletRequest);
@@ -57,12 +59,15 @@ public class FromDPServlet extends HttpServlet {
                                                                                                                        TCConfig.getDebugFromDPDumpPathIfEnabled (),
                                                                                                                        "from-dp.asic"));
 
-    if (aResponseMsg == null) {
+    if (aResponseMsg == null)
+    {
       // The message content is invalid
       ToopKafkaClient.send (EErrorLevel.ERROR,
                             "The request does not contain an ASiC archive or the ASiC archive does not contain a TOOP Response Message!");
       aUR.setStatus (HttpServletResponse.SC_BAD_REQUEST);
-    } else {
+    }
+    else
+    {
       // Enqueue to processor and we're good
       MessageProcessorDPOutgoing.getInstance ().enqueue (aResponseMsg);
 

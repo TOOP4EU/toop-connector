@@ -24,9 +24,11 @@ import com.helger.commons.mock.SPITestHelper;
  *
  * @author Philip Helger
  */
-public final class SPITest {
+public final class SPITest
+{
   @Test
-  public void testBasic () throws Exception {
+  public void testBasic () throws Exception
+  {
     SPITestHelper.testIfAllSPIImplementationsAreValid ();
     // PhotonCoreValidator.validateExternalResources ();
   }

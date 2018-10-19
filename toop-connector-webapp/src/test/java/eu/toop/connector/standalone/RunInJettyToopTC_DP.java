@@ -26,8 +26,10 @@ import com.helger.photon.jetty.JettyStarter;
  * @author Philip Helger
  */
 @Immutable
-public final class RunInJettyToopTC_DP {
-  public static void main (final String[] args) throws Exception {
+public final class RunInJettyToopTC_DP
+{
+  public static void main (final String [] args) throws Exception
+  {
     final JettyStarter js = new JettyStarter (RunInJettyToopTC_DP.class).setPort (8091).setStopPort (8093);
     js.run ();
   }

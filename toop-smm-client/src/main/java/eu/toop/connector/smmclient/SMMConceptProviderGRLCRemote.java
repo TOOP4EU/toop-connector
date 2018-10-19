@@ -54,26 +54,29 @@ import eu.toop.kafkaclient.ToopKafkaClient;
  * @author Philip Helger
  */
 @ThreadSafe
-public final class SMMConceptProviderGRLCRemote {
+public final class SMMConceptProviderGRLCRemote
+{
   // Static cache
   private static final SimpleReadWriteLock s_aRWLock = new SimpleReadWriteLock ();
   @GuardedBy ("s_aRWLock")
-  private static final ICommonsMap<String, ICommonsMap<String, MappedValueList>> s_aCache = new CommonsHashMap<> ();
+  private static final ICommonsMap <String, ICommonsMap <String, MappedValueList>> s_aCache = new CommonsHashMap <> ();
 
-  private SMMConceptProviderGRLCRemote () {
-  }
+  private SMMConceptProviderGRLCRemote ()
+  {}
 
   /**
    * Remove all cache values.
    */
-  public static void clearCache () {
+  public static void clearCache ()
+  {
     s_aRWLock.writeLocked (s_aCache::clear);
   }
 
   @Nullable
   private static MappedValueList _getFromCache (@Nonnull @Nonempty final String sSourceNamespace,
-                                                @Nonnull @Nonempty final String sDestNamespace) {
-    final ICommonsMap<String, MappedValueList> aPerSrcMap = s_aCache.get (sSourceNamespace);
+                                                @Nonnull @Nonempty final String sDestNamespace)
+  {
+    final ICommonsMap <String, MappedValueList> aPerSrcMap = s_aCache.get (sSourceNamespace);
     if (aPerSrcMap != null)
       return aPerSrcMap.get (sDestNamespace);
     return null;
@@ -84,41 +87,47 @@ public final class SMMConceptProviderGRLCRemote {
    * cache) it is retrieved from the remote server.
    *
    * @param sLogPrefix
-   *          Log prefix. May not be <code>null</code> but may be empty.
+   *        Log prefix. May not be <code>null</code> but may be empty.
    * @param sSourceNamespace
-   *          Source namespace to map from. May not be <code>null</code>.
+   *        Source namespace to map from. May not be <code>null</code>.
    * @param sDestNamespace
-   *          Target namespace to map to. May not be <code>null</code>.
+   *        Target namespace to map to. May not be <code>null</code>.
    * @return The non-<code>null</code> but maybe empty list of mapped values.
    * @throws IOException
-   *           In case fetching from server failed
+   *         In case fetching from server failed
    */
   @Nonnull
   public static MappedValueList getAllMappedValues (@Nonnull final String sLogPrefix,
                                                     @Nonnull final String sSourceNamespace,
-                                                    @Nonnull final String sDestNamespace) throws IOException {
+                                                    @Nonnull final String sDestNamespace) throws IOException
+  {
     ValueEnforcer.notNull (sLogPrefix, "LogPrefix");
     ValueEnforcer.notNull (sSourceNamespace, "SourceNamespace");
     ValueEnforcer.notNull (sDestNamespace, "DestNamespace");
 
     // First in read-lock for maximum speed
     MappedValueList ret = s_aRWLock.readLocked ( () -> _getFromCache (sSourceNamespace, sDestNamespace));
-    if (ret == null) {
+    if (ret == null)
+    {
       // Not found - slow path
       s_aRWLock.writeLock ().lock ();
-      try {
+      try
+      {
         // Try in write lock
         ret = _getFromCache (sSourceNamespace, sDestNamespace);
-        if (ret == null) {
+        if (ret == null)
+        {
           // Not in cache - query from server and put in cache
           ret = remoteQueryAllMappedValues (sLogPrefix, sSourceNamespace, sDestNamespace);
-          s_aCache.computeIfAbsent (sSourceNamespace, k -> new CommonsHashMap<> ()).put (sDestNamespace, ret);
+          s_aCache.computeIfAbsent (sSourceNamespace, k -> new CommonsHashMap <> ()).put (sDestNamespace, ret);
 
           // Put in the map the other way around as well (inference)
-          s_aCache.computeIfAbsent (sDestNamespace, k -> new CommonsHashMap<> ()).put (sSourceNamespace,
-                                                                                       ret.getSwappedSourceAndDest ());
+          s_aCache.computeIfAbsent (sDestNamespace, k -> new CommonsHashMap <> ())
+                  .put (sSourceNamespace, ret.getSwappedSourceAndDest ());
         }
-      } finally {
+      }
+      finally
+      {
         s_aRWLock.writeLock ().unlock ();
       }
     }
@@ -130,26 +139,28 @@ public final class SMMConceptProviderGRLCRemote {
    * HTTP GET caller
    *
    * @param aDestinationURL
-   *          destination URL
+   *        destination URL
    * @param aResponseHandler
-   *          Response handler - basically defines the data type
+   *        Response handler - basically defines the data type
    * @param aResultHandler
-   *          The result handler that accepts the data type
+   *        The result handler that accepts the data type
    * @throws IOException
-   *           In case of IO error
+   *         In case of IO error
    * @param <T>
-   *          data type to be handled
+   *        data type to be handled
    */
   private static <T> void _httpClientGetJson (@Nonnull final ISimpleURL aDestinationURL,
-                                              @Nonnull final ResponseHandler<T> aResponseHandler,
-                                              @Nonnull final Consumer<T> aResultHandler) throws IOException {
+                                              @Nonnull final ResponseHandler <T> aResponseHandler,
+                                              @Nonnull final Consumer <T> aResultHandler) throws IOException
+  {
     ValueEnforcer.notNull (aDestinationURL, "DestinationURL");
     ValueEnforcer.notNull (aResponseHandler, "ResponseHandler");
     ValueEnforcer.notNull (aResultHandler, "ResultHandler");
 
     final TCHttpClientFactory aHCFactory = new TCHttpClientFactory ();
 
-    try (final HttpClientManager aMgr = new HttpClientManager (aHCFactory)) {
+    try (final HttpClientManager aMgr = new HttpClientManager (aHCFactory))
+    {
       final HttpGet aGet = new HttpGet (aDestinationURL.getAsStringWithEncodedParameters ());
       // Add HTTP header - to get JSON and not XML
       aGet.addHeader ("Accept", "application/json,*;q=0");
@@ -164,24 +175,30 @@ public final class SMMConceptProviderGRLCRemote {
    * mappings from source namespace to target namespace.
    *
    * @param sLogPrefix
-   *          Log prefix. May not be <code>null</code> but may be empty.
+   *        Log prefix. May not be <code>null</code> but may be empty.
    * @param sSourceNamespace
-   *          Source namespace. May not be <code>null</code>.
+   *        Source namespace. May not be <code>null</code>.
    * @param sDestNamespace
-   *          Target namespace. May not be <code>null</code>.
+   *        Target namespace. May not be <code>null</code>.
    * @return A list with all mapped values. Never <code>null</code>.
    * @throws IOException
-   *           In case the HTTP connection has a problem
+   *         In case the HTTP connection has a problem
    */
   @Nonnull
   public static MappedValueList remoteQueryAllMappedValues (@Nonnull final String sLogPrefix,
                                                             @Nonnull final String sSourceNamespace,
-                                                            @Nonnull final String sDestNamespace) throws IOException {
+                                                            @Nonnull final String sDestNamespace) throws IOException
+  {
     ValueEnforcer.notNull (sSourceNamespace, "SourceNamespace");
     ValueEnforcer.notNull (sDestNamespace, "DestinationNamespace");
 
-    ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "Remote querying SMM mappings from '" + sSourceNamespace
-                                                  + "' to '" + sDestNamespace + "'");
+    ToopKafkaClient.send (EErrorLevel.INFO,
+                          () -> sLogPrefix +
+                                "Remote querying SMM mappings from '" +
+                                sSourceNamespace +
+                                "' to '" +
+                                sDestNamespace +
+                                "'");
 
     // Build URL with params etc.
     String sBaseURL = TCConfig.getSMMGRLCURL ();
@@ -189,11 +206,11 @@ public final class SMMConceptProviderGRLCRemote {
       throw new IllegalArgumentException ("SMM GRLC URL is missing!");
     if (!sBaseURL.endsWith ("/"))
       sBaseURL += "/";
-    final ISimpleURL aDestinationURL = new SimpleURL (sBaseURL
-                                                      + "api/JackJackie/toop-sparql/get-all-mapped-concepts-between-two-namespaces").add ("sourcenamespace",
-                                                                                                                                          sSourceNamespace)
-                                                                                                                                    .add ("targetnamespace",
-                                                                                                                                          sDestNamespace);
+    final ISimpleURL aDestinationURL = new SimpleURL (sBaseURL +
+                                                      "api/JackJackie/toop-sparql/get-all-mapped-concepts-between-two-namespaces").add ("sourcenamespace",
+                                                                                                                                        sSourceNamespace)
+                                                                                                                                  .add ("targetnamespace",
+                                                                                                                                        sDestNamespace);
     // Always no-debug
     final ResponseHandlerJson aJsonHandler = new ResponseHandlerJson (false);
 
@@ -203,12 +220,15 @@ public final class SMMConceptProviderGRLCRemote {
     // Execute HTTP request
     _httpClientGetJson (aDestinationURL, aJsonHandler, aJson -> {
       // Interpret result
-      if (aJson.isObject ()) {
+      if (aJson.isObject ())
+      {
         final IJsonObject aResults = aJson.getAsObject ().getAsObject ("results");
-        if (aResults != null) {
+        if (aResults != null)
+        {
           final IJsonArray aBindings = aResults.getAsArray ("bindings");
           if (aBindings != null)
-            for (final IJson aBinding : aBindings) {
+            for (final IJson aBinding : aBindings)
+            {
               // subject (contains source namespace which needs to be cut)
               String sSourceValue = aBinding.getAsObject ().getAsObject ("s").getAsString ("value");
               sSourceValue = StringHelper.trimStart (sSourceValue, sSourceNamespace + "#");
@@ -231,7 +251,8 @@ public final class SMMConceptProviderGRLCRemote {
   }
 
   @Nonnull
-  public static ICommonsOrderedSet<String> remoteQueryAllNamespaces (@Nonnull final String sLogPrefix) throws IOException {
+  public static ICommonsOrderedSet <String> remoteQueryAllNamespaces (@Nonnull final String sLogPrefix) throws IOException
+  {
     ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "Remote querying all SMM namespaces");
 
     // Build URL with params etc.
@@ -245,19 +266,23 @@ public final class SMMConceptProviderGRLCRemote {
     final ResponseHandlerJson aJsonHandler = new ResponseHandlerJson (false);
 
     // Result object to be filled
-    final ICommonsOrderedSet<String> ret = new CommonsLinkedHashSet<> ();
+    final ICommonsOrderedSet <String> ret = new CommonsLinkedHashSet <> ();
 
     // Execute HTTP request
     _httpClientGetJson (aDestinationURL, aJsonHandler, aJson -> {
       // Interpret result
-      if (aJson.isObject ()) {
+      if (aJson.isObject ())
+      {
         final IJsonObject aResults = aJson.getAsObject ().getAsObject ("results");
-        if (aResults != null) {
+        if (aResults != null)
+        {
           final IJsonArray aBindings = aResults.getAsArray ("bindings");
           if (aBindings != null)
-            for (final IJson aBinding : aBindings) {
+            for (final IJson aBinding : aBindings)
+            {
               final IJsonObject aNSObj = aBinding.getAsObject ().getAsObject ("ns");
-              if (aNSObj != null) {
+              if (aNSObj != null)
+              {
                 final String sURL = aNSObj.getAsString ("value");
                 if (StringHelper.hasText (sURL))
                   ret.add (sURL);

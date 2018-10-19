@@ -35,7 +35,8 @@ import eu.toop.commons.codelist.SMMDocumentTypeMapping;
  *
  * @author Philip Helger
  */
-public final class SMMConceptProviderGRLCRemoteTest {
+public final class SMMConceptProviderGRLCRemoteTest
+{
   private static final Logger s_aLogger = LoggerFactory.getLogger (SMMConceptProviderGRLCRemoteTest.class);
   private static final String LOG_PREFIX = "[unit test] ";
   private static final String NS_TOOP = SMMDocumentTypeMapping.getToopSMNamespace (EPredefinedDocumentTypeIdentifier.REQUEST_REGISTEREDORGANIZATION);
@@ -43,13 +44,16 @@ public final class SMMConceptProviderGRLCRemoteTest {
   private static final String NS_FREEDONIA = "http://example.register.fre/freedonia-business-register";
 
   @Before
-  public void reset () {
+  public void reset ()
+  {
     SMMConceptProviderGRLCRemote.clearCache ();
   }
 
   @Test
-  public void testRemoteQueryToopFreedonia () throws IOException {
-    final MappedValueList aMVL = SMMConceptProviderGRLCRemote.remoteQueryAllMappedValues (LOG_PREFIX, NS_TOOP,
+  public void testRemoteQueryToopFreedonia () throws IOException
+  {
+    final MappedValueList aMVL = SMMConceptProviderGRLCRemote.remoteQueryAllMappedValues (LOG_PREFIX,
+                                                                                          NS_TOOP,
                                                                                           NS_FREEDONIA);
     assertNotNull (aMVL);
     assertFalse (aMVL.isEmpty ());
@@ -58,8 +62,10 @@ public final class SMMConceptProviderGRLCRemoteTest {
   }
 
   @Test
-  public void testRemoteQueryFreedoniaToop () throws IOException {
-    final MappedValueList aMVL = SMMConceptProviderGRLCRemote.remoteQueryAllMappedValues (LOG_PREFIX, NS_FREEDONIA,
+  public void testRemoteQueryFreedoniaToop () throws IOException
+  {
+    final MappedValueList aMVL = SMMConceptProviderGRLCRemote.remoteQueryAllMappedValues (LOG_PREFIX,
+                                                                                          NS_FREEDONIA,
                                                                                           NS_TOOP);
     assertNotNull (aMVL);
     assertFalse (aMVL.isEmpty ());
@@ -68,8 +74,10 @@ public final class SMMConceptProviderGRLCRemoteTest {
   }
 
   @Test
-  public void testRemoteQueryToopElonia () throws IOException {
-    final MappedValueList aMVL = SMMConceptProviderGRLCRemote.remoteQueryAllMappedValues (LOG_PREFIX, NS_TOOP,
+  public void testRemoteQueryToopElonia () throws IOException
+  {
+    final MappedValueList aMVL = SMMConceptProviderGRLCRemote.remoteQueryAllMappedValues (LOG_PREFIX,
+                                                                                          NS_TOOP,
                                                                                           NS_ELONIA);
     assertNotNull (aMVL);
     assertFalse (aMVL.isEmpty ());
@@ -78,8 +86,10 @@ public final class SMMConceptProviderGRLCRemoteTest {
   }
 
   @Test
-  public void testRemoteQueryEloniaToop () throws IOException {
-    final MappedValueList aMVL = SMMConceptProviderGRLCRemote.remoteQueryAllMappedValues (LOG_PREFIX, NS_ELONIA,
+  public void testRemoteQueryEloniaToop () throws IOException
+  {
+    final MappedValueList aMVL = SMMConceptProviderGRLCRemote.remoteQueryAllMappedValues (LOG_PREFIX,
+                                                                                          NS_ELONIA,
                                                                                           NS_TOOP);
     assertNotNull (aMVL);
     assertFalse (aMVL.isEmpty ());
@@ -88,8 +98,9 @@ public final class SMMConceptProviderGRLCRemoteTest {
   }
 
   @Test
-  public void testGetAllNamespaces () throws IOException {
-    final ICommonsOrderedSet<String> aNSs = SMMConceptProviderGRLCRemote.remoteQueryAllNamespaces (LOG_PREFIX);
+  public void testGetAllNamespaces () throws IOException
+  {
+    final ICommonsOrderedSet <String> aNSs = SMMConceptProviderGRLCRemote.remoteQueryAllNamespaces (LOG_PREFIX);
     assertNotNull (aNSs);
     assertFalse (aNSs.isEmpty ());
     if (false)

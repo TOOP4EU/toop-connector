@@ -28,8 +28,10 @@ import com.helger.servlet.response.UnifiedResponse;
  *
  * @author Philip Helger
  */
-public class TCUnifiedResponse extends UnifiedResponse {
-  public TCUnifiedResponse (@Nonnull final HttpServletRequest aHttpRequest) {
+public class TCUnifiedResponse extends UnifiedResponse
+{
+  public TCUnifiedResponse (@Nonnull final HttpServletRequest aHttpRequest)
+  {
     super (RequestHelper.getHttpVersion (aHttpRequest), RequestHelper.getHttpMethod (aHttpRequest), aHttpRequest);
     setCharset (StandardCharsets.UTF_8);
     setAllowContentOnStatusCode (true);

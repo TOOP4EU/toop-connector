@@ -26,11 +26,13 @@ import com.helger.xservlet.AbstractXServlet;
  * @author Philip Helger
  */
 @WebServlet ("/tc-status")
-public class TCStatusServlet extends AbstractXServlet {
+public class TCStatusServlet extends AbstractXServlet
+{
   public static final String SERVLET_DEFAULT_NAME = "tc-status";
   public static final String SERVLET_DEFAULT_PATH = '/' + SERVLET_DEFAULT_NAME;
 
-  public TCStatusServlet () {
+  public TCStatusServlet ()
+  {
     handlerRegistry ().registerHandler (EHttpMethod.GET, new TCStatusXServletHandler ());
   }
 }

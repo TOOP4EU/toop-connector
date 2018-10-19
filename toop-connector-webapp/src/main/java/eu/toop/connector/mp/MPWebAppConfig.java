@@ -30,7 +30,8 @@ import eu.toop.connector.smmclient.SMMConceptProviderGRLCRemote;
  * @author Philip Helger
  */
 @Immutable
-public final class MPWebAppConfig {
+public final class MPWebAppConfig
+{
   private static final SignatureHelper SH = new SignatureHelper (TCConfig.getKeystoreType (),
                                                                  TCConfig.getKeystorePath (),
                                                                  TCConfig.getKeystorePassword (),
@@ -38,14 +39,15 @@ public final class MPWebAppConfig {
                                                                  TCConfig.getKeystoreKeyPassword ());
   private static final ISMMConceptProvider CP = SMMConceptProviderGRLCRemote::getAllMappedValues;
 
-  private MPWebAppConfig () {
-  }
+  private MPWebAppConfig ()
+  {}
 
   /**
    * @return The {@link SignatureHelper} singleton. Never <code>null</code>.
    */
   @Nonnull
-  public static SignatureHelper getSignatureHelper () {
+  public static SignatureHelper getSignatureHelper ()
+  {
     return SH;
   }
 
@@ -53,7 +55,8 @@ public final class MPWebAppConfig {
    * @return The {@link ISMMConceptProvider} singleton. Never <code>null</code>.
    */
   @Nonnull
-  public static ISMMConceptProvider getSMMConceptProvider () {
+  public static ISMMConceptProvider getSMMConceptProvider ()
+  {
     return CP;
   }
 

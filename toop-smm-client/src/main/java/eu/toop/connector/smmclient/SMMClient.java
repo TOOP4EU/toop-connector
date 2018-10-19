@@ -35,29 +35,31 @@ import eu.toop.commons.concept.ConceptValue;
 import eu.toop.kafkaclient.ToopKafkaClient;
 
 @NotThreadSafe
-public class SMMClient {
-  private final ICommonsMap<String, ICommonsList<String>> m_aSrcMap = new CommonsHashMap<> ();
+public class SMMClient
+{
+  private final ICommonsMap <String, ICommonsList <String>> m_aSrcMap = new CommonsHashMap <> ();
 
-  public SMMClient () {
-  }
+  public SMMClient ()
+  {}
 
   /**
    * Add a new concept that requires mapping
    *
    * @param sConceptNamespace
-   *          The concept namespace to be used. May neither be <code>null</code>
-   *          nor empty.
+   *        The concept namespace to be used. May neither be <code>null</code>
+   *        nor empty.
    * @param sConceptValue
-   *          The concept value to be used. May neither be <code>null</code> nor
-   *          empty.
+   *        The concept value to be used. May neither be <code>null</code> nor
+   *        empty.
    * @return this for chaining
    */
   @Nonnull
   public SMMClient addConceptToBeMapped (@Nonnull @Nonempty final String sConceptNamespace,
-                                         @Nonnull @Nonempty final String sConceptValue) {
+                                         @Nonnull @Nonempty final String sConceptValue)
+  {
     ValueEnforcer.notEmpty (sConceptNamespace, "Scheme");
     ValueEnforcer.notEmpty (sConceptValue, "Value");
-    m_aSrcMap.computeIfAbsent (sConceptNamespace, k -> new CommonsArrayList<> ()).add (sConceptValue);
+    m_aSrcMap.computeIfAbsent (sConceptNamespace, k -> new CommonsArrayList <> ()).add (sConceptValue);
     return this;
   }
 
@@ -65,19 +67,21 @@ public class SMMClient {
    * Add a new concept that requires mapping
    *
    * @param aConceptValue
-   *          The concept value to be mapped. May not be <code>null</code>.
+   *        The concept value to be mapped. May not be <code>null</code>.
    * @return this for chaining
    */
   @Nonnull
-  public SMMClient addConceptToBeMapped (@Nonnull final ConceptValue aConceptValue) {
+  public SMMClient addConceptToBeMapped (@Nonnull final ConceptValue aConceptValue)
+  {
     ValueEnforcer.notNull (aConceptValue, "aConceptValue");
     return addConceptToBeMapped (aConceptValue.getNamespace (), aConceptValue.getValue ());
   }
 
   @Nonnegative
-  private int _getTotalCount () {
+  private int _getTotalCount ()
+  {
     int ret = 0;
-    for (final ICommonsList<?> aList : m_aSrcMap.values ())
+    for (final ICommonsList <?> aList : m_aSrcMap.values ())
       ret += aList.size ();
     return ret;
   }
@@ -87,63 +91,95 @@ public class SMMClient {
    * namespace.
    *
    * @param sLogPrefix
-   *          Logging prefix to easily fit together what belongs together. May not
-   *          be <code>null</code> but may be empty.
+   *        Logging prefix to easily fit together what belongs together. May not
+   *        be <code>null</code> but may be empty.
    * @param sDestNamespace
-   *          Destination namespace to map the concepts to. May neither be
-   *          <code>null</code> nor empty.
+   *        Destination namespace to map the concepts to. May neither be
+   *        <code>null</code> nor empty.
    * @param aConceptProvider
-   *          The concept provider implementation to use. May not be
-   *          <code>null</code>.
+   *        The concept provider implementation to use. May not be
+   *        <code>null</code>.
    * @return A non-<code>null</code> but maybe empty list of mappings.
    * @throws IOException
-   *           in case of HTTP IO error
+   *         in case of HTTP IO error
    */
   @Nonnull
   @ReturnsMutableCopy
-  public IMappedValueList performMapping (@Nonnull final String sLogPrefix, @Nonnull final String sDestNamespace,
-                                          @Nonnull final ISMMConceptProvider aConceptProvider) throws IOException {
+  public IMappedValueList performMapping (@Nonnull final String sLogPrefix,
+                                          @Nonnull final String sDestNamespace,
+                                          @Nonnull final ISMMConceptProvider aConceptProvider) throws IOException
+  {
 
     ValueEnforcer.notNull (sLogPrefix, "LogPrefix");
     ValueEnforcer.notNull (sDestNamespace, "DestNamespace");
     ValueEnforcer.notNull (aConceptProvider, "ConceptProvider");
 
     ToopKafkaClient.send (EErrorLevel.INFO,
-                          () -> sLogPrefix + "SMM client mapping " + _getTotalCount () + " concept(s) from "
-                                + m_aSrcMap.size () + " source namespace(s) to '" + sDestNamespace + "'");
+                          () -> sLogPrefix +
+                                "SMM client mapping " +
+                                _getTotalCount () +
+                                " concept(s) from " +
+                                m_aSrcMap.size () +
+                                " source namespace(s) to '" +
+                                sDestNamespace +
+                                "'");
 
     final MappedValueList ret = new MappedValueList ();
     // for all source namespaces (maybe many)
-    for (final Map.Entry<String, ICommonsList<String>> aEntry : m_aSrcMap.entrySet ()) {
+    for (final Map.Entry <String, ICommonsList <String>> aEntry : m_aSrcMap.entrySet ())
+    {
       final String sSourceNamespace = aEntry.getKey ();
-      if (sSourceNamespace.equals (sDestNamespace)) {
+      if (sSourceNamespace.equals (sDestNamespace))
+      {
         // No mapping needed - use unmapped values
-        for (final String sSourceValue : aEntry.getValue ()) {
+        for (final String sSourceValue : aEntry.getValue ())
+        {
           final ConceptValue aValue = new ConceptValue (sSourceNamespace, sSourceValue);
           ret.addMappedValue (new MappedValue (aValue, aValue));
         }
-      } else {
+      }
+      else
+      {
         // Namespace are different - get the mapping list
         // This eventually performs a remote call!
-        final MappedValueList aValueList = aConceptProvider.getAllMappedValues (sLogPrefix, sSourceNamespace,
+        final MappedValueList aValueList = aConceptProvider.getAllMappedValues (sLogPrefix,
+                                                                                sSourceNamespace,
                                                                                 sDestNamespace);
 
         // Map all source values
-        for (final String sSourceValue : aEntry.getValue ()) {
+        for (final String sSourceValue : aEntry.getValue ())
+        {
           // The source value may be mapped to 0, 1 or n elements
           final MappedValueList aMatching = aValueList.getAllBySource (x -> x.hasValue (sSourceValue));
-          if (aMatching.isEmpty ()) {
+          if (aMatching.isEmpty ())
+          {
             // Found no mapping
             ToopKafkaClient.send (EErrorLevel.INFO,
-                                  () -> sLogPrefix + "Found no mapping for '" + sSourceNamespace + '#' + sSourceValue
-                                        + "' to destination namespace '" + sDestNamespace + "'");
+                                  () -> sLogPrefix +
+                                        "Found no mapping for '" +
+                                        sSourceNamespace +
+                                        '#' +
+                                        sSourceValue +
+                                        "' to destination namespace '" +
+                                        sDestNamespace +
+                                        "'");
             // TODO shall we add a mapping to null?
-          } else {
-            if (aMatching.size () > 1) {
+          }
+          else
+          {
+            if (aMatching.size () > 1)
+            {
               ToopKafkaClient.send (EErrorLevel.WARN,
-                                    () -> sLogPrefix + "Found " + aMatching.size () + " mappings for '"
-                                          + sSourceNamespace + '#' + sSourceValue + "' to destination namespace '"
-                                          + sDestNamespace + "'");
+                                    () -> sLogPrefix +
+                                          "Found " +
+                                          aMatching.size () +
+                                          " mappings for '" +
+                                          sSourceNamespace +
+                                          '#' +
+                                          sSourceValue +
+                                          "' to destination namespace '" +
+                                          sDestNamespace +
+                                          "'");
             }
             ret.addAllMappedValues (aMatching);
           }

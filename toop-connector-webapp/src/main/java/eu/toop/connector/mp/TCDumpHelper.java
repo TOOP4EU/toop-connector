@@ -40,29 +40,36 @@ import com.helger.commons.io.stream.WrappedOutputStream;
  * @author Philip Helger
  */
 @Immutable
-public final class TCDumpHelper {
+public final class TCDumpHelper
+{
   private static final Logger s_aLogger = LoggerFactory.getLogger (TCDumpHelper.class);
 
-  private TCDumpHelper () {
-  }
+  private TCDumpHelper ()
+  {}
 
   @Nonnull
-  public static InputStream getDumpInputStream (@Nonnull final InputStream aSrcIS, @Nullable final File aDumpDirectory,
-                                                @Nonnull @Nonempty final String sContextAndExtension) {
+  public static InputStream getDumpInputStream (@Nonnull final InputStream aSrcIS,
+                                                @Nullable final File aDumpDirectory,
+                                                @Nonnull @Nonempty final String sContextAndExtension)
+  {
     ValueEnforcer.notNull (aSrcIS, "SrcIS");
     ValueEnforcer.notEmpty (sContextAndExtension, "ContextAndExtension");
 
-    if (aDumpDirectory != null && aDumpDirectory.exists ()) {
+    if (aDumpDirectory != null && aDumpDirectory.exists ())
+    {
       // Only if the dump directory is present and existing
       final String sFilename = Long.toString (System.nanoTime ()) + sContextAndExtension;
       final File aDumpFile = new File (aDumpDirectory, sFilename);
 
       // Open log file
       final FileOutputStream aDebugFOS = FileHelper.getOutputStream (aDumpFile);
-      if (aDebugFOS != null) {
-        return new WrappedInputStream (aSrcIS) {
+      if (aDebugFOS != null)
+      {
+        return new WrappedInputStream (aSrcIS)
+        {
           @Override
-          public int read () throws IOException {
+          public int read () throws IOException
+          {
             final int ret = super.read ();
             if (ret >= 0)
               aDebugFOS.write ((byte) ret);
@@ -70,7 +77,8 @@ public final class TCDumpHelper {
           }
 
           @Override
-          public int read (final byte[] aBuf, final int nOfs, final int nLen) throws IOException {
+          public int read (final byte [] aBuf, final int nOfs, final int nLen) throws IOException
+          {
             final int ret = super.read (aBuf, nOfs, nLen);
             if (ret >= 0)
               aDebugFOS.write (aBuf, nOfs, ret);
@@ -78,11 +86,15 @@ public final class TCDumpHelper {
           }
 
           @Override
-          public void close () throws IOException {
-            try {
+          public void close () throws IOException
+          {
+            try
+            {
               // Close dump file as well
               aDebugFOS.close ();
-            } finally {
+            }
+            finally
+            {
               super.close ();
             }
           }
@@ -98,46 +110,60 @@ public final class TCDumpHelper {
   @Nonnull
   public static OutputStream getDumpOutputStream (@Nonnull final OutputStream aSrcOS,
                                                   @Nullable final File aDumpDirectory,
-                                                  @Nonnull @Nonempty final String sContextAndExtension) {
+                                                  @Nonnull @Nonempty final String sContextAndExtension)
+  {
     ValueEnforcer.notNull (aSrcOS, "SrcOS");
     ValueEnforcer.notEmpty (sContextAndExtension, "ContextAndExtension");
 
-    if (aDumpDirectory != null && aDumpDirectory.exists ()) {
+    if (aDumpDirectory != null && aDumpDirectory.exists ())
+    {
       // Only if the dump directory is present and existing
       final String sFilename = Long.toString (System.nanoTime ()) + sContextAndExtension;
       final File aDumpFile = new File (aDumpDirectory, sFilename);
 
       // Open log file
       final FileOutputStream aDebugFOS = FileHelper.getOutputStream (aDumpFile);
-      if (aDebugFOS != null) {
-        return new WrappedOutputStream (aSrcOS) {
+      if (aDebugFOS != null)
+      {
+        return new WrappedOutputStream (aSrcOS)
+        {
           @Override
-          public void write (final int b) throws IOException {
+          public void write (final int b) throws IOException
+          {
             super.write (b);
             aDebugFOS.write (b);
           }
 
           @Override
-          public void write (final byte[] aBuf, final int nOfs, final int nLen) throws IOException {
+          public void write (final byte [] aBuf, final int nOfs, final int nLen) throws IOException
+          {
             super.write (aBuf, nOfs, nLen);
             aDebugFOS.write (aBuf, nOfs, nLen);
           }
 
           @Override
-          public void flush () throws IOException {
-            try {
+          public void flush () throws IOException
+          {
+            try
+            {
               aDebugFOS.flush ();
-            } finally {
+            }
+            finally
+            {
               super.flush ();
             }
           }
 
           @Override
-          public void close () throws IOException {
-            try {
+          public void close () throws IOException
+          {
+            try
+            {
               // Close dump file as well
               aDebugFOS.close ();
-            } finally {
+            }
+            finally
+            {
               super.close ();
             }
           }
