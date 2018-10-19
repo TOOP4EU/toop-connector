@@ -24,7 +24,7 @@ import com.helger.settings.ISettings;
 import com.helger.settings.exchange.properties.SettingsPersistenceProperties;
 
 /**
- * This class contains global TC server constants.
+ * This class contains global TC (TOOP Connector) server constants.
  *
  * @author Philip Helger
  */
@@ -33,14 +33,18 @@ public final class CTC {
   public static final String TOOP_CONNECTOR_VERSION_FILENAME = "toop-connector-version.properties";
 
   private static final String VERSION_NUMBER;
+  private static final String TIMESTAMP;
 
   static {
     // Read version number
     final SettingsPersistenceProperties aSPP = new SettingsPersistenceProperties ();
     final ISettings aVersionProps = aSPP.readSettings (new ClassPathResource (TOOP_CONNECTOR_VERSION_FILENAME));
-    VERSION_NUMBER = aVersionProps.getAsString ("tc.version");
+    VERSION_NUMBER = aVersionProps.getAsString ("version");
     if (VERSION_NUMBER == null)
       throw new InitializationException ("Error determining TOOP Connector version number!");
+    TIMESTAMP = aVersionProps.getAsString ("timestamp");
+    if (TIMESTAMP == null)
+      throw new InitializationException ("Error determining TOOP Connector ´timestamp!");
   }
 
   private CTC () {
@@ -48,10 +52,20 @@ public final class CTC {
 
   /**
    * @return The version number of the TC server read from the internal properties
-   *         file. Never <code>null</code>.
+   *         file. Never <code>null</code>. This is the same as the Maven project
+   *         version.
    */
   @Nonnull
   public static String getVersionNumber () {
     return VERSION_NUMBER;
+  }
+
+  /**
+   * @return The build timestamp of the TC server read from the internal
+   *         properties file. Never <code>null</code>.
+   */
+  @Nonnull
+  public static String getBuildTimestamp () {
+    return TIMESTAMP;
   }
 }
