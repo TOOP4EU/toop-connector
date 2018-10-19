@@ -87,10 +87,10 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
    * @author Philip Helger
    */
   static final class Performer implements IConcurrentPerformer<TDETOOPRequestType> {
-    private static final Logger s_aLogger = LoggerFactory.getLogger (MessageProcessorDCOutgoing.Performer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger (MessageProcessorDCOutgoing.Performer.class);
 
     public void runAsync (@Nonnull final TDETOOPRequestType aRequest) {
-      // TODO Schematrin
+      // TODO Schematron
 
       // Select document type
       final EPredefinedDocumentTypeIdentifier eDocType = EPredefinedDocumentTypeIdentifier.getFromDocumentTypeIdentifierOrNull (aRequest.getDocumentTypeIdentifier ()
@@ -99,6 +99,7 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
                                                                                                                                         .getValue ());
       if (eDocType == null) {
         // TODO send back async error
+
         throw new IllegalStateException ("Failed to resolve document type "
                                          + aRequest.getDocumentTypeIdentifier ().getSchemeID () + "::"
                                          + aRequest.getDocumentTypeIdentifier ().getValue ());
@@ -206,8 +207,8 @@ public final class MessageProcessorDCOutgoing extends AbstractGlobalWebSingleton
 
         ToopKafkaClient.send (EErrorLevel.INFO, sLogPrefix + "R2D2 found [" + aEndpoints.size () + "/"
                                                 + aTotalEndpoints.size () + "] endpoints");
-        if (s_aLogger.isDebugEnabled ())
-          s_aLogger.info (sLogPrefix + "Endpoint details: " + aEndpoints);
+        if (LOGGER.isDebugEnabled ())
+          LOGGER.info (sLogPrefix + "Endpoint details: " + aEndpoints);
 
         // TODO if no endpoint, send back async error
       }

@@ -58,6 +58,7 @@ public class FromDCServlet extends HttpServlet {
 
     if (aRequestMsg == null) {
       // The message content is invalid
+      // Synchronous error
       ToopKafkaClient.send (EErrorLevel.ERROR,
                             "The request does not contain an ASiC archive, or the ASiC archive does not contain a TOOP DataRequest!");
       aUR.setContentAndCharset ("The provided ASIC container could not be interpreted as a valid TOOP request.",
