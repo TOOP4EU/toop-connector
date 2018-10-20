@@ -20,6 +20,7 @@ import java.util.Map;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
 
 import com.helger.commons.ValueEnforcer;
@@ -99,6 +100,9 @@ public class SMMClient
    * @param aConceptProvider
    *        The concept provider implementation to use. May not be
    *        <code>null</code>.
+   * @param aUnmappableCallback
+   *        Callback to be invoked if a non-mappable entry was found. May be
+   *        <code>null</code>.
    * @return A non-<code>null</code> but maybe empty list of mappings.
    * @throws IOException
    *         in case of HTTP IO error
@@ -106,12 +110,13 @@ public class SMMClient
   @Nonnull
   @ReturnsMutableCopy
   public IMappedValueList performMapping (@Nonnull final String sLogPrefix,
-                                          @Nonnull final String sDestNamespace,
-                                          @Nonnull final ISMMConceptProvider aConceptProvider) throws IOException
+                                          @Nonnull @Nonempty final String sDestNamespace,
+                                          @Nonnull final ISMMConceptProvider aConceptProvider,
+                                          @Nullable final IUnmappableCallback aUnmappableCallback) throws IOException
   {
 
     ValueEnforcer.notNull (sLogPrefix, "LogPrefix");
-    ValueEnforcer.notNull (sDestNamespace, "DestNamespace");
+    ValueEnforcer.notEmpty (sDestNamespace, "DestNamespace");
     ValueEnforcer.notNull (aConceptProvider, "ConceptProvider");
 
     ToopKafkaClient.send (EErrorLevel.INFO,
@@ -154,15 +159,20 @@ public class SMMClient
           if (aMatching.isEmpty ())
           {
             // Found no mapping
-            ToopKafkaClient.send (EErrorLevel.INFO,
-                                  () -> sLogPrefix +
-                                        "Found no mapping for '" +
-                                        sSourceNamespace +
-                                        '#' +
-                                        sSourceValue +
-                                        "' to destination namespace '" +
-                                        sDestNamespace +
-                                        "'");
+            if (aUnmappableCallback != null)
+              aUnmappableCallback.onUnmappableValue (sLogPrefix, sSourceNamespace, sSourceValue, sDestNamespace);
+            else
+            {
+              ToopKafkaClient.send (EErrorLevel.WARN,
+                                    () -> sLogPrefix +
+                                          "Found no mapping for '" +
+                                          sSourceNamespace +
+                                          '#' +
+                                          sSourceValue +
+                                          "' to destination namespace '" +
+                                          sDestNamespace +
+                                          "'");
+            }
             // TODO shall we add a mapping to null?
           }
           else

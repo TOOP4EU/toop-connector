@@ -66,6 +66,10 @@
     </dependency>
     <dependency>
       <groupId>eu.toop</groupId>
+      <artifactId>toop-commons</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>eu.toop</groupId>
       <artifactId>toop-connector-api</artifactId>
     </dependency>
     <dependency>

@@ -48,6 +48,7 @@ public final class SMMClientTest
   // Use with cache and remote
   private static final ISMMConceptProvider [] CP = new ISMMConceptProvider [] { SMMConceptProviderGRLCRemote::getAllMappedValues,
                                                                                 SMMConceptProviderGRLCRemote::remoteQueryAllMappedValues };
+  private static final IUnmappableCallback UCB = (sLogPrefix, aSourceNamespace, aSourceValue, aDestNamespace) -> {};
 
   @Test
   public void testEmpty () throws IOException
@@ -56,7 +57,7 @@ public final class SMMClientTest
     {
       s_aLogger.info ("Starting testEmpty");
       final SMMClient aClient = new SMMClient ();
-      final IMappedValueList ret = aClient.performMapping (LOG_PREFIX, NS_FREEDONIA, aCP);
+      final IMappedValueList ret = aClient.performMapping (LOG_PREFIX, NS_FREEDONIA, aCP, UCB);
       assertNotNull (ret);
       assertTrue (ret.isEmpty ());
       assertEquals (0, ret.size ());
@@ -71,7 +72,7 @@ public final class SMMClientTest
       s_aLogger.info ("Starting testOneMatch");
       final SMMClient aClient = new SMMClient ();
       aClient.addConceptToBeMapped (CONCEPT_TOOP_1);
-      final IMappedValueList ret = aClient.performMapping (LOG_PREFIX, NS_FREEDONIA, aCP);
+      final IMappedValueList ret = aClient.performMapping (LOG_PREFIX, NS_FREEDONIA, aCP, UCB);
       assertNotNull (ret);
       assertEquals (1, ret.size ());
 
@@ -96,7 +97,7 @@ public final class SMMClientTest
       aClient.addConceptToBeMapped (CONCEPT_TOOP_1);
       aClient.addConceptToBeMapped (NS_TOOP, "NonExistingField");
       aClient.addConceptToBeMapped ("SourceNamespace", "NonExistingField");
-      final IMappedValueList ret = aClient.performMapping (LOG_PREFIX, NS_FREEDONIA, aCP);
+      final IMappedValueList ret = aClient.performMapping (LOG_PREFIX, NS_FREEDONIA, aCP, UCB);
       assertNotNull (ret);
       assertEquals (1, ret.size ());
 
@@ -119,7 +120,7 @@ public final class SMMClientTest
       s_aLogger.info ("Starting testNoMappingNeeded");
       final SMMClient aClient = new SMMClient ();
       aClient.addConceptToBeMapped (CONCEPT_FR_1);
-      final IMappedValueList ret = aClient.performMapping (LOG_PREFIX, NS_FREEDONIA, aCP);
+      final IMappedValueList ret = aClient.performMapping (LOG_PREFIX, NS_FREEDONIA, aCP, UCB);
       assertNotNull (ret);
       assertEquals (1, ret.size ());
 

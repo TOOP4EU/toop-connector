@@ -21,27 +21,17 @@ import java.util.concurrent.ThreadFactory;
 
 import javax.annotation.Nonnull;
 
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ByteArrayEntity;
-
-import com.helger.asic.SignatureHelper;
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.UsedViaReflection;
 import com.helger.commons.concurrent.BasicThreadFactory;
 import com.helger.commons.concurrent.ExecutorServiceHelper;
 import com.helger.commons.concurrent.collector.ConcurrentCollectorSingle;
-import com.helger.commons.concurrent.collector.IConcurrentPerformer;
 import com.helger.commons.error.level.EErrorLevel;
-import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 import com.helger.commons.state.ESuccess;
-import com.helger.httpclient.HttpClientManager;
 import com.helger.scope.IScope;
 import com.helger.web.scope.singleton.AbstractGlobalWebSingleton;
 
 import eu.toop.commons.dataexchange.TDETOOPResponseType;
-import eu.toop.commons.exchange.ToopMessageBuilder;
-import eu.toop.connector.api.TCConfig;
-import eu.toop.connector.api.http.TCHttpClientFactory;
 import eu.toop.kafkaclient.ToopKafkaClient;
 
 /**
@@ -53,47 +43,6 @@ import eu.toop.kafkaclient.ToopKafkaClient;
  */
 public final class MessageProcessorDCIncoming extends AbstractGlobalWebSingleton
 {
-  /**
-   * The nested performer class that does the hard work.
-   *
-   * @author Philip Helger
-   */
-  static final class Performer implements IConcurrentPerformer <TDETOOPResponseType>
-  {
-    public void runAsync (@Nonnull final TDETOOPResponseType aResponse) throws Exception
-    {
-      final String sRequestID = aResponse.getDataRequestIdentifier ().getValue ();
-      final String sLogPrefix = "[" + sRequestID + "] ";
-      ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "Received DC Incoming Request (4/4)");
-
-      // Forward to the DC at /to-dc interface
-      final TCHttpClientFactory aHCFactory = new TCHttpClientFactory ();
-
-      try (final HttpClientManager aMgr = new HttpClientManager (aHCFactory))
-      {
-        final SignatureHelper aSH = new SignatureHelper (TCConfig.getKeystoreType (),
-                                                         TCConfig.getKeystorePath (),
-                                                         TCConfig.getKeystorePassword (),
-                                                         TCConfig.getKeystoreKeyAlias (),
-                                                         TCConfig.getKeystoreKeyPassword ());
-
-        try (final NonBlockingByteArrayOutputStream aBAOS = new NonBlockingByteArrayOutputStream ())
-        {
-          ToopMessageBuilder.createResponseMessage (aResponse, aBAOS, aSH);
-
-          // Send to DC (see ToDCServlet in toop-interface)
-          final String sDestinationUrl = TCConfig.getMPToopInterfaceDCUrl ();
-
-          ToopKafkaClient.send (EErrorLevel.INFO, () -> "Posting signed ASiC response to " + sDestinationUrl);
-
-          final HttpPost aPost = new HttpPost (sDestinationUrl);
-          aPost.setEntity (new ByteArrayEntity (aBAOS.toByteArray ()));
-          aMgr.execute (aPost);
-        }
-      }
-    }
-  }
-
   // Just to have custom named threads....
   private static final ThreadFactory s_aThreadFactory = new BasicThreadFactory.Builder ().setNamingPattern ("MP-DC-In-%d")
                                                                                          .setDaemon (true)
@@ -105,7 +54,7 @@ public final class MessageProcessorDCIncoming extends AbstractGlobalWebSingleton
   @UsedViaReflection
   public MessageProcessorDCIncoming ()
   {
-    m_aCollector.setPerformer (new Performer ());
+    m_aCollector.setPerformer (new MessageProcessorDCIncomingPerformer ());
     m_aExecutorPool = Executors.newSingleThreadExecutor (s_aThreadFactory);
     m_aExecutorPool.submit (m_aCollector::collect);
   }

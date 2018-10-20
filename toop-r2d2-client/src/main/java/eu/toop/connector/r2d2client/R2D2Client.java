@@ -56,6 +56,8 @@ import com.helger.peppol.identifier.generic.process.IProcessIdentifier;
 import com.helger.peppol.smpclient.exception.SMPClientException;
 import com.helger.security.certificate.CertificateHelper;
 
+import eu.toop.commons.error.EToopErrorCode;
+import eu.toop.commons.error.ToopErrorException;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.TCSettings;
 import eu.toop.connector.api.http.TCHttpClientFactory;
@@ -98,13 +100,13 @@ public class R2D2Client implements IR2D2Client
    * @param aDocumentTypeID
    *        Document type ID to query. May not be <code>null</code>.
    * @return A non-<code>null</code> but maybe empty set of Participant IDs.
-   * @throws IOException
+   * @throws ToopErrorException
    *         On query exception
    */
   @Nonnull
   private static ICommonsSet <IParticipantIdentifier> _getAllRecipientIDsFromDirectory (@Nonnull final String sLogPrefix,
                                                                                         @Nonnull @Nonempty final String sCountryCode,
-                                                                                        @Nonnull final IDocumentTypeIdentifier aDocumentTypeID) throws IOException
+                                                                                        @Nonnull final IDocumentTypeIdentifier aDocumentTypeID) throws ToopErrorException
   {
     final ICommonsSet <IParticipantIdentifier> ret = new CommonsHashSet <> ();
 
@@ -187,15 +189,14 @@ public class R2D2Client implements IR2D2Client
     }
     catch (final IOException ex)
     {
-      ToopKafkaClient.send (EErrorLevel.ERROR,
-                            () -> sLogPrefix +
-                                  "Error querying TOOP Directory for matches (" +
-                                  sCountryCode +
-                                  ", " +
-                                  aDocumentTypeID.getURIEncoded () +
-                                  ")",
-                            ex);
-      throw ex;
+      throw new ToopErrorException (sLogPrefix +
+                                    "Error querying TOOP Directory for matches (" +
+                                    sCountryCode +
+                                    ", " +
+                                    aDocumentTypeID.getURIEncoded () +
+                                    ")",
+                                    ex,
+                                    EToopErrorCode.DD_001);
     }
 
     return ret;
@@ -206,9 +207,7 @@ public class R2D2Client implements IR2D2Client
   public ICommonsList <IR2D2Endpoint> getEndpoints (@Nonnull final String sLogPrefix,
                                                     @Nonnull @Nonempty final String sCountryCode,
                                                     @Nonnull final IDocumentTypeIdentifier aDocumentTypeID,
-                                                    @Nonnull final IProcessIdentifier aProcessID) throws IOException,
-                                                                                                  CertificateException,
-                                                                                                  SMPClientException
+                                                    @Nonnull final IProcessIdentifier aProcessID) throws ToopErrorException
   {
     ValueEnforcer.notEmpty (sCountryCode, "CountryCode");
     ValueEnforcer.isTrue (sCountryCode.length () == 2, "CountryCode must have length 2");
@@ -255,8 +254,7 @@ public class R2D2Client implements IR2D2Client
   public ICommonsList <IR2D2Endpoint> getEndpoints (@Nonnull final String sLogPrefix,
                                                     @Nonnull final IParticipantIdentifier aRecipientID,
                                                     @Nonnull final IDocumentTypeIdentifier aDocumentTypeID,
-                                                    @Nonnull final IProcessIdentifier aProcessID) throws CertificateException,
-                                                                                                  SMPClientException
+                                                    @Nonnull final IProcessIdentifier aProcessID) throws ToopErrorException
   {
     ValueEnforcer.notNull (aRecipientID, "Recipient");
     ValueEnforcer.notNull (aDocumentTypeID, "DocumentTypeID");
@@ -332,18 +330,29 @@ public class R2D2Client implements IR2D2Client
         ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "SMP lookup result: maybe a redirect?");
       }
     }
-    catch (final CertificateException | SMPClientException ex)
+    catch (final SMPClientException ex)
     {
-      ToopKafkaClient.send (EErrorLevel.ERROR,
-                            () -> sLogPrefix +
-                                  "Error fetching SMP endpoint " +
-                                  aRecipientID.getURIEncoded () +
-                                  "/" +
-                                  aDocumentTypeID.getURIEncoded () +
-                                  "/" +
-                                  aProcessID.getURIEncoded (),
-                            ex);
-      throw ex;
+      throw new ToopErrorException (sLogPrefix +
+                                    "Error fetching SMP endpoint " +
+                                    aRecipientID.getURIEncoded () +
+                                    "/" +
+                                    aDocumentTypeID.getURIEncoded () +
+                                    "/" +
+                                    aProcessID.getURIEncoded (),
+                                    ex,
+                                    EToopErrorCode.DD_002);
+    }
+    catch (final CertificateException ex)
+    {
+      throw new ToopErrorException (sLogPrefix +
+                                    "Error validating the signature from SMP response for endpoint " +
+                                    aRecipientID.getURIEncoded () +
+                                    "/" +
+                                    aDocumentTypeID.getURIEncoded () +
+                                    "/" +
+                                    aProcessID.getURIEncoded (),
+                                    ex,
+                                    EToopErrorCode.DD_003);
     }
     return ret;
   }
