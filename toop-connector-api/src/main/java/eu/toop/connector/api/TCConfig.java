@@ -111,6 +111,7 @@ public final class TCConfig {
   }
 
   public static final boolean DEFAULT_TOOP_TRACKER_ENABLED = false;
+  public static final String DEFAULT_TOOP_TRACKER_TOPIC = "toop";
   public static final boolean DEFAULT_USE_SML = true;
 
   private TCConfig () {
@@ -148,6 +149,11 @@ public final class TCConfig {
   @Nullable
   public static String getToopTrackerUrl () {
     return getConfigFile ().getAsString ("toop.tracker.url");
+  }
+
+  @Nullable
+  public static String getToopTrackerTopic () {
+    return getConfigFile ().getAsString ("toop.tracker.topic", DEFAULT_TOOP_TRACKER_TOPIC);
   }
 
   /**
