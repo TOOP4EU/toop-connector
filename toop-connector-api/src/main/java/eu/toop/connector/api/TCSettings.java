@@ -29,17 +29,20 @@ import com.helger.peppol.url.IPeppolURLProvider;
  * @author Philip Helger, BRZ, AT
  */
 @Immutable
-public final class TCSettings {
-  private TCSettings () {
-  }
+public final class TCSettings
+{
+  private TCSettings ()
+  {}
 
   @Nonnull
-  public static IIdentifierFactory getIdentifierFactory () {
+  public static IIdentifierFactory getIdentifierFactory ()
+  {
     return SimpleIdentifierFactory.INSTANCE;
   }
 
   @Nonnull
-  public static IPeppolURLProvider getSMPUrlProvider () {
+  public static IPeppolURLProvider getSMPUrlProvider ()
+  {
     return EsensURLProvider.INSTANCE;
   }
 }

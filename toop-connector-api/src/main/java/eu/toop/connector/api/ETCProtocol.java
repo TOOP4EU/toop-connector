@@ -28,7 +28,8 @@ import com.helger.peppol.smp.ESMPTransportProfile;
  *
  * @author Philip Helger
  */
-public enum ETCProtocol implements IHasID<String> {
+public enum ETCProtocol implements IHasID <String>
+{
   /**
    * AS4 using the common transport profile introduced by eSENS
    */
@@ -40,29 +41,33 @@ public enum ETCProtocol implements IHasID<String> {
 
   private String m_sTransportProfileID;
 
-  private ETCProtocol (@Nonnull @Nonempty final String sID, @Nonnull @Nonempty final String sTransportProfileID) {
+  private ETCProtocol (@Nonnull @Nonempty final String sID, @Nonnull @Nonempty final String sTransportProfileID)
+  {
     m_sID = sID;
     m_sTransportProfileID = sTransportProfileID;
   }
 
   @Nonnull
   @Nonempty
-  public String getID () {
+  public String getID ()
+  {
     return m_sID;
   }
 
   /**
-   * @return The transport profile ID for the SMP to be used for this MP protocol.
-   *         Neither <code>null</code> nor empty.
+   * @return The transport profile ID for the SMP to be used for this MP
+   *         protocol. Neither <code>null</code> nor empty.
    */
   @Nonnull
   @Nonempty
-  public String getTransportProfileID () {
+  public String getTransportProfileID ()
+  {
     return m_sTransportProfileID;
   }
 
   @Nullable
-  public static ETCProtocol getFromIDOrNull (@Nullable final String sID) {
+  public static ETCProtocol getFromIDOrNull (@Nullable final String sID)
+  {
     return EnumHelper.getFromIDOrNull (ETCProtocol.class, sID);
   }
 }

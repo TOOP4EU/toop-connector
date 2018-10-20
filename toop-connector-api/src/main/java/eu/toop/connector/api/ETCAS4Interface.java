@@ -28,7 +28,8 @@ import com.helger.commons.lang.EnumHelper;
  *
  * @author Philip Helger
  */
-public enum ETCAS4Interface implements IHasID<String> {
+public enum ETCAS4Interface implements IHasID <String>
+{
   /**
    * CEF conformance test WebService interface
    */
@@ -38,18 +39,21 @@ public enum ETCAS4Interface implements IHasID<String> {
 
   private final String m_sID;
 
-  private ETCAS4Interface (@Nonnull @Nonempty final String sID) {
+  private ETCAS4Interface (@Nonnull @Nonempty final String sID)
+  {
     m_sID = sID;
   }
 
   @Nonnull
   @Nonempty
-  public String getID () {
+  public String getID ()
+  {
     return m_sID;
   }
 
   @Nullable
-  public static ETCAS4Interface getFromIDOrNull (@Nullable final String sID) {
+  public static ETCAS4Interface getFromIDOrNull (@Nullable final String sID)
+  {
     return EnumHelper.getFromIDOrNull (ETCAS4Interface.class, sID);
   }
 }

@@ -24,11 +24,12 @@ import org.junit.Test;
  * Test class for class {@link TCConfig}.
  *
  * @author Philip Helger
- *
  */
-public final class TCConfigTest {
+public final class TCConfigTest
+{
   @Test
-  public void testBasic () {
+  public void testBasic ()
+  {
     assertEquals ("http://directory.central.toop/pd", TCConfig.getR2D2DirectoryBaseUrl ());
     assertFalse (TCConfig.isR2D2UseDNS ());
   }

@@ -45,13 +45,15 @@ import com.helger.settings.exchange.configfile.ConfigFileBuilder;
  * @author Philip Helger, BRZ, AT
  */
 @Immutable
-public final class TCConfig {
+public final class TCConfig
+{
   private static final Logger s_aLogger = LoggerFactory.getLogger (TCConfig.class);
   private static final SimpleReadWriteLock s_aRWLock = new SimpleReadWriteLock ();
   @GuardedBy ("s_aRWLock")
   private static ConfigFile s_aConfigFile;
 
-  static {
+  static
+  {
     reloadConfiguration ();
   }
 
@@ -74,22 +76,24 @@ public final class TCConfig {
 
   /**
    * Reload the configuration file. It checks if the system property
-   * {@link #SYSTEM_PROPERTY_TOOP_CONNECTOR_SERVER_PROPERTIES_PATH} is present and
-   * if so, tries it first, than {@link #PATH_PRIVATE_TOOP_CONNECTOR_PROPERTIES}
-   * is checked and finally the {@link #PATH_TOOP_CONNECTOR_PROPERTIES} path is
-   * checked.
+   * {@link #SYSTEM_PROPERTY_TOOP_CONNECTOR_SERVER_PROPERTIES_PATH} is present
+   * and if so, tries it first, than
+   * {@link #PATH_PRIVATE_TOOP_CONNECTOR_PROPERTIES} is checked and finally the
+   * {@link #PATH_TOOP_CONNECTOR_PROPERTIES} path is checked.
    *
    * @return {@link ESuccess}
    */
   @Nonnull
-  public static ESuccess reloadConfiguration () {
+  public static ESuccess reloadConfiguration ()
+  {
     final ConfigFileBuilder aCFB = new ConfigFileBuilder ().addPathFromSystemProperty (SYSTEM_PROPERTY_TOOP_CONNECTOR_SERVER_PROPERTIES_PATH)
                                                            .addPath (PATH_PRIVATE_TOOP_CONNECTOR_PROPERTIES)
                                                            .addPath (PATH_TOOP_CONNECTOR_PROPERTIES);
 
     return s_aRWLock.writeLocked ( () -> {
       s_aConfigFile = aCFB.build ();
-      if (!s_aConfigFile.isRead ()) {
+      if (!s_aConfigFile.isRead ())
+      {
         s_aLogger.warn ("Failed to read TOOP Connector server properties from " + aCFB.getAllPaths ());
         return ESuccess.FAILURE;
       }
@@ -98,10 +102,12 @@ public final class TCConfig {
       s_aCachedSMLInfo = null;
 
       // Ensure dump directories are present if enabled
-      if (isDebugFromDCDumpEnabled ()) {
+      if (isDebugFromDCDumpEnabled ())
+      {
         FileOperationManager.INSTANCE.createDirRecursiveIfNotExisting (getDebugFromDCDumpPath ());
       }
-      if (isDebugFromDPDumpEnabled ()) {
+      if (isDebugFromDPDumpEnabled ())
+      {
         FileOperationManager.INSTANCE.createDirRecursiveIfNotExisting (getDebugFromDPDumpPath ());
       }
 
@@ -114,22 +120,25 @@ public final class TCConfig {
   public static final String DEFAULT_TOOP_TRACKER_TOPIC = "toop";
   public static final boolean DEFAULT_USE_SML = true;
 
-  private TCConfig () {
-  }
+  private TCConfig ()
+  {}
 
   /**
    * @return The configuration file. Never <code>null</code>.
    */
   @Nonnull
-  public static ConfigFile getConfigFile () {
+  public static ConfigFile getConfigFile ()
+  {
     return s_aRWLock.readLocked ( () -> s_aConfigFile);
   }
 
-  public static boolean isGlobalDebug () {
+  public static boolean isGlobalDebug ()
+  {
     return getConfigFile ().getAsBoolean ("global.debug", GlobalDebug.isDebugMode ());
   }
 
-  public static boolean isGlobalProduction () {
+  public static boolean isGlobalProduction ()
+  {
     return getConfigFile ().getAsBoolean ("global.production", GlobalDebug.isProductionMode ());
   }
 
@@ -138,21 +147,25 @@ public final class TCConfig {
    *         address is used.
    */
   @Nullable
-  public static String getToopInstanceName () {
+  public static String getToopInstanceName ()
+  {
     return getConfigFile ().getAsString ("toop.instancename");
   }
 
-  public static boolean isToopTrackerEnabled () {
+  public static boolean isToopTrackerEnabled ()
+  {
     return getConfigFile ().getAsBoolean ("toop.tracker.enabled", DEFAULT_TOOP_TRACKER_ENABLED);
   }
 
   @Nullable
-  public static String getToopTrackerUrl () {
+  public static String getToopTrackerUrl ()
+  {
     return getConfigFile ().getAsString ("toop.tracker.url");
   }
 
   @Nullable
-  public static String getToopTrackerTopic () {
+  public static String getToopTrackerTopic ()
+  {
     return getConfigFile ().getAsString ("toop.tracker.topic", DEFAULT_TOOP_TRACKER_TOPIC);
   }
 
@@ -161,7 +174,8 @@ public final class TCConfig {
    *         <code>null</code> - no default.
    */
   @Nullable
-  public static String getSMMGRLCURL () {
+  public static String getSMMGRLCURL ()
+  {
     // E.g.
     // http://localhost:8001/
     // https://hamster.tno.nl/plasido-grlc/
@@ -172,24 +186,29 @@ public final class TCConfig {
    * @return The destination namespace URI to map to (for DP incoming step 2/4)
    */
   @Nullable
-  public static String getSMMMappingNamespaceURIForDP () {
+  public static String getSMMMappingNamespaceURIForDP ()
+  {
     return getConfigFile ().getAsString ("toop.smm.namespaceuri");
   }
 
   /**
-   * @return The TOOP Directory base URL for R2D2. Should never end with a slash.
+   * @return The TOOP Directory base URL for R2D2. Should never end with a
+   *         slash.
    */
   @Nullable
-  public static String getR2D2DirectoryBaseUrl () {
+  public static String getR2D2DirectoryBaseUrl ()
+  {
     return getConfigFile ().getAsString ("toop.r2d2.directory.baseurl");
   }
 
   /**
-   * @return <code>true</code> to use SML lookup, <code>false</code> to not do it.
+   * @return <code>true</code> to use SML lookup, <code>false</code> to not do
+   *         it.
    * @see #getR2D2SML()
    * @see #getR2D2SMPUrl()
    */
-  public static boolean isR2D2UseDNS () {
+  public static boolean isR2D2UseDNS ()
+  {
     return getConfigFile ().getAsBoolean ("toop.r2d2.usedns", DEFAULT_USE_SML);
   }
 
@@ -198,16 +217,20 @@ public final class TCConfig {
    *         {@link #isR2D2UseDNS()} returned <code>true</code>.
    */
   @Nonnull
-  public static ISMLInfo getR2D2SML () {
+  public static ISMLInfo getR2D2SML ()
+  {
     ISMLInfo ret = s_aCachedSMLInfo;
-    if (ret == null) {
+    if (ret == null)
+    {
       final String sSMLID = getConfigFile ().getAsString ("toop.r2d2.sml.id");
       final ESML eSML = ESML.getFromIDOrNull (sSMLID);
       if (eSML != null)
       // Pre-configured SML
       {
         ret = eSML;
-      } else {
+      }
+      else
+      {
         // Custom SML
         final String sDisplayName = getConfigFile ().getAsString ("toop.r2d2.sml.name", "TOOP SML");
         // E.g. edelivery.tech.ec.europa.eu.
@@ -228,23 +251,26 @@ public final class TCConfig {
    *         {@link #isR2D2UseDNS()} returned <code>false</code>.
    */
   @Nullable
-  public static URI getR2D2SMPUrl () {
+  public static URI getR2D2SMPUrl ()
+  {
     // E.g. http://smp.central.toop
     final String sURI = getConfigFile ().getAsString ("toop.r2d2.smp.url");
     return URLHelper.getAsURI (sURI);
   }
 
   /**
-   * Get the overall protocol to be used. Depending on that output different other
-   * properties might be queried.
+   * Get the overall protocol to be used. Depending on that output different
+   * other properties might be queried.
    *
    * @return The overall protocol to use. Never <code>null</code>.
    */
   @Nonnull
-  public static ETCProtocol getMEMProtocol () {
+  public static ETCProtocol getMEMProtocol ()
+  {
     final String sID = getConfigFile ().getAsString ("toop.mem.protocol", ETCProtocol.DEFAULT.getID ());
     final ETCProtocol eProtocol = ETCProtocol.getFromIDOrNull (sID);
-    if (eProtocol == null) {
+    if (eProtocol == null)
+    {
       throw new IllegalStateException ("Failed to resolve protocol with ID '" + sID + "'");
     }
     return eProtocol;
@@ -252,20 +278,24 @@ public final class TCConfig {
 
   // GW_URL
   @Nullable
-  public static String getMEMAS4Endpoint () {
+  public static String getMEMAS4Endpoint ()
+  {
     return getConfigFile ().getAsString ("toop.mem.as4.endpoint");
   }
 
   @Nullable
-  public static String getMEMAS4GwPartyID () {
+  public static String getMEMAS4GwPartyID ()
+  {
     return getConfigFile ().getAsString ("toop.mem.as4.gw.partyid");
   }
 
-  public static String getMEMAS4TcPartyid () {
+  public static String getMEMAS4TcPartyid ()
+  {
     return getConfigFile ().getAsString ("toop.mem.as4.tc.partyid");
   }
 
-  public static long getGatewayNotificationWaitTimeout () {
+  public static long getGatewayNotificationWaitTimeout ()
+  {
     return getConfigFile ().getAsLong ("toop.mem.as4.notificationWaitTimeout", 20000);
   }
 
@@ -273,7 +303,8 @@ public final class TCConfig {
    * @return The URL of the DP backend for step 2/4
    */
   @Nullable
-  public static String getMPToopInterfaceDPUrl () {
+  public static String getMPToopInterfaceDPUrl ()
+  {
     return getConfigFile ().getAsString ("toop.mp.dp.url");
   }
 
@@ -281,33 +312,39 @@ public final class TCConfig {
    * @return The URL of the DC backend for step 4/4
    */
   @Nullable
-  public static String getMPToopInterfaceDCUrl () {
+  public static String getMPToopInterfaceDCUrl ()
+  {
     return getConfigFile ().getAsString ("toop.mp.dc.url");
   }
 
   @Nullable
-  public static IKeyStoreType getKeystoreType () {
+  public static IKeyStoreType getKeystoreType ()
+  {
     // TODO make configurable
     return EKeyStoreType.JKS;
   }
 
   @Nullable
-  public static String getKeystorePath () {
+  public static String getKeystorePath ()
+  {
     return getConfigFile ().getAsString ("toop.keystore.path");
   }
 
   @Nullable
-  public static String getKeystorePassword () {
+  public static String getKeystorePassword ()
+  {
     return getConfigFile ().getAsString ("toop.keystore.password");
   }
 
   @Nullable
-  public static String getKeystoreKeyAlias () {
+  public static String getKeystoreKeyAlias ()
+  {
     return getConfigFile ().getAsString ("toop.keystore.key.alias");
   }
 
   @Nullable
-  public static String getKeystoreKeyPassword () {
+  public static String getKeystoreKeyPassword ()
+  {
     return getConfigFile ().getAsString ("toop.keystore.key.password");
   }
 
@@ -316,67 +353,80 @@ public final class TCConfig {
    *         is enabled, <code>false</code> if it is disabled. By default it is
    *         enabled.
    */
-  public static boolean isStatusEnabled () {
+  public static boolean isStatusEnabled ()
+  {
     return getConfigFile ().getAsBoolean ("toop.status.enabled", true);
   }
 
-  public static boolean isDebugFromDCDumpEnabled () {
+  public static boolean isDebugFromDCDumpEnabled ()
+  {
     return getConfigFile ().getAsBoolean ("toop.debug.from-dc.dump.enabled", false);
   }
 
   @Nullable
-  public static File getDebugFromDCDumpPath () {
+  public static File getDebugFromDCDumpPath ()
+  {
     final String sPath = getConfigFile ().getAsString ("toop.debug.from-dc.dump.path");
     return sPath == null ? null : new File (sPath);
   }
 
   @Nullable
-  public static File getDebugFromDCDumpPathIfEnabled () {
+  public static File getDebugFromDCDumpPathIfEnabled ()
+  {
     return isDebugFromDCDumpEnabled () ? getDebugFromDCDumpPath () : null;
   }
 
-  public static boolean isDebugFromDPDumpEnabled () {
+  public static boolean isDebugFromDPDumpEnabled ()
+  {
     return getConfigFile ().getAsBoolean ("toop.debug.from-dp.dump.enabled", false);
   }
 
   @Nullable
-  public static File getDebugFromDPDumpPath () {
+  public static File getDebugFromDPDumpPath ()
+  {
     final String sPath = getConfigFile ().getAsString ("toop.debug.from-dp.dump.path");
     return sPath == null ? null : new File (sPath);
   }
 
   @Nullable
-  public static File getDebugFromDPDumpPathIfEnabled () {
+  public static File getDebugFromDPDumpPathIfEnabled ()
+  {
     return isDebugFromDPDumpEnabled () ? getDebugFromDPDumpPath () : null;
   }
 
-  public static boolean isDebugToDCDumpEnabled () {
+  public static boolean isDebugToDCDumpEnabled ()
+  {
     return getConfigFile ().getAsBoolean ("toop.debug.to-dc.dump.enabled", false);
   }
 
   @Nullable
-  public static File getDebugToDCDumpPath () {
+  public static File getDebugToDCDumpPath ()
+  {
     final String sPath = getConfigFile ().getAsString ("toop.debug.to-dc.dump.path");
     return sPath == null ? null : new File (sPath);
   }
 
   @Nullable
-  public static File getDebugToDCDumpPathIfEnabled () {
+  public static File getDebugToDCDumpPathIfEnabled ()
+  {
     return isDebugToDCDumpEnabled () ? getDebugToDCDumpPath () : null;
   }
 
-  public static boolean isDebugToDPDumpEnabled () {
+  public static boolean isDebugToDPDumpEnabled ()
+  {
     return getConfigFile ().getAsBoolean ("toop.debug.to-dp.dump.enabled", false);
   }
 
   @Nullable
-  public static File getDebugToDPDumpPath () {
+  public static File getDebugToDPDumpPath ()
+  {
     final String sPath = getConfigFile ().getAsString ("toop.debug.to-dp.dump.path");
     return sPath == null ? null : new File (sPath);
   }
 
   @Nullable
-  public static File getDebugToDPDumpPathIfEnabled () {
+  public static File getDebugToDPDumpPathIfEnabled ()
+  {
     return isDebugToDPDumpEnabled () ? getDebugToDPDumpPath () : null;
   }
 }

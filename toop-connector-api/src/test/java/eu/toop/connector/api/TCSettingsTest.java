@@ -23,11 +23,12 @@ import org.junit.Test;
  * Test class for class {@link TCSettings}.
  *
  * @author Philip Helger
- *
  */
-public final class TCSettingsTest {
+public final class TCSettingsTest
+{
   @Test
-  public void testBasic () {
+  public void testBasic ()
+  {
     assertNotNull (TCSettings.getIdentifierFactory ());
     assertNotNull (TCSettings.getSMPUrlProvider ());
   }
