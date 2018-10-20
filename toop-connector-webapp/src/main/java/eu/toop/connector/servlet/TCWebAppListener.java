@@ -42,6 +42,7 @@ import eu.toop.connector.me.MEPayload;
 import eu.toop.connector.mp.MessageProcessorDCIncoming;
 import eu.toop.connector.mp.MessageProcessorDPIncoming;
 import eu.toop.kafkaclient.ToopKafkaClient;
+import eu.toop.kafkaclient.ToopKafkaSettings;
 
 /**
  * Global startup/shutdown listener for the whole web application. Extends from
@@ -88,14 +89,14 @@ public class TCWebAppListener extends WebScopeListener
 
     {
       // Init tracker client
-      ToopKafkaClient.setKafkaEnabled (TCConfig.isToopTrackerEnabled ());
+      ToopKafkaSettings.setKafkaEnabled (TCConfig.isToopTrackerEnabled ());
       final String sToopTrackerUrl = TCConfig.getToopTrackerUrl ();
       if (StringHelper.hasNoText (sToopTrackerUrl))
         throw new InitializationException ("If the tracker is enabled, the tracker URL MUST be provided in the configuration file!");
-      ToopKafkaClient.defaultProperties ().put ("bootstrap.servers", sToopTrackerUrl);
+      ToopKafkaSettings.defaultProperties ().put ("bootstrap.servers", sToopTrackerUrl);
 
       final String sToopTrackerTopic = TCConfig.getToopTrackerTopic ();
-      ToopKafkaClient.setKafkaTopic (sToopTrackerTopic);
+      ToopKafkaSettings.setKafkaTopic (sToopTrackerTopic);
     }
 
     {
