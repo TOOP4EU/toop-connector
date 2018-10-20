@@ -126,7 +126,7 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
                                                                             TCConfig.getDebugToDCDumpPathIfEnabled (),
                                                                             "to-dc.asic"))
         {
-          ToopMessageBuilder.createResponseMessage (aResponse, aDumpOS, MPWebAppConfig.getSignatureHelper ());
+          ToopMessageBuilder.createResponseMessageAsic (aResponse, aDumpOS, MPWebAppConfig.getSignatureHelper ());
         }
 
         // build MEM once

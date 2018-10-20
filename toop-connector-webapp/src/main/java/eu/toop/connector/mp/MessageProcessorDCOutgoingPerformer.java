@@ -49,6 +49,7 @@ import eu.toop.commons.dataexchange.TDEDataElementRequestType;
 import eu.toop.commons.dataexchange.TDEErrorType;
 import eu.toop.commons.dataexchange.TDELegalEntityType;
 import eu.toop.commons.dataexchange.TDENaturalPersonType;
+import eu.toop.commons.dataexchange.TDETOOPErrorMessageType;
 import eu.toop.commons.dataexchange.TDETOOPRequestType;
 import eu.toop.commons.error.EToopErrorCategory;
 import eu.toop.commons.error.EToopErrorCode;
@@ -293,7 +294,7 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
             {
               aErrors.add (_createError (sLogPrefix,
                                          EToopErrorCategory.DYNAMIC_DISCOVERY,
-                                         EToopErrorCode.DD_004,
+                                         EToopErrorCode.DD_006,
                                          "Found no endpoints for transport profile '" +
                                                                 sTransportProfileID +
                                                                 "' by querying Directory and SMP",
@@ -308,7 +309,7 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
         // 3. start message exchange to DC
         // Combine MS data and TOOP data into a single ASiC message
         // Do this only once and not for every endpoint
-        MEMessage meMessage;
+        MEMessage aMEMessage;
         try (final NonBlockingByteArrayOutputStream aBAOS = new NonBlockingByteArrayOutputStream ())
         {
           // Ensure flush/close of DumpOS!
@@ -316,7 +317,7 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
                                                                               TCConfig.getDebugToDPDumpPathIfEnabled (),
                                                                               "to-dp.asic"))
           {
-            ToopMessageBuilder.createRequestMessage (aRequest, aBAOS, MPWebAppConfig.getSignatureHelper ());
+            ToopMessageBuilder.createRequestMessageAsic (aRequest, aBAOS, MPWebAppConfig.getSignatureHelper ());
           }
           catch (final ToopErrorException ex)
           {
@@ -333,38 +334,51 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
 
           // build MEM once
           final MEPayload aPayload = new MEPayload (AsicUtils.MIMETYPE_ASICE, sRequestID, aBAOS.toByteArray ());
-          meMessage = new MEMessage (aPayload);
+          aMEMessage = new MEMessage (aPayload);
         }
 
-        // For all matching endpoints
-        for (final IR2D2Endpoint aEP : aEndpoints)
+        if (aErrors.isEmpty ())
         {
-          final GatewayRoutingMetadata aMetadata = new GatewayRoutingMetadata (aSenderID.getURIEncoded (),
-                                                                               aDocTypeID.getURIEncoded (),
-                                                                               aProcessID.getURIEncoded (),
-                                                                               aEP,
-                                                                               EActingSide.DC);
-          ToopKafkaClient.send (EErrorLevel.INFO,
-                                sLogPrefix +
-                                                  "Sending MEM message to '" +
-                                                  aEP.getEndpointURL () +
-                                                  "' using transport protocol '" +
-                                                  aEP.getTransportProtocol () +
-                                                  "'");
-          MEMDelegate.getInstance ().sendMessage (aMetadata, meMessage);
+          // For all matching endpoints
+          for (final IR2D2Endpoint aEP : aEndpoints)
+          {
+            final GatewayRoutingMetadata aMetadata = new GatewayRoutingMetadata (aSenderID.getURIEncoded (),
+                                                                                 aDocTypeID.getURIEncoded (),
+                                                                                 aProcessID.getURIEncoded (),
+                                                                                 aEP,
+                                                                                 EActingSide.DC);
+            ToopKafkaClient.send (EErrorLevel.INFO,
+                                  sLogPrefix +
+                                                    "Sending MEM message to '" +
+                                                    aEP.getEndpointURL () +
+                                                    "' using transport protocol '" +
+                                                    aEP.getTransportProtocol () +
+                                                    "'");
 
-          /*
-           * XXX just send to the first one, to mimic, that this is how it will
-           * be in the final version (where step 4/4 will aggregate)
-           */
-          break;
+            if (!MEMDelegate.getInstance ().sendMessage (aMetadata, aMEMessage))
+            {
+              aErrors.add (_createError (sLogPrefix,
+                                         EToopErrorCategory.E_DELIVERY,
+                                         EToopErrorCode.ME_001,
+                                         "Error sending message",
+                                         null));
+            }
+
+            /*
+             * XXX just send to the first one, to mimic, that this is how it
+             * will be in the final version (where step 4/4 will aggregate)
+             */
+            break;
+          }
         }
       }
     }
 
     if (aErrors.isNotEmpty ())
     {
-      // TODO
+      final TDETOOPErrorMessageType aErrorMsg = ToopMessageBuilder.createErrorMessage (aRequest);
+      aErrorMsg.getError ().addAll (aErrors);
+      MessageProcessorDCIncoming.getInstance ().enqueue (aErrorMsg);
     }
   }
 }

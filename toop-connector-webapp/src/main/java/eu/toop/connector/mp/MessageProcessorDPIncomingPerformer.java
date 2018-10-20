@@ -139,7 +139,7 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
 
       try (final NonBlockingByteArrayOutputStream aBAOS = new NonBlockingByteArrayOutputStream ())
       {
-        ToopMessageBuilder.createRequestMessage (aRequest, aBAOS, aSH);
+        ToopMessageBuilder.createRequestMessageAsic (aRequest, aBAOS, aSH);
 
         // Send to DP (see ToDPServlet in toop-interface)
         final String sDestinationUrl = TCConfig.getMPToopInterfaceDPUrl ();

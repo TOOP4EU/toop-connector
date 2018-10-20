@@ -238,12 +238,20 @@ public class R2D2Client implements IR2D2Client
                                 "]: " +
                                 StringHelper.getImplodedMapped (", ", aPIs, IParticipantIdentifier::getURIEncoded));
 
+    if (aPIs.isEmpty ())
+      throw new ToopErrorException ("TOOP Directory lookup returned no matches", EToopErrorCode.DD_004);
+
     // For all matching IDs (if any)
     for (final IParticipantIdentifier aPI : aPIs)
     {
       // Single SMP query
       final ICommonsList <IR2D2Endpoint> aLocal = getEndpoints (sLogPrefix, aPI, aDocumentTypeID, aProcessID);
       ret.addAll (aLocal);
+
+      if (aLocal.isEmpty ())
+      {
+        // TODO somehow emit warning DD_005
+      }
     }
 
     return ret;
