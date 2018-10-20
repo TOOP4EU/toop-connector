@@ -37,11 +37,11 @@ import eu.toop.commons.codelist.SMMDocumentTypeMapping;
  */
 public final class SMMConceptProviderGRLCRemoteTest
 {
-  private static final Logger s_aLogger = LoggerFactory.getLogger (SMMConceptProviderGRLCRemoteTest.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger (SMMConceptProviderGRLCRemoteTest.class);
   private static final String LOG_PREFIX = "[unit test] ";
   private static final String NS_TOOP = SMMDocumentTypeMapping.getToopSMNamespace (EPredefinedDocumentTypeIdentifier.REQUEST_REGISTEREDORGANIZATION);
-  private static final String NS_ELONIA = "http://example.register.elo/elonia-business-register";
-  private static final String NS_FREEDONIA = "http://example.register.fre/freedonia-business-register";
+  private static final String NS_ELONIA = "http://toop.elo/elonia-business-register";
+  private static final String NS_FREEDONIA = "http://toop.fre/freedonia-business-register";
 
   @Before
   public void reset ()
@@ -58,7 +58,7 @@ public final class SMMConceptProviderGRLCRemoteTest
     assertNotNull (aMVL);
     assertFalse (aMVL.isEmpty ());
     if (false)
-      aMVL.forEach (x -> s_aLogger.info (x.getSource ().getValue ()));
+      aMVL.forEach (x -> LOGGER.info (x.getSource ().getValue ()));
   }
 
   @Test
@@ -70,7 +70,7 @@ public final class SMMConceptProviderGRLCRemoteTest
     assertNotNull (aMVL);
     assertFalse (aMVL.isEmpty ());
     if (false)
-      aMVL.forEach (x -> s_aLogger.info (x.getSource ().getValue ()));
+      aMVL.forEach (x -> LOGGER.info (x.getSource ().getValue ()));
   }
 
   @Test
@@ -82,7 +82,7 @@ public final class SMMConceptProviderGRLCRemoteTest
     assertNotNull (aMVL);
     assertFalse (aMVL.isEmpty ());
     if (false)
-      aMVL.forEach (x -> s_aLogger.info (x.getSource ().getValue ()));
+      aMVL.forEach (x -> LOGGER.info (x.getSource ().getValue ()));
   }
 
   @Test
@@ -94,7 +94,7 @@ public final class SMMConceptProviderGRLCRemoteTest
     assertNotNull (aMVL);
     assertFalse (aMVL.isEmpty ());
     if (false)
-      aMVL.forEach (x -> s_aLogger.info (x.getSource ().getValue ()));
+      aMVL.forEach (x -> LOGGER.info (x.getSource ().getValue ()));
   }
 
   @Test
@@ -104,6 +104,6 @@ public final class SMMConceptProviderGRLCRemoteTest
     assertNotNull (aNSs);
     assertFalse (aNSs.isEmpty ());
     if (false)
-      aNSs.forEach (s_aLogger::info);
+      aNSs.forEach (LOGGER::info);
   }
 }

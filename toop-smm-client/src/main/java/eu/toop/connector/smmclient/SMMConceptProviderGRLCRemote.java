@@ -207,10 +207,10 @@ public final class SMMConceptProviderGRLCRemote
     if (!sBaseURL.endsWith ("/"))
       sBaseURL += "/";
     final ISimpleURL aDestinationURL = new SimpleURL (sBaseURL +
-                                                      "api/JackJackie/toop-sparql/get-all-mapped-concepts-between-two-namespaces").add ("sourcenamespace",
-                                                                                                                                        sSourceNamespace)
-                                                                                                                                  .add ("targetnamespace",
-                                                                                                                                        sDestNamespace);
+                                                      "api/JackJackie/toop-sparql/get-all-mapped-concepts-between-two-namespaces-v2").add ("sourcenamespace",
+                                                                                                                                           sSourceNamespace)
+                                                                                                                                     .add ("targetnamespace",
+                                                                                                                                           sDestNamespace);
     // Always no-debug
     final ResponseHandlerJson aJsonHandler = new ResponseHandlerJson (false);
 
@@ -230,11 +230,11 @@ public final class SMMConceptProviderGRLCRemote
             for (final IJson aBinding : aBindings)
             {
               // subject (contains source namespace which needs to be cut)
-              String sSourceValue = aBinding.getAsObject ().getAsObject ("s").getAsString ("value");
+              String sSourceValue = aBinding.getAsObject ().getAsObject ("source").getAsString ("value");
               sSourceValue = StringHelper.trimStart (sSourceValue, sSourceNamespace + "#");
 
               // object (contains destination namespace which needs to be cut)
-              String sDestValue = aBinding.getAsObject ().getAsObject ("o").getAsString ("value");
+              String sDestValue = aBinding.getAsObject ().getAsObject ("target").getAsString ("value");
               sDestValue = StringHelper.trimStart (sDestValue, sDestNamespace + "#");
 
               // Add result entry into list

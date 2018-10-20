@@ -38,7 +38,7 @@ public final class SMMClientTest
 {
   private static final Logger s_aLogger = LoggerFactory.getLogger (SMMClientTest.class);
 
-  private static final String NS_FREEDONIA = "http://example.register.fre/freedonia-business-register";
+  private static final String NS_FREEDONIA = "http://toop.fre/freedonia-business-register";
 
   private static final String LOG_PREFIX = "[unit test] ";
   private static final String NS_TOOP = SMMDocumentTypeMapping.getToopSMNamespace (EPredefinedDocumentTypeIdentifier.REQUEST_REGISTEREDORGANIZATION);
