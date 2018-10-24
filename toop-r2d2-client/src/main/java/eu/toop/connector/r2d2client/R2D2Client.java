@@ -54,6 +54,7 @@ import com.helger.peppol.identifier.generic.doctype.IDocumentTypeIdentifier;
 import com.helger.peppol.identifier.generic.participant.IParticipantIdentifier;
 import com.helger.peppol.identifier.generic.process.IProcessIdentifier;
 import com.helger.peppol.smpclient.exception.SMPClientException;
+import com.helger.peppol.url.PeppolDNSResolutionException;
 import com.helger.security.certificate.CertificateHelper;
 
 import eu.toop.commons.error.EToopErrorCode;
@@ -279,19 +280,20 @@ public class R2D2Client implements IR2D2Client
                                 ")");
 
     final ICommonsList <IR2D2Endpoint> ret = new CommonsArrayList <> ();
-    BDXRClient aSMPClient;
-    if (TCConfig.isR2D2UseDNS ())
-    {
-      // Use dynamic lookup via DNS
-      aSMPClient = new BDXRClient (TCSettings.getSMPUrlProvider (), aRecipientID, TCConfig.getR2D2SML ());
-    }
-    else
-    {
-      // Use a constant SMP URL
-      aSMPClient = new BDXRClient (TCConfig.getR2D2SMPUrl ());
-    }
     try
     {
+      BDXRClient aSMPClient;
+      if (TCConfig.isR2D2UseDNS ())
+      {
+        // Use dynamic lookup via DNS - can throw exception
+        aSMPClient = new BDXRClient (TCSettings.getSMPUrlProvider (), aRecipientID, TCConfig.getR2D2SML ());
+      }
+      else
+      {
+        // Use a constant SMP URL
+        aSMPClient = new BDXRClient (TCConfig.getR2D2SMPUrl ());
+      }
+
       // Query SMP
       final SignedServiceMetadataType aSG = aSMPClient.getServiceRegistration (aRecipientID, aDocumentTypeID);
       final ServiceInformationType aSI = aSG.getServiceMetadata ().getServiceInformation ();
@@ -338,7 +340,7 @@ public class R2D2Client implements IR2D2Client
         ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "SMP lookup result: maybe a redirect?");
       }
     }
-    catch (final SMPClientException ex)
+    catch (final PeppolDNSResolutionException | SMPClientException ex)
     {
       throw new ToopErrorException (sLogPrefix +
                                     "Error fetching SMP endpoint " +
