@@ -378,6 +378,7 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
     {
       final TDETOOPResponseType aResponseMsg = ToopMessageBuilder.createResponse (aRequest);
       aResponseMsg.getError ().addAll (aErrors);
+      // Put the error in queue 4/4
       MessageProcessorDCIncoming.getInstance ().enqueue (aResponseMsg);
     }
   }

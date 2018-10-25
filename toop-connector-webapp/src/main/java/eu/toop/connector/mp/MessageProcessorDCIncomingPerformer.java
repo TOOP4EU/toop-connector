@@ -17,8 +17,10 @@ package eu.toop.connector.mp;
 
 import javax.annotation.Nonnull;
 
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.InputStreamEntity;
+import org.apache.http.util.EntityUtils;
 
 import com.helger.asic.SignatureHelper;
 import com.helger.commons.concurrent.collector.IConcurrentPerformer;
@@ -65,9 +67,12 @@ final class MessageProcessorDCIncomingPerformer implements IConcurrentPerformer 
 
         ToopKafkaClient.send (EErrorLevel.INFO, () -> "Posting signed ASiC response to " + sDestinationUrl);
 
-        final HttpPost aPost = new HttpPost (sDestinationUrl);
-        aPost.setEntity (new ByteArrayEntity (aBAOS.toByteArray ()));
-        aMgr.execute (aPost);
+        final HttpPost aHttpPost = new HttpPost (sDestinationUrl);
+        aHttpPost.setEntity (new InputStreamEntity (aBAOS.getAsInputStream ()));
+        try (final CloseableHttpResponse aHttpResponse = aMgr.execute (aHttpPost))
+        {
+          EntityUtils.consume (aHttpResponse.getEntity ());
+        }
       }
     }
   }
