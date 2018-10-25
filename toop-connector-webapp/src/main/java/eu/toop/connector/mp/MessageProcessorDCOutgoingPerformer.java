@@ -49,8 +49,8 @@ import eu.toop.commons.dataexchange.TDEDataElementRequestType;
 import eu.toop.commons.dataexchange.TDEErrorType;
 import eu.toop.commons.dataexchange.TDELegalEntityType;
 import eu.toop.commons.dataexchange.TDENaturalPersonType;
-import eu.toop.commons.dataexchange.TDETOOPErrorMessageType;
 import eu.toop.commons.dataexchange.TDETOOPRequestType;
+import eu.toop.commons.dataexchange.TDETOOPResponseType;
 import eu.toop.commons.error.EToopErrorCategory;
 import eu.toop.commons.error.EToopErrorCode;
 import eu.toop.commons.error.EToopErrorOrigin;
@@ -376,9 +376,9 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
 
     if (aErrors.isNotEmpty ())
     {
-      final TDETOOPErrorMessageType aErrorMsg = ToopMessageBuilder.createErrorMessage (aRequest);
-      aErrorMsg.getError ().addAll (aErrors);
-      MessageProcessorDCIncoming.getInstance ().enqueue (aErrorMsg);
+      final TDETOOPResponseType aResponseMsg = ToopMessageBuilder.createResponse (aRequest);
+      aResponseMsg.getError ().addAll (aErrors);
+      MessageProcessorDCIncoming.getInstance ().enqueue (aResponseMsg);
     }
   }
 }

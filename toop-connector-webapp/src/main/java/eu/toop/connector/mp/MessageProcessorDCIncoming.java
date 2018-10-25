@@ -15,7 +15,6 @@
  */
 package eu.toop.connector.mp;
 
-import java.io.Serializable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -32,7 +31,6 @@ import com.helger.commons.state.ESuccess;
 import com.helger.scope.IScope;
 import com.helger.web.scope.singleton.AbstractGlobalWebSingleton;
 
-import eu.toop.commons.dataexchange.TDETOOPErrorMessageType;
 import eu.toop.commons.dataexchange.TDETOOPResponseType;
 import eu.toop.kafkaclient.ToopKafkaClient;
 
@@ -49,7 +47,7 @@ public final class MessageProcessorDCIncoming extends AbstractGlobalWebSingleton
   private static final ThreadFactory s_aThreadFactory = new BasicThreadFactory.Builder ().setNamingPattern ("MP-DC-In-%d")
                                                                                          .setDaemon (true)
                                                                                          .build ();
-  private final ConcurrentCollectorSingle <Serializable> m_aCollector = new ConcurrentCollectorSingle <> ();
+  private final ConcurrentCollectorSingle <TDETOOPResponseType> m_aCollector = new ConcurrentCollectorSingle <> ();
   private final ExecutorService m_aExecutorPool;
 
   @Deprecated
@@ -83,14 +81,14 @@ public final class MessageProcessorDCIncoming extends AbstractGlobalWebSingleton
   }
 
   /**
-   * Queue a new Toop Response or error message.
+   * Queue a new Toop Response message.
    *
    * @param aMsg
    *        The data to be queued. May not be <code>null</code>.
    * @return {@link ESuccess}. Never <code>null</code>.
    */
   @Nonnull
-  private ESuccess _enqueue (@Nonnull final Serializable aMsg)
+  public ESuccess enqueue (@Nonnull final TDETOOPResponseType aMsg)
   {
     ValueEnforcer.notNull (aMsg, "Msg");
     try
@@ -104,31 +102,5 @@ public final class MessageProcessorDCIncoming extends AbstractGlobalWebSingleton
       ToopKafkaClient.send (EErrorLevel.WARN, () -> "Cannot enqueue " + aMsg, ex);
       return ESuccess.FAILURE;
     }
-  }
-
-  /**
-   * Queue a new Toop Response message.
-   *
-   * @param aMsg
-   *        The data to be queued. May not be <code>null</code>.
-   * @return {@link ESuccess}. Never <code>null</code>.
-   */
-  @Nonnull
-  public ESuccess enqueue (@Nonnull final TDETOOPResponseType aMsg)
-  {
-    return _enqueue (aMsg);
-  }
-
-  /**
-   * Queue a new Toop Error message.
-   *
-   * @param aMsg
-   *        The data to be queued. May not be <code>null</code>.
-   * @return {@link ESuccess}. Never <code>null</code>.
-   */
-  @Nonnull
-  public ESuccess enqueue (@Nonnull final TDETOOPErrorMessageType aMsg)
-  {
-    return _enqueue (aMsg);
   }
 }

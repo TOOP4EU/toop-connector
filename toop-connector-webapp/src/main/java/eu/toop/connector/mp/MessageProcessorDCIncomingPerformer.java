@@ -15,8 +15,6 @@
  */
 package eu.toop.connector.mp;
 
-import java.io.Serializable;
-
 import javax.annotation.Nonnull;
 
 import org.apache.http.client.methods.HttpPost;
@@ -28,7 +26,6 @@ import com.helger.commons.error.level.EErrorLevel;
 import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 import com.helger.httpclient.HttpClientManager;
 
-import eu.toop.commons.dataexchange.TDETOOPErrorMessageType;
 import eu.toop.commons.dataexchange.TDETOOPResponseType;
 import eu.toop.commons.exchange.ToopMessageBuilder;
 import eu.toop.connector.api.TCConfig;
@@ -40,9 +37,9 @@ import eu.toop.kafkaclient.ToopKafkaClient;
  *
  * @author Philip Helger
  */
-final class MessageProcessorDCIncomingPerformer implements IConcurrentPerformer <Serializable>
+final class MessageProcessorDCIncomingPerformer implements IConcurrentPerformer <TDETOOPResponseType>
 {
-  private void _handleResponse (@Nonnull final TDETOOPResponseType aResponse) throws Exception
+  public void runAsync (@Nonnull final TDETOOPResponseType aResponse) throws Exception
   {
     final String sRequestID = aResponse.getDataRequestIdentifier ().getValue ();
     final String sLogPrefix = "[" + sRequestID + "] ";
@@ -73,46 +70,5 @@ final class MessageProcessorDCIncomingPerformer implements IConcurrentPerformer 
         aMgr.execute (aPost);
       }
     }
-  }
-
-  private void _handleErrorMessage (@Nonnull final TDETOOPErrorMessageType aErrorMsg) throws Exception
-  {
-    final String sRequestID = aErrorMsg.getDataRequestIdentifier ().getValue ();
-    final String sLogPrefix = "[" + sRequestID + "] ";
-    ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "Received DC Incoming Error Message (4/4)");
-
-    // Forward to the DC at /to-dc interface
-    final TCHttpClientFactory aHCFactory = new TCHttpClientFactory ();
-
-    try (final HttpClientManager aMgr = new HttpClientManager (aHCFactory))
-    {
-      final SignatureHelper aSH = new SignatureHelper (TCConfig.getKeystoreType (),
-                                                       TCConfig.getKeystorePath (),
-                                                       TCConfig.getKeystorePassword (),
-                                                       TCConfig.getKeystoreKeyAlias (),
-                                                       TCConfig.getKeystoreKeyPassword ());
-
-      try (final NonBlockingByteArrayOutputStream aBAOS = new NonBlockingByteArrayOutputStream ())
-      {
-        ToopMessageBuilder.createErrorMessageAsic (aErrorMsg, aBAOS, aSH);
-
-        // Send to DC (see ToDCServlet in toop-interface)
-        final String sDestinationUrl = TCConfig.getMPToopInterfaceDCUrl ();
-
-        ToopKafkaClient.send (EErrorLevel.INFO, () -> "Posting signed ASiC response to " + sDestinationUrl);
-
-        final HttpPost aPost = new HttpPost (sDestinationUrl);
-        aPost.setEntity (new ByteArrayEntity (aBAOS.toByteArray ()));
-        aMgr.execute (aPost);
-      }
-    }
-  }
-
-  public void runAsync (@Nonnull final Serializable aResponse) throws Exception
-  {
-    if (aResponse instanceof TDETOOPResponseType)
-      _handleResponse ((TDETOOPResponseType) aResponse);
-    else
-      _handleErrorMessage ((TDETOOPErrorMessageType) aResponse);
   }
 }

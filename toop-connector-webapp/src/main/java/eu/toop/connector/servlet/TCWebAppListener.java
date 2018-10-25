@@ -31,7 +31,6 @@ import com.helger.commons.id.factory.StringIDFromGlobalLongIDFactory;
 import com.helger.commons.string.StringHelper;
 import com.helger.web.servlets.scope.WebScopeListener;
 
-import eu.toop.commons.dataexchange.TDETOOPErrorMessageType;
 import eu.toop.commons.dataexchange.TDETOOPRequestType;
 import eu.toop.commons.dataexchange.TDETOOPResponseType;
 import eu.toop.commons.exchange.ToopMessageBuilder;
@@ -124,7 +123,7 @@ public class TCWebAppListener extends WebScopeListener
       if (aPayload != null)
       {
         // Extract from ASiC
-        final Object aMsg = ToopMessageBuilder.parseRequestOrResponseOrError (aPayload.getDataInputStream ());
+        final Object aMsg = ToopMessageBuilder.parseRequestOrResponse (aPayload.getDataInputStream ());
 
         if (aMsg instanceof TDETOOPResponseType)
         {
@@ -133,21 +132,14 @@ public class TCWebAppListener extends WebScopeListener
           MessageProcessorDCIncoming.getInstance ().enqueue ((TDETOOPResponseType) aMsg);
         }
         else
-          if (aMsg instanceof TDETOOPErrorMessageType)
+          if (aMsg instanceof TDETOOPRequestType)
           {
-            // Error back to the DC
-            ToopKafkaClient.send (EErrorLevel.INFO, () -> m_sLogPrefix + "TC got DC incoming error message (4/4)");
-            MessageProcessorDCIncoming.getInstance ().enqueue ((TDETOOPErrorMessageType) aMsg);
+            // This is the way from DC to DP; we're in DP incoming mode
+            ToopKafkaClient.send (EErrorLevel.INFO, () -> m_sLogPrefix + "TC got DP incoming request (2/4)");
+            MessageProcessorDPIncoming.getInstance ().enqueue ((TDETOOPRequestType) aMsg);
           }
           else
-            if (aMsg instanceof TDETOOPRequestType)
-            {
-              // This is the way from DC to DP; we're in DP incoming mode
-              ToopKafkaClient.send (EErrorLevel.INFO, () -> m_sLogPrefix + "TC got DP incoming request (2/4)");
-              MessageProcessorDPIncoming.getInstance ().enqueue ((TDETOOPRequestType) aMsg);
-            }
-            else
-              ToopKafkaClient.send (EErrorLevel.ERROR, () -> m_sLogPrefix + "Unsuspported Message: " + aMsg);
+            ToopKafkaClient.send (EErrorLevel.ERROR, () -> m_sLogPrefix + "Unsuspported Message: " + aMsg);
       }
       else
         ToopKafkaClient.send (EErrorLevel.WARN, () -> m_sLogPrefix + "MEMessage contains no payload: " + aMEMessage);
