@@ -15,6 +15,7 @@
  */
 package eu.toop.connector.mp;
 
+import java.io.IOException;
 import java.util.Locale;
 
 import javax.annotation.Nonnull;
@@ -47,6 +48,7 @@ import eu.toop.commons.error.EToopErrorCategory;
 import eu.toop.commons.error.EToopErrorCode;
 import eu.toop.commons.error.EToopErrorOrigin;
 import eu.toop.commons.error.EToopErrorSeverity;
+import eu.toop.commons.error.ToopErrorException;
 import eu.toop.commons.exchange.ToopMessageBuilder;
 import eu.toop.commons.jaxb.ToopXSDHelper;
 import eu.toop.connector.api.TCConfig;
@@ -85,6 +87,38 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
   private static TDEErrorType _createGenericError (@Nonnull final String sLogPrefix, @Nonnull final Throwable t)
   {
     return _createError (sLogPrefix, EToopErrorCategory.TECHNICAL_ERROR, EToopErrorCode.GEN, t.getMessage (), t);
+  }
+
+  public static void sendTo_to_dp (@Nonnull final TDETOOPRequestType aRequest) throws ToopErrorException, IOException
+  {
+    // Forward to the DP at /to-dp interface
+    final TCHttpClientFactory aHCFactory = new TCHttpClientFactory ();
+
+    try (final HttpClientManager aMgr = new HttpClientManager (aHCFactory))
+    {
+      final SignatureHelper aSH = new SignatureHelper (TCConfig.getKeystoreType (),
+                                                       TCConfig.getKeystorePath (),
+                                                       TCConfig.getKeystorePassword (),
+                                                       TCConfig.getKeystoreKeyAlias (),
+                                                       TCConfig.getKeystoreKeyPassword ());
+
+      try (final NonBlockingByteArrayOutputStream aBAOS = new NonBlockingByteArrayOutputStream ())
+      {
+        ToopMessageBuilder.createRequestMessageAsic (aRequest, aBAOS, aSH);
+
+        // Send to DP (see ToDPServlet in toop-interface)
+        final String sDestinationUrl = TCConfig.getMPToopInterfaceDPUrl ();
+
+        ToopKafkaClient.send (EErrorLevel.INFO, () -> "Posting signed ASiC request to " + sDestinationUrl);
+
+        final HttpPost aHttpPost = new HttpPost (sDestinationUrl);
+        aHttpPost.setEntity (new InputStreamEntity (aBAOS.getAsInputStream ()));
+        try (final CloseableHttpResponse aHttpResponse = aMgr.execute (aHttpPost))
+        {
+          EntityUtils.consume (aHttpResponse.getEntity ());
+        }
+      }
+    }
   }
 
   public void runAsync (@Nonnull final TDETOOPRequestType aRequest) throws Exception
@@ -179,34 +213,7 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
 
     if (aErrors.isEmpty ())
     {
-      // Forward to the DP at /to-dp interface
-      final TCHttpClientFactory aHCFactory = new TCHttpClientFactory ();
-
-      try (final HttpClientManager aMgr = new HttpClientManager (aHCFactory))
-      {
-        final SignatureHelper aSH = new SignatureHelper (TCConfig.getKeystoreType (),
-                                                         TCConfig.getKeystorePath (),
-                                                         TCConfig.getKeystorePassword (),
-                                                         TCConfig.getKeystoreKeyAlias (),
-                                                         TCConfig.getKeystoreKeyPassword ());
-
-        try (final NonBlockingByteArrayOutputStream aBAOS = new NonBlockingByteArrayOutputStream ())
-        {
-          ToopMessageBuilder.createRequestMessageAsic (aRequest, aBAOS, aSH);
-
-          // Send to DP (see ToDPServlet in toop-interface)
-          final String sDestinationUrl = TCConfig.getMPToopInterfaceDPUrl ();
-
-          ToopKafkaClient.send (EErrorLevel.INFO, () -> "Posting signed ASiC request to " + sDestinationUrl);
-
-          final HttpPost aHttpPost = new HttpPost (sDestinationUrl);
-          aHttpPost.setEntity (new InputStreamEntity (aBAOS.getAsInputStream ()));
-          try (final CloseableHttpResponse aHttpResponse = aMgr.execute (aHttpPost))
-          {
-            EntityUtils.consume (aHttpResponse.getEntity ());
-          }
-        }
-      }
+      sendTo_to_dp (aRequest);
     }
 
     if (aErrors.isNotEmpty ())
