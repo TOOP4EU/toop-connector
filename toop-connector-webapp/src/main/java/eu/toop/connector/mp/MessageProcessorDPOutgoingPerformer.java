@@ -15,26 +15,45 @@
  */
 package eu.toop.connector.mp;
 
+import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Locale;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.InputStreamEntity;
+import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.helger.asic.AsicUtils;
+import com.helger.asic.SignatureHelper;
+import com.helger.commons.collection.impl.CommonsArrayList;
 import com.helger.commons.collection.impl.ICommonsList;
 import com.helger.commons.concurrent.collector.IConcurrentPerformer;
 import com.helger.commons.error.level.EErrorLevel;
 import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
+import com.helger.commons.lang.StackTraceHelper;
+import com.helger.commons.text.MultilingualText;
+import com.helger.httpclient.HttpClientManager;
 import com.helger.peppol.identifier.generic.doctype.IDocumentTypeIdentifier;
 import com.helger.peppol.identifier.generic.participant.IParticipantIdentifier;
 import com.helger.peppol.identifier.generic.process.IProcessIdentifier;
 
+import eu.toop.commons.dataexchange.TDEErrorType;
 import eu.toop.commons.dataexchange.TDETOOPResponseType;
+import eu.toop.commons.error.EToopErrorCategory;
+import eu.toop.commons.error.EToopErrorCode;
+import eu.toop.commons.error.EToopErrorOrigin;
+import eu.toop.commons.error.EToopErrorSeverity;
+import eu.toop.commons.error.ToopErrorException;
 import eu.toop.commons.exchange.ToopMessageBuilder;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.TCSettings;
+import eu.toop.connector.api.http.TCHttpClientFactory;
 import eu.toop.connector.me.EActingSide;
 import eu.toop.connector.me.GatewayRoutingMetadata;
 import eu.toop.connector.me.MEMDelegate;
@@ -51,13 +70,70 @@ import eu.toop.kafkaclient.ToopKafkaClient;
  */
 final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer <TDETOOPResponseType>
 {
-  private static final Logger s_aLogger = LoggerFactory.getLogger (MessageProcessorDPOutgoingPerformer.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger (MessageProcessorDPOutgoingPerformer.class);
+
+  @Nonnull
+  private static TDEErrorType _createError (@Nonnull final String sLogPrefix,
+                                            @Nonnull final EToopErrorCategory eCategory,
+                                            @Nonnull final EToopErrorCode eErrorCode,
+                                            @Nonnull final String sErrorText,
+                                            @Nullable final Throwable t)
+  {
+    // Surely no DP here
+    ToopKafkaClient.send (EErrorLevel.ERROR, () -> sLogPrefix + "[" + eErrorCode.getID () + "] " + sErrorText);
+    return ToopMessageBuilder.createError (null,
+                                           EToopErrorOrigin.RESPONSE_SUBMISSION,
+                                           eCategory,
+                                           eErrorCode,
+                                           EToopErrorSeverity.FAILURE,
+                                           new MultilingualText (Locale.US, sErrorText),
+                                           t == null ? null : StackTraceHelper.getStackAsString (t));
+  }
+
+  @Nonnull
+  private static TDEErrorType _createGenericError (@Nonnull final String sLogPrefix, @Nonnull final Throwable t)
+  {
+    return _createError (sLogPrefix, EToopErrorCategory.TECHNICAL_ERROR, EToopErrorCode.GEN, t.getMessage (), t);
+  }
+
+  public static void sendTo_to_dp (@Nonnull final TDETOOPResponseType aResponse) throws ToopErrorException, IOException
+  {
+    // Forward to the DP at /to-dp interface
+    final TCHttpClientFactory aHCFactory = new TCHttpClientFactory ();
+
+    try (final HttpClientManager aMgr = new HttpClientManager (aHCFactory))
+    {
+      final SignatureHelper aSH = new SignatureHelper (TCConfig.getKeystoreType (),
+                                                       TCConfig.getKeystorePath (),
+                                                       TCConfig.getKeystorePassword (),
+                                                       TCConfig.getKeystoreKeyAlias (),
+                                                       TCConfig.getKeystoreKeyPassword ());
+
+      try (final NonBlockingByteArrayOutputStream aBAOS = new NonBlockingByteArrayOutputStream ())
+      {
+        ToopMessageBuilder.createResponseMessageAsic (aResponse, aBAOS, aSH);
+
+        // Send to DP (see ToDPServlet in toop-interface)
+        final String sDestinationUrl = TCConfig.getMPToopInterfaceDPUrl ();
+
+        ToopKafkaClient.send (EErrorLevel.INFO, () -> "Posting signed ASiC response to " + sDestinationUrl);
+
+        final HttpPost aHttpPost = new HttpPost (sDestinationUrl);
+        aHttpPost.setEntity (new InputStreamEntity (aBAOS.getAsInputStream ()));
+        try (final CloseableHttpResponse aHttpResponse = aMgr.execute (aHttpPost))
+        {
+          EntityUtils.consume (aHttpResponse.getEntity ());
+        }
+      }
+    }
+  }
 
   public void runAsync (@Nonnull final TDETOOPResponseType aResponse) throws Exception
   {
     final String sRequestID = aResponse.getDataRequestIdentifier ().getValue ();
     final String sLogPrefix = "[" + sRequestID + "] ";
     ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "Received DP outgoing response (3/4)");
+    final ICommonsList <TDEErrorType> aErrors = new CommonsArrayList <> ();
 
     // No need to invoke SMM - source concepts are still available
 
@@ -100,8 +176,8 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
                                   "/" +
                                   aTotalEndpoints.size () +
                                   "] endpoints");
-      if (s_aLogger.isDebugEnabled ())
-        s_aLogger.info (sLogPrefix + "Endpoint details: " + aEndpoints);
+      if (LOGGER.isDebugEnabled ())
+        LOGGER.debug (sLogPrefix + "Endpoint details: " + aEndpoints);
     }
 
     // 3. start message exchange to DC
@@ -114,7 +190,21 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
                                                                                                      .getDPElectronicAddressIdentifier ()
                                                                                                      .getValue ());
 
-    if (aEndpoints.isNotEmpty ())
+    if (aEndpoints.isEmpty ())
+    {
+      // No endpoint - ooops
+      aErrors.add (_createError (sLogPrefix,
+                                 EToopErrorCategory.DYNAMIC_DISCOVERY,
+                                 EToopErrorCode.DD_004,
+                                 "Found no matching DC endpoint - not transmitting response from DP '" +
+                                                        aDPParticipantID.getURIEncoded () +
+                                                        "' to DC '" +
+                                                        aDCParticipantID.getURIEncoded () +
+                                                        "'!",
+                                 null));
+    }
+
+    if (aErrors.isEmpty ())
     {
       // Combine MS data and TOOP data into a single ASiC message
       // Do this only once and not for every endpoint
@@ -148,13 +238,9 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
     }
     else
     {
-      // No endpoint - ooops
-      ToopKafkaClient.send (EErrorLevel.ERROR,
-                            () -> "Found no matching DC endpoint - not transmitting response from DP '" +
-                                  aDPParticipantID.getURIEncoded () +
-                                  "' to DC '" +
-                                  aDCParticipantID.getURIEncoded () +
-                                  "'!");
+      // send back to DP including errors
+      aResponse.getError ().addAll (aErrors);
+      sendTo_to_dp (aResponse);
     }
   }
 }
