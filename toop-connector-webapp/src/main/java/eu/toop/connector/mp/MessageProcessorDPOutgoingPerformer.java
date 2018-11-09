@@ -39,10 +39,12 @@ import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 import com.helger.commons.lang.StackTraceHelper;
 import com.helger.commons.text.MultilingualText;
 import com.helger.httpclient.HttpClientManager;
+import com.helger.peppol.identifier.factory.IIdentifierFactory;
 import com.helger.peppol.identifier.generic.doctype.IDocumentTypeIdentifier;
 import com.helger.peppol.identifier.generic.participant.IParticipantIdentifier;
 import com.helger.peppol.identifier.generic.process.IProcessIdentifier;
 
+import eu.toop.commons.dataexchange.TDEDataProviderType;
 import eu.toop.commons.dataexchange.TDEErrorType;
 import eu.toop.commons.dataexchange.TDETOOPResponseType;
 import eu.toop.commons.error.EToopErrorCategory;
@@ -135,108 +137,117 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
     ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "Received DP outgoing response (3/4)");
     final ICommonsList <TDEErrorType> aErrors = new CommonsArrayList <> ();
 
-    // No need to invoke SMM - source concepts are still available
+    // TODO Schematron validation
 
-    // invoke R2D2 client with a single endpoint
-    // The destination EP is the sender of the original document!
-    final IParticipantIdentifier aDCParticipantID = TCSettings.getIdentifierFactory ()
-                                                              .createParticipantIdentifier (aResponse.getDataConsumer ()
-                                                                                                     .getDCElectronicAddressIdentifier ()
-                                                                                                     .getSchemeID (),
-                                                                                            aResponse.getDataConsumer ()
-                                                                                                     .getDCElectronicAddressIdentifier ()
-                                                                                                     .getValue ());
-    final IDocumentTypeIdentifier aDocTypeID = TCSettings.getIdentifierFactory ()
-                                                         .createDocumentTypeIdentifier (aResponse.getDocumentTypeIdentifier ()
-                                                                                                 .getSchemeID (),
-                                                                                        aResponse.getDocumentTypeIdentifier ()
-                                                                                                 .getValue ());
-    final IProcessIdentifier aProcessID = TCSettings.getIdentifierFactory ()
-                                                    .createProcessIdentifier (aResponse.getProcessIdentifier ()
-                                                                                       .getSchemeID (),
-                                                                              aResponse.getProcessIdentifier ()
-                                                                                       .getValue ());
-
-    ICommonsList <IR2D2Endpoint> aEndpoints;
+    // Ensure data provider element is present (required in all cases)
+    final TDEDataProviderType aDataProvider = aResponse.getDataProvider ()
+                                                       .isEmpty () ? null : aResponse.getDataProviderAtIndex (0);
+    if (aDataProvider == null)
     {
-      final ICommonsList <IR2D2Endpoint> aTotalEndpoints = new R2D2Client ().getEndpoints (sLogPrefix,
-                                                                                           aDCParticipantID,
-                                                                                           aDocTypeID,
-                                                                                           aProcessID);
-
-      // Filter all endpoints with the corresponding transport profile
-      final String sTransportProfileID = TCConfig.getMEMProtocol ().getTransportProfileID ();
-      aEndpoints = aTotalEndpoints.getAll (x -> x.getTransportProtocol ().equals (sTransportProfileID));
-
-      // Expecting exactly one endpoint!
-      ToopKafkaClient.send (aEndpoints.size () == 1 ? EErrorLevel.INFO : EErrorLevel.ERROR,
-                            () -> sLogPrefix +
-                                  "R2D2 found [" +
-                                  aEndpoints.size () +
-                                  "/" +
-                                  aTotalEndpoints.size () +
-                                  "] endpoints");
-      if (LOGGER.isDebugEnabled ())
-        LOGGER.debug (sLogPrefix + "Endpoint details: " + aEndpoints);
-    }
-
-    // 3. start message exchange to DC
-    // The sender of the response is the DP
-    final IParticipantIdentifier aDPParticipantID = TCSettings.getIdentifierFactory ()
-                                                              .createParticipantIdentifier (aResponse.getDataProvider ()
-                                                                                                     .getDPElectronicAddressIdentifier ()
-                                                                                                     .getSchemeID (),
-                                                                                            aResponse.getDataProvider ()
-                                                                                                     .getDPElectronicAddressIdentifier ()
-                                                                                                     .getValue ());
-
-    if (aEndpoints.isEmpty ())
-    {
-      // No endpoint - ooops
-      aErrors.add (_createError (sLogPrefix,
-                                 EToopErrorCategory.DYNAMIC_DISCOVERY,
-                                 EToopErrorCode.DD_004,
-                                 "Found no matching DC endpoint - not transmitting response from DP '" +
-                                                        aDPParticipantID.getURIEncoded () +
-                                                        "' to DC '" +
-                                                        aDCParticipantID.getURIEncoded () +
-                                                        "'!",
-                                 null));
-    }
-
-    if (aErrors.isEmpty ())
-    {
-      // Combine MS data and TOOP data into a single ASiC message
-      // Do this only once and not for every endpoint
-      MEMessage aMEMessage;
-      try (final NonBlockingByteArrayOutputStream aBAOS = new NonBlockingByteArrayOutputStream ())
-      {
-        // Ensure flush/close of DumpOS!
-        try (final OutputStream aDumpOS = TCDumpHelper.getDumpOutputStream (aBAOS,
-                                                                            TCConfig.getDebugToDCDumpPathIfEnabled (),
-                                                                            "to-dc.asic"))
-        {
-          ToopMessageBuilder.createResponseMessageAsic (aResponse, aDumpOS, MPWebAppConfig.getSignatureHelper ());
-        }
-
-        // build MEM once
-        final MEPayload aPayload = new MEPayload (AsicUtils.MIMETYPE_ASICE, sRequestID, aBAOS.toByteArray ());
-        aMEMessage = new MEMessage (aPayload);
-      }
-
-      for (final IR2D2Endpoint aEP : aEndpoints)
-      {
-        // routing metadata - sender ID!
-        final GatewayRoutingMetadata aGWM = new GatewayRoutingMetadata (aDPParticipantID.getURIEncoded (),
-                                                                        aDocTypeID.getURIEncoded (),
-                                                                        aProcessID.getURIEncoded (),
-                                                                        aEP,
-                                                                        EActingSide.DP);
-        // Reuse the same MEMessage for each endpoint
-        MEMDelegate.getInstance ().sendMessage (aGWM, aMEMessage);
-      }
+      final String sErrorMsg = "The DataProvider element is missing in the response";
+      aErrors.add (_createError (sLogPrefix, EToopErrorCategory.PARSING, EToopErrorCode.IF_001, sErrorMsg, null));
     }
     else
+    {
+      // No need to invoke SMM - source concepts are still available
+      final IIdentifierFactory aIDFactory = TCSettings.getIdentifierFactory ();
+
+      // invoke R2D2 client with a single endpoint
+      // The destination EP is the sender of the original document!
+      final IParticipantIdentifier aDCParticipantID = aIDFactory.createParticipantIdentifier (aResponse.getDataConsumer ()
+                                                                                                       .getDCElectronicAddressIdentifier ()
+                                                                                                       .getSchemeID (),
+                                                                                              aResponse.getDataConsumer ()
+                                                                                                       .getDCElectronicAddressIdentifier ()
+                                                                                                       .getValue ());
+      final IDocumentTypeIdentifier aDocTypeID = aIDFactory.createDocumentTypeIdentifier (aResponse.getDocumentTypeIdentifier ()
+                                                                                                   .getSchemeID (),
+                                                                                          aResponse.getDocumentTypeIdentifier ()
+                                                                                                   .getValue ());
+      final IProcessIdentifier aProcessID = aIDFactory.createProcessIdentifier (aResponse.getProcessIdentifier ()
+                                                                                         .getSchemeID (),
+                                                                                aResponse.getProcessIdentifier ()
+                                                                                         .getValue ());
+
+      ICommonsList <IR2D2Endpoint> aEndpoints;
+      {
+        final ICommonsList <IR2D2Endpoint> aTotalEndpoints = new R2D2Client ().getEndpoints (sLogPrefix,
+                                                                                             aDCParticipantID,
+                                                                                             aDocTypeID,
+                                                                                             aProcessID);
+
+        // Filter all endpoints with the corresponding transport profile
+        final String sTransportProfileID = TCConfig.getMEMProtocol ().getTransportProfileID ();
+        aEndpoints = aTotalEndpoints.getAll (x -> x.getTransportProtocol ().equals (sTransportProfileID));
+
+        // Expecting exactly one endpoint!
+        ToopKafkaClient.send (aEndpoints.size () == 1 ? EErrorLevel.INFO : EErrorLevel.ERROR,
+                              () -> sLogPrefix +
+                                    "R2D2 found [" +
+                                    aEndpoints.size () +
+                                    "/" +
+                                    aTotalEndpoints.size () +
+                                    "] endpoints");
+        if (LOGGER.isDebugEnabled ())
+          LOGGER.debug (sLogPrefix + "Endpoint details: " + aEndpoints);
+      }
+
+      // 3. start message exchange to DC
+      // The sender of the response is the DP
+      final IParticipantIdentifier aDPParticipantID = aIDFactory.createParticipantIdentifier (aDataProvider.getDPElectronicAddressIdentifier ()
+                                                                                                           .getSchemeID (),
+                                                                                              aDataProvider.getDPElectronicAddressIdentifier ()
+                                                                                                           .getValue ());
+
+      if (aEndpoints.isEmpty ())
+      {
+        // No endpoint - ooops
+        aErrors.add (_createError (sLogPrefix,
+                                   EToopErrorCategory.DYNAMIC_DISCOVERY,
+                                   EToopErrorCode.DD_004,
+                                   "Found no matching DC endpoint - not transmitting response from DP '" +
+                                                          aDPParticipantID.getURIEncoded () +
+                                                          "' to DC '" +
+                                                          aDCParticipantID.getURIEncoded () +
+                                                          "'!",
+                                   null));
+      }
+
+      if (aErrors.isEmpty ())
+      {
+        // Combine MS data and TOOP data into a single ASiC message
+        // Do this only once and not for every endpoint
+        MEMessage aMEMessage;
+        try (final NonBlockingByteArrayOutputStream aBAOS = new NonBlockingByteArrayOutputStream ())
+        {
+          // Ensure flush/close of DumpOS!
+          try (final OutputStream aDumpOS = TCDumpHelper.getDumpOutputStream (aBAOS,
+                                                                              TCConfig.getDebugToDCDumpPathIfEnabled (),
+                                                                              "to-dc.asic"))
+          {
+            ToopMessageBuilder.createResponseMessageAsic (aResponse, aDumpOS, MPWebAppConfig.getSignatureHelper ());
+          }
+
+          // build MEM once
+          final MEPayload aPayload = new MEPayload (AsicUtils.MIMETYPE_ASICE, sRequestID, aBAOS.toByteArray ());
+          aMEMessage = new MEMessage (aPayload);
+        }
+
+        for (final IR2D2Endpoint aEP : aEndpoints)
+        {
+          // routing metadata - sender ID!
+          final GatewayRoutingMetadata aGWM = new GatewayRoutingMetadata (aDPParticipantID.getURIEncoded (),
+                                                                          aDocTypeID.getURIEncoded (),
+                                                                          aProcessID.getURIEncoded (),
+                                                                          aEP,
+                                                                          EActingSide.DP);
+          // Reuse the same MEMessage for each endpoint
+          MEMDelegate.getInstance ().sendMessage (aGWM, aMEMessage);
+        }
+      }
+    }
+
+    if (aErrors.isNotEmpty ())
     {
       // send back to DP including errors
       aResponse.getError ().addAll (aErrors);
