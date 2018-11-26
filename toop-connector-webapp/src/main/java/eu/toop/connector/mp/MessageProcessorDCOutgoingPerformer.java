@@ -62,6 +62,7 @@ import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.TCSettings;
 import eu.toop.connector.me.EActingSide;
 import eu.toop.connector.me.GatewayRoutingMetadata;
+import eu.toop.connector.me.MEException;
 import eu.toop.connector.me.MEMDelegate;
 import eu.toop.connector.me.MEMessage;
 import eu.toop.connector.me.MEPayload;
@@ -108,8 +109,8 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
   public void runAsync (@Nonnull final TDETOOPRequestType aRequest)
   {
     /*
-     * This is the unique ID of this request message and must be used throughout
-     * the whole process for identification
+     * This is the unique ID of this request message and must be used throughout the
+     * whole process for identification
      */
     final String sRequestID = GlobalIDFactory.getNewPersistentStringID ();
     final String sLogPrefix = "[" + sRequestID + "] ";
@@ -355,18 +356,29 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
                                                     aEP.getTransportProtocol () +
                                                     "'");
 
-            if (!MEMDelegate.getInstance ().sendMessage (aMetadata, aMEMessage))
+            try
+            {
+              if (!MEMDelegate.getInstance ().sendMessage (aMetadata, aMEMessage))
+              {
+                aErrors.add (_createError (sLogPrefix,
+                                           EToopErrorCategory.E_DELIVERY,
+                                           EToopErrorCode.ME_001,
+                                           "Error sending message",
+                                           null));
+              }
+            }
+            catch (final MEException ex)
             {
               aErrors.add (_createError (sLogPrefix,
                                          EToopErrorCategory.E_DELIVERY,
                                          EToopErrorCode.ME_001,
                                          "Error sending message",
-                                         null));
+                                         ex));
             }
 
             /*
-             * XXX just send to the first one, to mimic, that this is how it
-             * will be in the final version (where step 4/4 will aggregate)
+             * XXX just send to the first one, to mimic, that this is how it will be in the
+             * final version (where step 4/4 will aggregate)
              */
             break;
           }
