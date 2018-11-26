@@ -343,11 +343,11 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
           // For all matching endpoints
           for (final IR2D2Endpoint aEP : aEndpoints)
           {
-            final GatewayRoutingMetadata aMetadata = new GatewayRoutingMetadata (aSenderID.getURIEncoded (),
-                                                                                 aDocTypeID.getURIEncoded (),
-                                                                                 aProcessID.getURIEncoded (),
-                                                                                 aEP,
-                                                                                 EActingSide.DC);
+            final GatewayRoutingMetadata aGRM = new GatewayRoutingMetadata (aSenderID.getURIEncoded (),
+                                                                            aDocTypeID.getURIEncoded (),
+                                                                            aProcessID.getURIEncoded (),
+                                                                            aEP,
+                                                                            EActingSide.DC);
             ToopKafkaClient.send (EErrorLevel.INFO,
                                   sLogPrefix +
                                                     "Sending MEM message to '" +
@@ -358,7 +358,7 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
 
             try
             {
-              if (!MEMDelegate.getInstance ().sendMessage (aMetadata, aMEMessage))
+              if (!MEMDelegate.getInstance ().sendMessage (aGRM, aMEMessage))
               {
                 aErrors.add (_createError (sLogPrefix,
                                            EToopErrorCategory.E_DELIVERY,

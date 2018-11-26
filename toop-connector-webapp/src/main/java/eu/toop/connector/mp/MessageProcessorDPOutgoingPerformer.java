@@ -58,6 +58,7 @@ import eu.toop.connector.api.TCSettings;
 import eu.toop.connector.api.http.TCHttpClientFactory;
 import eu.toop.connector.me.EActingSide;
 import eu.toop.connector.me.GatewayRoutingMetadata;
+import eu.toop.connector.me.MEException;
 import eu.toop.connector.me.MEMDelegate;
 import eu.toop.connector.me.MEMessage;
 import eu.toop.connector.me.MEPayload;
@@ -227,6 +228,18 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
           {
             ToopMessageBuilder.createResponseMessageAsic (aResponse, aDumpOS, MPWebAppConfig.getSignatureHelper ());
           }
+          catch (final ToopErrorException ex)
+          {
+            aErrors.add (_createError (sLogPrefix,
+                                       EToopErrorCategory.E_DELIVERY,
+                                       ex.getErrorCode (),
+                                       ex.getMessage (),
+                                       ex.getCause ()));
+          }
+          catch (final IOException ex)
+          {
+            aErrors.add (_createGenericError (sLogPrefix, ex));
+          }
 
           // build MEM once
           final MEPayload aPayload = new MEPayload (AsicUtils.MIMETYPE_ASICE, sRequestID, aBAOS.toByteArray ());
@@ -236,13 +249,40 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
         for (final IR2D2Endpoint aEP : aEndpoints)
         {
           // routing metadata - sender ID!
-          final GatewayRoutingMetadata aGWM = new GatewayRoutingMetadata (aDPParticipantID.getURIEncoded (),
+          final GatewayRoutingMetadata aGRM = new GatewayRoutingMetadata (aDPParticipantID.getURIEncoded (),
                                                                           aDocTypeID.getURIEncoded (),
                                                                           aProcessID.getURIEncoded (),
                                                                           aEP,
                                                                           EActingSide.DP);
-          // Reuse the same MEMessage for each endpoint
-          MEMDelegate.getInstance ().sendMessage (aGWM, aMEMessage);
+
+          ToopKafkaClient.send (EErrorLevel.INFO,
+                                sLogPrefix +
+                                                  "Sending MEM message to '" +
+                                                  aEP.getEndpointURL () +
+                                                  "' using transport protocol '" +
+                                                  aEP.getTransportProtocol () +
+                                                  "'");
+
+          try
+          {
+            // Reuse the same MEMessage for each endpoint
+            if (!MEMDelegate.getInstance ().sendMessage (aGRM, aMEMessage))
+            {
+              aErrors.add (_createError (sLogPrefix,
+                                         EToopErrorCategory.E_DELIVERY,
+                                         EToopErrorCode.ME_001,
+                                         "Error sending message",
+                                         null));
+            }
+          }
+          catch (final MEException ex)
+          {
+            aErrors.add (_createError (sLogPrefix,
+                                       EToopErrorCategory.E_DELIVERY,
+                                       EToopErrorCode.ME_001,
+                                       "Error sending message",
+                                       ex));
+          }
         }
       }
     }
