@@ -109,8 +109,8 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
   public void runAsync (@Nonnull final TDETOOPRequestType aRequest)
   {
     /*
-     * This is the unique ID of this request message and must be used throughout the
-     * whole process for identification
+     * This is the unique ID of this request message and must be used throughout
+     * the whole process for identification
      */
     final String sRequestID = GlobalIDFactory.getNewPersistentStringID ();
     final String sLogPrefix = "[" + sRequestID + "] ";
@@ -310,7 +310,7 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
         // 3. start message exchange to DC
         // Combine MS data and TOOP data into a single ASiC message
         // Do this only once and not for every endpoint
-        MEMessage aMEMessage;
+        byte [] aPayloadBytes = null;
         try (final NonBlockingByteArrayOutputStream aBAOS = new NonBlockingByteArrayOutputStream ())
         {
           // Ensure flush/close of DumpOS!
@@ -333,21 +333,18 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
             aErrors.add (_createGenericError (sLogPrefix, ex));
           }
 
-          // build MEM once
-          final MEPayload aPayload = new MEPayload (AsicUtils.MIMETYPE_ASICE, sRequestID, aBAOS.toByteArray ());
-          aMEMessage = new MEMessage (aPayload);
+          aPayloadBytes = aBAOS.toByteArray ();
         }
 
         if (aErrors.isEmpty ())
         {
+          // build MEM once
+          final MEPayload aPayload = new MEPayload (AsicUtils.MIMETYPE_ASICE, sRequestID, aPayloadBytes);
+          final MEMessage aMEMessage = new MEMessage (aPayload);
+
           // For all matching endpoints
           for (final IR2D2Endpoint aEP : aEndpoints)
           {
-            final GatewayRoutingMetadata aGRM = new GatewayRoutingMetadata (aSenderID.getURIEncoded (),
-                                                                            aDocTypeID.getURIEncoded (),
-                                                                            aProcessID.getURIEncoded (),
-                                                                            aEP,
-                                                                            EActingSide.DC);
             ToopKafkaClient.send (EErrorLevel.INFO,
                                   sLogPrefix +
                                                     "Sending MEM message to '" +
@@ -356,6 +353,11 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
                                                     aEP.getTransportProtocol () +
                                                     "'");
 
+            final GatewayRoutingMetadata aGRM = new GatewayRoutingMetadata (aSenderID.getURIEncoded (),
+                                                                            aDocTypeID.getURIEncoded (),
+                                                                            aProcessID.getURIEncoded (),
+                                                                            aEP,
+                                                                            EActingSide.DC);
             try
             {
               if (!MEMDelegate.getInstance ().sendMessage (aGRM, aMEMessage))
@@ -377,8 +379,8 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
             }
 
             /*
-             * XXX just send to the first one, to mimic, that this is how it will be in the
-             * final version (where step 4/4 will aggregate)
+             * XXX just send to the first one, to mimic, that this is how it
+             * will be in the final version (where step 4/4 will aggregate)
              */
             break;
           }

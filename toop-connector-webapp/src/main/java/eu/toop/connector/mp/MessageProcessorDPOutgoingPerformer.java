@@ -188,7 +188,7 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
                                     aEndpoints.size () +
                                     "/" +
                                     aTotalEndpoints.size () +
-                                    "] endpoints");
+                                    "] endpoint(s)");
         if (LOGGER.isDebugEnabled ())
           LOGGER.debug (sLogPrefix + "Endpoint details: " + aEndpoints);
       }
@@ -218,7 +218,7 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
       {
         // Combine MS data and TOOP data into a single ASiC message
         // Do this only once and not for every endpoint
-        MEMessage aMEMessage;
+        byte [] aPayloadBytes = null;
         try (final NonBlockingByteArrayOutputStream aBAOS = new NonBlockingByteArrayOutputStream ())
         {
           // Ensure flush/close of DumpOS!
@@ -241,47 +241,52 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
             aErrors.add (_createGenericError (sLogPrefix, ex));
           }
 
-          // build MEM once
-          final MEPayload aPayload = new MEPayload (AsicUtils.MIMETYPE_ASICE, sRequestID, aBAOS.toByteArray ());
-          aMEMessage = new MEMessage (aPayload);
+          aPayloadBytes = aBAOS.toByteArray ();
         }
 
-        for (final IR2D2Endpoint aEP : aEndpoints)
+        if (aErrors.isEmpty ())
         {
-          // routing metadata - sender ID!
-          final GatewayRoutingMetadata aGRM = new GatewayRoutingMetadata (aDPParticipantID.getURIEncoded (),
-                                                                          aDocTypeID.getURIEncoded (),
-                                                                          aProcessID.getURIEncoded (),
-                                                                          aEP,
-                                                                          EActingSide.DP);
+          // build MEM once
+          final MEPayload aPayload = new MEPayload (AsicUtils.MIMETYPE_ASICE, sRequestID, aPayloadBytes);
+          final MEMessage aMEMessage = new MEMessage (aPayload);
 
-          ToopKafkaClient.send (EErrorLevel.INFO,
-                                sLogPrefix +
-                                                  "Sending MEM message to '" +
-                                                  aEP.getEndpointURL () +
-                                                  "' using transport protocol '" +
-                                                  aEP.getTransportProtocol () +
-                                                  "'");
-
-          try
+          for (final IR2D2Endpoint aEP : aEndpoints)
           {
-            // Reuse the same MEMessage for each endpoint
-            if (!MEMDelegate.getInstance ().sendMessage (aGRM, aMEMessage))
+            ToopKafkaClient.send (EErrorLevel.INFO,
+                                  sLogPrefix +
+                                                    "Sending MEM message to '" +
+                                                    aEP.getEndpointURL () +
+                                                    "' using transport protocol '" +
+                                                    aEP.getTransportProtocol () +
+                                                    "'");
+
+            // routing metadata - sender ID!
+            final GatewayRoutingMetadata aGRM = new GatewayRoutingMetadata (aDPParticipantID.getURIEncoded (),
+                                                                            aDocTypeID.getURIEncoded (),
+                                                                            aProcessID.getURIEncoded (),
+                                                                            aEP,
+                                                                            EActingSide.DP);
+
+            try
+            {
+              // Reuse the same MEMessage for each endpoint
+              if (!MEMDelegate.getInstance ().sendMessage (aGRM, aMEMessage))
+              {
+                aErrors.add (_createError (sLogPrefix,
+                                           EToopErrorCategory.E_DELIVERY,
+                                           EToopErrorCode.ME_001,
+                                           "Error sending message",
+                                           null));
+              }
+            }
+            catch (final MEException ex)
             {
               aErrors.add (_createError (sLogPrefix,
                                          EToopErrorCategory.E_DELIVERY,
                                          EToopErrorCode.ME_001,
                                          "Error sending message",
-                                         null));
+                                         ex));
             }
-          }
-          catch (final MEException ex)
-          {
-            aErrors.add (_createError (sLogPrefix,
-                                       EToopErrorCategory.E_DELIVERY,
-                                       EToopErrorCode.ME_001,
-                                       "Error sending message",
-                                       ex));
           }
         }
       }
