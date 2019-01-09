@@ -44,13 +44,13 @@ import eu.toop.commons.codelist.EPredefinedDocumentTypeIdentifier;
 import eu.toop.commons.codelist.SMMDocumentTypeMapping;
 import eu.toop.commons.concept.ConceptValue;
 import eu.toop.commons.concept.EConceptType;
-import eu.toop.commons.dataexchange.TDEConceptRequestType;
-import eu.toop.commons.dataexchange.TDEDataElementRequestType;
-import eu.toop.commons.dataexchange.TDEErrorType;
-import eu.toop.commons.dataexchange.TDELegalEntityType;
-import eu.toop.commons.dataexchange.TDENaturalPersonType;
-import eu.toop.commons.dataexchange.TDETOOPRequestType;
-import eu.toop.commons.dataexchange.TDETOOPResponseType;
+import eu.toop.commons.dataexchange.v120.TDEConceptRequestType;
+import eu.toop.commons.dataexchange.v120.TDEDataElementRequestType;
+import eu.toop.commons.dataexchange.v120.TDEErrorType;
+import eu.toop.commons.dataexchange.v120.TDELegalEntityType;
+import eu.toop.commons.dataexchange.v120.TDENaturalPersonType;
+import eu.toop.commons.dataexchange.v120.TDETOOPRequestType;
+import eu.toop.commons.dataexchange.v120.TDETOOPResponseType;
 import eu.toop.commons.error.EToopErrorCategory;
 import eu.toop.commons.error.EToopErrorCode;
 import eu.toop.commons.error.EToopErrorOrigin;
@@ -109,8 +109,8 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
   public void runAsync (@Nonnull final TDETOOPRequestType aRequest)
   {
     /*
-     * This is the unique ID of this request message and must be used throughout
-     * the whole process for identification
+     * This is the unique ID of this request message and must be used throughout the
+     * whole process for identification
      */
     final String sRequestID = GlobalIDFactory.getNewPersistentStringID ();
     final String sLogPrefix = "[" + sRequestID + "] ";
@@ -379,8 +379,8 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
             }
 
             /*
-             * XXX just send to the first one, to mimic, that this is how it
-             * will be in the final version (where step 4/4 will aggregate)
+             * XXX just send to the first one, to mimic, that this is how it will be in the
+             * final version (where step 4/4 will aggregate)
              */
             break;
           }

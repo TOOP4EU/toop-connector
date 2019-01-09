@@ -31,8 +31,8 @@ import com.helger.commons.id.factory.StringIDFromGlobalLongIDFactory;
 import com.helger.commons.string.StringHelper;
 import com.helger.web.servlets.scope.WebScopeListener;
 
-import eu.toop.commons.dataexchange.TDETOOPRequestType;
-import eu.toop.commons.dataexchange.TDETOOPResponseType;
+import eu.toop.commons.dataexchange.v120.TDETOOPRequestType;
+import eu.toop.commons.dataexchange.v120.TDETOOPResponseType;
 import eu.toop.commons.exchange.ToopMessageBuilder;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.app.CTC;

@@ -26,7 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.helger.commons.error.level.EErrorLevel;
 
-import eu.toop.commons.dataexchange.TDETOOPRequestType;
+import eu.toop.commons.dataexchange.v120.TDETOOPRequestType;
 import eu.toop.commons.exchange.ToopMessageBuilder;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.mp.MessageProcessorDCOutgoing;

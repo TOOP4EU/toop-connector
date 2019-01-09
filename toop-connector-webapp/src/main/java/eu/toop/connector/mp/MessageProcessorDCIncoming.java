@@ -31,7 +31,7 @@ import com.helger.commons.state.ESuccess;
 import com.helger.scope.IScope;
 import com.helger.web.scope.singleton.AbstractGlobalWebSingleton;
 
-import eu.toop.commons.dataexchange.TDETOOPResponseType;
+import eu.toop.commons.dataexchange.v120.TDETOOPResponseType;
 import eu.toop.kafkaclient.ToopKafkaClient;
 
 /**
@@ -83,8 +83,7 @@ public final class MessageProcessorDCIncoming extends AbstractGlobalWebSingleton
   /**
    * Queue a new Toop Response message.
    *
-   * @param aMsg
-   *        The data to be queued. May not be <code>null</code>.
+   * @param aMsg The data to be queued. May not be <code>null</code>.
    * @return {@link ESuccess}. Never <code>null</code>.
    */
   @Nonnull
