@@ -39,11 +39,11 @@ import com.helger.httpclient.HttpClientManager;
 
 import eu.toop.commons.concept.ConceptValue;
 import eu.toop.commons.concept.EConceptType;
-import eu.toop.commons.dataexchange.v120.TDEConceptRequestType;
-import eu.toop.commons.dataexchange.v120.TDEDataElementRequestType;
-import eu.toop.commons.dataexchange.v120.TDEErrorType;
-import eu.toop.commons.dataexchange.v120.TDETOOPRequestType;
-import eu.toop.commons.dataexchange.v120.TDETOOPResponseType;
+import eu.toop.commons.dataexchange.v140.TDEConceptRequestType;
+import eu.toop.commons.dataexchange.v140.TDEDataElementRequestType;
+import eu.toop.commons.dataexchange.v140.TDEErrorType;
+import eu.toop.commons.dataexchange.v140.TDETOOPRequestType;
+import eu.toop.commons.dataexchange.v140.TDETOOPResponseType;
 import eu.toop.commons.error.EToopErrorCategory;
 import eu.toop.commons.error.EToopErrorCode;
 import eu.toop.commons.error.EToopErrorOrigin;

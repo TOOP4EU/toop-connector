@@ -31,8 +31,8 @@ import com.helger.commons.id.factory.StringIDFromGlobalLongIDFactory;
 import com.helger.commons.string.StringHelper;
 import com.helger.web.servlets.scope.WebScopeListener;
 
-import eu.toop.commons.dataexchange.v120.TDETOOPRequestType;
-import eu.toop.commons.dataexchange.v120.TDETOOPResponseType;
+import eu.toop.commons.dataexchange.v140.TDETOOPRequestType;
+import eu.toop.commons.dataexchange.v140.TDETOOPResponseType;
 import eu.toop.commons.exchange.ToopMessageBuilder;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.app.CTC;
@@ -145,25 +145,27 @@ public class TCWebAppListener extends WebScopeListener
         ToopKafkaClient.send (EErrorLevel.WARN, () -> m_sLogPrefix + "MEMessage contains no payload: " + aMEMessage);
     });
 
-    MEMDelegate.getInstance ().registerNotificationHandler (aRelayResult -> {
-      // more to come
-      ToopKafkaClient.send (EErrorLevel.INFO,
-                            () -> m_sLogPrefix +
-                                  "Notification[" +
-                                  aRelayResult.getErrorCode () +
-                                  "]: " +
-                                  aRelayResult.getDescription ());
-    });
+    MEMDelegate.getInstance ()
+               .registerNotificationHandler (aRelayResult -> {
+                 // more to come
+                 ToopKafkaClient.send (EErrorLevel.INFO,
+                                       () -> m_sLogPrefix +
+                                             "Notification[" +
+                                             aRelayResult.getErrorCode () +
+                                             "]: " +
+                                             aRelayResult.getDescription ());
+               });
 
-    MEMDelegate.getInstance ().registerSubmissionResultHandler (aRelayResult -> {
-      // more to come
-      ToopKafkaClient.send (EErrorLevel.INFO,
-                            () -> m_sLogPrefix +
-                                  "SubmissionResult[" +
-                                  aRelayResult.getErrorCode () +
-                                  "]: " +
-                                  aRelayResult.getDescription ());
-    });
+    MEMDelegate.getInstance ()
+               .registerSubmissionResultHandler (aRelayResult -> {
+                 // more to come
+                 ToopKafkaClient.send (EErrorLevel.INFO,
+                                       () -> m_sLogPrefix +
+                                             "SubmissionResult[" +
+                                             aRelayResult.getErrorCode () +
+                                             "]: " +
+                                             aRelayResult.getDescription ());
+               });
 
     ToopKafkaClient.send (EErrorLevel.INFO, m_sLogPrefix + "TOOP Connector started");
   }

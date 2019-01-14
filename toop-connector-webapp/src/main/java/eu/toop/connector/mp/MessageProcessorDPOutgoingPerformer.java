@@ -44,9 +44,9 @@ import com.helger.peppol.identifier.generic.doctype.IDocumentTypeIdentifier;
 import com.helger.peppol.identifier.generic.participant.IParticipantIdentifier;
 import com.helger.peppol.identifier.generic.process.IProcessIdentifier;
 
-import eu.toop.commons.dataexchange.v120.TDEDataProviderType;
-import eu.toop.commons.dataexchange.v120.TDEErrorType;
-import eu.toop.commons.dataexchange.v120.TDETOOPResponseType;
+import eu.toop.commons.dataexchange.v140.TDEDataProviderType;
+import eu.toop.commons.dataexchange.v140.TDEErrorType;
+import eu.toop.commons.dataexchange.v140.TDETOOPResponseType;
 import eu.toop.commons.error.EToopErrorCategory;
 import eu.toop.commons.error.EToopErrorCode;
 import eu.toop.commons.error.EToopErrorOrigin;
@@ -161,13 +161,17 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
                                                                                               aResponse.getDataConsumer ()
                                                                                                        .getDCElectronicAddressIdentifier ()
                                                                                                        .getValue ());
-      final IDocumentTypeIdentifier aDocTypeID = aIDFactory.createDocumentTypeIdentifier (aResponse.getDocumentTypeIdentifier ()
+      final IDocumentTypeIdentifier aDocTypeID = aIDFactory.createDocumentTypeIdentifier (aResponse.getRoutingInformation ()
+                                                                                                   .getDocumentTypeIdentifier ()
                                                                                                    .getSchemeID (),
-                                                                                          aResponse.getDocumentTypeIdentifier ()
+                                                                                          aResponse.getRoutingInformation ()
+                                                                                                   .getDocumentTypeIdentifier ()
                                                                                                    .getValue ());
-      final IProcessIdentifier aProcessID = aIDFactory.createProcessIdentifier (aResponse.getProcessIdentifier ()
+      final IProcessIdentifier aProcessID = aIDFactory.createProcessIdentifier (aResponse.getRoutingInformation ()
+                                                                                         .getProcessIdentifier ()
                                                                                          .getSchemeID (),
-                                                                                aResponse.getProcessIdentifier ()
+                                                                                aResponse.getRoutingInformation ()
+                                                                                         .getProcessIdentifier ()
                                                                                          .getValue ());
 
       ICommonsList <IR2D2Endpoint> aEndpoints;

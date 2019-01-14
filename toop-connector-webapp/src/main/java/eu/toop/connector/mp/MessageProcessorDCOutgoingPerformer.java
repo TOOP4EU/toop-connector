@@ -44,13 +44,11 @@ import eu.toop.commons.codelist.EPredefinedDocumentTypeIdentifier;
 import eu.toop.commons.codelist.SMMDocumentTypeMapping;
 import eu.toop.commons.concept.ConceptValue;
 import eu.toop.commons.concept.EConceptType;
-import eu.toop.commons.dataexchange.v120.TDEConceptRequestType;
-import eu.toop.commons.dataexchange.v120.TDEDataElementRequestType;
-import eu.toop.commons.dataexchange.v120.TDEErrorType;
-import eu.toop.commons.dataexchange.v120.TDELegalEntityType;
-import eu.toop.commons.dataexchange.v120.TDENaturalPersonType;
-import eu.toop.commons.dataexchange.v120.TDETOOPRequestType;
-import eu.toop.commons.dataexchange.v120.TDETOOPResponseType;
+import eu.toop.commons.dataexchange.v140.TDEConceptRequestType;
+import eu.toop.commons.dataexchange.v140.TDEDataElementRequestType;
+import eu.toop.commons.dataexchange.v140.TDEErrorType;
+import eu.toop.commons.dataexchange.v140.TDETOOPRequestType;
+import eu.toop.commons.dataexchange.v140.TDETOOPResponseType;
 import eu.toop.commons.error.EToopErrorCategory;
 import eu.toop.commons.error.EToopErrorCode;
 import eu.toop.commons.error.EToopErrorOrigin;
@@ -109,8 +107,8 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
   public void runAsync (@Nonnull final TDETOOPRequestType aRequest)
   {
     /*
-     * This is the unique ID of this request message and must be used throughout the
-     * whole process for identification
+     * This is the unique ID of this request message and must be used throughout
+     * the whole process for identification
      */
     final String sRequestID = GlobalIDFactory.getNewPersistentStringID ();
     final String sLogPrefix = "[" + sRequestID + "] ";
@@ -119,16 +117,18 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
     // TODO Schematron
 
     // Select document type
-    final EPredefinedDocumentTypeIdentifier eDocType = EPredefinedDocumentTypeIdentifier.getFromDocumentTypeIdentifierOrNull (aRequest.getDocumentTypeIdentifier ()
+    final EPredefinedDocumentTypeIdentifier eDocType = EPredefinedDocumentTypeIdentifier.getFromDocumentTypeIdentifierOrNull (aRequest.getRoutingInformation ()
+                                                                                                                                      .getDocumentTypeIdentifier ()
                                                                                                                                       .getSchemeID (),
-                                                                                                                              aRequest.getDocumentTypeIdentifier ()
+                                                                                                                              aRequest.getRoutingInformation ()
+                                                                                                                                      .getDocumentTypeIdentifier ()
                                                                                                                                       .getValue ());
     if (eDocType == null)
     {
       final String sErrorMsg = "Failed to resolve document type " +
-                               aRequest.getDocumentTypeIdentifier ().getSchemeID () +
+                               aRequest.getRoutingInformation ().getDocumentTypeIdentifier ().getSchemeID () +
                                "::" +
-                               aRequest.getDocumentTypeIdentifier ().getValue ();
+                               aRequest.getRoutingInformation ().getDocumentTypeIdentifier ().getValue ();
       aErrors.add (_createError (sLogPrefix, EToopErrorCategory.PARSING, EToopErrorCode.IF_001, sErrorMsg, null));
     }
     else
@@ -222,29 +222,27 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
                                                                                 aRequest.getDataConsumer ()
                                                                                         .getDCElectronicAddressIdentifier ()
                                                                                         .getValue ());
-      final IDocumentTypeIdentifier aDocTypeID = aIF.createDocumentTypeIdentifier (aRequest.getDocumentTypeIdentifier ()
+      final IDocumentTypeIdentifier aDocTypeID = aIF.createDocumentTypeIdentifier (aRequest.getRoutingInformation ()
+                                                                                           .getDocumentTypeIdentifier ()
                                                                                            .getSchemeID (),
-                                                                                   aRequest.getDocumentTypeIdentifier ()
+                                                                                   aRequest.getRoutingInformation ()
+                                                                                           .getDocumentTypeIdentifier ()
                                                                                            .getValue ());
-      final IProcessIdentifier aProcessID = aIF.createProcessIdentifier (aRequest.getProcessIdentifier ()
+      final IProcessIdentifier aProcessID = aIF.createProcessIdentifier (aRequest.getRoutingInformation ()
+                                                                                 .getProcessIdentifier ()
                                                                                  .getSchemeID (),
-                                                                         aRequest.getProcessIdentifier ().getValue ());
+                                                                         aRequest.getRoutingInformation ()
+                                                                                 .getProcessIdentifier ()
+                                                                                 .getValue ());
 
       if (aErrors.isEmpty ())
       {
         // 2. invoke R2D2 client
 
         // Find destination country code
-        String sDestinationCountryCode = null;
-        final TDELegalEntityType aLegalEntity = aRequest.getDataRequestSubject ().getLegalEntity ();
-        if (aLegalEntity != null)
-          sDestinationCountryCode = aLegalEntity.getLegalEntityLegalAddress ().getCountryCode ().getValue ();
-        if (StringHelper.hasNoText (sDestinationCountryCode))
-        {
-          final TDENaturalPersonType aNaturalPerson = aRequest.getDataRequestSubject ().getNaturalPerson ();
-          if (aNaturalPerson != null)
-            sDestinationCountryCode = aNaturalPerson.getNaturalPersonLegalAddress ().getCountryCode ().getValue ();
-        }
+        final String sDestinationCountryCode = aRequest.getRoutingInformation ()
+                                                       .getDataProviderCountryCode ()
+                                                       .getValue ();
         if (StringHelper.hasNoText (sDestinationCountryCode))
         {
           aErrors.add (_createError (sLogPrefix,
@@ -379,8 +377,8 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
             }
 
             /*
-             * XXX just send to the first one, to mimic, that this is how it will be in the
-             * final version (where step 4/4 will aggregate)
+             * XXX just send to the first one, to mimic, that this is how it
+             * will be in the final version (where step 4/4 will aggregate)
              */
             break;
           }
