@@ -30,9 +30,9 @@ import org.slf4j.LoggerFactory;
 import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 import com.helger.commons.mime.CMimeType;
 
+import eu.toop.connector.api.as4.MEMessage;
+import eu.toop.connector.api.as4.MEPayload;
 import eu.toop.connector.me.EBMSUtils;
-import eu.toop.connector.me.MEMessage;
-import eu.toop.connector.me.MEPayload;
 import eu.toop.connector.me.SubmissionMessageProperties;
 
 public final class EBSMUtilsTest {

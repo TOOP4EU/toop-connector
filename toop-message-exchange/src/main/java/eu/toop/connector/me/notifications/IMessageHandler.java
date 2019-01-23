@@ -17,7 +17,7 @@ package eu.toop.connector.me.notifications;
 
 import javax.annotation.Nonnull;
 
-import eu.toop.connector.me.MEMessage;
+import eu.toop.connector.api.as4.MEMessage;
 
 /**
  * @author myildiz at 15.02.2018.

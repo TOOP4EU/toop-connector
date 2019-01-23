@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package eu.toop.connector.me;
+package eu.toop.connector.api.as4;
 
 import java.util.ArrayList;
 import java.util.List;

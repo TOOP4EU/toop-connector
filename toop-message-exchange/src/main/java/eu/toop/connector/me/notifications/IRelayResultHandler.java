@@ -17,7 +17,7 @@ package eu.toop.connector.me.notifications;
 
 import javax.annotation.Nonnull;
 
-import eu.toop.connector.me.MEException;
+import eu.toop.connector.api.as4.MEException;
 
 /**
  * Implement this interface and register it to the MEMDelegate in order to receive Notifications about the dispatch of

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package eu.toop.connector.me;
+package eu.toop.connector.api.as4;
 
 /**
  * A separate runtime exception to make it easier for the users to distinguish between the 'source path' to the

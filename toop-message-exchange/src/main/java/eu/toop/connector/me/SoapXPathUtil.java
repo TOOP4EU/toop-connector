@@ -32,6 +32,8 @@ import com.helger.commons.annotation.ReturnsMutableCopy;
 import com.helger.xml.namespace.MapBasedNamespaceContext;
 import com.helger.xml.xpath.XPathHelper;
 
+import eu.toop.connector.api.as4.MEException;
+
 /**
  * @author myildiz at 15.02.2018.
  */

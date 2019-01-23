@@ -63,6 +63,9 @@ import com.helger.xml.serialize.write.XMLWriterSettings;
 import com.helger.xml.transform.TransformSourceFactory;
 
 import eu.toop.connector.api.TCConfig;
+import eu.toop.connector.api.as4.MEException;
+import eu.toop.connector.api.as4.MEMessage;
+import eu.toop.connector.api.as4.MEPayload;
 import eu.toop.connector.me.notifications.RelayResult;
 import eu.toop.connector.me.notifications.SubmissionResult;
 import eu.toop.connector.r2d2client.IR2D2Endpoint;

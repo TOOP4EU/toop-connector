@@ -25,7 +25,7 @@ import com.helger.commons.CGlobal;
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.wrapper.Wrapper;
 
-import eu.toop.connector.me.MEException;
+import eu.toop.connector.api.as4.MEException;
 
 /**
  * @author yerlibilgin

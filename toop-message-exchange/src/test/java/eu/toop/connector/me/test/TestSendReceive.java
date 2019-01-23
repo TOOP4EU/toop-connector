@@ -30,10 +30,10 @@ import com.helger.commons.url.URLHelper;
 import com.helger.scope.mock.ScopeAwareTestSetup;
 
 import eu.toop.connector.api.TCConfig;
+import eu.toop.connector.api.as4.MEMessage;
 import eu.toop.connector.me.EActingSide;
 import eu.toop.connector.me.GatewayRoutingMetadata;
 import eu.toop.connector.me.MEMDelegate;
-import eu.toop.connector.me.MEMessage;
 import eu.toop.connector.me.notifications.IMessageHandler;
 
 /**

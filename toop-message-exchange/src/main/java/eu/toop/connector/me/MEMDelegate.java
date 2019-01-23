@@ -29,6 +29,8 @@ import com.helger.commons.url.URLHelper;
 import com.helger.scope.singleton.AbstractGlobalSingleton;
 
 import eu.toop.connector.api.TCConfig;
+import eu.toop.connector.api.as4.MEException;
+import eu.toop.connector.api.as4.MEMessage;
 import eu.toop.connector.me.notifications.IMessageHandler;
 import eu.toop.connector.me.notifications.IRelayResultHandler;
 import eu.toop.connector.me.notifications.ISubmissionResultHandler;

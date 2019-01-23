@@ -29,11 +29,11 @@ import com.helger.peppol.identifier.generic.participant.IParticipantIdentifier;
 import eu.toop.commons.codelist.EPredefinedDocumentTypeIdentifier;
 import eu.toop.commons.codelist.EPredefinedProcessIdentifier;
 import eu.toop.connector.api.TCSettings;
+import eu.toop.connector.api.as4.MEException;
+import eu.toop.connector.api.as4.MEMessage;
+import eu.toop.connector.api.as4.MEPayload;
 import eu.toop.connector.me.EActingSide;
 import eu.toop.connector.me.GatewayRoutingMetadata;
-import eu.toop.connector.me.MEException;
-import eu.toop.connector.me.MEMessage;
-import eu.toop.connector.me.MEPayload;
 import eu.toop.connector.r2d2client.IR2D2Endpoint;
 import eu.toop.connector.r2d2client.R2D2Endpoint;
 

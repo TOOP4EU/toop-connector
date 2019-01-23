@@ -32,6 +32,7 @@ import javax.xml.soap.SOAPMessage;
 import com.helger.commons.error.level.EErrorLevel;
 import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 
+import eu.toop.connector.api.as4.MEException;
 import eu.toop.kafkaclient.ToopKafkaClient;
 
 /**

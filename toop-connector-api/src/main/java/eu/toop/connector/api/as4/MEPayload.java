@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package eu.toop.connector.me;
+package eu.toop.connector.api.as4;
 
 import java.io.InputStream;
 import java.util.UUID;
@@ -33,64 +33,71 @@ import com.helger.commons.string.StringHelper;
  * @author myildiz at 15.02.2018.
  */
 @Immutable
-public final class MEPayload {
+public final class MEPayload
+{
 
   /**
    * Type of the payload
    */
-  private final IMimeType mimeType;
+  private final IMimeType m_aMimeType;
 
   /**
    * Optional id for the payload. If left empty, a default id will be used. i.e.
    * <em>uuid</em>@mp.toop (see {@link #createRandomPayloadID()}).
    */
-  private final String payloadId;
+  private final String m_sPayloadID;
 
   /**
    * The actual payload content
    */
-  private final byte[] data;
+  private final byte [] data;
 
   @Nonnull
   @Nonempty
-  public static String createRandomPayloadID() {
-    return UUID.randomUUID().toString() + "@mp.toop";
+  public static String createRandomPayloadID ()
+  {
+    return UUID.randomUUID ().toString () + "@mp.toop";
   }
 
-  public MEPayload(@Nonnull final IMimeType aMimeType, @Nullable final String sPayloadID,
-      @Nonnull final byte[] aData) {
-    ValueEnforcer.notNull(aMimeType, "MimeType");
-    ValueEnforcer.notNull(aData, "Data");
+  public MEPayload (@Nonnull final IMimeType aMimeType, @Nullable final String sPayloadID, @Nonnull final byte [] aData)
+  {
+    ValueEnforcer.notNull (aMimeType, "MimeType");
+    ValueEnforcer.notNull (aData, "Data");
 
-    mimeType = aMimeType;
+    m_aMimeType = aMimeType;
     // Ensure a payload is present
-    payloadId = StringHelper.hasText(sPayloadID) ? sPayloadID : createRandomPayloadID();
+    m_sPayloadID = StringHelper.hasText (sPayloadID) ? sPayloadID : createRandomPayloadID ();
     data = aData;
   }
 
   @Nonnull
-  public String getMimeTypeString() {
-    return mimeType.getAsString();
+  public String getMimeTypeString ()
+  {
+    return m_aMimeType.getAsString ();
   }
 
   @Nonnull
-  public String getPayloadId() {
-    return payloadId;
+  public String getPayloadId ()
+  {
+    return m_sPayloadID;
   }
 
   @Nonnull
   @ReturnsMutableObject
-  public byte[] getData() {
+  public byte [] getData ()
+  {
     return data;
   }
 
   @Nonnull
-  public InputStream getDataInputStream() {
-    return new NonBlockingByteArrayInputStream(data);
+  public InputStream getDataInputStream ()
+  {
+    return new NonBlockingByteArrayInputStream (data);
   }
 
   @Override
-  public String toString() {
-    return "Payload [" + payloadId + ", " + mimeType.getAsString() + "], length: " + data.length;
+  public String toString ()
+  {
+    return "Payload [" + m_sPayloadID + ", " + m_aMimeType.getAsString () + "], length: " + data.length;
   }
 }
