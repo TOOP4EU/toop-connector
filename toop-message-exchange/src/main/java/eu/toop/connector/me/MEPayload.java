@@ -42,7 +42,7 @@ public final class MEPayload {
 
   /**
    * Optional id for the payload. If left empty, a default id will be used. i.e.
-   * payload_X@toop.eu
+   * <em>uuid</em>@mp.toop (see {@link #createRandomPayloadID()}).
    */
   private final String payloadId;
 
