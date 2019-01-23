@@ -44,6 +44,7 @@ import org.w3c.dom.Node;
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.charset.CharsetHelper;
 import com.helger.commons.error.level.EErrorLevel;
+import com.helger.commons.io.ByteArrayWrapper;
 import com.helger.commons.io.resource.ClassPathResource;
 import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 import com.helger.commons.mime.CMimeType;
@@ -283,8 +284,10 @@ public final class EBMSUtils {
         final AttachmentPart attachmentPart = message.createAttachmentPart();
         attachmentPart.setContentId('<' + payload.getPayloadId() + '>');
         try {
-          final byte[] data = payload.getData();
-          attachmentPart.setRawContentBytes(data, 0, data.length, payload.getMimeTypeString());
+          attachmentPart.setRawContentBytes(payload.getData ().bytes (),
+                                            payload.getData ().getOffset (),
+                                            payload.getData ().size (),
+                                            payload.getMimeTypeString());
         } catch (final SOAPException e) {
           throw new MEException(e);
         }
@@ -372,7 +375,7 @@ public final class EBMSUtils {
           throw new MEException(e);
         }
 
-        final MEPayload payload = new MEPayload(mimeType, href, rawContentBytes);
+        final MEPayload payload = new MEPayload(mimeType, href, new ByteArrayWrapper (rawContentBytes, false));
         if (LOG.isDebugEnabled()) {
           LOG.debug("\tpayload.payloadId: " + payload.getPayloadId());
           LOG.debug("\tpayload.mimeType: " + payload.getMimeTypeString());

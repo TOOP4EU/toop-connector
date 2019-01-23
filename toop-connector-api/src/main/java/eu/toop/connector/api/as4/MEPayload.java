@@ -15,7 +15,7 @@
  */
 package eu.toop.connector.api.as4;
 
-import java.io.InputStream;
+import java.io.Serializable;
 import java.util.UUID;
 
 import javax.annotation.Nonnull;
@@ -25,17 +25,17 @@ import javax.annotation.concurrent.Immutable;
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.Nonempty;
 import com.helger.commons.annotation.ReturnsMutableObject;
-import com.helger.commons.io.stream.NonBlockingByteArrayInputStream;
+import com.helger.commons.io.ByteArrayWrapper;
 import com.helger.commons.mime.IMimeType;
 import com.helger.commons.string.StringHelper;
+import com.helger.commons.string.ToStringGenerator;
 
 /**
  * @author myildiz at 15.02.2018.
  */
 @Immutable
-public final class MEPayload
+public final class MEPayload implements Serializable
 {
-
   /**
    * Type of the payload
    */
@@ -50,7 +50,7 @@ public final class MEPayload
   /**
    * The actual payload content
    */
-  private final byte [] data;
+  private final ByteArrayWrapper m_aData;
 
   @Nonnull
   @Nonempty
@@ -59,7 +59,9 @@ public final class MEPayload
     return UUID.randomUUID ().toString () + "@mp.toop";
   }
 
-  public MEPayload (@Nonnull final IMimeType aMimeType, @Nullable final String sPayloadID, @Nonnull final byte [] aData)
+  public MEPayload (@Nonnull final IMimeType aMimeType,
+                    @Nullable final String sPayloadID,
+                    @Nonnull final ByteArrayWrapper aData)
   {
     ValueEnforcer.notNull (aMimeType, "MimeType");
     ValueEnforcer.notNull (aData, "Data");
@@ -67,7 +69,7 @@ public final class MEPayload
     m_aMimeType = aMimeType;
     // Ensure a payload is present
     m_sPayloadID = StringHelper.hasText (sPayloadID) ? sPayloadID : createRandomPayloadID ();
-    data = aData;
+    m_aData = aData;
   }
 
   @Nonnull
@@ -84,20 +86,17 @@ public final class MEPayload
 
   @Nonnull
   @ReturnsMutableObject
-  public byte [] getData ()
+  public ByteArrayWrapper getData ()
   {
-    return data;
-  }
-
-  @Nonnull
-  public InputStream getDataInputStream ()
-  {
-    return new NonBlockingByteArrayInputStream (data);
+    return m_aData;
   }
 
   @Override
   public String toString ()
   {
-    return "Payload [" + m_sPayloadID + ", " + m_aMimeType.getAsString () + "], length: " + data.length;
+    return new ToStringGenerator (this).append ("MimeType", m_aMimeType)
+                                       .append ("PayloadID", m_sPayloadID)
+                                       .append ("Data", m_aData)
+                                       .getToString ();
   }
 }

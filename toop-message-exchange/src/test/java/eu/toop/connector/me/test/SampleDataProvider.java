@@ -22,6 +22,7 @@ import java.security.cert.X509Certificate;
 
 import javax.annotation.Nonnull;
 
+import com.helger.commons.io.ByteArrayWrapper;
 import com.helger.commons.mime.CMimeType;
 import com.helger.commons.mime.IMimeType;
 import com.helger.peppol.identifier.generic.participant.IParticipantIdentifier;
@@ -76,7 +77,7 @@ public class SampleDataProvider {
     final IMimeType contentType = CMimeType.APPLICATION_XML;
     final byte[] payloadData = "<sample>xml</sample>".getBytes(StandardCharsets.ISO_8859_1);
 
-    final MEPayload payload = new MEPayload(contentType, payloadId, payloadData);
+    final MEPayload payload = new MEPayload(contentType, payloadId, new ByteArrayWrapper (payloadData, false));
     return new MEMessage(payload);
   }
 

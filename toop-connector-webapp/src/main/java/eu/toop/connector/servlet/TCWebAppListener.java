@@ -123,7 +123,7 @@ public class TCWebAppListener extends WebScopeListener
       if (aPayload != null)
       {
         // Extract from ASiC
-        final Object aMsg = ToopMessageBuilder.parseRequestOrResponse (aPayload.getDataInputStream ());
+        final Object aMsg = ToopMessageBuilder.parseRequestOrResponse (aPayload.getData ().getInputStream ());
 
         if (aMsg instanceof TDETOOPResponseType)
         {

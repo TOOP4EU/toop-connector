@@ -35,6 +35,7 @@ import com.helger.commons.collection.impl.CommonsArrayList;
 import com.helger.commons.collection.impl.ICommonsList;
 import com.helger.commons.concurrent.collector.IConcurrentPerformer;
 import com.helger.commons.error.level.EErrorLevel;
+import com.helger.commons.io.ByteArrayWrapper;
 import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 import com.helger.commons.lang.StackTraceHelper;
 import com.helger.commons.text.MultilingualText;
@@ -222,7 +223,7 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
       {
         // Combine MS data and TOOP data into a single ASiC message
         // Do this only once and not for every endpoint
-        byte [] aPayloadBytes = null;
+        ByteArrayWrapper aPayloadBytes = null;
         try (final NonBlockingByteArrayOutputStream aBAOS = new NonBlockingByteArrayOutputStream ())
         {
           // Ensure flush/close of DumpOS!
@@ -245,7 +246,7 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
             aErrors.add (_createGenericError (sLogPrefix, ex));
           }
 
-          aPayloadBytes = aBAOS.toByteArray ();
+          aPayloadBytes = new ByteArrayWrapper (aBAOS.directGetBuffer (), 0, aBAOS.size (), false);
         }
 
         if (aErrors.isEmpty ())
