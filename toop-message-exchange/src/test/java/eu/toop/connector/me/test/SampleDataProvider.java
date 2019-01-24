@@ -75,11 +75,8 @@ public class SampleDataProvider {
   public static MEMessage createSampleMessage() {
     final String payloadId = "xmlpayload@dp";
     final IMimeType contentType = CMimeType.APPLICATION_XML;
-    final byte[] payloadData = "<sample>xml</sample>".getBytes(StandardCharsets.ISO_8859_1);
 
-    final MEPayload payload = new MEPayload(contentType, payloadId, new ByteArrayWrapper (payloadData, false));
-    return new MEMessage(payload);
+    final MEPayload payload = new MEPayload(contentType, payloadId, ByteArrayWrapper.create ("<sample>xml</sample>", StandardCharsets.ISO_8859_1));
+    return MEMessage.create(payload);
   }
-
-
 }

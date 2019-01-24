@@ -246,14 +246,14 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
             aErrors.add (_createGenericError (sLogPrefix, ex));
           }
 
-          aPayloadBytes = new ByteArrayWrapper (aBAOS.directGetBuffer (), 0, aBAOS.size (), false);
+          aPayloadBytes = ByteArrayWrapper.create (aBAOS, false);
         }
 
         if (aErrors.isEmpty ())
         {
           // build MEM once
           final MEPayload aPayload = new MEPayload (AsicUtils.MIMETYPE_ASICE, sRequestID, aPayloadBytes);
-          final MEMessage aMEMessage = new MEMessage (aPayload);
+          final MEMessage aMEMessage = MEMessage.create (aPayload);
 
           for (final IR2D2Endpoint aEP : aEndpoints)
           {

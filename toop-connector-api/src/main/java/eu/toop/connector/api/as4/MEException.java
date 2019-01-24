@@ -16,25 +16,25 @@
 package eu.toop.connector.api.as4;
 
 /**
- * A separate runtime exception to make it easier for the users to distinguish between the 'source path' to the
- * underlying problem.
+ * A separate runtime exception to make it easier for the users to distinguish
+ * between the 'source path' to the underlying problem.
  *
  * @author yerlibilgin
  */
-public class MEException extends IllegalStateException {
-
-  public MEException(String message) {
-    super(message);
+public class MEException extends IllegalStateException
+{
+  public MEException (final String sMsg)
+  {
+    super (sMsg);
   }
 
-
-  public MEException(String message, Throwable cause) {
-    super(message, cause);
+  public MEException (final Throwable aCause)
+  {
+    super (aCause);
   }
 
-
-  public MEException(Throwable cause) {
-    super(cause);
+  public MEException (final String sMsg, final Throwable aCause)
+  {
+    super (sMsg, aCause);
   }
-
 }

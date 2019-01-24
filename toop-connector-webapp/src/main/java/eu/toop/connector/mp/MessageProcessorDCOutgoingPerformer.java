@@ -62,6 +62,7 @@ import eu.toop.connector.api.TCSettings;
 import eu.toop.connector.api.as4.MEException;
 import eu.toop.connector.api.as4.MEMessage;
 import eu.toop.connector.api.as4.MEPayload;
+import eu.toop.connector.api.as4.MERoutingInformation;
 import eu.toop.connector.me.EActingSide;
 import eu.toop.connector.me.GatewayRoutingMetadata;
 import eu.toop.connector.me.MEMDelegate;
@@ -108,8 +109,8 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
   public void runAsync (@Nonnull final TDETOOPRequestType aRequest)
   {
     /*
-     * This is the unique ID of this request message and must be used throughout
-     * the whole process for identification
+     * This is the unique ID of this request message and must be used throughout the
+     * whole process for identification
      */
     final String sRequestID = GlobalIDFactory.getNewPersistentStringID ();
     final String sLogPrefix = "[" + sRequestID + "] ";
@@ -332,14 +333,14 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
             aErrors.add (_createGenericError (sLogPrefix, ex));
           }
 
-          aPayloadBytes = new ByteArrayWrapper (aBAOS.directGetBuffer (), 0, aBAOS.size (), false);
+          aPayloadBytes = ByteArrayWrapper.create (aBAOS, false);
         }
 
         if (aErrors.isEmpty ())
         {
           // build MEM once
           final MEPayload aPayload = new MEPayload (AsicUtils.MIMETYPE_ASICE, sRequestID, aPayloadBytes);
-          final MEMessage aMEMessage = new MEMessage (aPayload);
+          final MEMessage aMEMessage = MEMessage.create (aPayload);
 
           // For all matching endpoints
           for (final IR2D2Endpoint aEP : aEndpoints)
@@ -351,6 +352,15 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
                                                     "' using transport protocol '" +
                                                     aEP.getTransportProtocol () +
                                                     "'");
+
+            if (false)
+              new MERoutingInformation (aSenderID,
+                                        aEP.getParticipantID (),
+                                        aDocTypeID,
+                                        aProcessID,
+                                        aEP.getTransportProtocol (),
+                                        aEP.getEndpointURL (),
+                                        aEP.getCertificate ());
 
             final GatewayRoutingMetadata aGRM = new GatewayRoutingMetadata (aSenderID.getURIEncoded (),
                                                                             aDocTypeID.getURIEncoded (),
@@ -378,8 +388,8 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
             }
 
             /*
-             * XXX just send to the first one, to mimic, that this is how it
-             * will be in the final version (where step 4/4 will aggregate)
+             * XXX just send to the first one, to mimic, that this is how it will be in the
+             * final version (where step 4/4 will aggregate)
              */
             break;
           }

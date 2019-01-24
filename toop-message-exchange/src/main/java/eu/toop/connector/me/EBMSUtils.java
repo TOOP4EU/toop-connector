@@ -257,7 +257,7 @@ public final class EBMSUtils {
 
       {
         final IMicroElement ePayloadInfo = eUserMessage.appendElement(NS_EBMS, "PayloadInfo");
-        for (final MEPayload aPayload : meMessage.getPayloads()) {
+        for (final MEPayload aPayload : meMessage.payloads()) {
           final IMicroElement ePartInfo = ePayloadInfo.appendElement(NS_EBMS, "PartInfo");
           ePartInfo.setAttribute("href", "cid:" + aPayload.getPayloadId());
 
@@ -280,7 +280,7 @@ public final class EBMSUtils {
       final Node importNode = message.getSOAPHeader().getOwnerDocument().importNode(element, true);
       message.getSOAPHeader().appendChild(importNode);
 
-      meMessage.getPayloads().forEach(payload -> {
+      meMessage.payloads().forEach(payload -> {
         final AttachmentPart attachmentPart = message.createAttachmentPart();
         attachmentPart.setContentId('<' + payload.getPayloadId() + '>');
         try {
@@ -381,7 +381,7 @@ public final class EBMSUtils {
           LOG.debug("\tpayload.mimeType: " + payload.getMimeTypeString());
         }
 
-        meMessage.getPayloads().add(payload);
+        meMessage.payloads().add(payload);
       });
     }
     return meMessage;

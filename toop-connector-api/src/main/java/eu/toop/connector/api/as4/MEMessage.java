@@ -15,45 +15,54 @@
  */
 package eu.toop.connector.api.as4;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.Serializable;
 
 import javax.annotation.Nonnull;
 
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.ReturnsMutableObject;
+import com.helger.commons.collection.impl.CommonsArrayList;
+import com.helger.commons.collection.impl.ICommonsList;
 
 /**
  * @author myildiz at 12.02.2018.
  */
-public class MEMessage {
-  private final List<MEPayload> payloads = new ArrayList<> ();
+public class MEMessage implements Serializable
+{
+  private final ICommonsList <MEPayload> m_aPayloads = new CommonsArrayList <> ();
 
-  public MEMessage () {
-  }
-
-  public MEMessage (@Nonnull final MEPayload aPayload) {
-    ValueEnforcer.notNull (aPayload, "Payload");
-    payloads.add (aPayload);
-  }
+  public MEMessage ()
+  {}
 
   /**
    * For ease of use, get the first payload
    *
    * @return the first payload
    * @throws MEException
-   *           in case non is contained
+   *         in case non is contained
    */
   @Nonnull
-  public MEPayload head () {
-    if (payloads.isEmpty ())
+  public MEPayload head ()
+  {
+    if (m_aPayloads.isEmpty ())
       throw new MEException ("There is no payload");
-    return payloads.get (0);
+    return m_aPayloads.getFirst ();
   }
 
   @Nonnull
   @ReturnsMutableObject
-  public List<MEPayload> getPayloads () {
-    return payloads;
+  public ICommonsList <MEPayload> payloads ()
+  {
+    return m_aPayloads;
+  }
+
+  @Nonnull
+  @ReturnsMutableObject
+  public static MEMessage create (@Nonnull final MEPayload aPayload)
+  {
+    ValueEnforcer.notNull (aPayload, "Payload");
+    final MEMessage ret = new MEMessage ();
+    ret.payloads ().add (aPayload);
+    return ret;
   }
 }

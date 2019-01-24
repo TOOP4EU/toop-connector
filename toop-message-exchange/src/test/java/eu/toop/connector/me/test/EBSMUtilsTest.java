@@ -43,8 +43,8 @@ public final class EBSMUtilsTest {
   public void testFault () throws SOAPException, IOException {
     final SubmissionMessageProperties sd = new SubmissionMessageProperties();
     sd.conversationId = "EBSMUtilsTestConv";
-    final MEMessage msg = new MEMessage (new MEPayload(CMimeType.APPLICATION_XML, "blafoo",
-                                                       new ByteArrayWrapper ("<?xml version='1.0'?><root demo='true' />".getBytes (StandardCharsets.ISO_8859_1), false)));
+    final MEMessage msg = MEMessage.create (new MEPayload(CMimeType.APPLICATION_XML, "blafoo",
+                                                         ByteArrayWrapper.create ("<?xml version='1.0'?><root demo='true' />", StandardCharsets.ISO_8859_1)));
     final SOAPMessage sm = EBMSUtils.convert2MEOutboundAS4Message (sd, msg);
     assertNotNull (sm);
     try (final NonBlockingByteArrayOutputStream aBAOS = new NonBlockingByteArrayOutputStream ()) {

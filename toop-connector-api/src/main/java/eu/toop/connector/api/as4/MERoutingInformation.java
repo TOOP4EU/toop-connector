@@ -6,6 +6,7 @@ import javax.annotation.Nonnull;
 
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.Nonempty;
+import com.helger.commons.string.ToStringGenerator;
 import com.helger.peppol.identifier.generic.doctype.IDocumentTypeIdentifier;
 import com.helger.peppol.identifier.generic.participant.IParticipantIdentifier;
 import com.helger.peppol.identifier.generic.process.IProcessIdentifier;
@@ -21,6 +22,7 @@ public class MERoutingInformation implements IMERoutingInformation
   private final IParticipantIdentifier m_aReceiverID;
   private final IDocumentTypeIdentifier m_aDocTypeID;
   private final IProcessIdentifier m_aProcessID;
+  private final String m_sTransportProtocol;
   private final String m_sEndpointURL;
   private final X509Certificate m_aCert;
 
@@ -28,6 +30,7 @@ public class MERoutingInformation implements IMERoutingInformation
                                @Nonnull final IParticipantIdentifier aReceiverID,
                                @Nonnull final IDocumentTypeIdentifier aDocTypeID,
                                @Nonnull final IProcessIdentifier aProcessID,
+                               @Nonnull @Nonempty final String sTransportProtocol,
                                @Nonnull @Nonempty final String sEndpointURL,
                                @Nonnull final X509Certificate aCert)
   {
@@ -35,6 +38,7 @@ public class MERoutingInformation implements IMERoutingInformation
     ValueEnforcer.notNull (aReceiverID, "ReceiverID");
     ValueEnforcer.notNull (aDocTypeID, "DocTypeID");
     ValueEnforcer.notNull (aProcessID, "ProcessID");
+    ValueEnforcer.notEmpty (sTransportProtocol, "TransportProtocol");
     ValueEnforcer.notEmpty (sEndpointURL, "EndpointURL");
     ValueEnforcer.notNull (aCert, "Cert");
 
@@ -42,6 +46,7 @@ public class MERoutingInformation implements IMERoutingInformation
     m_aReceiverID = aReceiverID;
     m_aDocTypeID = aDocTypeID;
     m_aProcessID = aProcessID;
+    m_sTransportProtocol = sTransportProtocol;
     m_sEndpointURL = sEndpointURL;
     m_aCert = aCert;
   }
@@ -72,6 +77,13 @@ public class MERoutingInformation implements IMERoutingInformation
 
   @Nonnull
   @Nonempty
+  public String getTransportProtocol ()
+  {
+    return m_sTransportProtocol;
+  }
+
+  @Nonnull
+  @Nonempty
   public String getEndpointURL ()
   {
     return m_sEndpointURL;
@@ -81,5 +93,18 @@ public class MERoutingInformation implements IMERoutingInformation
   public X509Certificate getCertificate ()
   {
     return m_aCert;
+  }
+
+  @Override
+  public String toString ()
+  {
+    return new ToStringGenerator (this).append ("SenderID", m_aSenderID)
+                                       .append ("ReceiverID", m_aReceiverID)
+                                       .append ("DocTypeID", m_aDocTypeID)
+                                       .append ("ProcID", m_aProcessID)
+                                       .append ("TransportProtocol", m_sTransportProtocol)
+                                       .append ("EndpointURL", m_sEndpointURL)
+                                       .append ("Cert", m_aCert)
+                                       .getToString ();
   }
 }

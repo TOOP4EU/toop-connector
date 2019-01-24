@@ -12,7 +12,7 @@ import com.helger.peppol.identifier.generic.process.IProcessIdentifier;
 
 /**
  * Message Exchange Routing Information.
- * 
+ *
  * @author Philip Helger
  */
 public interface IMERoutingInformation extends Serializable
@@ -40,6 +40,14 @@ public interface IMERoutingInformation extends Serializable
    */
   @Nonnull
   IProcessIdentifier getProcessID ();
+
+  /**
+   * @return The transport profile ID from the constructor. Neither
+   *         <code>null</code> nor empty.
+   */
+  @Nonnull
+  @Nonempty
+  String getTransportProtocol ();
 
   /**
    * @return The endpoint URL from the SMP lookup. Neither <code>null</code> nor
