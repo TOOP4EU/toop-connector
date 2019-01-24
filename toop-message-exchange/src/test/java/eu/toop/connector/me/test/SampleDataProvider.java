@@ -44,30 +44,23 @@ import eu.toop.connector.r2d2client.R2D2Endpoint;
 public class SampleDataProvider {
 
   @Nonnull
-  public static IR2D2Endpoint createSampleEndpoint(final EActingSide actingSide, final String c3URL) {
-    final IParticipantIdentifier identifier = TCSettings.getIdentifierFactory().createParticipantIdentifier("var1",
-        "var2");
-
-    final X509Certificate x509;
+  public static X509Certificate readCert(final EActingSide actingSide) {
     try {
       //If I am DC, use dp certificate or vice versa
       final String certName = actingSide == EActingSide.DC ? "/freedonia.crt" : "/elonia.crt" ;
-      x509 = (X509Certificate) CertificateFactory.getInstance("X509")
+      return (X509Certificate) CertificateFactory.getInstance("X509")
           .generateCertificate(SampleDataProvider.class
               .getResourceAsStream(certName));
     } catch (final CertificateException e) {
       throw new MEException(e.getMessage(), e);
     }
-
-    final R2D2Endpoint endpoint = new R2D2Endpoint(identifier, "protocol", c3URL, x509);
-    return endpoint;
   }
 
   public static GatewayRoutingMetadata createGatewayRoutingMetadata(final EActingSide actingSide,
       final String receivingGWURL) {
     final GatewayRoutingMetadata metadata = new GatewayRoutingMetadata("iso6523-actorid-upis::0088:123456",
         EPredefinedDocumentTypeIdentifier.REQUEST_REGISTEREDORGANIZATION.getURIEncoded(),
-        EPredefinedProcessIdentifier.DATAREQUESTRESPONSE.getURIEncoded(), createSampleEndpoint(actingSide, receivingGWURL), actingSide);
+        EPredefinedProcessIdentifier.DATAREQUESTRESPONSE.getURIEncoded(), receivingGWURL, readCert(actingSide), actingSide);
 
     return metadata;
   }

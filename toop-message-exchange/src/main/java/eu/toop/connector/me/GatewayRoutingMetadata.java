@@ -16,14 +16,13 @@
 package eu.toop.connector.me;
 
 import java.io.Serializable;
+import java.security.cert.X509Certificate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.Nonempty;
-
-import eu.toop.connector.r2d2client.IR2D2Endpoint;
 
 /**
  * @author myildiz at 15.02.2018.
@@ -49,24 +48,29 @@ public class GatewayRoutingMetadata implements Serializable {
   /**
    * The target endpoint
    */
-  private final IR2D2Endpoint endpoint;
+  private final String endpointUrl;
+
+  private final X509Certificate cert;
 
   private final EActingSide side;
 
-
   public GatewayRoutingMetadata(@Nonnull @Nonempty final String sSenderParticipantId,
       @Nonnull @Nonempty final String sDocumentTypeId,
-      @Nonnull @Nonempty final String sProcessId, @Nonnull final IR2D2Endpoint aEndpoint,
+      @Nonnull @Nonempty final String sProcessId, 
+      @Nonnull @Nonempty final String sEndpointUrl, 
+      @Nonnull final X509Certificate aCert,
       @Nonnull final EActingSide eSide) {
     ValueEnforcer.notEmpty(sSenderParticipantId, "SenderParticipantID");
     ValueEnforcer.notEmpty(sDocumentTypeId, "DocumentTypeID");
     ValueEnforcer.notEmpty(sProcessId, "ProcessID");
-    ValueEnforcer.notNull(aEndpoint, "Endpoint");
+    ValueEnforcer.notEmpty(sEndpointUrl, "EndpointURL");
+    ValueEnforcer.notNull(aCert, "Cert");
     ValueEnforcer.notNull(eSide, "Side");
     senderParticipantId = sSenderParticipantId;
     documentTypeId = sDocumentTypeId;
     processId = sProcessId;
-    endpoint = aEndpoint;
+    endpointUrl = sEndpointUrl;
+    cert = aCert;
     side = eSide;
   }
 
@@ -89,8 +93,14 @@ public class GatewayRoutingMetadata implements Serializable {
   }
 
   @Nonnull
-  public IR2D2Endpoint getEndpoint() {
-    return endpoint;
+  @Nonempty
+  public String getEndpointUrl() {
+    return endpointUrl;
+  }
+
+  @Nonnull
+  public X509Certificate getCertificate() {
+    return cert;
   }
 
   @Nonnull

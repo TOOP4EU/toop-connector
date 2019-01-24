@@ -365,7 +365,8 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
             final GatewayRoutingMetadata aGRM = new GatewayRoutingMetadata (aSenderID.getURIEncoded (),
                                                                             aDocTypeID.getURIEncoded (),
                                                                             aProcessID.getURIEncoded (),
-                                                                            aEP,
+                                                                            aEP.getEndpointURL (),
+                                                                            aEP.getCertificate (),
                                                                             EActingSide.DC);
             try
             {

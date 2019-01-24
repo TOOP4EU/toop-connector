@@ -508,8 +508,7 @@ public final class EBMSUtils {
    * @return SubmissionData
    */
   static SubmissionMessageProperties inferSubmissionData(final GatewayRoutingMetadata gatewayRoutingMetadata) {
-    final IR2D2Endpoint endpoint = gatewayRoutingMetadata.getEndpoint();
-    final X509Certificate certificate = endpoint.getCertificate();
+    final X509Certificate certificate = gatewayRoutingMetadata.getCertificate();
     // we need the certificate to obtain the to party id
     ValueEnforcer.notNull(certificate, "Endpoint Certificate");
     final SubmissionMessageProperties submissionData = new SubmissionMessageProperties();
@@ -517,7 +516,7 @@ public final class EBMSUtils {
     submissionData.action = gatewayRoutingMetadata.getDocumentTypeId();
     submissionData.service = gatewayRoutingMetadata.getProcessId();
 
-    submissionData.toPartyId = _getCN(gatewayRoutingMetadata.getEndpoint().getCertificate()
+    submissionData.toPartyId = _getCN(gatewayRoutingMetadata.getCertificate()
         .getSubjectX500Principal().getName());
 
     // TODO: infer it from the transaction id
@@ -527,11 +526,11 @@ public final class EBMSUtils {
     //to the role of the SENDING gateway (i.e MEMConstants.GW_PARTY_ROLE)
     submissionData.toPartyRole = MEMConstants.GW_PARTY_ROLE;
 
-    submissionData.targetURL = endpoint.getEndpointURL();
+    submissionData.targetURL = gatewayRoutingMetadata.getEndpointUrl ();
 
     try {
       // DER encoded X509 certificate
-      final byte[] certBytes = endpoint.getCertificate().getEncoded();
+      final byte[] certBytes = gatewayRoutingMetadata.getCertificate().getEncoded();
       // base 64 encoded DER bytes (i.e. converted to CER)
       submissionData.toPartyCertificate = DatatypeConverter.printBase64Binary(certBytes);
     } catch (final CertificateEncodingException e) {
