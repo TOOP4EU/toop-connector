@@ -24,22 +24,28 @@ import javax.annotation.Nullable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
 
 import com.helger.asic.AsicUtils;
 import com.helger.commons.collection.impl.CommonsArrayList;
 import com.helger.commons.collection.impl.ICommonsList;
 import com.helger.commons.concurrent.collector.IConcurrentPerformer;
+import com.helger.commons.error.IError;
 import com.helger.commons.error.level.EErrorLevel;
+import com.helger.commons.error.level.IErrorLevel;
+import com.helger.commons.error.list.ErrorList;
 import com.helger.commons.id.factory.GlobalIDFactory;
 import com.helger.commons.io.ByteArrayWrapper;
 import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 import com.helger.commons.lang.StackTraceHelper;
 import com.helger.commons.string.StringHelper;
 import com.helger.commons.text.MultilingualText;
+import com.helger.jaxb.validation.WrappedCollectingValidationEventHandler;
 import com.helger.peppol.identifier.factory.IIdentifierFactory;
 import com.helger.peppol.identifier.generic.doctype.IDocumentTypeIdentifier;
 import com.helger.peppol.identifier.generic.participant.IParticipantIdentifier;
 import com.helger.peppol.identifier.generic.process.IProcessIdentifier;
+import com.helger.schematron.svrl.AbstractSVRLMessage;
 
 import eu.toop.commons.codelist.EPredefinedDocumentTypeIdentifier;
 import eu.toop.commons.codelist.SMMDocumentTypeMapping;
@@ -48,6 +54,7 @@ import eu.toop.commons.concept.EConceptType;
 import eu.toop.commons.dataexchange.v140.TDEConceptRequestType;
 import eu.toop.commons.dataexchange.v140.TDEDataElementRequestType;
 import eu.toop.commons.dataexchange.v140.TDEErrorType;
+import eu.toop.commons.dataexchange.v140.TDERoutingInformationType;
 import eu.toop.commons.dataexchange.v140.TDETOOPRequestType;
 import eu.toop.commons.dataexchange.v140.TDETOOPResponseType;
 import eu.toop.commons.error.EToopErrorCategory;
@@ -56,7 +63,9 @@ import eu.toop.commons.error.EToopErrorOrigin;
 import eu.toop.commons.error.EToopErrorSeverity;
 import eu.toop.commons.error.ToopErrorException;
 import eu.toop.commons.exchange.ToopMessageBuilder;
+import eu.toop.commons.jaxb.ToopWriter;
 import eu.toop.commons.jaxb.ToopXSDHelper;
+import eu.toop.commons.schematron.TOOPSchematronValidator;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.TCSettings;
 import eu.toop.connector.api.as4.MEException;
@@ -83,21 +92,33 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
   private static final Logger LOGGER = LoggerFactory.getLogger (MessageProcessorDCOutgoingPerformer.class);
 
   @Nonnull
-  private static TDEErrorType _createError (@Nonnull final String sLogPrefix,
+  private static TDEErrorType _createError (@Nonnull final IErrorLevel aErrorLevel,
+                                            @Nonnull final String sLogPrefix,
                                             @Nonnull final EToopErrorCategory eCategory,
                                             @Nonnull final EToopErrorCode eErrorCode,
                                             @Nonnull final String sErrorText,
                                             @Nullable final Throwable t)
   {
     // Surely no DP here
-    ToopKafkaClient.send (EErrorLevel.ERROR, () -> sLogPrefix + "[" + eErrorCode.getID () + "] " + sErrorText);
+    ToopKafkaClient.send (aErrorLevel, () -> sLogPrefix + "[" + eErrorCode.getID () + "] " + sErrorText);
     return ToopMessageBuilder.createError (null,
                                            EToopErrorOrigin.REQUEST_SUBMISSION,
                                            eCategory,
                                            eErrorCode,
-                                           EToopErrorSeverity.FAILURE,
+                                           aErrorLevel.isError () ? EToopErrorSeverity.FAILURE
+                                                                  : EToopErrorSeverity.WARNING,
                                            new MultilingualText (Locale.US, sErrorText),
                                            t == null ? null : StackTraceHelper.getStackAsString (t));
+  }
+
+  @Nonnull
+  private static TDEErrorType _createError (@Nonnull final String sLogPrefix,
+                                            @Nonnull final EToopErrorCategory eCategory,
+                                            @Nonnull final EToopErrorCode eErrorCode,
+                                            @Nonnull final String sErrorText,
+                                            @Nullable final Throwable t)
+  {
+    return _createError (EErrorLevel.ERROR, sLogPrefix, eCategory, eErrorCode, sErrorText, t);
   }
 
   @Nonnull
@@ -116,21 +137,73 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
     final String sLogPrefix = "[" + sRequestID + "] ";
     final ICommonsList <TDEErrorType> aErrors = new CommonsArrayList <> ();
 
-    // TODO Schematron
+    // Schematron validation
+    {
+      final ErrorList aErrorList = new ErrorList ();
+      // XML creation
+      final Document aDoc = ToopWriter.request ()
+                                      .setValidationEventHandler (new WrappedCollectingValidationEventHandler (aErrorList))
+                                      .getAsDocument (aRequest);
+      if (aDoc == null)
+      {
+        for (final IError aError : aErrorList)
+          aErrors.add (_createError (aError.getErrorLevel (),
+                                     sLogPrefix,
+                                     EToopErrorCategory.PARSING,
+                                     EToopErrorCode.IF_001,
+                                     aError.getErrorText (Locale.US),
+                                     aError.getLinkedException ()));
+      }
+      else
+      {
+        // Schematron validation
+        final TOOPSchematronValidator aValidator = new TOOPSchematronValidator ();
+        final ICommonsList <AbstractSVRLMessage> aMsgs = aValidator.validateTOOPMessage (aDoc);
+        for (final AbstractSVRLMessage aMsg : aMsgs)
+        {
+          aErrors.add (_createError (aMsg.getFlag (),
+                                     sLogPrefix,
+                                     EToopErrorCategory.PARSING,
+                                     EToopErrorCode.IF_001,
+                                     "[" + aMsg.getLocation () + "] [Test: " + aMsg.getTest () + "] " + aMsg.getText (),
+                                     null));
+        }
+      }
+    }
+
+    final IIdentifierFactory aIF = TCSettings.getIdentifierFactory ();
+    final TDERoutingInformationType aRoutingInfo = aRequest.getRoutingInformation ();
+    final IParticipantIdentifier aSenderID = aRoutingInfo == null ? null
+                                                                  : aIF.createParticipantIdentifier (aRequest.getDataConsumer ()
+                                                                                                             .getDCElectronicAddressIdentifier ()
+                                                                                                             .getSchemeID (),
+                                                                                                     aRequest.getDataConsumer ()
+                                                                                                             .getDCElectronicAddressIdentifier ()
+                                                                                                             .getValue ());
+    final IDocumentTypeIdentifier aDocTypeID = aRoutingInfo == null ? null
+                                                                    : aIF.createDocumentTypeIdentifier (aRoutingInfo.getDocumentTypeIdentifier ()
+                                                                                                                    .getSchemeID (),
+                                                                                                        aRoutingInfo.getDocumentTypeIdentifier ()
+                                                                                                                    .getValue ());
+    final IProcessIdentifier aProcessID = aRoutingInfo == null ? null
+                                                               : aIF.createProcessIdentifier (aRoutingInfo.getProcessIdentifier ()
+                                                                                                          .getSchemeID (),
+                                                                                              aRoutingInfo.getProcessIdentifier ()
+                                                                                                          .getValue ());
 
     // Select document type
-    final EPredefinedDocumentTypeIdentifier eDocType = EPredefinedDocumentTypeIdentifier.getFromDocumentTypeIdentifierOrNull (aRequest.getRoutingInformation ()
-                                                                                                                                      .getDocumentTypeIdentifier ()
-                                                                                                                                      .getSchemeID (),
-                                                                                                                              aRequest.getRoutingInformation ()
-                                                                                                                                      .getDocumentTypeIdentifier ()
-                                                                                                                                      .getValue ());
+    final EPredefinedDocumentTypeIdentifier eDocType = aRoutingInfo == null ? null
+                                                                            : EPredefinedDocumentTypeIdentifier.getFromDocumentTypeIdentifierOrNull (aRoutingInfo.getDocumentTypeIdentifier ()
+                                                                                                                                                                 .getSchemeID (),
+                                                                                                                                                     aRoutingInfo.getDocumentTypeIdentifier ()
+                                                                                                                                                                 .getValue ());
     if (eDocType == null)
     {
       final String sErrorMsg = "Failed to resolve document type " +
-                               aRequest.getRoutingInformation ().getDocumentTypeIdentifier ().getSchemeID () +
-                               "::" +
-                               aRequest.getRoutingInformation ().getDocumentTypeIdentifier ().getValue ();
+                               (aRoutingInfo == null ? null
+                                                     : aRoutingInfo.getDocumentTypeIdentifier ().getSchemeID () +
+                                                       "::" +
+                                                       aRoutingInfo.getDocumentTypeIdentifier ().getValue ());
       aErrors.add (_createError (sLogPrefix, EToopErrorCategory.PARSING, EToopErrorCode.IF_001, sErrorMsg, null));
     }
     else
@@ -217,34 +290,13 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
       }
 
       ICommonsList <IR2D2Endpoint> aEndpoints = null;
-      final IIdentifierFactory aIF = TCSettings.getIdentifierFactory ();
-      final IParticipantIdentifier aSenderID = aIF.createParticipantIdentifier (aRequest.getDataConsumer ()
-                                                                                        .getDCElectronicAddressIdentifier ()
-                                                                                        .getSchemeID (),
-                                                                                aRequest.getDataConsumer ()
-                                                                                        .getDCElectronicAddressIdentifier ()
-                                                                                        .getValue ());
-      final IDocumentTypeIdentifier aDocTypeID = aIF.createDocumentTypeIdentifier (aRequest.getRoutingInformation ()
-                                                                                           .getDocumentTypeIdentifier ()
-                                                                                           .getSchemeID (),
-                                                                                   aRequest.getRoutingInformation ()
-                                                                                           .getDocumentTypeIdentifier ()
-                                                                                           .getValue ());
-      final IProcessIdentifier aProcessID = aIF.createProcessIdentifier (aRequest.getRoutingInformation ()
-                                                                                 .getProcessIdentifier ()
-                                                                                 .getSchemeID (),
-                                                                         aRequest.getRoutingInformation ()
-                                                                                 .getProcessIdentifier ()
-                                                                                 .getValue ());
 
       if (aErrors.isEmpty ())
       {
         // 2. invoke R2D2 client
 
         // Find destination country code
-        final String sDestinationCountryCode = aRequest.getRoutingInformation ()
-                                                       .getDataProviderCountryCode ()
-                                                       .getValue ();
+        final String sDestinationCountryCode = aRoutingInfo.getDataProviderCountryCode ().getValue ();
         if (StringHelper.hasNoText (sDestinationCountryCode))
         {
           aErrors.add (_createError (sLogPrefix,
