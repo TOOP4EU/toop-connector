@@ -25,6 +25,7 @@ import org.apache.http.util.EntityUtils;
 import com.helger.asic.SignatureHelper;
 import com.helger.commons.concurrent.collector.IConcurrentPerformer;
 import com.helger.commons.error.level.EErrorLevel;
+import com.helger.commons.id.factory.GlobalIDFactory;
 import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 import com.helger.httpclient.HttpClientManager;
 
@@ -43,7 +44,8 @@ final class MessageProcessorDCIncomingPerformer implements IConcurrentPerformer 
 {
   public void runAsync (@Nonnull final TDETOOPResponseType aResponse) throws Exception
   {
-    final String sRequestID = aResponse.getDataRequestIdentifier ().getValue ();
+    final String sRequestID = aResponse != null &&
+                              aResponse.getDataRequestIdentifier () != null ? aResponse.getDataRequestIdentifier ().getValue () : "temp-tc4-id-" + GlobalIDFactory.getNewIntID ();
     final String sLogPrefix = "[" + sRequestID + "] ";
     ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "Received DC Incoming Request (4/4)");
 

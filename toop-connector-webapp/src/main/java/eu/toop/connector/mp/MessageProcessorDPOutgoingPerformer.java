@@ -39,6 +39,7 @@ import com.helger.commons.error.IError;
 import com.helger.commons.error.level.EErrorLevel;
 import com.helger.commons.error.level.IErrorLevel;
 import com.helger.commons.error.list.ErrorList;
+import com.helger.commons.id.factory.GlobalIDFactory;
 import com.helger.commons.io.ByteArrayWrapper;
 import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 import com.helger.commons.lang.StackTraceHelper;
@@ -154,7 +155,8 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
 
   public void runAsync (@Nonnull final TDETOOPResponseType aResponse) throws Exception
   {
-    final String sRequestID = aResponse.getDataRequestIdentifier ().getValue ();
+    final String sRequestID = aResponse != null &&
+                              aResponse.getDataRequestIdentifier () != null ? aResponse.getDataRequestIdentifier ().getValue () : "temp-tc3-id-" + GlobalIDFactory.getNewIntID ();
     final String sLogPrefix = "[" + sRequestID + "] ";
     ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "Received DP outgoing response (3/4)");
     final ICommonsList <TDEErrorType> aErrors = new CommonsArrayList <> ();

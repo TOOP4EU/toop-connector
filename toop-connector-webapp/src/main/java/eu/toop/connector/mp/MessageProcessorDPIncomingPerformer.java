@@ -31,6 +31,7 @@ import com.helger.commons.collection.impl.CommonsArrayList;
 import com.helger.commons.collection.impl.ICommonsList;
 import com.helger.commons.concurrent.collector.IConcurrentPerformer;
 import com.helger.commons.error.level.EErrorLevel;
+import com.helger.commons.id.factory.GlobalIDFactory;
 import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 import com.helger.commons.lang.StackTraceHelper;
 import com.helger.commons.string.StringHelper;
@@ -124,7 +125,8 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
 
   public void runAsync (@Nonnull final TDETOOPRequestType aRequest) throws Exception
   {
-    final String sRequestID = aRequest.getDataRequestIdentifier ().getValue ();
+    final String sRequestID = aRequest != null &&
+                              aRequest.getDocumentUniversalUniqueIdentifier () != null ? aRequest.getDocumentUniversalUniqueIdentifier ().getValue () : "temp-tc2-id-" + GlobalIDFactory.getNewIntID ();
     final String sLogPrefix = "[" + sRequestID + "] ";
     final ICommonsList <TDEErrorType> aErrors = new CommonsArrayList <> ();
 

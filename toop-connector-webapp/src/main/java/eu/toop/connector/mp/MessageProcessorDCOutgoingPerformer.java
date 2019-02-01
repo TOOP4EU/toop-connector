@@ -134,7 +134,8 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
      * This is the unique ID of this request message and must be used throughout the
      * whole process for identification
      */
-    final String sRequestID = GlobalIDFactory.getNewPersistentStringID ();
+    final String sRequestID = aRequest != null &&
+                              aRequest.getDocumentUniversalUniqueIdentifier () != null ? aRequest.getDocumentUniversalUniqueIdentifier ().getValue () : "temp-tc1-id-" + GlobalIDFactory.getNewIntID ();
     final String sLogPrefix = "[" + sRequestID + "] ";
     final ICommonsList <TDEErrorType> aErrors = new CommonsArrayList <> ();
 
