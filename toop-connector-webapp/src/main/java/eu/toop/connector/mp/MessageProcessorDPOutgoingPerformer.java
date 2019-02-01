@@ -28,22 +28,28 @@ import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
 
 import com.helger.asic.AsicUtils;
 import com.helger.asic.SignatureHelper;
 import com.helger.commons.collection.impl.CommonsArrayList;
 import com.helger.commons.collection.impl.ICommonsList;
 import com.helger.commons.concurrent.collector.IConcurrentPerformer;
+import com.helger.commons.error.IError;
 import com.helger.commons.error.level.EErrorLevel;
+import com.helger.commons.error.level.IErrorLevel;
+import com.helger.commons.error.list.ErrorList;
 import com.helger.commons.io.ByteArrayWrapper;
 import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 import com.helger.commons.lang.StackTraceHelper;
 import com.helger.commons.text.MultilingualText;
 import com.helger.httpclient.HttpClientManager;
+import com.helger.jaxb.validation.WrappedCollectingValidationEventHandler;
 import com.helger.peppol.identifier.factory.IIdentifierFactory;
 import com.helger.peppol.identifier.generic.doctype.IDocumentTypeIdentifier;
 import com.helger.peppol.identifier.generic.participant.IParticipantIdentifier;
 import com.helger.peppol.identifier.generic.process.IProcessIdentifier;
+import com.helger.schematron.svrl.AbstractSVRLMessage;
 
 import eu.toop.commons.dataexchange.v140.TDEDataProviderType;
 import eu.toop.commons.dataexchange.v140.TDEErrorType;
@@ -55,6 +61,8 @@ import eu.toop.commons.error.EToopErrorSeverity;
 import eu.toop.commons.error.IToopErrorCode;
 import eu.toop.commons.error.ToopErrorException;
 import eu.toop.commons.exchange.ToopMessageBuilder;
+import eu.toop.commons.jaxb.ToopWriter;
+import eu.toop.commons.schematron.TOOPSchematronValidator;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.TCSettings;
 import eu.toop.connector.api.as4.MEException;
@@ -78,21 +86,32 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
   private static final Logger LOGGER = LoggerFactory.getLogger (MessageProcessorDPOutgoingPerformer.class);
 
   @Nonnull
+  private static TDEErrorType _createError (@Nonnull final IErrorLevel aErrorLevel,
+                                            @Nonnull final String sLogPrefix,
+                                            @Nonnull final EToopErrorCategory eCategory,
+                                            @Nonnull final IToopErrorCode aErrorCode,
+                                            @Nonnull final String sErrorText,
+                                            @Nullable final Throwable t)
+  {
+    ToopKafkaClient.send (aErrorLevel, () -> sLogPrefix + "[" + aErrorCode.getID () + "] " + sErrorText);
+    return ToopMessageBuilder.createError (null,
+                                           EToopErrorOrigin.RESPONSE_SUBMISSION,
+                                           eCategory,
+                                           aErrorCode,
+                                           aErrorLevel.isError () ? EToopErrorSeverity.FAILURE
+                                                                  : EToopErrorSeverity.WARNING,
+                                           new MultilingualText (Locale.US, sErrorText),
+                                           t == null ? null : StackTraceHelper.getStackAsString (t));
+  }
+
+  @Nonnull
   private static TDEErrorType _createError (@Nonnull final String sLogPrefix,
                                             @Nonnull final EToopErrorCategory eCategory,
                                             @Nonnull final IToopErrorCode aErrorCode,
                                             @Nonnull final String sErrorText,
                                             @Nullable final Throwable t)
   {
-    // Surely no DP here
-    ToopKafkaClient.send (EErrorLevel.ERROR, () -> sLogPrefix + "[" + aErrorCode.getID () + "] " + sErrorText);
-    return ToopMessageBuilder.createError (null,
-                                           EToopErrorOrigin.RESPONSE_SUBMISSION,
-                                           eCategory,
-                                           aErrorCode,
-                                           EToopErrorSeverity.FAILURE,
-                                           new MultilingualText (Locale.US, sErrorText),
-                                           t == null ? null : StackTraceHelper.getStackAsString (t));
+    return _createError (EErrorLevel.ERROR, sLogPrefix, eCategory, aErrorCode, sErrorText, t);
   }
 
   @Nonnull
@@ -140,7 +159,39 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
     ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "Received DP outgoing response (3/4)");
     final ICommonsList <TDEErrorType> aErrors = new CommonsArrayList <> ();
 
-    // TODO Schematron validation
+    // Schematron validation
+    {
+      final ErrorList aErrorList = new ErrorList ();
+      // XML creation
+      final Document aDoc = ToopWriter.response ()
+                                      .setValidationEventHandler (new WrappedCollectingValidationEventHandler (aErrorList))
+                                      .getAsDocument (aResponse);
+      if (aDoc == null)
+      {
+        for (final IError aError : aErrorList)
+          aErrors.add (_createError (aError.getErrorLevel (),
+                                     sLogPrefix,
+                                     EToopErrorCategory.PARSING,
+                                     EToopErrorCode.IF_001,
+                                     aError.getErrorText (Locale.US),
+                                     aError.getLinkedException ()));
+      }
+      else
+      {
+        // Schematron validation
+        final TOOPSchematronValidator aValidator = new TOOPSchematronValidator ();
+        final ICommonsList <AbstractSVRLMessage> aMsgs = aValidator.validateTOOPMessage (aDoc);
+        for (final AbstractSVRLMessage aMsg : aMsgs)
+        {
+          aErrors.add (_createError (aMsg.getFlag (),
+                                     sLogPrefix,
+                                     EToopErrorCategory.PARSING,
+                                     EToopErrorCode.IF_001,
+                                     "[" + aMsg.getLocation () + "] [Test: " + aMsg.getTest () + "] " + aMsg.getText (),
+                                     null));
+        }
+      }
+    }
 
     // Ensure data provider element is present (required in all cases)
     final TDEDataProviderType aDataProvider = aResponse.getDataProvider ()
