@@ -52,6 +52,7 @@ import eu.toop.commons.error.EToopErrorCategory;
 import eu.toop.commons.error.EToopErrorCode;
 import eu.toop.commons.error.EToopErrorOrigin;
 import eu.toop.commons.error.EToopErrorSeverity;
+import eu.toop.commons.error.IToopErrorCode;
 import eu.toop.commons.error.ToopErrorException;
 import eu.toop.commons.exchange.ToopMessageBuilder;
 import eu.toop.connector.api.TCConfig;
@@ -79,16 +80,16 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
   @Nonnull
   private static TDEErrorType _createError (@Nonnull final String sLogPrefix,
                                             @Nonnull final EToopErrorCategory eCategory,
-                                            @Nonnull final EToopErrorCode eErrorCode,
+                                            @Nonnull final IToopErrorCode aErrorCode,
                                             @Nonnull final String sErrorText,
                                             @Nullable final Throwable t)
   {
     // Surely no DP here
-    ToopKafkaClient.send (EErrorLevel.ERROR, () -> sLogPrefix + "[" + eErrorCode.getID () + "] " + sErrorText);
+    ToopKafkaClient.send (EErrorLevel.ERROR, () -> sLogPrefix + "[" + aErrorCode.getID () + "] " + sErrorText);
     return ToopMessageBuilder.createError (null,
                                            EToopErrorOrigin.RESPONSE_SUBMISSION,
                                            eCategory,
-                                           eErrorCode,
+                                           aErrorCode,
                                            EToopErrorSeverity.FAILURE,
                                            new MultilingualText (Locale.US, sErrorText),
                                            t == null ? null : StackTraceHelper.getStackAsString (t));

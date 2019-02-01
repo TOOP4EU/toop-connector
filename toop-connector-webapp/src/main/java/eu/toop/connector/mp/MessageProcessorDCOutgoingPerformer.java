@@ -61,6 +61,7 @@ import eu.toop.commons.error.EToopErrorCategory;
 import eu.toop.commons.error.EToopErrorCode;
 import eu.toop.commons.error.EToopErrorOrigin;
 import eu.toop.commons.error.EToopErrorSeverity;
+import eu.toop.commons.error.IToopErrorCode;
 import eu.toop.commons.error.ToopErrorException;
 import eu.toop.commons.exchange.ToopMessageBuilder;
 import eu.toop.commons.jaxb.ToopWriter;
@@ -95,16 +96,16 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
   private static TDEErrorType _createError (@Nonnull final IErrorLevel aErrorLevel,
                                             @Nonnull final String sLogPrefix,
                                             @Nonnull final EToopErrorCategory eCategory,
-                                            @Nonnull final EToopErrorCode eErrorCode,
+                                            @Nonnull final IToopErrorCode aErrorCode,
                                             @Nonnull final String sErrorText,
                                             @Nullable final Throwable t)
   {
     // Surely no DP here
-    ToopKafkaClient.send (aErrorLevel, () -> sLogPrefix + "[" + eErrorCode.getID () + "] " + sErrorText);
+    ToopKafkaClient.send (aErrorLevel, () -> sLogPrefix + "[" + aErrorCode.getID () + "] " + sErrorText);
     return ToopMessageBuilder.createError (null,
                                            EToopErrorOrigin.REQUEST_SUBMISSION,
                                            eCategory,
-                                           eErrorCode,
+                                           aErrorCode,
                                            aErrorLevel.isError () ? EToopErrorSeverity.FAILURE
                                                                   : EToopErrorSeverity.WARNING,
                                            new MultilingualText (Locale.US, sErrorText),
@@ -114,11 +115,11 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
   @Nonnull
   private static TDEErrorType _createError (@Nonnull final String sLogPrefix,
                                             @Nonnull final EToopErrorCategory eCategory,
-                                            @Nonnull final EToopErrorCode eErrorCode,
+                                            @Nonnull final IToopErrorCode aErrorCode,
                                             @Nonnull final String sErrorText,
                                             @Nullable final Throwable t)
   {
-    return _createError (EErrorLevel.ERROR, sLogPrefix, eCategory, eErrorCode, sErrorText, t);
+    return _createError (EErrorLevel.ERROR, sLogPrefix, eCategory, aErrorCode, sErrorText, t);
   }
 
   @Nonnull
