@@ -208,8 +208,15 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
     }
     else
     {
-      // Remember request ID
-      aRequest.setDataRequestIdentifier (ToopXSDHelper.createIdentifier (sRequestID));
+      // Don't do this:
+      // DataRequestIdentifier: "A reference to the universally unique identifier of
+      // the corresponding Toop data request."
+      // -> so set only in step 3/4
+      if (false)
+      {
+        // Remember request ID
+        aRequest.setDataRequestIdentifier (ToopXSDHelper.createIdentifier (sRequestID));
+      }
 
       ToopKafkaClient.send (EErrorLevel.INFO, () -> "Created new unique request ID [" + sRequestID + "]");
       ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "Received DC Request (1/4)");
