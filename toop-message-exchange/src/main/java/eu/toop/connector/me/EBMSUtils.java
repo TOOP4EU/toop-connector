@@ -38,6 +38,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
+import eu.toop.commons.error.EToopErrorCode;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -580,13 +581,13 @@ public final class EBMSUtils {
       final String code = StringHelper.getNotNull(errorElement.getAttribute("errorCode")).toUpperCase(Locale.US);
 
       final StringBuilder errBuff = new StringBuilder();
-      errBuff.append("CODE: [" + code + "]\n");
+      errBuff.append("EBMS ERROR CODE: [" + code + "]\n");
       errBuff.append("Severity: [" + severity + "]\n");
       errBuff.append("Category: [" + cat + "]\n");
       errBuff.append("ShortDescription: [" + shortDescription
           + "]\n");
-      ToopKafkaClient.send(EErrorLevel.ERROR, () -> "Error from AS4 transmission:" + errBuff.toString());
-      throw new MEException(errBuff.toString());
+      ToopKafkaClient.send(EErrorLevel.ERROR, () -> "Error from AS4 transmission: EToopErrorCode.ME_002 -- " + errBuff.toString());
+      throw new MEException(EToopErrorCode.ME_002, errBuff.toString());
 
     }
 

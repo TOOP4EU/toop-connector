@@ -1,12 +1,12 @@
 /**
  * Copyright (C) 2018-2019 toop.eu
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *         http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -58,13 +58,13 @@ public class TestSendReceive {
   @BeforeClass
   public static void prepare() {
     // Port must match the message-processor.properties
-    if (LOG.isDebugEnabled ())
+    if (LOG.isDebugEnabled())
       LOG.debug("Prepare for the test");
 
     final URL backendURL = URLHelper.getAsURL("http://localhost:10001/backend");
     final URL gwURL = URLHelper.getAsURL(TCConfig.getMEMAS4Endpoint());
 
-    if (LOG.isInfoEnabled ()) {
+    if (LOG.isInfoEnabled()) {
       LOG.info("backend port: " + backendURL.getPort());
       LOG.info("backend localpath: " + backendURL.getPath());
       LOG.info("GW port: " + gwURL.getPort());
@@ -95,9 +95,7 @@ public class TestSendReceive {
         .createGatewayRoutingMetadata(EActingSide.DC, TCConfig.getMEMAS4Endpoint());
     final MEMessage meMessage = SampleDataProvider.createSampleMessage();
 
-    final boolean result = MEMDelegate.getInstance().sendMessage(metadata, meMessage);
-
-    assertTrue("Message sending result must be true", result );
+    MEMDelegate.getInstance().sendMessage(metadata, meMessage);
 
     final IMessageHandler handler = meMessage1 -> LOG.info("hooray! I Got a message");
 

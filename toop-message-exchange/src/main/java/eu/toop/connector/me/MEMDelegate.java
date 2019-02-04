@@ -1,12 +1,12 @@
 /**
  * Copyright (C) 2018-2019 toop.eu
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *         http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,9 +25,11 @@ import javax.xml.soap.SOAPMessage;
 
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.UsedViaReflection;
+import com.helger.commons.error.level.EErrorLevel;
 import com.helger.commons.url.URLHelper;
 import com.helger.scope.singleton.AbstractGlobalSingleton;
 
+import eu.toop.commons.error.EToopErrorCode;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.as4.MEException;
 import eu.toop.connector.api.as4.MEMessage;
@@ -38,6 +40,7 @@ import eu.toop.connector.me.notifications.InternalRelayResultHandler;
 import eu.toop.connector.me.notifications.InternalSubmissionResultHandler;
 import eu.toop.connector.me.notifications.RelayResult;
 import eu.toop.connector.me.notifications.SubmissionResult;
+import eu.toop.kafkaclient.ToopKafkaClient;
 
 /**
  * The API Entry class for the Message Exchange API.
@@ -78,18 +81,18 @@ public class MEMDelegate extends AbstractGlobalSingleton {
    * The V1 message sending interface for the message exchange module
    *
    * @param gatewayRoutingMetadata The container for the endpoint information and docid/procid
-   * @param meMessage the payloads and their metadata to be sent to the gateway.
+   * @param meMessage              the payloads and their metadata to be sent to the gateway.
    * @return <code>true</code> if sending was successful, <code>false</code> if not
    */
-  public boolean sendMessage(final GatewayRoutingMetadata gatewayRoutingMetadata, final MEMessage meMessage) {
-    if (LOG.isDebugEnabled ()) {
+  public void sendMessage(final GatewayRoutingMetadata gatewayRoutingMetadata, final MEMessage meMessage) {
+    if (LOG.isDebugEnabled()) {
       LOG.debug(
           "Send message called for procid: " + gatewayRoutingMetadata.getProcessId() + " docid: " + gatewayRoutingMetadata
               .getDocumentTypeId());
       LOG.debug("Convert gateway routing metadata to submission data");
     }
     final SubmissionMessageProperties submissionData = EBMSUtils.inferSubmissionData(gatewayRoutingMetadata);
-    if (LOG.isDebugEnabled ())
+    if (LOG.isDebugEnabled())
       LOG.debug("Create SOAP Message based on the submission data and the payloads");
     final SOAPMessage soapMessage = EBMSUtils.convert2MEOutboundAS4Message(submissionData, meMessage);
     if (LOG.isTraceEnabled()) {
@@ -98,12 +101,12 @@ public class MEMDelegate extends AbstractGlobalSingleton {
 
     String messageID;
     try {
-      messageID = SoapXPathUtil.getSingleNodeTextContent (soapMessage.getSOAPHeader(), "//:MessageInfo/:MessageId");
+      messageID = SoapXPathUtil.getSingleNodeTextContent(soapMessage.getSOAPHeader(), "//:MessageInfo/:MessageId");
     } catch (final SOAPException e) {
       throw new MEException(e);
     }
 
-    if (LOG.isDebugEnabled ()) {
+    if (LOG.isDebugEnabled()) {
       LOG.debug("New soap message ID " + messageID);
       LOG.debug("Send soap message " + messageID);
     }
@@ -113,36 +116,42 @@ public class MEMDelegate extends AbstractGlobalSingleton {
     }
 
     EBMSUtils.sendSOAPMessage(soapMessage, URLHelper.getAsURL(TCConfig.getMEMAS4Endpoint()));
-    if (LOG.isDebugEnabled ())
+    if (LOG.isDebugEnabled())
       LOG.debug("SOAP Message " + messageID + " sent");
 
     final long timeout = TCConfig.getGatewayNotificationWaitTimeout();
     //now that we have sent the object, first wait for the submission result
-    if (LOG.isDebugEnabled ())
+    if (LOG.isDebugEnabled())
       LOG.debug("Wait for SubmissionResult for " + messageID);
     final SubmissionResult submissionResult = (SubmissionResult) internalSRHandler.obtainNotification(messageID, timeout);
 
     LOG.info("SubmissionResult " + submissionResult.getResult());
     if (submissionResult.getResult() != ResultType.RECEIPT) {
-      if (LOG.isErrorEnabled ()) {
+      if (LOG.isErrorEnabled()) {
         LOG.error("SubmitMessageId: " + submissionResult.getErrorCode());
         LOG.error("C2-C3 MessageId: " + submissionResult.getRefToMessageID());
         LOG.error("ErrorCode: " + submissionResult.getErrorCode());
         LOG.error("Description: " + submissionResult.getDescription());
       }
-      return false;
+
+      String errorMesage = "Error from AS4 transmission: EToopErrorCode.ME_002 -- " +
+          "EBMS ERROR CODE: [" + submissionResult.getErrorCode() + "]\n";
+
+      ToopKafkaClient.send(EErrorLevel.ERROR, () -> errorMesage);
+      throw new MEException(EToopErrorCode.ME_002, errorMesage);
+
     }
 
-    if (LOG.isDebugEnabled ())
+    if (LOG.isDebugEnabled())
       LOG.debug("Wait for RelayResult for " + messageID);
     final RelayResult relayResult = (RelayResult) internalRelayResultHandler
         .obtainNotification(submissionResult.getMessageID(), timeout);
 
-    if (LOG.isInfoEnabled ())
+    if (LOG.isInfoEnabled())
       LOG.info("RelayResult " + relayResult.getResult());
 
     if (relayResult.getResult() != ResultType.RECEIPT) {
-      if (LOG.isErrorEnabled ()) {
+      if (LOG.isErrorEnabled()) {
         LOG.error("SubmitMessageId: " + relayResult.getErrorCode());
         LOG.error("C2-C3 MessageId: " + relayResult.getRefToMessageID());
         LOG.error("ErrorCode: " + relayResult.getErrorCode());
@@ -150,10 +159,18 @@ public class MEMDelegate extends AbstractGlobalSingleton {
         LOG.error("ShortDescription: " + relayResult.getShortDescription());
         LOG.error("Description: " + relayResult.getDescription());
       }
-      return false;
-    }
 
-    return true;
+      String errorMesage = "Error from AS4 transmission: EToopErrorCode.ME_002 -- " +
+          "EBMS ERROR CODE: " + relayResult.getErrorCode() +
+          "\nSeverity: " + relayResult.getSeverity() +
+          "\nShort Description: " + relayResult.getShortDescription();
+
+      ToopKafkaClient.send(EErrorLevel.ERROR, () -> errorMesage);
+      if ("EBMS:0301".equals(relayResult.getErrorCode()))
+        throw new MEException(EToopErrorCode.ME_003, errorMesage);
+      else
+        throw new MEException(EToopErrorCode.ME_004, errorMesage);
+    }
   }
 
   /**
@@ -225,9 +242,9 @@ public class MEMDelegate extends AbstractGlobalSingleton {
    * @param message message to be dispatched
    */
   public void dispatchInboundMessage(@Nonnull final SOAPMessage message) {
-    if (LOG.isInfoEnabled ())
+    if (LOG.isInfoEnabled())
       LOG.info("Received a Deliver message\n" + //
-           "   Inbound  AS4  Message ID: " + EBMSUtils.getMessageId(message));
+          "   Inbound  AS4  Message ID: " + EBMSUtils.getMessageId(message));
     try {
       // Do it only once
       final MEMessage aMEMessage = EBMSUtils.soap2MEMessage(message);
@@ -241,6 +258,7 @@ public class MEMDelegate extends AbstractGlobalSingleton {
 
   /**
    * Dispatch the received RelayResult to the registered listeners
+   *
    * @param notification Relay result
    */
   public void dispatchRelayResult(final SOAPMessage notification) {
@@ -248,7 +266,7 @@ public class MEMDelegate extends AbstractGlobalSingleton {
       // Do it only once
       final RelayResult relayResult = EBMSUtils.soap2RelayResult(notification);
 
-      if (LOG.isInfoEnabled ())
+      if (LOG.isInfoEnabled())
         LOG.info("RelayResult for \n" + //
             "   Outbound AS4  Message ID: " + relayResult.getRefToMessageID() + "\n" + //
             "   MessageID:                " + relayResult.getMessageID());
@@ -263,6 +281,7 @@ public class MEMDelegate extends AbstractGlobalSingleton {
 
   /**
    * Dispatch the received SubmissioNResult to the registered listeners
+   *
    * @param submissionResult Submission result SOAP message
    */
   public void dispatchSubmissionResult(final SOAPMessage submissionResult) {
@@ -270,7 +289,7 @@ public class MEMDelegate extends AbstractGlobalSingleton {
       // Do it only once
       final SubmissionResult sSubmissionResult = EBMSUtils.soap2SubmissionResult(submissionResult);
 
-      if (LOG.isInfoEnabled ())
+      if (LOG.isInfoEnabled())
         LOG.info("SubmissionResult for \n" + //
             "   SubmitMessage Message ID: " + sSubmissionResult.getRefToMessageID() + "\n" +
             "   Outbound AS4  Message ID: " + sSubmissionResult.getMessageID());

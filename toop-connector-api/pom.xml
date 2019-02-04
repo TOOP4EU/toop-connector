@@ -65,6 +65,10 @@
       <artifactId>javax.servlet-api</artifactId>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>eu.toop</groupId>
+      <artifactId>toop-commons</artifactId>
+    </dependency>
     <!-- Test only -->
     <dependency>
       <groupId>org.slf4j</groupId>

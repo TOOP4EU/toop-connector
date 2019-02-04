@@ -15,6 +15,8 @@
  */
 package eu.toop.connector.api.as4;
 
+import eu.toop.commons.error.EToopErrorCode;
+
 /**
  * A separate runtime exception to make it easier for the users to distinguish
  * between the 'source path' to the underlying problem.
@@ -23,6 +25,8 @@ package eu.toop.connector.api.as4;
  */
 public class MEException extends IllegalStateException
 {
+  private EToopErrorCode toopErrorCode;
+
   public MEException (final String sMsg)
   {
     super (sMsg);
@@ -36,5 +40,22 @@ public class MEException extends IllegalStateException
   public MEException (final String sMsg, final Throwable aCause)
   {
     super (sMsg, aCause);
+  }
+
+  public MEException(final EToopErrorCode toopErrorCode) {
+    super(toopErrorCode.toString());
+    this.toopErrorCode = toopErrorCode;
+  }
+  public MEException(final EToopErrorCode toopErrorCode, final Throwable aCause) {
+    super(toopErrorCode.toString(), aCause);
+    this.toopErrorCode = toopErrorCode;
+  }
+  public MEException(final EToopErrorCode toopErrorCode, String sMsg) {
+    super(toopErrorCode.toString() + " - " + sMsg);
+    this.toopErrorCode = toopErrorCode;
+  }
+
+  public EToopErrorCode getToopErrorCode() {
+    return toopErrorCode;
   }
 }

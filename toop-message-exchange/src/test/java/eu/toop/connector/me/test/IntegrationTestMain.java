@@ -1,12 +1,12 @@
 /**
  * Copyright (C) 2018-2019 toop.eu
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *         http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -40,7 +40,7 @@ import eu.toop.connector.me.notifications.IMessageHandler;
 /**
  * This class runs an and to end integration test with a locally running Toop Compatible gateway. The simulation is from
  * elonia-gw-gw-freedonia and back
- *
+ * <p>
  * This is not a unit test that is why it has a main method
  *
  * @author myildiz83
@@ -126,7 +126,7 @@ public class IntegrationTestMain {
    * Send a message from one side to the other
    */
   private static void sendMessage(final DeliveryWatcher deliveryWatcher, final EActingSide actingSide,
-      final String recivingSideURL) {
+                                  final String recivingSideURL) {
     deliveryWatcher.reset();
 
     //set the address of the receiving gateway to t
@@ -134,12 +134,13 @@ public class IntegrationTestMain {
         recivingSideURL);
     final MEMessage meMessage = SampleDataProvider.createSampleMessage();
 
-    final boolean result = MEMDelegate.getInstance().sendMessage(gatewayRoutingMetadata, meMessage);
+    try {
+      MEMDelegate.getInstance().sendMessage(gatewayRoutingMetadata, meMessage);
+    } catch (Throwable th) {
 
-    if (!result) {
       LOG.info("TEST for " + actingSide + " FAILED");
       LOG.error("Failed to send a message");
-
+      LOG.error(th.getMessage(), th);
       return;
     }
 

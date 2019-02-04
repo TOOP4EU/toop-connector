@@ -1,12 +1,12 @@
 /**
  * Copyright (C) 2018-2019 toop.eu
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *         http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,6 +17,7 @@ package eu.toop.connector.me;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.ConnectException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
@@ -32,6 +33,7 @@ import javax.xml.soap.SOAPMessage;
 import com.helger.commons.error.level.EErrorLevel;
 import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 
+import eu.toop.commons.error.EToopErrorCode;
 import eu.toop.connector.api.as4.MEException;
 import eu.toop.kafkaclient.ToopKafkaClient;
 
@@ -56,7 +58,8 @@ public class SoapUtil {
     factory.setNamespaceAware(true);
   }
 
-  private SoapUtil () {}
+  private SoapUtil() {
+  }
 
   /**
    * A utility method to create a SOAP1.2 With Attachments message
@@ -84,12 +87,12 @@ public class SoapUtil {
       final SOAPConnection connection = soapConnectionFactory.createConnection();
       return connection.call(message, endpoint);
     } catch (final SOAPException e) {
-      throw new MEException(e);
+      throw new MEException(EToopErrorCode.ME_001, e);
     }
   }
 
   public static SOAPMessage createMessage(final MimeHeaders headers,
-      final InputStream is) throws IOException, SOAPException {
+                                          final InputStream is) throws IOException, SOAPException {
     return messageFactory.createMessage(headers, is);
   }
 
