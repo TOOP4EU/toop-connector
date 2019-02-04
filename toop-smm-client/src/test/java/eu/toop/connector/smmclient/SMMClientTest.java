@@ -19,14 +19,19 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.toop.commons.codelist.EPredefinedDocumentTypeIdentifier;
-import eu.toop.commons.codelist.SMMDocumentTypeMapping;
+import com.helger.commons.collection.impl.ICommonsOrderedSet;
+import com.helger.xml.microdom.IMicroDocument;
+import com.helger.xml.microdom.IMicroElement;
+import com.helger.xml.microdom.MicroDocument;
+import com.helger.xml.microdom.serialize.MicroWriter;
+
 import eu.toop.commons.concept.ConceptValue;
 
 /**
@@ -34,30 +39,37 @@ import eu.toop.commons.concept.ConceptValue;
  *
  * @author Philip Helger
  */
-public final class SMMClientTest
-{
-  private static final Logger s_aLogger = LoggerFactory.getLogger (SMMClientTest.class);
+public final class SMMClientTest {
+  private static final Logger LOGGER = LoggerFactory.getLogger (SMMClientTest.class);
 
-  private static final String NS_FREEDONIA = "http://toop.fre/freedonia-business-register";
-
-  private static final String LOG_PREFIX = "[unit test] ";
-  private static final String NS_TOOP = SMMDocumentTypeMapping.getToopSMNamespace (EPredefinedDocumentTypeIdentifier.REQUEST_REGISTEREDORGANIZATION);
-  private static final ConceptValue CONCEPT_TOOP_1 = new ConceptValue (NS_TOOP, "CompanyCode");
-  private static final ConceptValue CONCEPT_FR_1 = new ConceptValue (NS_FREEDONIA, "FreedoniaBusinessCode");
+  private static final ConceptValue CONCEPT_TOOP_1 = new ConceptValue (CMockSMM.NS_TOOP, "CompanyCode");
+  private static final ConceptValue CONCEPT_FR_1 = new ConceptValue (CMockSMM.NS_FREEDONIA, "FreedoniaBusinessCode");
 
   // Use with cache and remote
-  private static final ISMMConceptProvider [] CP = new ISMMConceptProvider [] { SMMConceptProviderGRLCRemote::getAllMappedValues,
-                                                                                SMMConceptProviderGRLCRemote::remoteQueryAllMappedValues };
-  private static final IUnmappableCallback UCB = (sLogPrefix, aSourceNamespace, aSourceValue, aDestNamespace) -> {};
+  private static final ISMMConceptProvider[] CP = new ISMMConceptProvider[] { SMMConceptProviderGRLCRemote::getAllMappedValues,
+                                                                              SMMConceptProviderGRLCRemote::remoteQueryAllMappedValues };
+  private static final IUnmappableCallback UCB = (sLogPrefix, aSourceNamespace, aSourceValue, aDestNamespace) -> {
+  };
+
+  // static {
+  // final String sProxyHost = "172.30.9.6";
+  // final String sProxyPort = "8080";
+  // System.setProperty ("java.net.useSystemProxies", "false");
+  // System.setProperty ("http.proxyHost", sProxyHost);
+  // System.setProperty ("http.proxyPort", sProxyPort);
+  // System.setProperty ("https.proxyHost", sProxyHost);
+  // System.setProperty ("https.proxyPort", sProxyPort);
+  // System.setProperty ("http.nonProxyHosts", "*.brz.gv.at|localhost");
+  // System.setProperty ("com.sun.net.ssl.checkRevocation", "false");
+  // System.setProperty ("javax.net.ssl.trustStore", "/BRZ-StammCA-2-01.jks");
+  // }
 
   @Test
-  public void testEmpty () throws IOException
-  {
-    for (final ISMMConceptProvider aCP : CP)
-    {
-      s_aLogger.info ("Starting testEmpty");
+  public void testEmpty () throws IOException {
+    for (final ISMMConceptProvider aCP : CP) {
+      LOGGER.info ("Starting testEmpty");
       final SMMClient aClient = new SMMClient ();
-      final IMappedValueList ret = aClient.performMapping (LOG_PREFIX, NS_FREEDONIA, aCP, UCB);
+      final IMappedValueList ret = aClient.performMapping (CMockSMM.LOG_PREFIX, CMockSMM.NS_FREEDONIA, aCP, UCB);
       assertNotNull (ret);
       assertTrue (ret.isEmpty ());
       assertEquals (0, ret.size ());
@@ -65,14 +77,12 @@ public final class SMMClientTest
   }
 
   @Test
-  public void testOneMatch () throws IOException
-  {
-    for (final ISMMConceptProvider aCP : CP)
-    {
-      s_aLogger.info ("Starting testOneMatch");
+  public void testOneMatch () throws IOException {
+    for (final ISMMConceptProvider aCP : CP) {
+      LOGGER.info ("Starting testOneMatch");
       final SMMClient aClient = new SMMClient ();
       aClient.addConceptToBeMapped (CONCEPT_TOOP_1);
-      final IMappedValueList ret = aClient.performMapping (LOG_PREFIX, NS_FREEDONIA, aCP, UCB);
+      final IMappedValueList ret = aClient.performMapping (CMockSMM.LOG_PREFIX, CMockSMM.NS_FREEDONIA, aCP, UCB);
       assertNotNull (ret);
       assertEquals (1, ret.size ());
 
@@ -88,16 +98,14 @@ public final class SMMClientTest
   }
 
   @Test
-  public void testOneMatchOneNotFound () throws IOException
-  {
-    for (final ISMMConceptProvider aCP : CP)
-    {
-      s_aLogger.info ("Starting testOneMatchOneNotFound");
+  public void testOneMatchOneNotFound () throws IOException {
+    for (final ISMMConceptProvider aCP : CP) {
+      LOGGER.info ("Starting testOneMatchOneNotFound");
       final SMMClient aClient = new SMMClient ();
       aClient.addConceptToBeMapped (CONCEPT_TOOP_1);
-      aClient.addConceptToBeMapped (NS_TOOP, "NonExistingField");
+      aClient.addConceptToBeMapped (CMockSMM.NS_TOOP, "NonExistingField");
       aClient.addConceptToBeMapped ("SourceNamespace", "NonExistingField");
-      final IMappedValueList ret = aClient.performMapping (LOG_PREFIX, NS_FREEDONIA, aCP, UCB);
+      final IMappedValueList ret = aClient.performMapping (CMockSMM.LOG_PREFIX, CMockSMM.NS_FREEDONIA, aCP, UCB);
       assertNotNull (ret);
       assertEquals (1, ret.size ());
 
@@ -113,14 +121,12 @@ public final class SMMClientTest
   }
 
   @Test
-  public void testNoMappingNeeded () throws IOException
-  {
-    for (final ISMMConceptProvider aCP : CP)
-    {
-      s_aLogger.info ("Starting testNoMappingNeeded");
+  public void testNoMappingNeeded () throws IOException {
+    for (final ISMMConceptProvider aCP : CP) {
+      LOGGER.info ("Starting testNoMappingNeeded");
       final SMMClient aClient = new SMMClient ();
       aClient.addConceptToBeMapped (CONCEPT_FR_1);
-      final IMappedValueList ret = aClient.performMapping (LOG_PREFIX, NS_FREEDONIA, aCP, UCB);
+      final IMappedValueList ret = aClient.performMapping (CMockSMM.LOG_PREFIX, CMockSMM.NS_FREEDONIA, aCP, UCB);
       assertNotNull (ret);
       assertEquals (1, ret.size ());
 
@@ -133,5 +139,31 @@ public final class SMMClientTest
       assertEquals (CONCEPT_FR_1, aValue.getSource ());
       assertEquals (CONCEPT_FR_1, aValue.getDestination ());
     }
+  }
+
+  @Test
+  public void testCreateAllMappings () throws IOException {
+    final IMicroDocument aDoc = new MicroDocument ();
+    final IMicroElement eRoot = aDoc.appendElement ("root");
+    // Get all namespaces
+    final ICommonsOrderedSet<String> aNSs = SMMConceptProviderGRLCRemote.remoteQueryAllNamespaces (CMockSMM.LOG_PREFIX);
+
+    // For all namespaces
+    for (final String sSrc : aNSs)
+      if (!sSrc.equals (CMockSMM.NS_TOOP)) {
+        final IMicroElement eValueList = eRoot.appendElement ("value-list");
+        eValueList.setAttribute ("srcns", sSrc);
+        eValueList.setAttribute ("dstns", CMockSMM.NS_TOOP);
+
+        final MappedValueList aMVL = SMMConceptProviderGRLCRemote.getAllMappedValues (CMockSMM.LOG_PREFIX, sSrc,
+                                                                                      CMockSMM.NS_TOOP);
+        for (final MappedValue aItem : aMVL) {
+          final IMicroElement eItem = eValueList.appendElement ("item");
+          eItem.setAttribute ("srcval", aItem.getSource ().getValue ());
+          eItem.setAttribute ("dstval", aItem.getDestination ().getValue ());
+        }
+      }
+    MicroWriter.writeToFile (aDoc, new File ("src/test/resources/existing-smm-mappings.xml"));
+    LOGGER.info ("done");
   }
 }

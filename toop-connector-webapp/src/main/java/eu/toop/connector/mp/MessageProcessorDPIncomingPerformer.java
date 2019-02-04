@@ -31,6 +31,7 @@ import com.helger.commons.collection.impl.CommonsArrayList;
 import com.helger.commons.collection.impl.ICommonsList;
 import com.helger.commons.concurrent.collector.IConcurrentPerformer;
 import com.helger.commons.error.level.EErrorLevel;
+import com.helger.commons.id.factory.GlobalIDFactory;
 import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 import com.helger.commons.lang.StackTraceHelper;
 import com.helger.commons.string.StringHelper;
@@ -48,6 +49,7 @@ import eu.toop.commons.error.EToopErrorCategory;
 import eu.toop.commons.error.EToopErrorCode;
 import eu.toop.commons.error.EToopErrorOrigin;
 import eu.toop.commons.error.EToopErrorSeverity;
+import eu.toop.commons.error.IToopErrorCode;
 import eu.toop.commons.error.ToopErrorException;
 import eu.toop.commons.exchange.ToopMessageBuilder;
 import eu.toop.commons.jaxb.ToopXSDHelper;
@@ -68,16 +70,16 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
   @Nonnull
   private static TDEErrorType _createError (@Nonnull final String sLogPrefix,
                                             @Nonnull final EToopErrorCategory eCategory,
-                                            @Nonnull final EToopErrorCode eErrorCode,
+                                            @Nonnull final IToopErrorCode aErrorCode,
                                             @Nonnull final String sErrorText,
                                             @Nullable final Throwable t)
   {
     // Surely no DP here
-    ToopKafkaClient.send (EErrorLevel.ERROR, () -> sLogPrefix + "[" + eErrorCode.getID () + "] " + sErrorText);
+    ToopKafkaClient.send (EErrorLevel.ERROR, () -> sLogPrefix + "[" + aErrorCode.getID () + "] " + sErrorText);
     return ToopMessageBuilder.createError (null,
                                            EToopErrorOrigin.REQUEST_RECEPTION,
                                            eCategory,
-                                           eErrorCode,
+                                           aErrorCode,
                                            EToopErrorSeverity.FAILURE,
                                            new MultilingualText (Locale.US, sErrorText),
                                            t == null ? null : StackTraceHelper.getStackAsString (t));
@@ -123,7 +125,8 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
 
   public void runAsync (@Nonnull final TDETOOPRequestType aRequest) throws Exception
   {
-    final String sRequestID = aRequest.getDataRequestIdentifier ().getValue ();
+    final String sRequestID = aRequest != null &&
+                              aRequest.getDocumentUniversalUniqueIdentifier () != null ? aRequest.getDocumentUniversalUniqueIdentifier ().getValue () : "temp-tc2-id-" + GlobalIDFactory.getNewIntID ();
     final String sLogPrefix = "[" + sRequestID + "] ";
     final ICommonsList <TDEErrorType> aErrors = new CommonsArrayList <> ();
 

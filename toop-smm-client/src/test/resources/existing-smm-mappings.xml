@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+  <value-list srcns="http://toop.nl/nationaalhandelsregister" dstns="http://toop.eu/registered-organization">
+    <item srcval="Adres" dstval="PhysicalAddress" />
+    <item srcval="NatuurlijkPersoon" dstval="Person" />
+    <item srcval="heeftRechtsvorm" dstval="hasCompanyType" />
+    <item srcval="land" dstval="countryName" />
+    <item srcval="naamMaatschappelijkeActiviteit" dstval="companyName" />
+    <item srcval="plaats" dstval="locality" />
+    <item srcval="postcode" dstval="postalCode" />
+    <item srcval="regio" dstval="region" />
+    <item srcval="straatHuisnummer" dstval="streetAddress" />
+    <item srcval="wordtGeleidVanuit" dstval="hasRegisteredSite" />
+  </value-list>
+  <value-list srcns="http://toop.fre/freedonia-business-register" dstns="http://toop.eu/registered-organization">
+    <item srcval="FreedoniaBusinessCode" dstval="CompanyCode" />
+    <item srcval="FreedoniaAddress" dstval="PhysicalAddress" />
+    <item srcval="FreedoniaRegistrationNumber" dstval="RegistrationNumber" />
+    <item srcval="FreedoniaSSNumber" dstval="SSNumber" />
+    <item srcval="FreedoniaVATNumber" dstval="VATNumber" />
+    <item srcval="FreedoniaActivityDeclaration" dstval="activityDescription" />
+    <item srcval="FreedoniaCompanyName" dstval="companyName" />
+    <item srcval="hasBusinessCode" dstval="hasCompanyCode" />
+    <item srcval="FreedoniaCompanyType" dstval="hasCompanyType" />
+    <item srcval="FreedoniaLegalStatus" dstval="hasLegalStatus" />
+    <item srcval="FreedoniaCompanyNaceCode" dstval="hasNaceCode" />
+    <item srcval="FreedoniaRegistrationAuthority" dstval="hasRegistrationAuthority" />
+    <item srcval="FreedoniaLegalStatusEffectiveDate" dstval="legalStatusEffectiveDate" />
+    <item srcval="FreedoniaRegistrationDate" dstval="registrationDate" />
+  </value-list>
+  <value-list srcns="http://toop.elo/elonia-business-register" dstns="http://toop.eu/registered-organization">
+    <item srcval="EloniaActivityDeclaration" dstval="activityDescription" />
+    <item srcval="EloniaAddress" dstval="PhysicalAddress" />
+    <item srcval="EloniaBusinessCode" dstval="CompanyCode" />
+    <item srcval="EloniaCompanyNaceCode" dstval="hasNaceCode" />
+    <item srcval="EloniaCompanyName" dstval="companyName" />
+    <item srcval="EloniaCompanyType" dstval="hasCompanyType" />
+    <item srcval="EloniaLegalStatus" dstval="hasLegalStatus" />
+    <item srcval="EloniaLegalStatusEffectiveDate" dstval="legalStatusEffectiveDate" />
+    <item srcval="EloniaRegistrationAuthority" dstval="hasRegistrationAuthority" />
+    <item srcval="EloniaRegistrationDate" dstval="registrationDate" />
+    <item srcval="EloniaRegistrationNumber" dstval="RegistrationNumber" />
+    <item srcval="EloniaSSNumber" dstval="SSNumber" />
+    <item srcval="EloniaVATNumber" dstval="VATNumber" />
+    <item srcval="hasBusinessCode" dstval="hasCompanyCode" />
+  </value-list>
+  <value-list srcns="http://toop.eu/mapping" dstns="http://toop.eu/registered-organization" />
+</root>
