@@ -140,6 +140,9 @@ public class TCWebAppListener extends WebScopeListener
   {
     ToopKafkaClient.send (EErrorLevel.INFO, m_sLogPrefix + "TOOP Connector shutting down");
 
+    // Shutdown message exchange
+    MessageExchangeManager.getConfiguredImplementation ().shutdown (aEvent.getServletContext ());
+
     // Shutdown tracker
     ToopKafkaClient.close ();
 

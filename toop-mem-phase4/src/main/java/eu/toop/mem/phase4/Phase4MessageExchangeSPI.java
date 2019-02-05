@@ -66,4 +66,7 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
   public void sendDPOutgoing (@Nonnull final IMERoutingInformation aRoutingInfo,
                               @Nonnull final MEMessage aMessage) throws MEException
   {}
+
+  public void shutdown (@Nonnull final ServletContext aServletContext)
+  {}
 }

@@ -145,4 +145,7 @@ public final class DefaultMessageExchangeSPI implements IMessageExchangeSPI
       throw new MEException ("Error sending message");
     }
   }
+
+  public void shutdown (@Nonnull final ServletContext aServletContext)
+  {}
 }

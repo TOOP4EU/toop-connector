@@ -110,4 +110,13 @@ public interface IMessageExchangeSPI
    *         In case of error.
    */
   void sendDPOutgoing (@Nonnull IMERoutingInformation aRoutingInfo, @Nonnull MEMessage aMessage) throws MEException;
+
+  /**
+   * Shutdown the Message Exchange.
+   * 
+   * @param aServletContext
+   *        The servlet context in which the handler should be registered. Never
+   *        <code>null</code>.
+   */
+  void shutdown (@Nonnull ServletContext aServletContext);
 }
