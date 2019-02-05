@@ -18,6 +18,7 @@ package eu.toop.connector.api.as4;
 import java.io.Serializable;
 
 import javax.annotation.Nonnull;
+import javax.servlet.ServletContext;
 
 import com.helger.commons.annotation.IsSPIImplementation;
 import com.helger.commons.annotation.Nonempty;
@@ -75,12 +76,16 @@ public interface IMessageExchangeSPI
    * {@link #sendDPOutgoing(IMERoutingInformation, MEMessage)} of this
    * implementation are also never called.
    *
+   * @param aServletContext
+   *        The servlet context in which the handler should be registered. Never
+   *        <code>null</code>.
    * @param aIncomingHandler
    *        The handler to use. May not be <code>null</code>.
    * @throws MEException
    *         In case of error.
    */
-  void registerIncomingHandler (@Nonnull IIncomingHandler aIncomingHandler) throws MEException;
+  void registerIncomingHandler (@Nonnull ServletContext aServletContext,
+                                @Nonnull IIncomingHandler aIncomingHandler) throws MEException;
 
   /**
    * Trigger the message transmission in step 1/4. This method acts synchronous.

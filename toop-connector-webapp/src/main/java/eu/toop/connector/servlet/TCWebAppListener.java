@@ -116,20 +116,21 @@ public class TCWebAppListener extends WebScopeListener
                           () -> m_sLogPrefix + "TOOP Connector WebApp " + CTC.getVersionNumber () + " startup");
 
     // Init incoming message handler
-    MessageExchangeManager.getConfiguredImplementation ().registerIncomingHandler (new IIncomingHandler ()
-    {
-      public void handleIncomingRequest (@Nonnull final TDETOOPRequestType aRequest) throws MEException
-      {
-        ToopKafkaClient.send (EErrorLevel.INFO, () -> "TC got DP incoming request (2/4)");
-        MessageProcessorDPIncoming.getInstance ().enqueue (aRequest);
-      }
+    MessageExchangeManager.getConfiguredImplementation ()
+                          .registerIncomingHandler (aEvent.getServletContext (), new IIncomingHandler ()
+                          {
+                            public void handleIncomingRequest (@Nonnull final TDETOOPRequestType aRequest) throws MEException
+                            {
+                              ToopKafkaClient.send (EErrorLevel.INFO, () -> "TC got DP incoming request (2/4)");
+                              MessageProcessorDPIncoming.getInstance ().enqueue (aRequest);
+                            }
 
-      public void handleIncomingResponse (@Nonnull final TDETOOPResponseType aResponse) throws MEException
-      {
-        ToopKafkaClient.send (EErrorLevel.INFO, () -> "TC got DC incoming request (4/4)");
-        MessageProcessorDCIncoming.getInstance ().enqueue (aResponse);
-      }
-    });
+                            public void handleIncomingResponse (@Nonnull final TDETOOPResponseType aResponse) throws MEException
+                            {
+                              ToopKafkaClient.send (EErrorLevel.INFO, () -> "TC got DC incoming request (4/4)");
+                              MessageProcessorDCIncoming.getInstance ().enqueue (aResponse);
+                            }
+                          });
 
     ToopKafkaClient.send (EErrorLevel.INFO, m_sLogPrefix + "TOOP Connector started");
   }

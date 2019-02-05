@@ -16,6 +16,7 @@
 package eu.toop.connector.me.spi;
 
 import javax.annotation.Nonnull;
+import javax.servlet.ServletContext;
 
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.IsSPIImplementation;
@@ -57,8 +58,10 @@ public final class DefaultMessageExchangeSPI implements IMessageExchangeSPI
     return MessageExchangeManager.DEFAULT_ID;
   }
 
-  public void registerIncomingHandler (@Nonnull final IIncomingHandler aIncomingHandler) throws MEException
+  public void registerIncomingHandler (@Nonnull ServletContext aServletContext,
+                                       @Nonnull final IIncomingHandler aIncomingHandler) throws MEException
   {
+    ValueEnforcer.notNull (aServletContext, "ServletContext");
     ValueEnforcer.notNull (aIncomingHandler, "IncomingHandler");
     if (m_aIncomingHandler != null)
       throw new IllegalStateException ("Another incoming handler was already registered!");

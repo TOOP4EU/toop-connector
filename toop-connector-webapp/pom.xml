@@ -87,12 +87,16 @@
       <groupId>eu.toop</groupId>
       <artifactId>toop-r2d2-client</artifactId>
     </dependency>
-    <!--  
+    <!-- Default MEM module -->
     <dependency>
       <groupId>eu.toop</groupId>
       <artifactId>toop-message-exchange</artifactId>
     </dependency>
-    -->
+    <!-- ph-as4 MEM module -->
+    <dependency>
+      <groupId>eu.toop</groupId>
+      <artifactId>toop-mem-phase4</artifactId>
+    </dependency>
 
     <!-- Logging -->
     <dependency>
