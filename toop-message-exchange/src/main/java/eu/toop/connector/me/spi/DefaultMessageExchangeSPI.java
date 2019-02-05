@@ -125,10 +125,7 @@ public final class DefaultMessageExchangeSPI implements IMessageExchangeSPI
                                                                     aRoutingInfo.getEndpointURL (),
                                                                     aRoutingInfo.getCertificate (),
                                                                     EActingSide.DC);
-    if (!MEMDelegate.getInstance ().sendMessage (aGRM, aMessage))
-    {
-      throw new MEException ("Error sending message");
-    }
+    MEMDelegate.getInstance ().sendMessage (aGRM, aMessage);
   }
 
   public void sendDPOutgoing (@Nonnull final IMERoutingInformation aRoutingInfo,
@@ -140,10 +137,7 @@ public final class DefaultMessageExchangeSPI implements IMessageExchangeSPI
                                                                     aRoutingInfo.getEndpointURL (),
                                                                     aRoutingInfo.getCertificate (),
                                                                     EActingSide.DP);
-    if (!MEMDelegate.getInstance ().sendMessage (aGRM, aMessage))
-    {
-      throw new MEException ("Error sending message");
-    }
+    MEMDelegate.getInstance ().sendMessage (aGRM, aMessage);
   }
 
   public void shutdown (@Nonnull final ServletContext aServletContext)
