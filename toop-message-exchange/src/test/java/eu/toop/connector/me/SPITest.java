@@ -13,17 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package eu.toop.connector.smmclient;
+package eu.toop.connector.me;
 
-import eu.toop.commons.codelist.EPredefinedDocumentTypeIdentifier;
-import eu.toop.commons.codelist.SMMDocumentTypeMapping;
+import org.junit.Test;
 
-final class CMockSMM {
-  public static final String LOG_PREFIX = "[unit test] ";
-  public static final String NS_TOOP = SMMDocumentTypeMapping.getToopSMNamespace (EPredefinedDocumentTypeIdentifier.REQUEST_REGISTEREDORGANIZATION);
-  public static final String NS_ELONIA = "http://toop.elo/elonia-business-register";
-  public static final String NS_FREEDONIA = "http://toop.fre/freedonia-business-register";
+import com.helger.commons.mock.SPITestHelper;
 
-  private CMockSMM () {
+/**
+ * Test SPI definitions
+ *
+ * @author Philip Helger
+ */
+public final class SPITest
+{
+  @Test
+  public void testBasic () throws Exception
+  {
+    SPITestHelper.testIfAllSPIImplementationsAreValid ();
   }
 }

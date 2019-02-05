@@ -31,6 +31,8 @@ import com.helger.commons.string.StringHelper;
 import com.helger.commons.string.ToStringGenerator;
 
 /**
+ * A single payload of an AS4 message. Used inside {@link MEMessage}
+ *
  * @author myildiz at 15.02.2018.
  */
 @Immutable
@@ -56,6 +58,7 @@ public final class MEPayload implements Serializable
   @Nonempty
   public static String createRandomPayloadID ()
   {
+    // Must use RFC 2822 style
     return UUID.randomUUID ().toString () + "@mp.toop";
   }
 

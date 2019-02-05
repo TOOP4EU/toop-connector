@@ -69,10 +69,9 @@ import eu.toop.connector.api.TCSettings;
 import eu.toop.connector.api.as4.MEException;
 import eu.toop.connector.api.as4.MEMessage;
 import eu.toop.connector.api.as4.MEPayload;
+import eu.toop.connector.api.as4.MERoutingInformation;
+import eu.toop.connector.api.as4.MessageExchangeManager;
 import eu.toop.connector.api.http.TCHttpClientFactory;
-import eu.toop.connector.me.EActingSide;
-import eu.toop.connector.me.GatewayRoutingMetadata;
-import eu.toop.connector.me.MEMDelegate;
 import eu.toop.connector.r2d2client.IR2D2Endpoint;
 import eu.toop.connector.r2d2client.R2D2Client;
 import eu.toop.kafkaclient.ToopKafkaClient;
@@ -321,18 +320,17 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
                                                       aEP.getTransportProtocol () +
                                                       "'");
 
-              // routing metadata - sender ID!
-              final GatewayRoutingMetadata aGRM = new GatewayRoutingMetadata (aDPParticipantID.getURIEncoded (),
-                                                                              aDocTypeID.getURIEncoded (),
-                                                                              aProcessID.getURIEncoded (),
-                                                                              aEP.getEndpointURL (),
-                                                                              aEP.getCertificate (),
-                                                                              EActingSide.DP);
-
+              // Main message exchange
+              final MERoutingInformation aMERoutingInfo = new MERoutingInformation (aDPParticipantID,
+                                                                                    aEP.getParticipantID (),
+                                                                                    aDocTypeID,
+                                                                                    aProcessID,
+                                                                                    aEP.getTransportProtocol (),
+                                                                                    aEP.getEndpointURL (),
+                                                                                    aEP.getCertificate ());
               try
               {
-                // Reuse the same MEMessage for each endpoint
-                MEMDelegate.getInstance ().sendMessage (aGRM, aMEMessage);
+                MessageExchangeManager.getConfiguredImplementation ().sendDPOutgoing (aMERoutingInfo, aMEMessage);
               }
               catch (final MEException ex)
               {
