@@ -48,7 +48,6 @@ import com.helger.peppol.identifier.generic.process.IProcessIdentifier;
 import com.helger.schematron.svrl.AbstractSVRLMessage;
 
 import eu.toop.commons.codelist.EPredefinedDocumentTypeIdentifier;
-import eu.toop.commons.codelist.SMMDocumentTypeMapping;
 import eu.toop.commons.concept.ConceptValue;
 import eu.toop.commons.concept.EConceptType;
 import eu.toop.commons.dataexchange.v140.TDEConceptRequestType;
@@ -67,6 +66,7 @@ import eu.toop.commons.exchange.ToopMessageBuilder;
 import eu.toop.commons.jaxb.ToopWriter;
 import eu.toop.commons.jaxb.ToopXSDHelper;
 import eu.toop.commons.schematron.TOOPSchematronValidator;
+import eu.toop.commons.usecase.SMMDocumentTypeMapping;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.TCSettings;
 import eu.toop.connector.api.as4.MEException;

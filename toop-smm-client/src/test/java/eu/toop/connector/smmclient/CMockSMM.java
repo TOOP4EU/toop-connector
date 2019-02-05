@@ -16,7 +16,7 @@
 package eu.toop.connector.smmclient;
 
 import eu.toop.commons.codelist.EPredefinedDocumentTypeIdentifier;
-import eu.toop.commons.codelist.SMMDocumentTypeMapping;
+import eu.toop.commons.usecase.SMMDocumentTypeMapping;
 
 final class CMockSMM {
   public static final String LOG_PREFIX = "[unit test] ";
