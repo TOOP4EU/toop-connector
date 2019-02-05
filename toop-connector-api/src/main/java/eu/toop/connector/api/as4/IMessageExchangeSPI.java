@@ -37,5 +37,27 @@ public interface IMessageExchangeSPI
   @Nonempty
   String getID ();
 
+  /**
+   * Trigger the message transmission in step 1/4.
+   *
+   * @param aRoutingInfo
+   *        Routing information. May not be <code>null</code>.
+   * @param aMessage
+   *        The message to be exchanged. May not be <code>null</code>.
+   * @throws MEException
+   *         In case of error.
+   */
   void sendDCOutgoing (@Nonnull IMERoutingInformation aRoutingInfo, @Nonnull MEMessage aMessage) throws MEException;
+
+  /**
+   * Trigger the message transmission in step 3/4.
+   *
+   * @param aRoutingInfo
+   *        Routing information. May not be <code>null</code>.
+   * @param aMessage
+   *        The message to be exchanged. May not be <code>null</code>.
+   * @throws MEException
+   *         In case of error.
+   */
+  void sendDPOutgoing (@Nonnull IMERoutingInformation aRoutingInfo, @Nonnull MEMessage aMessage) throws MEException;
 }

@@ -58,4 +58,18 @@ public final class DefaultMessageExchangeSPI implements IMessageExchangeSPI
       throw new MEException ("Error sending message");
     }
   }
+
+  public void sendDPOutgoing (@Nonnull IMERoutingInformation aRoutingInfo,@Nonnull MEMessage aMessage) throws MEException
+  {
+    final GatewayRoutingMetadata aGRM = new GatewayRoutingMetadata (aRoutingInfo.getSenderID ().getURIEncoded (),
+                                                                    aRoutingInfo.getDocumentTypeID ().getURIEncoded (),
+                                                                    aRoutingInfo.getProcessID ().getURIEncoded (),
+                                                                    aRoutingInfo.getEndpointURL (),
+                                                                    aRoutingInfo.getCertificate (),
+                                                                    EActingSide.DP);
+    if (!MEMDelegate.getInstance ().sendMessage (aGRM, aMessage))
+    {
+      throw new MEException ("Error sending message");
+    }
+  }
 }
