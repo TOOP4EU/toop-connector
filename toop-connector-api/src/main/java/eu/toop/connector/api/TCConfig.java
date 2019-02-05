@@ -75,18 +75,20 @@ public final class TCConfig
   private static ISMLInfo s_aCachedSMLInfo;
 
   /**
-   * Reload the configuration file. It checks if the system property
-   * {@link #SYSTEM_PROPERTY_TOOP_CONNECTOR_SERVER_PROPERTIES_PATH} is present
-   * and if so, tries it first, than
-   * {@link #PATH_PRIVATE_TOOP_CONNECTOR_PROPERTIES} is checked and finally the
-   * {@link #PATH_TOOP_CONNECTOR_PROPERTIES} path is checked.
+   * Reload the configuration file. It checks if the environment variable
+   * <code>TOOP_CONNECTOR_CONFIG</code> the system property
+   * {@link #SYSTEM_PROPERTY_TOOP_CONNECTOR_SERVER_PROPERTIES_PATH} is present and
+   * if so, tries it first, than {@link #PATH_PRIVATE_TOOP_CONNECTOR_PROPERTIES}
+   * is checked and finally the {@link #PATH_TOOP_CONNECTOR_PROPERTIES} path is
+   * checked.
    *
    * @return {@link ESuccess}
    */
   @Nonnull
   public static ESuccess reloadConfiguration ()
   {
-    final ConfigFileBuilder aCFB = new ConfigFileBuilder ().addPathFromSystemProperty (SYSTEM_PROPERTY_TOOP_CONNECTOR_SERVER_PROPERTIES_PATH)
+    final ConfigFileBuilder aCFB = new ConfigFileBuilder ().addPathFromEnvVar ("TOOP_CONNECTOR_CONFIG")
+                                                           .addPathFromSystemProperty (SYSTEM_PROPERTY_TOOP_CONNECTOR_SERVER_PROPERTIES_PATH)
                                                            .addPath (PATH_PRIVATE_TOOP_CONNECTOR_PROPERTIES)
                                                            .addPath (PATH_TOOP_CONNECTOR_PROPERTIES);
 
@@ -192,8 +194,7 @@ public final class TCConfig
   }
 
   /**
-   * @return The TOOP Directory base URL for R2D2. Should never end with a
-   *         slash.
+   * @return The TOOP Directory base URL for R2D2. Should never end with a slash.
    */
   @Nullable
   public static String getR2D2DirectoryBaseUrl ()
@@ -202,8 +203,7 @@ public final class TCConfig
   }
 
   /**
-   * @return <code>true</code> to use SML lookup, <code>false</code> to not do
-   *         it.
+   * @return <code>true</code> to use SML lookup, <code>false</code> to not do it.
    * @see #getR2D2SML()
    * @see #getR2D2SMPUrl()
    */
@@ -259,8 +259,20 @@ public final class TCConfig
   }
 
   /**
-   * Get the overall protocol to be used. Depending on that output different
-   * other properties might be queried.
+   * @return The MEM implementation ID or the default value. Never
+   *         <code>null</code>.
+   * @since 0.10.0
+   */
+  @Nonnull
+  public static String getMEMImplementationID ()
+  {
+    // "mem-default" - see MessageExchangeManager
+    return getConfigFile ().getAsString ("toop.mem.implementation", "mem-default");
+  }
+
+  /**
+   * Get the overall protocol to be used. Depending on that output different other
+   * properties might be queried.
    *
    * @return The overall protocol to use. Never <code>null</code>.
    */

@@ -1,0 +1,64 @@
+package eu.toop.connector.api.as4;
+
+import javax.annotation.Nonnegative;
+import javax.annotation.Nullable;
+import javax.annotation.concurrent.GuardedBy;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.helger.commons.collection.impl.CommonsLinkedHashMap;
+import com.helger.commons.collection.impl.ICommonsMap;
+import com.helger.commons.concurrent.SimpleReadWriteLock;
+import com.helger.commons.exception.InitializationException;
+import com.helger.commons.lang.ServiceLoaderHelper;
+
+public class MessageExchangeManager
+{
+  public static final String DEFAULT_ID = "mem-default";
+  private static final Logger LOGGER = LoggerFactory.getLogger (MessageExchangeManager.class);
+
+  private static final SimpleReadWriteLock s_aRWLock = new SimpleReadWriteLock ();
+  @GuardedBy ("s_aRWLock")
+  private static ICommonsMap <String, IMessageExchangeSPI> s_aMap = new CommonsLinkedHashMap <> ();
+
+  public static void reinitialize ()
+  {
+    s_aRWLock.writeLocked ( () -> {
+      s_aMap.clear ();
+      for (final IMessageExchangeSPI aImpl : ServiceLoaderHelper.getAllSPIImplementations (IMessageExchangeSPI.class))
+      {
+        final String sID = aImpl.getID ();
+        if (s_aMap.containsKey (sID))
+          throw new InitializationException ("The IMessageExchangeSPI ID '" +
+                                             sID +
+                                             "' is already in use - please provide a different one!");
+        s_aMap.put (sID, aImpl);
+      }
+      if (!s_aMap.containsKey (DEFAULT_ID))
+        LOGGER.warn ("The default IMessageExchangeSPI ID '" + DEFAULT_ID + "' is not registered!");
+    });
+  }
+
+  static
+  {
+    // Initial init
+    reinitialize ();
+  }
+
+  private MessageExchangeManager ()
+  {}
+
+  @Nullable
+  public static IMessageExchangeSPI getSafeImplementationOfID (@Nullable final String sID)
+  {
+    // Fallback to default
+    return s_aRWLock.readLocked ( () -> s_aMap.computeIfAbsent (sID, k -> s_aMap.get (DEFAULT_ID)));
+  }
+
+  @Nonnegative
+  public static ICommonsMap <String, IMessageExchangeSPI> getAll ()
+  {
+    return s_aRWLock.readLocked ( () -> s_aMap.getClone ());
+  }
+}

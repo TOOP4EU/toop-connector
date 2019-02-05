@@ -69,13 +69,12 @@ import eu.toop.commons.jaxb.ToopXSDHelper;
 import eu.toop.commons.schematron.TOOPSchematronValidator;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.TCSettings;
+import eu.toop.connector.api.as4.IMessageExchangeSPI;
 import eu.toop.connector.api.as4.MEException;
 import eu.toop.connector.api.as4.MEMessage;
 import eu.toop.connector.api.as4.MEPayload;
 import eu.toop.connector.api.as4.MERoutingInformation;
-import eu.toop.connector.me.EActingSide;
-import eu.toop.connector.me.GatewayRoutingMetadata;
-import eu.toop.connector.me.MEMDelegate;
+import eu.toop.connector.api.as4.MessageExchangeManager;
 import eu.toop.connector.r2d2client.IR2D2Endpoint;
 import eu.toop.connector.r2d2client.R2D2Client;
 import eu.toop.connector.smmclient.IMappedValueList;
@@ -416,31 +415,19 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
                                                       aEP.getTransportProtocol () +
                                                       "'");
 
-              if (false)
-                new MERoutingInformation (aSenderID,
-                                          aEP.getParticipantID (),
-                                          aDocTypeID,
-                                          aProcessID,
-                                          aEP.getTransportProtocol (),
-                                          aEP.getEndpointURL (),
-                                          aEP.getCertificate ());
+              // Main message exchange
+              final IMessageExchangeSPI aSPI = MessageExchangeManager.getSafeImplementationOfID (TCConfig.getMEMImplementationID ());
 
-              final GatewayRoutingMetadata aGRM = new GatewayRoutingMetadata (aSenderID.getURIEncoded (),
-                                                                              aDocTypeID.getURIEncoded (),
-                                                                              aProcessID.getURIEncoded (),
-                                                                              aEP.getEndpointURL (),
-                                                                              aEP.getCertificate (),
-                                                                              EActingSide.DC);
+              final MERoutingInformation aMERoutingInfo = new MERoutingInformation (aSenderID,
+                                                                                    aEP.getParticipantID (),
+                                                                                    aDocTypeID,
+                                                                                    aProcessID,
+                                                                                    aEP.getTransportProtocol (),
+                                                                                    aEP.getEndpointURL (),
+                                                                                    aEP.getCertificate ());
               try
               {
-                if (!MEMDelegate.getInstance ().sendMessage (aGRM, aMEMessage))
-                {
-                  aErrors.add (_createError (sLogPrefix,
-                                             EToopErrorCategory.E_DELIVERY,
-                                             EToopErrorCode.ME_001,
-                                             "Error sending message",
-                                             null));
-                }
+                aSPI.sendDCOutgoing (aMERoutingInfo, aMEMessage);
               }
               catch (final MEException ex)
               {
@@ -464,6 +451,7 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
 
     if (aErrors.isNotEmpty ())
     {
+      // Create an error response
       final TDETOOPResponseType aResponseMsg = ToopMessageBuilder.createResponse (aRequest);
       aResponseMsg.getError ().addAll (aErrors);
       // Put the error in queue 4/4

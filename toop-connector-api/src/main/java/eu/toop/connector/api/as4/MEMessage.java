@@ -25,6 +25,8 @@ import com.helger.commons.collection.impl.CommonsArrayList;
 import com.helger.commons.collection.impl.ICommonsList;
 
 /**
+ * List of {@link MEPayload} objects.
+ * 
  * @author myildiz at 12.02.2018.
  */
 public class MEMessage implements Serializable
