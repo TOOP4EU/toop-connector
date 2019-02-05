@@ -15,6 +15,9 @@
  */
 package eu.toop.connector.api.as4;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import eu.toop.commons.error.EToopErrorCode;
 
 /**
@@ -25,7 +28,7 @@ import eu.toop.commons.error.EToopErrorCode;
  */
 public class MEException extends IllegalStateException
 {
-  private EToopErrorCode toopErrorCode;
+  private EToopErrorCode m_eToopErrorCode;
 
   public MEException (final String sMsg)
   {
@@ -42,20 +45,27 @@ public class MEException extends IllegalStateException
     super (sMsg, aCause);
   }
 
-  public MEException(final EToopErrorCode toopErrorCode) {
-    super(toopErrorCode.toString());
-    this.toopErrorCode = toopErrorCode;
-  }
-  public MEException(final EToopErrorCode toopErrorCode, final Throwable aCause) {
-    super(toopErrorCode.toString(), aCause);
-    this.toopErrorCode = toopErrorCode;
-  }
-  public MEException(final EToopErrorCode toopErrorCode, String sMsg) {
-    super(toopErrorCode.toString() + " - " + sMsg);
-    this.toopErrorCode = toopErrorCode;
+  public MEException (@Nonnull final EToopErrorCode toopErrorCode)
+  {
+    super (toopErrorCode.name ());
+    m_eToopErrorCode = toopErrorCode;
   }
 
-  public EToopErrorCode getToopErrorCode() {
-    return toopErrorCode;
+  public MEException (@Nonnull final EToopErrorCode toopErrorCode, final Throwable aCause)
+  {
+    super (toopErrorCode.name (), aCause);
+    m_eToopErrorCode = toopErrorCode;
+  }
+
+  public MEException (@Nonnull final EToopErrorCode toopErrorCode, final String sMsg)
+  {
+    super (toopErrorCode.name () + " - " + sMsg);
+    m_eToopErrorCode = toopErrorCode;
+  }
+
+  @Nullable
+  public EToopErrorCode getToopErrorCode ()
+  {
+    return m_eToopErrorCode;
   }
 }

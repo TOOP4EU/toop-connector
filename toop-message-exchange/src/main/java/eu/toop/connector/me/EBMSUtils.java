@@ -38,7 +38,6 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
-import eu.toop.commons.error.EToopErrorCode;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -64,13 +63,13 @@ import com.helger.xml.serialize.read.DOMReader;
 import com.helger.xml.serialize.write.XMLWriterSettings;
 import com.helger.xml.transform.TransformSourceFactory;
 
+import eu.toop.commons.error.EToopErrorCode;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.as4.MEException;
 import eu.toop.connector.api.as4.MEMessage;
 import eu.toop.connector.api.as4.MEPayload;
 import eu.toop.connector.me.notifications.RelayResult;
 import eu.toop.connector.me.notifications.SubmissionResult;
-import eu.toop.connector.r2d2client.IR2D2Endpoint;
 import eu.toop.kafkaclient.ToopKafkaClient;
 
 public final class EBMSUtils {
