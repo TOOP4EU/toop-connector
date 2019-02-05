@@ -28,6 +28,8 @@ import com.helger.commons.concurrent.SimpleReadWriteLock;
 import com.helger.commons.exception.InitializationException;
 import com.helger.commons.lang.ServiceLoaderHelper;
 
+import eu.toop.connector.api.TCConfig;
+
 public class MessageExchangeManager
 {
   public static final String DEFAULT_ID = "mem-default";
@@ -69,6 +71,12 @@ public class MessageExchangeManager
   {
     // Fallback to default
     return s_aRWLock.readLocked ( () -> s_aMap.computeIfAbsent (sID, k -> s_aMap.get (DEFAULT_ID)));
+  }
+
+  @Nullable
+  public static IMessageExchangeSPI getConfiguredImplementation ()
+  {
+    return getSafeImplementationOfID (TCConfig.getMEMImplementationID ());
   }
 
   @Nonnegative

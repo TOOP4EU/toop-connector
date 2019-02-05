@@ -15,10 +15,15 @@
  */
 package eu.toop.connector.api.as4;
 
+import java.io.Serializable;
+
 import javax.annotation.Nonnull;
 
 import com.helger.commons.annotation.IsSPIImplementation;
 import com.helger.commons.annotation.Nonempty;
+
+import eu.toop.commons.dataexchange.v140.TDETOOPRequestType;
+import eu.toop.commons.dataexchange.v140.TDETOOPResponseType;
 
 /**
  * Abstract API to be implemented for sending and receiving messages.
@@ -28,6 +33,29 @@ import com.helger.commons.annotation.Nonempty;
 @IsSPIImplementation
 public interface IMessageExchangeSPI
 {
+  public interface IIncomingHandler extends Serializable
+  {
+    /**
+     * Handle an incoming request for step 2/4.
+     *
+     * @param aRequest
+     *        The request to handle. Never <code>null</code>.
+     * @throws MEException
+     *         In case of error.
+     */
+    void handleIncomingRequest (@Nonnull TDETOOPRequestType aRequest) throws MEException;
+
+    /**
+     * Handle an incoming response for step 4/4.
+     *
+     * @param aResponse
+     *        The response to handle. Never <code>null</code>.
+     * @throws MEException
+     *         In case of error.
+     */
+    void handleIncomingResponse (@Nonnull TDETOOPResponseType aResponse) throws MEException;
+  }
+
   /**
    * @return The unique ID of the SPI implementation, so that it can be referenced
    *         from a configuration file. The implementer must ensure the uniqueness
@@ -38,7 +66,24 @@ public interface IMessageExchangeSPI
   String getID ();
 
   /**
-   * Trigger the message transmission in step 1/4.
+   * Register an incoming handler that takes the request/response to handle. The
+   * differentiation between step 2/4 and 4/4 must be inside of the SPI
+   * implementation. This method is only called once for the chosen
+   * implementation, so the implementation can act as an "init" method and perform
+   * further implementation activities. If this method is not called, it is
+   * ensured that {@link #sendDCOutgoing(IMERoutingInformation, MEMessage)} and
+   * {@link #sendDPOutgoing(IMERoutingInformation, MEMessage)} of this
+   * implementation are also never called.
+   *
+   * @param aIncomingHandler
+   *        The handler to use. May not be <code>null</code>.
+   * @throws MEException
+   *         In case of error.
+   */
+  void registerIncomingHandler (@Nonnull IIncomingHandler aIncomingHandler) throws MEException;
+
+  /**
+   * Trigger the message transmission in step 1/4. This method acts synchronous.
    *
    * @param aRoutingInfo
    *        Routing information. May not be <code>null</code>.

@@ -33,11 +33,11 @@ import com.helger.web.servlets.scope.WebScopeListener;
 
 import eu.toop.commons.dataexchange.v140.TDETOOPRequestType;
 import eu.toop.commons.dataexchange.v140.TDETOOPResponseType;
-import eu.toop.commons.exchange.ToopMessageBuilder;
 import eu.toop.connector.api.TCConfig;
-import eu.toop.connector.api.as4.MEPayload;
+import eu.toop.connector.api.as4.IMessageExchangeSPI.IIncomingHandler;
+import eu.toop.connector.api.as4.MEException;
+import eu.toop.connector.api.as4.MessageExchangeManager;
 import eu.toop.connector.app.CTC;
-import eu.toop.connector.me.MEMDelegate;
 import eu.toop.connector.mp.MessageProcessorDCIncoming;
 import eu.toop.connector.mp.MessageProcessorDPIncoming;
 import eu.toop.kafkaclient.ToopKafkaClient;
@@ -115,57 +115,21 @@ public class TCWebAppListener extends WebScopeListener
     ToopKafkaClient.send (EErrorLevel.INFO,
                           () -> m_sLogPrefix + "TOOP Connector WebApp " + CTC.getVersionNumber () + " startup");
 
-    // Register the AS4 handler needed
-    MEMDelegate.getInstance ().registerMessageHandler (aMEMessage -> {
-      // Always use response, because it is the super set of request and
-      // response
-      final MEPayload aPayload = aMEMessage.head ();
-      if (aPayload != null)
+    // Init incoming message handler
+    MessageExchangeManager.getConfiguredImplementation ().registerIncomingHandler (new IIncomingHandler ()
+    {
+      public void handleIncomingRequest (@Nonnull final TDETOOPRequestType aRequest) throws MEException
       {
-        // Extract from ASiC
-        final Object aMsg = ToopMessageBuilder.parseRequestOrResponse (aPayload.getData ().getInputStream ());
-
-        if (aMsg instanceof TDETOOPResponseType)
-        {
-          // This is the way from DP back to DC; we're in DC incoming mode
-          ToopKafkaClient.send (EErrorLevel.INFO, () -> m_sLogPrefix + "TC got DC incoming request (4/4)");
-          MessageProcessorDCIncoming.getInstance ().enqueue ((TDETOOPResponseType) aMsg);
-        }
-        else
-          if (aMsg instanceof TDETOOPRequestType)
-          {
-            // This is the way from DC to DP; we're in DP incoming mode
-            ToopKafkaClient.send (EErrorLevel.INFO, () -> m_sLogPrefix + "TC got DP incoming request (2/4)");
-            MessageProcessorDPIncoming.getInstance ().enqueue ((TDETOOPRequestType) aMsg);
-          }
-          else
-            ToopKafkaClient.send (EErrorLevel.ERROR, () -> m_sLogPrefix + "Unsuspported Message: " + aMsg);
+        ToopKafkaClient.send (EErrorLevel.INFO, () -> "TC got DP incoming request (2/4)");
+        MessageProcessorDPIncoming.getInstance ().enqueue (aRequest);
       }
-      else
-        ToopKafkaClient.send (EErrorLevel.WARN, () -> m_sLogPrefix + "MEMessage contains no payload: " + aMEMessage);
+
+      public void handleIncomingResponse (@Nonnull final TDETOOPResponseType aResponse) throws MEException
+      {
+        ToopKafkaClient.send (EErrorLevel.INFO, () -> "TC got DC incoming request (4/4)");
+        MessageProcessorDCIncoming.getInstance ().enqueue (aResponse);
+      }
     });
-
-    MEMDelegate.getInstance ()
-               .registerNotificationHandler (aRelayResult -> {
-                 // more to come
-                 ToopKafkaClient.send (EErrorLevel.INFO,
-                                       () -> m_sLogPrefix +
-                                             "Notification[" +
-                                             aRelayResult.getErrorCode () +
-                                             "]: " +
-                                             aRelayResult.getDescription ());
-               });
-
-    MEMDelegate.getInstance ()
-               .registerSubmissionResultHandler (aRelayResult -> {
-                 // more to come
-                 ToopKafkaClient.send (EErrorLevel.INFO,
-                                       () -> m_sLogPrefix +
-                                             "SubmissionResult[" +
-                                             aRelayResult.getErrorCode () +
-                                             "]: " +
-                                             aRelayResult.getDescription ());
-               });
 
     ToopKafkaClient.send (EErrorLevel.INFO, m_sLogPrefix + "TOOP Connector started");
   }

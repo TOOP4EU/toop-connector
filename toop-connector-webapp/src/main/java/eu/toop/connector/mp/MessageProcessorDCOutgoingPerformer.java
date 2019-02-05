@@ -69,7 +69,6 @@ import eu.toop.commons.jaxb.ToopXSDHelper;
 import eu.toop.commons.schematron.TOOPSchematronValidator;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.TCSettings;
-import eu.toop.connector.api.as4.IMessageExchangeSPI;
 import eu.toop.connector.api.as4.MEException;
 import eu.toop.connector.api.as4.MEMessage;
 import eu.toop.connector.api.as4.MEPayload;
@@ -416,8 +415,6 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
                                                       "'");
 
               // Main message exchange
-              final IMessageExchangeSPI aSPI = MessageExchangeManager.getSafeImplementationOfID (TCConfig.getMEMImplementationID ());
-
               final MERoutingInformation aMERoutingInfo = new MERoutingInformation (aSenderID,
                                                                                     aEP.getParticipantID (),
                                                                                     aDocTypeID,
@@ -427,7 +424,7 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
                                                                                     aEP.getCertificate ());
               try
               {
-                aSPI.sendDCOutgoing (aMERoutingInfo, aMEMessage);
+                MessageExchangeManager.getConfiguredImplementation ().sendDCOutgoing (aMERoutingInfo, aMEMessage);
               }
               catch (final MEException ex)
               {
