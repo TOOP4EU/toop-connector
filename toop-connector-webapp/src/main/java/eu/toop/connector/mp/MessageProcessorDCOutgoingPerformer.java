@@ -433,14 +433,7 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
                                                                               EActingSide.DC);
               try
               {
-                if (!MEMDelegate.getInstance ().sendMessage (aGRM, aMEMessage))
-                {
-                  aErrors.add (_createError (sLogPrefix,
-                                             EToopErrorCategory.E_DELIVERY,
-                                             EToopErrorCode.ME_001,
-                                             "Error sending message",
-                                             null));
-                }
+                MEMDelegate.getInstance ().sendMessage (aGRM, aMEMessage);
               }
               catch (final MEException ex)
               {

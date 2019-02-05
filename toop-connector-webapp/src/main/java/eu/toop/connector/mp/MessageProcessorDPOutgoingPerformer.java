@@ -332,14 +332,7 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
               try
               {
                 // Reuse the same MEMessage for each endpoint
-                if (!MEMDelegate.getInstance ().sendMessage (aGRM, aMEMessage))
-                {
-                  aErrors.add (_createError (sLogPrefix,
-                                             EToopErrorCategory.E_DELIVERY,
-                                             EToopErrorCode.ME_001,
-                                             "Error sending message",
-                                             null));
-                }
+                MEMDelegate.getInstance ().sendMessage (aGRM, aMEMessage);
               }
               catch (final MEException ex)
               {
