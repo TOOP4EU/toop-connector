@@ -82,7 +82,6 @@ public class MEMDelegate extends AbstractGlobalSingleton {
    *
    * @param gatewayRoutingMetadata The container for the endpoint information and docid/procid
    * @param meMessage              the payloads and their metadata to be sent to the gateway.
-   * @return <code>true</code> if sending was successful, <code>false</code> if not
    */
   public void sendMessage(final GatewayRoutingMetadata gatewayRoutingMetadata, final MEMessage meMessage) {
     if (LOG.isDebugEnabled()) {
@@ -168,8 +167,7 @@ public class MEMDelegate extends AbstractGlobalSingleton {
       ToopKafkaClient.send(EErrorLevel.ERROR, () -> errorMesage);
       if ("EBMS:0301".equals(relayResult.getErrorCode()))
         throw new MEException(EToopErrorCode.ME_003, errorMesage);
-      else
-        throw new MEException(EToopErrorCode.ME_004, errorMesage);
+      throw new MEException(EToopErrorCode.ME_004, errorMesage);
     }
   }
 
