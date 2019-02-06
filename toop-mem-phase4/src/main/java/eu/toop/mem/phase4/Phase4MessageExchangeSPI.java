@@ -15,12 +15,25 @@
  */
 package eu.toop.mem.phase4;
 
+import java.io.File;
+
 import javax.annotation.Nonnull;
 import javax.servlet.ServletContext;
 
+import com.helger.as4.attachment.EAS4CompressionMode;
+import com.helger.as4.esens.ESENSPMode;
+import com.helger.as4.mgr.MetaAS4Manager;
+import com.helger.as4.model.pmode.PMode;
+import com.helger.as4.model.pmode.PModeManager;
+import com.helger.as4.model.pmode.PModePayloadService;
+import com.helger.as4.servlet.AS4ServerInitializer;
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.Nonempty;
+import com.helger.commons.exception.InitializationException;
+import com.helger.commons.string.StringHelper;
+import com.helger.photon.basic.app.io.WebFileIO;
 
+import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.as4.IMERoutingInformation;
 import eu.toop.connector.api.as4.IMessageExchangeSPI;
 import eu.toop.connector.api.as4.MEException;
@@ -57,6 +70,51 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
     m_aIncomingHandler = aIncomingHandler;
 
     // TODO register for servlet
+
+    {
+      // Get the ServletContext base path
+      String sServletContextPath = aServletContext.getRealPath (".");
+      if (sServletContextPath == null)
+      {
+        // Fallback for Undertow
+        sServletContextPath = aServletContext.getRealPath ("");
+      }
+      if (StringHelper.hasNoText (sServletContextPath))
+        throw new InitializationException ("No servlet context path was provided!");
+
+      // Get the data path
+      final String sDataPath = TCConfig.getConfigFile ().getAsString ("toop.phase4.datapath");
+      if (StringHelper.hasNoText (sDataPath))
+        throw new InitializationException ("No data path was provided!");
+      final File aDataPath = new File (sDataPath).getAbsoluteFile ();
+      // Init the IO layer
+      WebFileIO.initPaths (aDataPath, sServletContextPath, false);
+    }
+
+    AS4ServerInitializer.initAS4Server ();
+
+    final PModeManager aPModeMgr = MetaAS4Manager.getPModeMgr ();
+    {
+      // SIMPLE_ONEWAY
+      // 1. MEP: One way - push
+      // 2. Compress: Yes
+      // 3. Retry: None
+      // 4. Sign: Yes
+      // 5. Encrypt: Yes
+      // 6. Service: SRV_SIMPLE_ONEWAY
+      // 7. Action: ACT_SIMPLE_ONEWAY
+      final PMode aPMode = ESENSPMode.createESENSPMode ("AnyInitiatorID",
+                                                        "AnyResponderID",
+                                                        "AnyResponderAddress",
+                                                        (i, r) -> "TOOP_PMODE",
+                                                        false);
+      aPMode.setPayloadService (new PModePayloadService (EAS4CompressionMode.GZIP));
+      aPMode.getReceptionAwareness ().setRetry (false);
+      aPMode.getLeg1 ().getBusinessInfo ().setService ("SRV_SIMPLE_ONEWAY");
+      aPMode.getLeg1 ().getBusinessInfo ().setAction ("ACT_SIMPLE_ONEWAY");
+      aPModeMgr.createOrUpdatePMode (aPMode);
+    }
+
   }
 
   public void sendDCOutgoing (@Nonnull final IMERoutingInformation aRoutingInfo,

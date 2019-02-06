@@ -57,6 +57,7 @@ public class TCWebAppListener extends WebScopeListener
   @Override
   public void contextInitialized (@Nonnull final ServletContextEvent aEvent)
   {
+    // Must be first
     super.contextInitialized (aEvent);
 
     GlobalIDFactory.setPersistentStringIDFactory (new StringIDFromGlobalLongIDFactory ("toop-mp-"));
@@ -146,6 +147,7 @@ public class TCWebAppListener extends WebScopeListener
     // Shutdown tracker
     ToopKafkaClient.close ();
 
+    // Must be last
     super.contextDestroyed (aEvent);
   }
 }
