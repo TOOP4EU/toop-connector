@@ -1,21 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-
-    Copyright (C) 2018-2019 toop.eu
-
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-
-            http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
-
--->
 <root>
   <value-list srcns="http://toop.nl/nationaalhandelsregister" dstns="http://toop.eu/registered-organization">
     <item srcval="Adres" dstval="PhysicalAddress" />
@@ -29,21 +12,19 @@
     <item srcval="straatHuisnummer" dstval="streetAddress" />
     <item srcval="wordtGeleidVanuit" dstval="hasRegisteredSite" />
   </value-list>
-  <value-list srcns="http://toop.fre/freedonia-business-register" dstns="http://toop.eu/registered-organization">
-    <item srcval="FreedoniaBusinessCode" dstval="CompanyCode" />
-    <item srcval="FreedoniaAddress" dstval="PhysicalAddress" />
-    <item srcval="FreedoniaRegistrationNumber" dstval="RegistrationNumber" />
-    <item srcval="FreedoniaSSNumber" dstval="SSNumber" />
-    <item srcval="FreedoniaVATNumber" dstval="VATNumber" />
-    <item srcval="FreedoniaActivityDeclaration" dstval="activityDescription" />
-    <item srcval="FreedoniaCompanyName" dstval="companyName" />
-    <item srcval="hasBusinessCode" dstval="hasCompanyCode" />
-    <item srcval="FreedoniaCompanyType" dstval="hasCompanyType" />
-    <item srcval="FreedoniaLegalStatus" dstval="hasLegalStatus" />
-    <item srcval="FreedoniaCompanyNaceCode" dstval="hasNaceCode" />
-    <item srcval="FreedoniaRegistrationAuthority" dstval="hasRegistrationAuthority" />
-    <item srcval="FreedoniaLegalStatusEffectiveDate" dstval="legalStatusEffectiveDate" />
-    <item srcval="FreedoniaRegistrationDate" dstval="registrationDate" />
+  <value-list srcns="http://toop.it/registroimprese" dstns="http://toop.eu/registered-organization">
+    <item srcval="AutoritaDiRegistrazione" dstval="hasRegistrationAuthority" />
+    <item srcval="CodiceFiscale" dstval="CompanyCode" />
+    <item srcval="CodiceImpresa" dstval="RegistrationNumber" />
+    <item srcval="CodiceNACE" dstval="hasNaceCode" />
+    <item srcval="DataDiIscrizione" dstval="registrationDate" />
+    <item srcval="Denominazione" dstval="companyName" />
+    <item srcval="DescrizioneAttivita" dstval="activityDescription" />
+    <item srcval="FormaGiuridica" dstval="hasCompanyType" />
+    <item srcval="Indirizzo" dstval="PhysicalAddress" />
+    <item srcval="PartitaIVA" dstval="VATNumber" />
+    <item srcval="StatoAttivita" dstval="hasLegalStatus" />
+    <item srcval="hasCodiceFiscale" dstval="hasCompanyCode" />
   </value-list>
   <value-list srcns="http://toop.elo/elonia-business-register" dstns="http://toop.eu/registered-organization">
     <item srcval="EloniaActivityDeclaration" dstval="activityDescription" />
@@ -60,6 +41,22 @@
     <item srcval="EloniaSSNumber" dstval="SSNumber" />
     <item srcval="EloniaVATNumber" dstval="VATNumber" />
     <item srcval="hasBusinessCode" dstval="hasCompanyCode" />
+  </value-list>
+  <value-list srcns="http://toop.fre/freedonia-business-register" dstns="http://toop.eu/registered-organization">
+    <item srcval="FreedoniaBusinessCode" dstval="CompanyCode" />
+    <item srcval="FreedoniaAddress" dstval="PhysicalAddress" />
+    <item srcval="FreedoniaRegistrationNumber" dstval="RegistrationNumber" />
+    <item srcval="FreedoniaSSNumber" dstval="SSNumber" />
+    <item srcval="FreedoniaVATNumber" dstval="VATNumber" />
+    <item srcval="FreedoniaActivityDeclaration" dstval="activityDescription" />
+    <item srcval="FreedoniaCompanyName" dstval="companyName" />
+    <item srcval="hasBusinessCode" dstval="hasCompanyCode" />
+    <item srcval="FreedoniaCompanyType" dstval="hasCompanyType" />
+    <item srcval="FreedoniaLegalStatus" dstval="hasLegalStatus" />
+    <item srcval="FreedoniaCompanyNaceCode" dstval="hasNaceCode" />
+    <item srcval="FreedoniaRegistrationAuthority" dstval="hasRegistrationAuthority" />
+    <item srcval="FreedoniaLegalStatusEffectiveDate" dstval="legalStatusEffectiveDate" />
+    <item srcval="FreedoniaRegistrationDate" dstval="registrationDate" />
   </value-list>
   <value-list srcns="http://toop.eu/mapping" dstns="http://toop.eu/registered-organization" />
 </root>
