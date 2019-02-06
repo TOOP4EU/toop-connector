@@ -39,6 +39,8 @@ import com.helger.security.keystore.IKeyStoreType;
 import com.helger.settings.exchange.configfile.ConfigFile;
 import com.helger.settings.exchange.configfile.ConfigFileBuilder;
 
+import eu.toop.connector.api.as4.MessageExchangeManager;
+
 /**
  * This class contains global configuration elements for the TOOP COnnector.
  *
@@ -266,8 +268,7 @@ public final class TCConfig
   @Nonnull
   public static String getMEMImplementationID ()
   {
-    // "mem-default" - see MessageExchangeManager
-    return getConfigFile ().getAsString ("toop.mem.implementation", "mem-default");
+    return getConfigFile ().getAsString ("toop.mem.implementation", MessageExchangeManager.DEFAULT_ID);
   }
 
   /**
