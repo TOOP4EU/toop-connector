@@ -76,6 +76,12 @@ public final class MEPayload implements Serializable
   }
 
   @Nonnull
+  public IMimeType getMimeType ()
+  {
+    return m_aMimeType;
+  }
+
+  @Nonnull
   public String getMimeTypeString ()
   {
     return m_aMimeType.getAsString ();
