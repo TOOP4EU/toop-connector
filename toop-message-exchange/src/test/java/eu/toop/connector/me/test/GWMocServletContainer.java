@@ -17,6 +17,7 @@ package eu.toop.connector.me.test;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
 
 /**
  * @author yerlibilgin
@@ -24,6 +25,7 @@ import org.eclipse.jetty.servlet.ServletHandler;
 public class GWMocServletContainer {
 
   private static Server server;
+  private static SampleGWServlet servlet;
 
   public static void createServletOn(final int port, final String localPath) {
     new Thread(() -> {
@@ -33,7 +35,7 @@ public class GWMocServletContainer {
         ServletHandler servletHandler = new ServletHandler();
         server.setHandler(servletHandler);
 
-        servletHandler.addServletWithMapping(SampleGWServlet.class, localPath);
+        servlet = (SampleGWServlet) servletHandler.addServletWithMapping(SampleGWServlet.class, localPath).getServlet();
 
         server.start();
         server.join();
