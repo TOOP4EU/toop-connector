@@ -49,20 +49,8 @@ public final class SMMClientTest {
   private static final ISMMConceptProvider[] CP = new ISMMConceptProvider[] { SMMConceptProviderGRLCRemote::getAllMappedValues,
                                                                               SMMConceptProviderGRLCRemote::remoteQueryAllMappedValues };
   private static final IUnmappableCallback UCB = (sLogPrefix, aSourceNamespace, aSourceValue, aDestNamespace) -> {
+    // Do nothing
   };
-
-  // static {
-  // final String sProxyHost = "172.30.9.6";
-  // final String sProxyPort = "8080";
-  // System.setProperty ("java.net.useSystemProxies", "false");
-  // System.setProperty ("http.proxyHost", sProxyHost);
-  // System.setProperty ("http.proxyPort", sProxyPort);
-  // System.setProperty ("https.proxyHost", sProxyHost);
-  // System.setProperty ("https.proxyPort", sProxyPort);
-  // System.setProperty ("http.nonProxyHosts", "*.brz.gv.at|localhost");
-  // System.setProperty ("com.sun.net.ssl.checkRevocation", "false");
-  // System.setProperty ("javax.net.ssl.trustStore", "/BRZ-StammCA-2-01.jks");
-  // }
 
   @Test
   public void testEmpty () throws IOException {

@@ -53,6 +53,32 @@
       <name>Jerry Dimitriou</name>
     </developer>
   </developers>
+  
+  <profiles>
+    <profile>
+      <id>default</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <dependencies>
+        <!-- Default MEM module -->
+        <dependency>
+          <groupId>eu.toop</groupId>
+          <artifactId>toop-message-exchange</artifactId>
+        </dependency>
+      </dependencies>
+    </profile>
+    <profile>
+      <id>phase4</id>
+      <dependencies>
+        <!-- ph-as4 MEM module -->
+        <dependency>
+          <groupId>eu.toop</groupId>
+          <artifactId>toop-mem-phase4</artifactId>
+        </dependency>
+      </dependencies>
+    </profile>
+  </profiles>
 
   <dependencies>
     <dependency>
@@ -86,16 +112,6 @@
     <dependency>
       <groupId>eu.toop</groupId>
       <artifactId>toop-r2d2-client</artifactId>
-    </dependency>
-    <!-- Default MEM module -->
-    <dependency>
-      <groupId>eu.toop</groupId>
-      <artifactId>toop-message-exchange</artifactId>
-    </dependency>
-    <!-- ph-as4 MEM module -->
-    <dependency>
-      <groupId>eu.toop</groupId>
-      <artifactId>toop-mem-phase4</artifactId>
     </dependency>
 
     <!-- Logging -->
@@ -159,9 +175,16 @@
     </resources>
     <plugins>
       <plugin>
+        <artifactId>maven-war-plugin</artifactId>
+        <configuration>
+          <attachClasses>true</attachClasses>
+          <classesClassifier>classes</classesClassifier>
+        </configuration>
+      </plugin>
+      <plugin>
         <groupId>org.eclipse.jetty</groupId>
         <artifactId>jetty-maven-plugin</artifactId>
-        <version>9.4.8.v20171121</version>
+        <version>9.4.14.v20181114</version>
         <configuration>
           <scanIntervalSeconds>3</scanIntervalSeconds>
         </configuration>

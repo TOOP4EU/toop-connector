@@ -15,7 +15,14 @@
  */
 package eu.toop.connector.api.http;
 
+import java.security.GeneralSecurityException;
+
+import org.apache.http.HttpHost;
+
+import com.helger.commons.exception.InitializationException;
 import com.helger.httpclient.HttpClientFactory;
+
+import eu.toop.connector.api.TCConfig;
 
 /**
  * Common TOOP Connector HTTPClient factory
@@ -26,9 +33,30 @@ public final class TCHttpClientFactory extends HttpClientFactory
 {
   public TCHttpClientFactory ()
   {
-    // For proxy etc
-    setUseSystemProperties (true);
+    if (TCConfig.isUseHttpSystemProperties ())
+    {
+      // For proxy etc
+      setUseSystemProperties (true);
+    }
+    else
+    {
+      // Add settings from configuration file here centrally
+      if (TCConfig.isProxyServerEnabled ())
+      {
+        setProxy (new HttpHost (TCConfig.getProxyServerAddress (), TCConfig.getProxyServerPort ()));
+      }
 
-    // Add settings from configuration file here centrally
+      // Disable SSL checks?
+      if (TCConfig.isTLSTrustAll ())
+        try
+        {
+          setSSLContextTrustAll ();
+          setHostnameVerifierVerifyAll ();
+        }
+        catch (final GeneralSecurityException ex)
+        {
+          throw new InitializationException (ex);
+        }
+    }
   }
 }

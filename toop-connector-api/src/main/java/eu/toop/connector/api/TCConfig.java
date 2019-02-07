@@ -18,6 +18,7 @@ package eu.toop.connector.api;
 import java.io.File;
 import java.net.URI;
 
+import javax.annotation.CheckForSigned;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.GuardedBy;
@@ -441,5 +442,33 @@ public final class TCConfig
   public static File getDebugToDPDumpPathIfEnabled ()
   {
     return isDebugToDPDumpEnabled () ? getDebugToDPDumpPath () : null;
+  }
+
+  public static boolean isUseHttpSystemProperties ()
+  {
+    return getConfigFile ().getAsBoolean ("toop.http.usesysprops", false);
+  }
+
+  public static boolean isProxyServerEnabled ()
+  {
+    return getConfigFile ().getAsBoolean ("toop.proxy.enabled", false);
+  }
+
+  @Nullable
+  public static String getProxyServerAddress ()
+  {
+    // Scheme plus hostname or IP address
+    return getConfigFile ().getAsString ("toop.proxy.address");
+  }
+
+  @CheckForSigned
+  public static int getProxyServerPort ()
+  {
+    return getConfigFile ().getAsInt ("toop.proxy.port", -1);
+  }
+
+  public static boolean isTLSTrustAll ()
+  {
+    return getConfigFile ().getAsBoolean ("toop.tls.trustall", false);
   }
 }

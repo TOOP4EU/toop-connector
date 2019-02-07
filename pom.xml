@@ -73,7 +73,7 @@
       <dependency>
         <groupId>com.helger</groupId>
         <artifactId>ph-web-parent-pom</artifactId>
-        <version>9.1.0</version>
+        <version>9.1.1-SNAPSHOT</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -132,6 +132,11 @@
         <artifactId>toop-mem-phase4</artifactId>
         <version>${project.version}</version>
       </dependency>
+      <dependency>
+        <groupId>eu.toop</groupId>
+        <artifactId>toop-connector-webapp</artifactId>
+        <version>${project.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -144,6 +149,7 @@
     <module>toop-mem-phase4</module>
     <module>toop-connector-webapp</module>
   </modules>
+  
   <build>
     <plugins>
       <plugin>
