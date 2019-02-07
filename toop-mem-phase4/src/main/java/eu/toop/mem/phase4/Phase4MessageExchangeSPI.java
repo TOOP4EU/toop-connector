@@ -16,7 +16,9 @@
 package eu.toop.mem.phase4;
 
 import java.io.File;
+import java.io.IOException;
 import java.security.KeyStore;
+import java.security.KeyStore.PrivateKeyEntry;
 import java.security.cert.X509Certificate;
 
 import javax.annotation.Nonnull;
@@ -26,10 +28,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.helger.as4.attachment.EAS4CompressionMode;
+import com.helger.as4.attachment.WSS4JAttachment;
 import com.helger.as4.client.AS4ClientUserMessage;
+import com.helger.as4.client.AbstractAS4Client.SentMessage;
 import com.helger.as4.crypto.CryptoProperties;
 import com.helger.as4.crypto.ECryptoAlgorithmSign;
 import com.helger.as4.crypto.ECryptoAlgorithmSignDigest;
+import com.helger.as4.messaging.domain.MessageHelperMethods;
 import com.helger.as4.mgr.MetaAS4Manager;
 import com.helger.as4.model.pmode.PMode;
 import com.helger.as4.model.pmode.PModeManager;
@@ -37,23 +42,30 @@ import com.helger.as4.model.pmode.PModePayloadService;
 import com.helger.as4.servlet.AS4ServerInitializer;
 import com.helger.as4.servlet.mgr.AS4ServerSettings;
 import com.helger.as4.soap.ESOAPVersion;
+import com.helger.as4.util.AS4ResourceManager;
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.IsSPIImplementation;
 import com.helger.commons.annotation.Nonempty;
 import com.helger.commons.exception.InitializationException;
+import com.helger.commons.io.file.FilenameHelper;
+import com.helger.commons.io.file.SimpleFileIO;
 import com.helger.commons.io.resource.ClassPathResource;
 import com.helger.commons.io.resource.FileSystemResource;
 import com.helger.commons.io.resource.IReadableResource;
 import com.helger.commons.string.StringHelper;
+import com.helger.commons.timing.StopWatch;
+import com.helger.httpclient.response.ResponseHandlerByteArray;
 import com.helger.photon.basic.app.io.WebFileIO;
 import com.helger.security.keystore.KeyStoreHelper;
 import com.helger.servlet.ServletHelper;
 
+import eu.toop.commons.error.EToopErrorCode;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.as4.IMERoutingInformation;
 import eu.toop.connector.api.as4.IMessageExchangeSPI;
 import eu.toop.connector.api.as4.MEException;
 import eu.toop.connector.api.as4.MEMessage;
+import eu.toop.connector.api.as4.MEPayload;
 import eu.toop.mem.phase4.config.TOOPPMode;
 
 /**
@@ -125,6 +137,14 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
       aPMode.getLeg1 ().getBusinessInfo ().setAction ("Deliver");
       aPModeMgr.createOrUpdatePMode (aPMode);
     }
+  }
+
+  private void _sendOutgoing (@Nonnull final IMERoutingInformation aRoutingInfo,
+                              @Nonnull final MEMessage aMessage) throws MEException
+  {
+    final StopWatch aSW = StopWatch.createdStarted ();
+
+    final X509Certificate aTheirCert = aRoutingInfo.getCertificate ();
 
     // Start crypto stuff
     final CryptoProperties aCP = AS4ServerSettings.getAS4CryptoFactory ().getCryptoProperties ();
@@ -132,13 +152,19 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
                                                          aCP.getKeyStorePath (),
                                                          aCP.getKeyStorePassword ())
                                           .getKeyStore ();
-    final KeyStore.PrivateKeyEntry aOurCert = KeyStoreHelper.loadPrivateKey (aOurKS,
-                                                                             aCP.getKeyStorePath (),
-                                                                             aCP.getKeyAlias (),
-                                                                             aCP.getKeyPassword ().toCharArray ())
-                                                            .getKeyEntry ();
+    if (aOurKS == null)
+      throw new InitializationException ("Failed to load keystore");
 
-    final AS4ClientUserMessage aClient = new AS4ClientUserMessage ();
+    final PrivateKeyEntry aOurCert = KeyStoreHelper.loadPrivateKey (aOurKS,
+                                                                    aCP.getKeyStorePath (),
+                                                                    aCP.getKeyAlias (),
+                                                                    aCP.getKeyPassword ().toCharArray ())
+                                                   .getKeyEntry ();
+    if (aOurCert == null)
+      throw new InitializationException ("Failed to load key");
+
+    final AS4ResourceManager aResMgr = new AS4ResourceManager ();
+    final AS4ClientUserMessage aClient = new AS4ClientUserMessage (aResMgr);
     aClient.setSOAPVersion (ESOAPVersion.SOAP_12);
 
     // Keystore data
@@ -153,12 +179,64 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
 
     aClient.setCryptoAlgorithmSign (ECryptoAlgorithmSign.RSA_SHA_512);
     aClient.setCryptoAlgorithmSignDigest (ECryptoAlgorithmSignDigest.DIGEST_SHA_512);
-  }
 
-  private void _sendOutgoing (@Nonnull final IMERoutingInformation aRoutingInfo,
-                              @Nonnull final MEMessage aMessage) throws MEException
-  {
-    final X509Certificate aTheirCert = aRoutingInfo.getCertificate ();
+    aClient.setAction (aRoutingInfo.getDocumentTypeID ().getURIEncoded ());
+    aClient.setServiceType (null);
+    aClient.setServiceValue (aRoutingInfo.getProcessID ().getURIEncoded ());
+    aClient.setConversationID (MessageHelperMethods.createRandomConversationID ());
+    aClient.setAgreementRefValue (null);
+
+    aClient.setFromRole ("http://www.toop.eu/edelivery/gateway");
+    aClient.setFromPartyID (TCConfig.getMEMAS4TcPartyid ());
+    aClient.setToRole ("http://www.toop.eu/edelivery/gateway");
+    aClient.setToPartyID (TCConfig.getMEMAS4GwPartyID ());
+    aClient.setPayload (null);
+
+    for (final MEPayload aPayload : aMessage.payloads ())
+    {
+      try
+      {
+        aClient.addAttachment (WSS4JAttachment.createOutgoingFileAttachment (aPayload.getData ().bytes (),
+                                                                             "",
+                                                                             aPayload.getMimeType (),
+                                                                             null,
+                                                                             aResMgr));
+      }
+      catch (final IOException ex)
+      {
+        throw new MEException (EToopErrorCode.ME_001, ex);
+      }
+    }
+
+    try
+    {
+      final SentMessage <byte []> aResponseEntity = aClient.sendMessage (aRoutingInfo.getEndpointURL (),
+                                                                         new ResponseHandlerByteArray ());
+      LOGGER.info ("Successfully transmitted document with message ID '" +
+                   aResponseEntity.getMessageID () +
+                   "' for '" +
+                   aRoutingInfo.getReceiverID ().getURIEncoded () +
+                   "' to '" +
+                   aRoutingInfo.getEndpointURL () +
+                   "' in " +
+                   aSW.stopAndGetMillis () +
+                   " ms");
+
+      if (aResponseEntity.hasResponse ())
+      {
+        final String sMessageID = aResponseEntity.getMessageID ();
+        final String sFilename = FilenameHelper.getAsSecureValidASCIIFilename (sMessageID) + "-response.xml";
+        final File aResponseFile = new File (sFilename);
+        if (SimpleFileIO.writeFile (aResponseFile, aResponseEntity.getResponse ()).isSuccess ())
+          LOGGER.info ("Response file was written to '" + aResponseFile.getAbsolutePath () + "'");
+        else
+          LOGGER.error ("Error writing response file to '" + aResponseFile.getAbsolutePath () + "'");
+      }
+    }
+    catch (final Exception ex)
+    {
+      throw new MEException (EToopErrorCode.ME_001, ex);
+    }
 
   }
 
