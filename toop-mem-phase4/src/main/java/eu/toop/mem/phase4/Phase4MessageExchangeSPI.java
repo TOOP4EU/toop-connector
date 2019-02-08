@@ -210,6 +210,7 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
 
     try
     {
+      // Main sending
       final SentMessage <byte []> aResponseEntity = aClient.sendMessage (aRoutingInfo.getEndpointURL (),
                                                                          new ResponseHandlerByteArray ());
       LOGGER.info ("Successfully transmitted document with message ID '" +

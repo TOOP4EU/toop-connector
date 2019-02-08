@@ -35,5 +35,6 @@ public class TCUnifiedResponse extends UnifiedResponse
     super (RequestHelper.getHttpVersion (aHttpRequest), RequestHelper.getHttpMethod (aHttpRequest), aHttpRequest);
     setCharset (StandardCharsets.UTF_8);
     setAllowContentOnStatusCode (true);
+    disableCaching ();
   }
 }
