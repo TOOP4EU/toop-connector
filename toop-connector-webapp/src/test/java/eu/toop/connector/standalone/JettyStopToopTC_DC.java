@@ -23,6 +23,6 @@ public final class JettyStopToopTC_DC
 {
   public static void main (final String [] args) throws IOException
   {
-    new JettyStopper ().setStopPort (8092).run ();
+    new JettyStopper ().setStopPort (9090).run ();
   }
 }
