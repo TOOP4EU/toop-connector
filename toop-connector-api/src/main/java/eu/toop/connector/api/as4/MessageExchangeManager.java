@@ -16,6 +16,7 @@
 package eu.toop.connector.api.as4;
 
 import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.GuardedBy;
 
@@ -73,10 +74,14 @@ public class MessageExchangeManager
     return s_aRWLock.readLocked ( () -> s_aMap.computeIfAbsent (sID, k -> s_aMap.get (DEFAULT_ID)));
   }
 
-  @Nullable
+  @Nonnull
   public static IMessageExchangeSPI getConfiguredImplementation ()
   {
-    return getSafeImplementationOfID (TCConfig.getMEMImplementationID ());
+    final String sID = TCConfig.getMEMImplementationID ();
+    final IMessageExchangeSPI ret = getSafeImplementationOfID (sID);
+    if (ret == null)
+      throw new IllegalStateException ("Failed to resolve MEM implementation ID '" + sID + "'");
+    return ret;
   }
 
   @Nonnegative
