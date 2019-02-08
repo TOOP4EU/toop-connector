@@ -24,7 +24,9 @@
         <eb:MessageProperties>
           <eb:Property name="MessageId">${propMessageId}</eb:Property>
           <eb:Property name="RefToMessageId">${propRefToMessageId}</eb:Property>
-          <eb:Property name="Result">Receipt</eb:Property>
+          <eb:Property name="Result">${result}</eb:Property>
+          <eb:Property name="ErrorCode">${errorCode}</eb:Property>
+          <eb:Property name="Description">${description}</eb:Property>
         </eb:MessageProperties>
       </eb:UserMessage>
     </eb:Messaging>

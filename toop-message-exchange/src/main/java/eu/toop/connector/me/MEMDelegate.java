@@ -159,7 +159,7 @@ public class MEMDelegate extends AbstractGlobalSingleton {
         LOG.error("Description: " + relayResult.getDescription());
       }
 
-      String errorMesage = "Error from AS4 transmission: EToopErrorCode.ME_002 -- " +
+      String errorMesage = "Error from AS4 transmission: " +
           "EBMS ERROR CODE: " + relayResult.getErrorCode() +
           "\nSeverity: " + relayResult.getSeverity() +
           "\nShort Description: " + relayResult.getShortDescription();

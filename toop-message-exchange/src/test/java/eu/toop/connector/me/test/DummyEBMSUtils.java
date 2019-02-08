@@ -1,12 +1,12 @@
 /**
  * Copyright (C) 2018-2019 toop.eu
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *         http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -32,6 +32,9 @@ import eu.toop.connector.me.SoapXPathUtil;
  * @author myildiz
  */
 public class DummyEBMSUtils {
+  private static boolean failOnSubmissionResult;
+  private static boolean failOnRelayResult;
+  private static String relayEbmsError;
 
   final static String xmlTemplate = com.helger.commons.io.stream.StreamHelper
       .getAllBytesAsString(DummyEBMSUtils.class.getResourceAsStream("/relay-sr-template.txt"),
@@ -52,13 +55,21 @@ public class DummyEBMSUtils {
       throw new MEException(e.getMessage(), e);
     }
 
-    final String xml =
+    String xml =
         xmlTemplate.replace("${timestamp}", DateTimeUtils.getCurrentTimestamp()).
             replace("${messageId}", EBMSUtils.genereateEbmsMessageId("test")).
             replace("${action}", action).
             replace("${propMessageId}", theAS4Message).
             replace("${propRefToMessageId}", EBMSUtils.getMessageId(receivedMessage)
             );
+
+    if (failOnSubmissionResult) {
+      xml = xml.replace("${result}", "Error");
+      xml = xml.replace("${description}", "Shit happens!");
+      xml = xml.replace("${errorCode}", "Shit happens!");
+    } else {
+      xml = xml.replace("${result}", "Receipt");
+    }
 
     try {
       return SoapUtil.createMessage(null, new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)));
@@ -83,13 +94,20 @@ public class DummyEBMSUtils {
       throw new MEException(e.getMessage(), e);
     }
 
-    final String xml =
+    String xml =
         xmlTemplate.replace("${timestamp}", DateTimeUtils.getCurrentTimestamp()).
             replace("${messageId}", EBMSUtils.genereateEbmsMessageId("test")).
             replace("${action}", action).
             replace("${propMessageId}", refToMessageId).
             replace("${propRefToMessageId}", refToMessageId
             );
+
+    if (failOnRelayResult) {
+      xml = xml.replace("${result}", "Error");
+      xml = xml.replace("${errorCode}", relayEbmsError);
+    } else {
+      xml = xml.replace("${result}", "Receipt");
+    }
 
     try {
       return SoapUtil.createMessage(null, new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)));
@@ -105,5 +123,15 @@ public class DummyEBMSUtils {
     return receivedMessage;
   }
 
+
+  public static void setFailOnSubmissionResult(boolean fail) {
+    DummyEBMSUtils.failOnSubmissionResult = fail;
+  }
+
+  public static void setFailOnRelayResult(boolean fail, String errorCode) {
+    DummyEBMSUtils.failOnRelayResult = fail;
+    DummyEBMSUtils.relayEbmsError = errorCode;
+
+  }
 
 }
