@@ -140,7 +140,8 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
         // Send to DP (see ToDPServlet in toop-interface)
         final String sDestinationUrl = TCConfig.getMPToopInterfaceDPUrl ();
 
-        ToopKafkaClient.send (EErrorLevel.INFO, () -> "Posting signed ASiC response to " + sDestinationUrl);
+        ToopKafkaClient.send (EErrorLevel.INFO,
+                              () -> "Start posting signed ASiC response to '" + sDestinationUrl + "'");
 
         final HttpPost aHttpPost = new HttpPost (sDestinationUrl);
         aHttpPost.setEntity (new InputStreamEntity (aBAOS.getAsInputStream ()));
@@ -148,6 +149,8 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
         {
           EntityUtils.consume (aHttpResponse.getEntity ());
         }
+
+        ToopKafkaClient.send (EErrorLevel.INFO, () -> "Done posting signed ASiC response to '" + sDestinationUrl + "'");
       }
     }
   }

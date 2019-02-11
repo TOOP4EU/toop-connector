@@ -20,6 +20,7 @@ import java.security.GeneralSecurityException;
 import org.apache.http.HttpHost;
 
 import com.helger.commons.exception.InitializationException;
+import com.helger.commons.string.StringHelper;
 import com.helger.httpclient.HttpClientFactory;
 
 import eu.toop.connector.api.TCConfig;
@@ -44,6 +45,11 @@ public final class TCHttpClientFactory extends HttpClientFactory
       if (TCConfig.isProxyServerEnabled ())
       {
         setProxy (new HttpHost (TCConfig.getProxyServerAddress (), TCConfig.getProxyServerPort ()));
+
+        // Non-proxy hosts
+        final String sNonProxy = TCConfig.getProxyServerNonProxyHosts ();
+        if (StringHelper.hasText (sNonProxy))
+          nonProxyHosts ().addAll (StringHelper.getExplodedArray ('|', sNonProxy));
       }
 
       // Disable SSL checks?

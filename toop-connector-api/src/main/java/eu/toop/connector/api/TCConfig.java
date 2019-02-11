@@ -467,6 +467,13 @@ public final class TCConfig
     return getConfigFile ().getAsInt ("toop.proxy.port", -1);
   }
 
+  @Nullable
+  public static String getProxyServerNonProxyHosts ()
+  {
+    // Separated by pipe
+    return getConfigFile ().getAsString ("toop.proxy.non-proxy");
+  }
+
   public static boolean isTLSTrustAll ()
   {
     return getConfigFile ().getAsBoolean ("toop.tls.trustall", false);

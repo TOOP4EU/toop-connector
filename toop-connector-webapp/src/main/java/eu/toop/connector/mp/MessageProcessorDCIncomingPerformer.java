@@ -52,6 +52,12 @@ final class MessageProcessorDCIncomingPerformer implements IConcurrentPerformer 
     // Forward to the DC at /to-dc interface
     final TCHttpClientFactory aHCFactory = new TCHttpClientFactory ();
 
+    // Send to DC (see ToDCServlet in toop-interface)
+    final String sDestinationUrl = TCConfig.getMPToopInterfaceDCUrl ();
+    if (false)
+      if (sDestinationUrl.contains ("//127.0.0.1") || sDestinationUrl.contains ("//localhost"))
+        aHCFactory.setProxy (null);
+
     try (final HttpClientManager aMgr = new HttpClientManager (aHCFactory))
     {
       final SignatureHelper aSH = new SignatureHelper (TCConfig.getKeystoreType (),
@@ -64,10 +70,8 @@ final class MessageProcessorDCIncomingPerformer implements IConcurrentPerformer 
       {
         ToopMessageBuilder.createResponseMessageAsic (aResponse, aBAOS, aSH);
 
-        // Send to DC (see ToDCServlet in toop-interface)
-        final String sDestinationUrl = TCConfig.getMPToopInterfaceDCUrl ();
-
-        ToopKafkaClient.send (EErrorLevel.INFO, () -> "Posting signed ASiC response to " + sDestinationUrl);
+        ToopKafkaClient.send (EErrorLevel.INFO,
+                              () -> "Start posting signed ASiC response to '" + sDestinationUrl + "'");
 
         final HttpPost aHttpPost = new HttpPost (sDestinationUrl);
         aHttpPost.setEntity (new InputStreamEntity (aBAOS.getAsInputStream ()));
@@ -75,6 +79,8 @@ final class MessageProcessorDCIncomingPerformer implements IConcurrentPerformer 
         {
           EntityUtils.consume (aHttpResponse.getEntity ());
         }
+
+        ToopKafkaClient.send (EErrorLevel.INFO, () -> "Done posting signed ASiC response to '" + sDestinationUrl + "'");
       }
     }
   }
