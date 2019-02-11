@@ -314,6 +314,16 @@ public final class TCConfig
   }
 
   /**
+   * @return <code>true</code> if Schematron validation is enabled,
+   *         <code>false</code> if not. Default is true.
+   * @since 0.10.0
+   */
+  public static boolean isMPSchematronValidationEnabled ()
+  {
+    return getConfigFile ().getAsBoolean ("toop.mp.schematron.enabled", true);
+  }
+
+  /**
    * @return The URL of the DP backend for step 2/4
    */
   @Nullable

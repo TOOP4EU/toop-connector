@@ -138,6 +138,7 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
     final ICommonsList <TDEErrorType> aErrors = new CommonsArrayList <> ();
 
     // Schematron validation
+    if (TCConfig.isMPSchematronValidationEnabled ())
     {
       final ErrorList aErrorList = new ErrorList ();
       // XML creation
@@ -169,6 +170,10 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
                                      null));
         }
       }
+    }
+    else
+    {
+      ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "Schematron validation was explicitly disabled.");
     }
 
     if (aErrors.isEmpty ())
