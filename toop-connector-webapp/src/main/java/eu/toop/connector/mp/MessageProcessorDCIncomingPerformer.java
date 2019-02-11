@@ -54,9 +54,6 @@ final class MessageProcessorDCIncomingPerformer implements IConcurrentPerformer 
 
     // Send to DC (see ToDCServlet in toop-interface)
     final String sDestinationUrl = TCConfig.getMPToopInterfaceDCUrl ();
-    if (false)
-      if (sDestinationUrl.contains ("//127.0.0.1") || sDestinationUrl.contains ("//localhost"))
-        aHCFactory.setProxy (null);
 
     try (final HttpClientManager aMgr = new HttpClientManager (aHCFactory))
     {
