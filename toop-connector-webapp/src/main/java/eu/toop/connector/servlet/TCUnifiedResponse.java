@@ -15,8 +15,6 @@
  */
 package eu.toop.connector.servlet;
 
-import java.nio.charset.StandardCharsets;
-
 import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
 
@@ -33,7 +31,6 @@ public class TCUnifiedResponse extends UnifiedResponse
   public TCUnifiedResponse (@Nonnull final HttpServletRequest aHttpRequest)
   {
     super (RequestHelper.getHttpVersion (aHttpRequest), RequestHelper.getHttpMethod (aHttpRequest), aHttpRequest);
-    setCharset (StandardCharsets.UTF_8);
     setAllowContentOnStatusCode (true);
     disableCaching ();
   }

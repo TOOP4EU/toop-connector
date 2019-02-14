@@ -16,6 +16,7 @@
 package eu.toop.connector.servlet;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import javax.annotation.Nonnull;
 import javax.servlet.ServletException;
@@ -25,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.helger.commons.error.level.EErrorLevel;
+import com.helger.commons.mime.CMimeType;
 
 import eu.toop.commons.dataexchange.v140.TDETOOPResponseType;
 import eu.toop.commons.exchange.ToopMessageBuilder;
@@ -64,6 +66,9 @@ public class FromDPServlet extends HttpServlet
       // The message content is invalid
       ToopKafkaClient.send (EErrorLevel.ERROR,
                             () -> "The request does not contain an ASiC archive or the ASiC archive does not contain a TOOP Response Message!");
+      aUR.setContentAndCharset ("The provided ASIC container could not be interpreted as a valid TOOP response.",
+                                StandardCharsets.UTF_8);
+      aUR.setMimeType (CMimeType.TEXT_PLAIN);
       aUR.setStatus (HttpServletResponse.SC_BAD_REQUEST);
     }
     else

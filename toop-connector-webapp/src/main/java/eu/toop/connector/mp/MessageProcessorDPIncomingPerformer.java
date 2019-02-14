@@ -119,6 +119,8 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
         {
           EntityUtils.consume (aHttpResponse.getEntity ());
         }
+
+        ToopKafkaClient.send (EErrorLevel.INFO, () -> "Done posting signed ASiC request to " + sDestinationUrl);
       }
     }
   }
