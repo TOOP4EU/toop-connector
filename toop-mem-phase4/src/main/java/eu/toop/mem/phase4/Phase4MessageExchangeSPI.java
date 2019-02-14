@@ -35,6 +35,7 @@ import com.helger.as4.client.AbstractAS4Client.SentMessage;
 import com.helger.as4.crypto.CryptoProperties;
 import com.helger.as4.crypto.ECryptoAlgorithmSign;
 import com.helger.as4.crypto.ECryptoAlgorithmSignDigest;
+import com.helger.as4.http.AS4HttpDebug;
 import com.helger.as4.messaging.domain.MessageHelperMethods;
 import com.helger.as4.mgr.MetaAS4Manager;
 import com.helger.as4.model.pmode.PMode;
@@ -68,6 +69,7 @@ import eu.toop.connector.api.as4.IMessageExchangeSPI;
 import eu.toop.connector.api.as4.MEException;
 import eu.toop.connector.api.as4.MEMessage;
 import eu.toop.connector.api.as4.MEPayload;
+import eu.toop.connector.api.http.TCHttpClientFactory;
 import eu.toop.mem.phase4.config.TOOPPMode;
 import eu.toop.mem.phase4.servlet.AS4MessageProcessorSPI;
 
@@ -214,6 +216,12 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
         throw new MEException (EToopErrorCode.ME_001, ex);
       }
     }
+
+    // Proxy config etc
+    aClient.setHttpClientFactory (new TCHttpClientFactory ());
+
+    if (false)
+      AS4HttpDebug.setEnabled (true);
 
     try
     {
