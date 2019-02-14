@@ -318,6 +318,12 @@ public class R2D2Client implements IR2D2Client
             else
               aCert = BDXRClientReadOnly.getEndpointCertificate (aEP);
 
+            if (StringHelper.hasNoText (aEP.getEndpointURI ()))
+            {
+              ToopKafkaClient.send (EErrorLevel.WARN, () -> sLogPrefix + "SMP lookup result: endpoint has not URI");
+              continue;
+            }
+
             // Convert to our data structure
             final R2D2Endpoint aDestEP = new R2D2Endpoint (aRecipientID,
                                                            aEP.getTransportProfile (),
