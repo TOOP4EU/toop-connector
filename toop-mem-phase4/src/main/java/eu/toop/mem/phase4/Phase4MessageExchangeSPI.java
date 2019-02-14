@@ -48,6 +48,7 @@ import com.helger.as4.util.AS4ResourceManager;
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.IsSPIImplementation;
 import com.helger.commons.annotation.Nonempty;
+import com.helger.commons.debug.GlobalDebug;
 import com.helger.commons.exception.InitializationException;
 import com.helger.commons.io.file.FileOperationManager;
 import com.helger.commons.io.file.FilenameHelper;
@@ -151,20 +152,23 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
 
     // Start crypto stuff
     final CryptoProperties aCP = AS4ServerSettings.getAS4CryptoFactory ().getCryptoProperties ();
-    final KeyStore aOurKS = KeyStoreHelper.loadKeyStore (aCP.getKeyStoreType (),
-                                                         aCP.getKeyStorePath (),
-                                                         aCP.getKeyStorePassword ())
-                                          .getKeyStore ();
-    if (aOurKS == null)
-      throw new InitializationException ("Failed to load keystore");
+    {
+      // Sanity check
+      final KeyStore aOurKS = KeyStoreHelper.loadKeyStore (aCP.getKeyStoreType (),
+                                                           aCP.getKeyStorePath (),
+                                                           aCP.getKeyStorePassword ())
+                                            .getKeyStore ();
+      if (aOurKS == null)
+        throw new InitializationException ("Failed to load keystore");
 
-    final PrivateKeyEntry aOurCert = KeyStoreHelper.loadPrivateKey (aOurKS,
-                                                                    aCP.getKeyStorePath (),
-                                                                    aCP.getKeyAlias (),
-                                                                    aCP.getKeyPassword ().toCharArray ())
-                                                   .getKeyEntry ();
-    if (aOurCert == null)
-      throw new InitializationException ("Failed to load key");
+      final PrivateKeyEntry aOurCert = KeyStoreHelper.loadPrivateKey (aOurKS,
+                                                                      aCP.getKeyStorePath (),
+                                                                      aCP.getKeyAlias (),
+                                                                      aCP.getKeyPassword ().toCharArray ())
+                                                     .getKeyEntry ();
+      if (aOurCert == null)
+        throw new InitializationException ("Failed to load key");
+    }
 
     final AS4ResourceManager aResMgr = new AS4ResourceManager ();
     final AS4ClientUserMessage aClient = new AS4ClientUserMessage (aResMgr);
@@ -220,7 +224,8 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
     // Proxy config etc
     aClient.setHttpClientFactory (new TCHttpClientFactory ());
 
-    if (false)
+    // Debug only!!!
+    if (GlobalDebug.isDebugMode ())
       AS4HttpDebug.setEnabled (true);
 
     try
