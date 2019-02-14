@@ -33,10 +33,18 @@ import com.helger.as4.servlet.spi.AS4SignalMessageProcessorResult;
 import com.helger.as4.servlet.spi.IAS4ServletMessageProcessorSPI;
 import com.helger.as4lib.ebms3header.Ebms3SignalMessage;
 import com.helger.as4lib.ebms3header.Ebms3UserMessage;
+import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.IsSPIImplementation;
 import com.helger.commons.collection.impl.ICommonsList;
+import com.helger.commons.error.level.EErrorLevel;
 import com.helger.commons.io.stream.StreamHelper;
 import com.helger.xml.serialize.write.XMLWriter;
+
+import eu.toop.commons.dataexchange.v140.TDETOOPRequestType;
+import eu.toop.commons.dataexchange.v140.TDETOOPResponseType;
+import eu.toop.commons.exchange.ToopMessageBuilder;
+import eu.toop.connector.api.as4.IMessageExchangeSPI.IIncomingHandler;
+import eu.toop.kafkaclient.ToopKafkaClient;
 
 /**
  * Test implementation of {@link IAS4ServletMessageProcessorSPI}
@@ -47,9 +55,16 @@ import com.helger.xml.serialize.write.XMLWriter;
 public class AS4MessageProcessorSPI implements IAS4ServletMessageProcessorSPI
 {
   public static final String ACTION_FAILURE = "Failure";
-  private static final String DEFAULT_AGREEMENT = "urn:as4:agreements:so-that-we-have-a-non-empty-value";
-
   private static final Logger LOGGER = LoggerFactory.getLogger (AS4MessageProcessorSPI.class);
+
+  private static IIncomingHandler s_aIncomingHandler;
+
+  public static void setIncomingHandler (@Nonnull final IIncomingHandler aIncomingHandler)
+  {
+    ValueEnforcer.notNull (aIncomingHandler, "IncomingHandler");
+    ValueEnforcer.isNull (s_aIncomingHandler, "s_aIncomingHandler");
+    s_aIncomingHandler = aIncomingHandler;
+  }
 
   @Nonnull
   public AS4MessageProcessorResult processAS4UserMessage (@Nonnull final Ebms3UserMessage aUserMessage,
@@ -87,6 +102,36 @@ public class AS4MessageProcessorSPI implements IAS4ServletMessageProcessorSPI
             }
           }
         }
+      }
+    }
+
+    if (aIncomingAttachments != null && aIncomingAttachments.size () == 1)
+    {
+      // This is the ASIC
+      final WSS4JAttachment aAttachment = aIncomingAttachments.getFirst ();
+      try
+      {
+        // Extract from ASiC
+        final Object aMsg = ToopMessageBuilder.parseRequestOrResponse (aAttachment.getSourceStream ());
+
+        // Response before Request because it is derived from Request!
+        if (aMsg instanceof TDETOOPResponseType)
+        {
+          // This is the way from DP back to DC; we're in DC incoming mode
+          s_aIncomingHandler.handleIncomingResponse ((TDETOOPResponseType) aMsg);
+        }
+        else
+          if (aMsg instanceof TDETOOPRequestType)
+          {
+            // This is the way from DC to DP; we're in DP incoming mode
+            s_aIncomingHandler.handleIncomingRequest ((TDETOOPRequestType) aMsg);
+          }
+          else
+            ToopKafkaClient.send (EErrorLevel.ERROR, () -> "Unsuspported Message: " + aMsg);
+      }
+      catch (final Exception ex)
+      {
+        ToopKafkaClient.send (EErrorLevel.ERROR, () -> "Error handling incoming AS4 message", ex);
       }
     }
 

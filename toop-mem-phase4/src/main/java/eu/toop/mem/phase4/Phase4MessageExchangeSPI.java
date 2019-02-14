@@ -27,6 +27,7 @@ import javax.servlet.ServletContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.helger.as4.CAS4;
 import com.helger.as4.attachment.EAS4CompressionMode;
 import com.helger.as4.attachment.WSS4JAttachment;
 import com.helger.as4.client.AS4ClientUserMessage;
@@ -47,6 +48,7 @@ import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.IsSPIImplementation;
 import com.helger.commons.annotation.Nonempty;
 import com.helger.commons.exception.InitializationException;
+import com.helger.commons.io.file.FileOperationManager;
 import com.helger.commons.io.file.FilenameHelper;
 import com.helger.commons.io.file.SimpleFileIO;
 import com.helger.commons.io.resource.ClassPathResource;
@@ -67,6 +69,7 @@ import eu.toop.connector.api.as4.MEException;
 import eu.toop.connector.api.as4.MEMessage;
 import eu.toop.connector.api.as4.MEPayload;
 import eu.toop.mem.phase4.config.TOOPPMode;
+import eu.toop.mem.phase4.servlet.AS4MessageProcessorSPI;
 
 /**
  * {@link IMessageExchangeSPI} implementation using ph-as4
@@ -78,8 +81,6 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
 {
   public static final String ID = "mem-phase4";
   private static final Logger LOGGER = LoggerFactory.getLogger (Phase4MessageExchangeSPI.class);
-
-  private IIncomingHandler m_aIncomingHandler;
 
   public Phase4MessageExchangeSPI ()
   {}
@@ -96,9 +97,6 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
   {
     ValueEnforcer.notNull (aServletContext, "ServletContext");
     ValueEnforcer.notNull (aIncomingHandler, "IncomingHandler");
-    if (m_aIncomingHandler != null)
-      throw new IllegalStateException ("Another incoming handler was already registered!");
-    m_aIncomingHandler = aIncomingHandler;
 
     // TODO register for servlet
 
@@ -137,6 +135,9 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
       aPMode.getLeg1 ().getBusinessInfo ().setAction ("Deliver");
       aPModeMgr.createOrUpdatePMode (aPMode);
     }
+
+    // Remember handler
+    AS4MessageProcessorSPI.setIncomingHandler (aIncomingHandler);
   }
 
   private void _sendOutgoing (@Nonnull final IMERoutingInformation aRoutingInfo,
@@ -192,12 +193,18 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
     aClient.setToPartyID (TCConfig.getMEMAS4GwPartyID ());
     aClient.setPayload (null);
 
+    aClient.ebms3Properties ()
+           .setAll (MessageHelperMethods.createEbms3Property (CAS4.ORIGINAL_SENDER,
+                                                              aRoutingInfo.getSenderID ().getURIEncoded ()),
+                    MessageHelperMethods.createEbms3Property (CAS4.FINAL_RECIPIENT,
+                                                              aRoutingInfo.getReceiverID ().getURIEncoded ()));
+
     for (final MEPayload aPayload : aMessage.payloads ())
     {
       try
       {
         aClient.addAttachment (WSS4JAttachment.createOutgoingFileAttachment (aPayload.getData ().bytes (),
-                                                                             "",
+                                                                             "payload.asic",
                                                                              aPayload.getMimeType (),
                                                                              null,
                                                                              aResMgr));
@@ -227,7 +234,8 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
       {
         final String sMessageID = aResponseEntity.getMessageID ();
         final String sFilename = FilenameHelper.getAsSecureValidASCIIFilename (sMessageID) + "-response.xml";
-        final File aResponseFile = new File (sFilename);
+        final File aResponseFile = new File ("as4-responses", sFilename);
+        FileOperationManager.INSTANCE.createDirIfNotExisting (aResponseFile.getParentFile ());
         if (SimpleFileIO.writeFile (aResponseFile, aResponseEntity.getResponse ()).isSuccess ())
           LOGGER.info ("Response file was written to '" + aResponseFile.getAbsolutePath () + "'");
         else
@@ -236,6 +244,7 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
     }
     catch (final Exception ex)
     {
+      LOGGER.error ("Error sending message", ex);
       throw new MEException (EToopErrorCode.ME_001, ex);
     }
 

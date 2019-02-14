@@ -8,7 +8,7 @@ import com.helger.xservlet.AbstractXServlet;
 
 /**
  * Local AS4 servlet
- * 
+ *
  * @author Philip Helger
  */
 @WebServlet ("/phase4")
@@ -18,6 +18,10 @@ public class AS4ReceiveServlet extends AbstractXServlet
   {
     // Multipart is handled specifically inside
     settings ().setMultipartEnabled (false);
+
+    // The servlet handler takes all SPI implementations of
+    // IAS4ServletMessageProcessorSPI and invokes them.
+    // -> see AS4MessageProcessorSPI
     handlerRegistry ().registerHandler (EHttpMethod.POST, new AS4XServletHandler ());
   }
 }
