@@ -216,11 +216,26 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
 
     if (aErrors.isEmpty ())
     {
-      sendTo_to_dp (aRequest);
+      try
+      {
+        sendTo_to_dp (aRequest);
+      }
+      catch (final IOException | ToopErrorException ex)
+      {
+        aErrors.add (_createError (sLogPrefix,
+                                   EToopErrorCategory.E_DELIVERY,
+                                   EToopErrorCode.GEN,
+                                   "Error sending request to DP",
+                                   ex));
+      }
     }
 
-    if (aErrors.isNotEmpty ())
+    final int nErrorCount = aErrors.size ();
+    if (nErrorCount > 0)
     {
+      ToopKafkaClient.send (EErrorLevel.INFO,
+                            () -> sLogPrefix + nErrorCount + " error(s) were found - directly pushing to queue 3/4.");
+
       // We have errors
       final TDETOOPResponseType aResponseMsg = ToopMessageBuilder.createResponse (aRequest);
       aResponseMsg.getError ().addAll (aErrors);

@@ -80,5 +80,11 @@ final class MessageProcessorDCIncomingPerformer implements IConcurrentPerformer 
         ToopKafkaClient.send (EErrorLevel.INFO, () -> "Done posting signed ASiC response to '" + sDestinationUrl + "'");
       }
     }
+    catch (final Exception ex)
+    {
+      ToopKafkaClient.send (EErrorLevel.ERROR,
+                            () -> "Error posting signed ASiC response to '" + sDestinationUrl + "'",
+                            ex);
+    }
   }
 }

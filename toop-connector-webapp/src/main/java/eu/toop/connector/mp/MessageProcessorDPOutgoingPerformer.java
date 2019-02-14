@@ -362,7 +362,7 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
       {
         sendTo_to_dp (aResponse);
       }
-      catch (IOException | ToopErrorException ex)
+      catch (final IOException | ToopErrorException ex)
       {
         ToopKafkaClient.send (EErrorLevel.ERROR, () -> sLogPrefix + "Error sending response back to DP", ex);
       }
