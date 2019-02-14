@@ -321,12 +321,12 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
             for (final IR2D2Endpoint aEP : aEndpoints)
             {
               ToopKafkaClient.send (EErrorLevel.INFO,
-                                    sLogPrefix +
-                                                      "Sending MEM message to '" +
-                                                      aEP.getEndpointURL () +
-                                                      "' using transport protocol '" +
-                                                      aEP.getTransportProtocol () +
-                                                      "'");
+                                    () -> sLogPrefix +
+                                          "Sending MEM message to '" +
+                                          aEP.getEndpointURL () +
+                                          "' using transport protocol '" +
+                                          aEP.getTransportProtocol () +
+                                          "'");
 
               // Main message exchange
               final MERoutingInformation aMERoutingInfo = new MERoutingInformation (aDPParticipantID,
@@ -358,7 +358,14 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
     {
       // send back to DP including errors
       aResponse.getError ().addAll (aErrors);
-      sendTo_to_dp (aResponse);
+      try
+      {
+        sendTo_to_dp (aResponse);
+      }
+      catch (IOException | ToopErrorException ex)
+      {
+        ToopKafkaClient.send (EErrorLevel.ERROR, () -> sLogPrefix + "Error sending response back to DP", ex);
+      }
     }
   }
 }

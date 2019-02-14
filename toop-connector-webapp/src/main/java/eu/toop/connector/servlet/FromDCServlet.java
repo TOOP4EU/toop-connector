@@ -49,7 +49,7 @@ public class FromDCServlet extends HttpServlet
   protected void doPost (@Nonnull final HttpServletRequest aHttpServletRequest,
                          @Nonnull final HttpServletResponse aHttpServletResponse) throws ServletException, IOException
   {
-    ToopKafkaClient.send (EErrorLevel.INFO, "MP got /from-dc request (1/4)");
+    ToopKafkaClient.send (EErrorLevel.INFO, () -> "MP got /from-dc request (1/4)");
 
     final TCUnifiedResponse aUR = new TCUnifiedResponse (aHttpServletRequest);
 
@@ -63,7 +63,7 @@ public class FromDCServlet extends HttpServlet
       // The message content is invalid
       // Synchronous error
       ToopKafkaClient.send (EErrorLevel.ERROR,
-                            "The request does not contain an ASiC archive, or the ASiC archive does not contain a TOOP DataRequest!");
+                            () -> "The request does not contain an ASiC archive, or the ASiC archive does not contain a TOOP DataRequest!");
       aUR.setContentAndCharset ("The provided ASIC container could not be interpreted as a valid TOOP request.",
                                 aUR.getCharset ());
       aUR.setStatus (HttpServletResponse.SC_BAD_REQUEST);

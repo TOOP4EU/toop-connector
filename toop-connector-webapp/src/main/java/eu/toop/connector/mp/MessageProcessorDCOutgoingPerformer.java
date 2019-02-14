@@ -347,13 +347,15 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
               final String sTransportProfileID = TCConfig.getMEMProtocol ().getTransportProfileID ();
               aEndpoints = aTotalEndpoints.getAll (x -> x.getTransportProtocol ().equals (sTransportProfileID));
 
+              final int nEnpointCount = aEndpoints.size ();
+              final int nTotalEndpointCount = aTotalEndpoints.size ();
               ToopKafkaClient.send (EErrorLevel.INFO,
-                                    sLogPrefix +
-                                                      "R2D2 found [" +
-                                                      aEndpoints.size () +
-                                                      "/" +
-                                                      aTotalEndpoints.size () +
-                                                      "] endpoints");
+                                    () -> sLogPrefix +
+                                          "R2D2 found [" +
+                                          nEnpointCount +
+                                          "/" +
+                                          nTotalEndpointCount +
+                                          "] endpoints");
               if (LOGGER.isDebugEnabled ())
                 LOGGER.debug (sLogPrefix + "Endpoint details: " + aEndpoints);
 
@@ -412,12 +414,12 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
             for (final IR2D2Endpoint aEP : aEndpoints)
             {
               ToopKafkaClient.send (EErrorLevel.INFO,
-                                    sLogPrefix +
-                                                      "Sending MEM message to '" +
-                                                      aEP.getEndpointURL () +
-                                                      "' using transport protocol '" +
-                                                      aEP.getTransportProtocol () +
-                                                      "'");
+                                    () -> sLogPrefix +
+                                          "Sending MEM message to '" +
+                                          aEP.getEndpointURL () +
+                                          "' using transport protocol '" +
+                                          aEP.getTransportProtocol () +
+                                          "'");
 
               // Main message exchange
               final MERoutingInformation aMERoutingInfo = new MERoutingInformation (aSenderID,

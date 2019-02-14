@@ -133,13 +133,13 @@ public class TCWebAppListener extends WebScopeListener
                             }
                           });
 
-    ToopKafkaClient.send (EErrorLevel.INFO, m_sLogPrefix + "TOOP Connector started");
+    ToopKafkaClient.send (EErrorLevel.INFO, () -> m_sLogPrefix + "TOOP Connector started");
   }
 
   @Override
   public void contextDestroyed (@Nonnull final ServletContextEvent aEvent)
   {
-    ToopKafkaClient.send (EErrorLevel.INFO, m_sLogPrefix + "TOOP Connector shutting down");
+    ToopKafkaClient.send (EErrorLevel.INFO, () -> m_sLogPrefix + "TOOP Connector shutting down");
 
     // Shutdown message exchange
     MessageExchangeManager.getConfiguredImplementation ().shutdown (aEvent.getServletContext ());
