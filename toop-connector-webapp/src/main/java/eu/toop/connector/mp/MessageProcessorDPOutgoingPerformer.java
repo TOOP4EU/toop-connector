@@ -240,23 +240,16 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
 
         ICommonsList <IR2D2Endpoint> aEndpoints;
         {
-          final ICommonsList <IR2D2Endpoint> aTotalEndpoints = new R2D2Client ().getEndpoints (sLogPrefix,
-                                                                                               aDCParticipantID,
-                                                                                               aDocTypeID,
-                                                                                               aProcessID);
-
-          // Filter all endpoints with the corresponding transport profile
           final String sTransportProfileID = TCConfig.getMEMProtocol ().getTransportProfileID ();
-          aEndpoints = aTotalEndpoints.getAll (x -> x.getTransportProtocol ().equals (sTransportProfileID));
+          aEndpoints = new R2D2Client ().getEndpoints (sLogPrefix,
+                                                       aDCParticipantID,
+                                                       aDocTypeID,
+                                                       aProcessID,
+                                                       sTransportProfileID);
 
           // Expecting exactly one endpoint!
           ToopKafkaClient.send (aEndpoints.size () == 1 ? EErrorLevel.INFO : EErrorLevel.ERROR,
-                                () -> sLogPrefix +
-                                      "R2D2 found [" +
-                                      aEndpoints.size () +
-                                      "/" +
-                                      aTotalEndpoints.size () +
-                                      "] endpoint(s)");
+                                () -> sLogPrefix + "R2D2 found " + aEndpoints.size () + " endpoint(s)");
           if (LOGGER.isDebugEnabled ())
             LOGGER.debug (sLogPrefix + "Endpoint details: " + aEndpoints);
         }
