@@ -80,6 +80,7 @@ import eu.toop.connector.smmclient.IMappedValueList;
 import eu.toop.connector.smmclient.MappedValue;
 import eu.toop.connector.smmclient.SMMClient;
 import eu.toop.kafkaclient.ToopKafkaClient;
+import oasis.names.specification.ubl.schema.xsd.unqualifieddatatypes_21.IdentifierType;
 
 /**
  * The nested performer class that does the hard work in step 1/4.
@@ -308,28 +309,24 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
         if (aErrors.isEmpty ())
         {
           // 2. invoke R2D2 client
+          final String sTransportProfileID = TCConfig.getMEMProtocol ().getTransportProfileID ();
 
-          // Find destination country code
-          final String sDestinationCountryCode = aRoutingInfo.getDataProviderCountryCode ().getValue ();
-          if (StringHelper.hasNoText (sDestinationCountryCode))
+          final IdentifierType aExplicitQueryAddress = aRoutingInfo.getDataProviderElectronicAddressIdentifier ();
+          final boolean bIsSingleParticipant = aExplicitQueryAddress != null;
+          if (bIsSingleParticipant)
           {
-            aErrors.add (_createError (sLogPrefix,
-                                       EToopErrorCategory.DYNAMIC_DISCOVERY,
-                                       EToopErrorCode.IF_001,
-                                       "Failed to find destination country code to query!",
-                                       null));
-          }
+            // Query one participant only
+            final IParticipantIdentifier aRecipientID = aIF.createParticipantIdentifier (aExplicitQueryAddress.getSchemeID (),
+                                                                                         aExplicitQueryAddress.getValue ());
 
-          if (aErrors.isEmpty ())
-          {
-            // Find all endpoints by country
-            ICommonsList <IR2D2Endpoint> aTotalEndpoints = null;
+            // Find all endpoints of recipient
             try
             {
-              aTotalEndpoints = new R2D2Client ().getEndpoints (sLogPrefix,
-                                                                sDestinationCountryCode,
-                                                                aDocTypeID,
-                                                                aProcessID);
+              aEndpoints = new R2D2Client ().getEndpoints (sLogPrefix,
+                                                           aRecipientID,
+                                                           aDocTypeID,
+                                                           aProcessID,
+                                                           sTransportProfileID);
             }
             catch (final ToopErrorException ex)
             {
@@ -340,35 +337,65 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
                                          ex.getMessage (),
                                          ex.getCause ()));
             }
+          }
+          else
+          {
+            // Find destination country code
+            final String sDestinationCountryCode = aRoutingInfo.getDataProviderCountryCode ().getValue ();
+            if (StringHelper.hasNoText (sDestinationCountryCode))
+            {
+              aErrors.add (_createError (sLogPrefix,
+                                         EToopErrorCategory.DYNAMIC_DISCOVERY,
+                                         EToopErrorCode.IF_001,
+                                         "Failed to find destination country code to query!",
+                                         null));
+            }
 
             if (aErrors.isEmpty ())
             {
-              // Filter all endpoints with the corresponding transport profile
-              final String sTransportProfileID = TCConfig.getMEMProtocol ().getTransportProfileID ();
-              aEndpoints = aTotalEndpoints.getAll (x -> x.getTransportProtocol ().equals (sTransportProfileID));
-
-              final int nEnpointCount = aEndpoints.size ();
-              final int nTotalEndpointCount = aTotalEndpoints.size ();
-              ToopKafkaClient.send (EErrorLevel.INFO,
-                                    () -> sLogPrefix +
-                                          "R2D2 found [" +
-                                          nEnpointCount +
-                                          "/" +
-                                          nTotalEndpointCount +
-                                          "] endpoints");
-              if (LOGGER.isDebugEnabled ())
-                LOGGER.debug (sLogPrefix + "Endpoint details: " + aEndpoints);
-
-              if (aTotalEndpoints.isEmpty ())
+              // Find all endpoints by country
+              try
               {
+                aEndpoints = new R2D2Client ().getEndpoints (sLogPrefix,
+                                                             sDestinationCountryCode,
+                                                             aDocTypeID,
+                                                             aProcessID,
+                                                             sTransportProfileID);
+              }
+              catch (final ToopErrorException ex)
+              {
+                // send back async error
                 aErrors.add (_createError (sLogPrefix,
                                            EToopErrorCategory.DYNAMIC_DISCOVERY,
-                                           EToopErrorCode.DD_006,
-                                           "Found no endpoints for transport profile '" +
-                                                                  sTransportProfileID +
-                                                                  "' by querying Directory and SMP",
-                                           null));
+                                           ex.getErrorCode (),
+                                           ex.getMessage (),
+                                           ex.getCause ()));
               }
+            }
+          }
+
+          if (aErrors.isEmpty ())
+          {
+            final int nEnpointCount = aEndpoints.size ();
+            ToopKafkaClient.send (EErrorLevel.INFO,
+                                  () -> sLogPrefix +
+                                        "R2D2 found " +
+                                        nEnpointCount +
+                                        " endpoints for " +
+                                        (bIsSingleParticipant ? "single participant" : "multi participant") +
+                                        " lookup");
+            if (LOGGER.isDebugEnabled ())
+              LOGGER.debug (sLogPrefix + "Endpoint details: " + aEndpoints);
+
+            if (aEndpoints.isEmpty ())
+            {
+              aErrors.add (_createError (sLogPrefix,
+                                         EToopErrorCategory.DYNAMIC_DISCOVERY,
+                                         EToopErrorCode.DD_006,
+                                         "Found no endpoints for transport profile '" +
+                                                                sTransportProfileID +
+                                                                "' by querying Directory and SMP",
+                                         null));
             }
           }
         }

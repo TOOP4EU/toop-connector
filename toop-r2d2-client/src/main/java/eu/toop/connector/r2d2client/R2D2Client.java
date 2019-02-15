@@ -208,12 +208,14 @@ public class R2D2Client implements IR2D2Client
   public ICommonsList <IR2D2Endpoint> getEndpoints (@Nonnull final String sLogPrefix,
                                                     @Nonnull @Nonempty final String sCountryCode,
                                                     @Nonnull final IDocumentTypeIdentifier aDocumentTypeID,
-                                                    @Nonnull final IProcessIdentifier aProcessID) throws ToopErrorException
+                                                    @Nonnull final IProcessIdentifier aProcessID,
+                                                    @Nonnull @Nonempty final String sTransportProfileID) throws ToopErrorException
   {
     ValueEnforcer.notEmpty (sCountryCode, "CountryCode");
     ValueEnforcer.isTrue (sCountryCode.length () == 2, "CountryCode must have length 2");
     ValueEnforcer.notNull (aDocumentTypeID, "DocumentTypeID");
     ValueEnforcer.notNull (aProcessID, "ProcessID");
+    ValueEnforcer.notEmpty (sTransportProfileID, "TransportProfileID");
 
     ToopKafkaClient.send (EErrorLevel.INFO,
                           () -> sLogPrefix +
@@ -223,6 +225,8 @@ public class R2D2Client implements IR2D2Client
                                 aDocumentTypeID.getURIEncoded () +
                                 ", " +
                                 aProcessID.getURIEncoded () +
+                                ", " +
+                                sTransportProfileID +
                                 ")");
 
     final ICommonsList <IR2D2Endpoint> ret = new CommonsArrayList <> ();
@@ -246,7 +250,11 @@ public class R2D2Client implements IR2D2Client
     for (final IParticipantIdentifier aPI : aPIs)
     {
       // Single SMP query
-      final ICommonsList <IR2D2Endpoint> aLocal = getEndpoints (sLogPrefix, aPI, aDocumentTypeID, aProcessID);
+      final ICommonsList <IR2D2Endpoint> aLocal = getEndpoints (sLogPrefix,
+                                                                aPI,
+                                                                aDocumentTypeID,
+                                                                aProcessID,
+                                                                sTransportProfileID);
       ret.addAll (aLocal);
 
       if (aLocal.isEmpty ())
@@ -263,11 +271,13 @@ public class R2D2Client implements IR2D2Client
   public ICommonsList <IR2D2Endpoint> getEndpoints (@Nonnull final String sLogPrefix,
                                                     @Nonnull final IParticipantIdentifier aRecipientID,
                                                     @Nonnull final IDocumentTypeIdentifier aDocumentTypeID,
-                                                    @Nonnull final IProcessIdentifier aProcessID) throws ToopErrorException
+                                                    @Nonnull final IProcessIdentifier aProcessID,
+                                                    @Nonnull @Nonempty final String sTransportProfileID) throws ToopErrorException
   {
     ValueEnforcer.notNull (aRecipientID, "Recipient");
     ValueEnforcer.notNull (aDocumentTypeID, "DocumentTypeID");
     ValueEnforcer.notNull (aProcessID, "ProcessID");
+    ValueEnforcer.notEmpty (sTransportProfileID, "TransportProfileID");
 
     ToopKafkaClient.send (EErrorLevel.INFO,
                           () -> sLogPrefix +
@@ -277,6 +287,8 @@ public class R2D2Client implements IR2D2Client
                                 aDocumentTypeID.getURIEncoded () +
                                 ", " +
                                 aProcessID.getURIEncoded () +
+                                ", " +
+                                sTransportProfileID +
                                 ")");
 
     final ICommonsList <IR2D2Endpoint> ret = new CommonsArrayList <> ();
@@ -307,37 +319,38 @@ public class R2D2Client implements IR2D2Client
         {
           // Add all endpoints to the result list
           for (final EndpointType aEP : aProcess.getServiceEndpointList ().getEndpoint ())
-          {
-            // Convert String to X509Certificate
-            X509Certificate aCert;
-            if (true)
+            if (sTransportProfileID.equals (aEP.getTransportProfile ()))
             {
-              final CertificateFactory aCertificateFactory = CertificateHelper.getX509CertificateFactory ();
-              aCert = (X509Certificate) aCertificateFactory.generateCertificate (new NonBlockingByteArrayInputStream (aEP.getCertificate ()));
+              // Convert String to X509Certificate
+              X509Certificate aCert;
+              if (true)
+              {
+                final CertificateFactory aCertificateFactory = CertificateHelper.getX509CertificateFactory ();
+                aCert = (X509Certificate) aCertificateFactory.generateCertificate (new NonBlockingByteArrayInputStream (aEP.getCertificate ()));
+              }
+              else
+                aCert = BDXRClientReadOnly.getEndpointCertificate (aEP);
+
+              if (StringHelper.hasNoText (aEP.getEndpointURI ()))
+              {
+                ToopKafkaClient.send (EErrorLevel.WARN, () -> sLogPrefix + "SMP lookup result: endpoint has not URI");
+                continue;
+              }
+
+              // Convert to our data structure
+              final R2D2Endpoint aDestEP = new R2D2Endpoint (aRecipientID,
+                                                             aEP.getTransportProfile (),
+                                                             aEP.getEndpointURI (),
+                                                             aCert);
+              ret.add (aDestEP);
+
+              ToopKafkaClient.send (EErrorLevel.INFO,
+                                    () -> sLogPrefix +
+                                          "SMP lookup result: " +
+                                          aEP.getTransportProfile () +
+                                          ", " +
+                                          aEP.getEndpointURI ());
             }
-            else
-              aCert = BDXRClientReadOnly.getEndpointCertificate (aEP);
-
-            if (StringHelper.hasNoText (aEP.getEndpointURI ()))
-            {
-              ToopKafkaClient.send (EErrorLevel.WARN, () -> sLogPrefix + "SMP lookup result: endpoint has not URI");
-              continue;
-            }
-
-            // Convert to our data structure
-            final R2D2Endpoint aDestEP = new R2D2Endpoint (aRecipientID,
-                                                           aEP.getTransportProfile (),
-                                                           aEP.getEndpointURI (),
-                                                           aCert);
-            ret.add (aDestEP);
-
-            ToopKafkaClient.send (EErrorLevel.INFO,
-                                  () -> sLogPrefix +
-                                        "SMP lookup result: " +
-                                        aEP.getTransportProfile () +
-                                        ", " +
-                                        aEP.getEndpointURI ());
-          }
         }
       }
       else
