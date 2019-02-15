@@ -22,6 +22,9 @@ import java.security.KeyStore.PrivateKeyEntry;
 import java.security.cert.X509Certificate;
 
 import javax.annotation.Nonnull;
+import javax.naming.InvalidNameException;
+import javax.naming.ldap.LdapName;
+import javax.naming.ldap.Rdn;
 import javax.servlet.ServletContext;
 
 import org.slf4j.Logger;
@@ -48,7 +51,6 @@ import com.helger.as4.util.AS4ResourceManager;
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.IsSPIImplementation;
 import com.helger.commons.annotation.Nonempty;
-import com.helger.commons.debug.GlobalDebug;
 import com.helger.commons.exception.InitializationException;
 import com.helger.commons.io.file.FileOperationManager;
 import com.helger.commons.io.file.FilenameHelper;
@@ -144,6 +146,22 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
     AS4MessageProcessorSPI.setIncomingHandler (aIncomingHandler);
   }
 
+  @Nonnull
+  private static String _getCN (final String sPrincipal)
+  {
+    try
+    {
+      for (final Rdn aRdn : new LdapName (sPrincipal).getRdns ())
+        if (aRdn.getType ().equalsIgnoreCase ("CN"))
+          return (String) aRdn.getValue ();
+    }
+    catch (final InvalidNameException ex)
+    {
+      // Ignore
+    }
+    throw new IllegalStateException ("Failed to get CN from '" + sPrincipal + "'");
+  }
+
   private void _sendOutgoing (@Nonnull final IMERoutingInformation aRoutingInfo,
                               @Nonnull final MEMessage aMessage) throws MEException
   {
@@ -197,7 +215,7 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
     aClient.setFromRole ("http://www.toop.eu/edelivery/backend");
     aClient.setFromPartyID (TCConfig.getMEMAS4TcPartyid ());
     aClient.setToRole ("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
-    aClient.setToPartyID (TCConfig.getMEMAS4GwPartyID ());
+    aClient.setToPartyID (_getCN (aTheirCert.getSubjectDN ().getName ()));
     aClient.setPayload (null);
 
     aClient.ebms3Properties ()
@@ -226,7 +244,7 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
     aClient.setHttpClientFactory (new TCHttpClientFactory ());
 
     // Debug only!!!
-    if (GlobalDebug.isDebugMode ())
+    if (true)
       AS4HttpDebug.setEnabled (true);
 
     try
