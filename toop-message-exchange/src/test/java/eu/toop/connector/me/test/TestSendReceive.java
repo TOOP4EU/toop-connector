@@ -15,9 +15,20 @@
  */
 package eu.toop.connector.me.test;
 
+import java.net.URL;
+
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.FixMethodOrder;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.helger.commons.concurrent.ThreadHelper;
 import com.helger.commons.url.URLHelper;
 import com.helger.scope.mock.ScopeAwareTestSetup;
+
 import eu.toop.commons.error.EToopErrorCode;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.as4.MEException;
@@ -26,11 +37,6 @@ import eu.toop.connector.me.EActingSide;
 import eu.toop.connector.me.GatewayRoutingMetadata;
 import eu.toop.connector.me.MEMDelegate;
 import eu.toop.connector.me.notifications.IMessageHandler;
-import org.junit.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.net.URL;
 
 /**
  * This test suite tests the whole sending/receiving of a simple MEMessage by mocking the as4 gateway

@@ -17,7 +17,6 @@ package eu.toop.connector.me.test;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 
 /**
  * @author yerlibilgin
