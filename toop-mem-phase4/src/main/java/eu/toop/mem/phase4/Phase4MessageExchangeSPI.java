@@ -58,6 +58,7 @@ import com.helger.commons.io.resource.FileSystemResource;
 import com.helger.commons.io.resource.IReadableResource;
 import com.helger.commons.string.StringHelper;
 import com.helger.commons.timing.StopWatch;
+import com.helger.datetime.util.PDTIOHelper;
 import com.helger.httpclient.response.ResponseHandlerByteArray;
 import com.helger.photon.basic.app.io.WebFileIO;
 import com.helger.security.keystore.KeyStoreHelper;
@@ -187,23 +188,23 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
     aClient.setCryptoAlgorithmSign (ECryptoAlgorithmSign.RSA_SHA_512);
     aClient.setCryptoAlgorithmSignDigest (ECryptoAlgorithmSignDigest.DIGEST_SHA_512);
 
-    aClient.setAction (aRoutingInfo.getDocumentTypeID ().getURIEncoded ());
+    aClient.setAction ("RequestDocuments");
     aClient.setServiceType (null);
-    aClient.setServiceValue (aRoutingInfo.getProcessID ().getURIEncoded ());
+    aClient.setServiceValue ("TOOPDataProvisioning");
     aClient.setConversationID (MessageHelperMethods.createRandomConversationID ());
     aClient.setAgreementRefValue (null);
 
-    aClient.setFromRole ("http://www.toop.eu/edelivery/gateway");
+    aClient.setFromRole ("http://www.toop.eu/edelivery/backend");
     aClient.setFromPartyID (TCConfig.getMEMAS4TcPartyid ());
-    aClient.setToRole ("http://www.toop.eu/edelivery/gateway");
+    aClient.setToRole ("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
     aClient.setToPartyID (TCConfig.getMEMAS4GwPartyID ());
     aClient.setPayload (null);
 
     aClient.ebms3Properties ()
            .setAll (MessageHelperMethods.createEbms3Property (CAS4.ORIGINAL_SENDER,
-                                                              aRoutingInfo.getSenderID ().getURIEncoded ()),
+                                                              "urn:oasis:names:tc:ebcore:partyid-type:unregistered:dc"),
                     MessageHelperMethods.createEbms3Property (CAS4.FINAL_RECIPIENT,
-                                                              aRoutingInfo.getReceiverID ().getURIEncoded ()));
+                                                              "urn:oasis:names:tc:ebcore:partyid-type:unregistered:dp"));
 
     for (final MEPayload aPayload : aMessage.payloads ())
     {
@@ -246,7 +247,10 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
       if (aResponseEntity.hasResponse ())
       {
         final String sMessageID = aResponseEntity.getMessageID ();
-        final String sFilename = FilenameHelper.getAsSecureValidASCIIFilename (sMessageID) + "-response.xml";
+        final String sFilename = PDTIOHelper.getCurrentLocalDateTimeForFilename () +
+                                 "-" +
+                                 FilenameHelper.getAsSecureValidASCIIFilename (sMessageID) +
+                                 "-response.xml";
         final File aResponseFile = new File ("as4-responses", sFilename);
         FileOperationManager.INSTANCE.createDirIfNotExisting (aResponseFile.getParentFile ());
         if (SimpleFileIO.writeFile (aResponseFile, aResponseEntity.getResponse ()).isSuccess ())
