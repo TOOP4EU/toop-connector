@@ -30,7 +30,7 @@ import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 import com.helger.httpclient.HttpClientManager;
 
 import eu.toop.commons.dataexchange.v140.TDETOOPResponseType;
-import eu.toop.commons.exchange.ToopMessageBuilder;
+import eu.toop.commons.exchange.ToopMessageBuilder140;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.http.TCHttpClientFactory;
 import eu.toop.kafkaclient.ToopKafkaClient;
@@ -65,7 +65,7 @@ final class MessageProcessorDCIncomingPerformer implements IConcurrentPerformer 
 
       try (final NonBlockingByteArrayOutputStream aBAOS = new NonBlockingByteArrayOutputStream ())
       {
-        ToopMessageBuilder.createResponseMessageAsic (aResponse, aBAOS, aSH);
+        ToopMessageBuilder140.createResponseMessageAsic (aResponse, aBAOS, aSH);
 
         ToopKafkaClient.send (EErrorLevel.INFO,
                               () -> "Start posting signed ASiC response to '" + sDestinationUrl + "'");

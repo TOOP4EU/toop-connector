@@ -25,7 +25,7 @@ import com.helger.commons.error.level.EErrorLevel;
 
 import eu.toop.commons.dataexchange.v140.TDETOOPRequestType;
 import eu.toop.commons.dataexchange.v140.TDETOOPResponseType;
-import eu.toop.commons.exchange.ToopMessageBuilder;
+import eu.toop.commons.exchange.ToopMessageBuilder140;
 import eu.toop.connector.api.as4.IMERoutingInformation;
 import eu.toop.connector.api.as4.IMessageExchangeSPI;
 import eu.toop.connector.api.as4.MEException;
@@ -95,7 +95,7 @@ public final class DefaultMessageExchangeSPI implements IMessageExchangeSPI
       if (aPayload != null)
       {
         // Extract from ASiC
-        final Object aMsg = ToopMessageBuilder.parseRequestOrResponse (aPayload.getData ().getInputStream ());
+        final Object aMsg = ToopMessageBuilder140.parseRequestOrResponse (aPayload.getData ().getInputStream ());
 
         // Response before Request because it is derived from Request!
         if (aMsg instanceof TDETOOPResponseType)

@@ -62,10 +62,10 @@ import eu.toop.commons.error.EToopErrorOrigin;
 import eu.toop.commons.error.EToopErrorSeverity;
 import eu.toop.commons.error.IToopErrorCode;
 import eu.toop.commons.error.ToopErrorException;
-import eu.toop.commons.exchange.ToopMessageBuilder;
+import eu.toop.commons.exchange.ToopMessageBuilder140;
 import eu.toop.commons.jaxb.ToopWriter;
-import eu.toop.commons.jaxb.ToopXSDHelper;
-import eu.toop.commons.schematron.TOOPSchematronValidator;
+import eu.toop.commons.jaxb.ToopXSDHelper140;
+import eu.toop.commons.schematron.TOOPSchematron140Validator;
 import eu.toop.commons.usecase.SMMDocumentTypeMapping;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.TCSettings;
@@ -101,7 +101,7 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
   {
     // Surely no DP here
     ToopKafkaClient.send (aErrorLevel, () -> sLogPrefix + "[" + aErrorCode.getID () + "] " + sErrorText);
-    return ToopMessageBuilder.createError (null,
+    return ToopMessageBuilder140.createError (null,
                                            EToopErrorOrigin.REQUEST_SUBMISSION,
                                            eCategory,
                                            aErrorCode,
@@ -143,7 +143,7 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
     {
       final ErrorList aErrorList = new ErrorList ();
       // XML creation
-      final Document aDoc = ToopWriter.request ()
+      final Document aDoc = ToopWriter.request140 ()
                                       .setValidationEventHandler (new WrappedCollectingValidationEventHandler (aErrorList))
                                       .getAsDocument (aRequest);
       if (aDoc == null)
@@ -159,7 +159,7 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
       else
       {
         // Schematron validation
-        final TOOPSchematronValidator aValidator = new TOOPSchematronValidator ();
+        final TOOPSchematron140Validator aValidator = new TOOPSchematron140Validator ();
         final ICommonsList <AbstractSVRLMessage> aMsgs = aValidator.validateTOOPMessage (aDoc);
         for (final AbstractSVRLMessage aMsg : aMsgs)
         {
@@ -223,7 +223,7 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
         if (false)
         {
           // Remember request ID
-          aRequest.setDataRequestIdentifier (ToopXSDHelper.createIdentifier (sRequestID));
+          aRequest.setDataRequestIdentifier (ToopXSDHelper140.createIdentifier (sRequestID));
         }
 
         ToopKafkaClient.send (EErrorLevel.INFO, () -> "Created new unique request ID [" + sRequestID + "]");
@@ -292,11 +292,11 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
                 for (final MappedValue aMV : aMappedValues.getAllBySource (x -> x.equals (aSrcCV)))
                 {
                   final TDEConceptRequestType aToopConcept = new TDEConceptRequestType ();
-                  aToopConcept.setConceptTypeCode (ToopXSDHelper.createCode (EConceptType.TC.getID ()));
-                  aToopConcept.setSemanticMappingExecutionIndicator (ToopXSDHelper.createIndicator (false));
-                  aToopConcept.setConceptNamespace (ToopXSDHelper.createIdentifier (aMV.getDestination ()
+                  aToopConcept.setConceptTypeCode (ToopXSDHelper140.createCode (EConceptType.TC.getID ()));
+                  aToopConcept.setSemanticMappingExecutionIndicator (ToopXSDHelper140.createIndicator (false));
+                  aToopConcept.setConceptNamespace (ToopXSDHelper140.createIdentifier (aMV.getDestination ()
                                                                                        .getNamespace ()));
-                  aToopConcept.setConceptName (ToopXSDHelper.createText (aMV.getDestination ().getValue ()));
+                  aToopConcept.setConceptName (ToopXSDHelper140.createText (aMV.getDestination ().getValue ()));
                   aSrcConcept.addConceptRequest (aToopConcept);
                 }
               }
@@ -413,7 +413,7 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
                                                                                 TCConfig.getDebugToDPDumpPathIfEnabled (),
                                                                                 "to-dp.asic"))
             {
-              ToopMessageBuilder.createRequestMessageAsic (aRequest, aBAOS, MPWebAppConfig.getSignatureHelper ());
+              ToopMessageBuilder140.createRequestMessageAsic (aRequest, aBAOS, MPWebAppConfig.getSignatureHelper ());
             }
             catch (final ToopErrorException ex)
             {
@@ -487,7 +487,7 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
                             () -> sLogPrefix + nErrorCount + " error(s) were found - directly pushing to queue 4/4.");
 
       // Create an error response
-      final TDETOOPResponseType aResponseMsg = ToopMessageBuilder.createResponse (aRequest);
+      final TDETOOPResponseType aResponseMsg = ToopMessageBuilder140.createResponse (aRequest);
       aResponseMsg.getError ().addAll (aErrors);
       // Put the error in queue 4/4
       MessageProcessorDCIncoming.getInstance ().enqueue (aResponseMsg);

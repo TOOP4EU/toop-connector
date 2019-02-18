@@ -42,7 +42,7 @@ import com.helger.xml.serialize.write.XMLWriter;
 
 import eu.toop.commons.dataexchange.v140.TDETOOPRequestType;
 import eu.toop.commons.dataexchange.v140.TDETOOPResponseType;
-import eu.toop.commons.exchange.ToopMessageBuilder;
+import eu.toop.commons.exchange.ToopMessageBuilder140;
 import eu.toop.connector.api.as4.IMessageExchangeSPI.IIncomingHandler;
 import eu.toop.kafkaclient.ToopKafkaClient;
 
@@ -112,7 +112,7 @@ public class AS4MessageProcessorSPI implements IAS4ServletMessageProcessorSPI
       try
       {
         // Extract from ASiC
-        final Object aMsg = ToopMessageBuilder.parseRequestOrResponse (aAttachment.getSourceStream ());
+        final Object aMsg = ToopMessageBuilder140.parseRequestOrResponse (aAttachment.getSourceStream ());
 
         // Response before Request because it is derived from Request!
         if (aMsg instanceof TDETOOPResponseType)

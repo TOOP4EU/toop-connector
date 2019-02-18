@@ -51,8 +51,8 @@ import eu.toop.commons.error.EToopErrorOrigin;
 import eu.toop.commons.error.EToopErrorSeverity;
 import eu.toop.commons.error.IToopErrorCode;
 import eu.toop.commons.error.ToopErrorException;
-import eu.toop.commons.exchange.ToopMessageBuilder;
-import eu.toop.commons.jaxb.ToopXSDHelper;
+import eu.toop.commons.exchange.ToopMessageBuilder140;
+import eu.toop.commons.jaxb.ToopXSDHelper140;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.http.TCHttpClientFactory;
 import eu.toop.connector.smmclient.IMappedValueList;
@@ -76,7 +76,7 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
   {
     // Surely no DP here
     ToopKafkaClient.send (EErrorLevel.ERROR, () -> sLogPrefix + "[" + aErrorCode.getID () + "] " + sErrorText);
-    return ToopMessageBuilder.createError (null,
+    return ToopMessageBuilder140.createError (null,
                                            EToopErrorOrigin.REQUEST_RECEPTION,
                                            eCategory,
                                            aErrorCode,
@@ -106,7 +106,7 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
 
       try (final NonBlockingByteArrayOutputStream aBAOS = new NonBlockingByteArrayOutputStream ())
       {
-        ToopMessageBuilder.createRequestMessageAsic (aRequest, aBAOS, aSH);
+        ToopMessageBuilder140.createRequestMessageAsic (aRequest, aBAOS, aSH);
 
         // Send to DP (see ToDPServlet in toop-interface)
         final String sDestinationUrl = TCConfig.getMPToopInterfaceDPUrl ();
@@ -194,11 +194,11 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
               for (final MappedValue aMV : aMappedValues.getAllBySource (x -> x.equals (aToopCV)))
               {
                 final TDEConceptRequestType aDstConcept = new TDEConceptRequestType ();
-                aDstConcept.setConceptTypeCode (ToopXSDHelper.createCode (EConceptType.DP.getID ()));
-                aDstConcept.setSemanticMappingExecutionIndicator (ToopXSDHelper.createIndicator (false));
-                aDstConcept.setConceptNamespace (ToopXSDHelper.createIdentifier (aMV.getDestination ()
+                aDstConcept.setConceptTypeCode (ToopXSDHelper140.createCode (EConceptType.DP.getID ()));
+                aDstConcept.setSemanticMappingExecutionIndicator (ToopXSDHelper140.createIndicator (false));
+                aDstConcept.setConceptNamespace (ToopXSDHelper140.createIdentifier (aMV.getDestination ()
                                                                                     .getNamespace ()));
-                aDstConcept.setConceptName (ToopXSDHelper.createText (aMV.getDestination ().getValue ()));
+                aDstConcept.setConceptName (ToopXSDHelper140.createText (aMV.getDestination ().getValue ()));
                 aToopConcept.addConceptRequest (aDstConcept);
               }
             }
@@ -239,7 +239,7 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
                             () -> sLogPrefix + nErrorCount + " error(s) were found - directly pushing to queue 3/4.");
 
       // We have errors
-      final TDETOOPResponseType aResponseMsg = ToopMessageBuilder.createResponse (aRequest);
+      final TDETOOPResponseType aResponseMsg = ToopMessageBuilder140.createResponse (aRequest);
       aResponseMsg.getError ().addAll (aErrors);
       // Put the error in queue 3/4
       MessageProcessorDPOutgoing.getInstance ().enqueue (aResponseMsg);
