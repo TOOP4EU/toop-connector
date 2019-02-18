@@ -138,7 +138,6 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
                                                      false);
       aPMode.setPayloadService (new PModePayloadService (EAS4CompressionMode.GZIP));
       aPMode.getReceptionAwareness ().setRetry (false);
-      aPMode.getLeg1 ().getBusinessInfo ().setAction ("Deliver");
       aPModeMgr.createOrUpdatePMode (aPMode);
     }
 
@@ -212,9 +211,13 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
     aClient.setConversationID (MessageHelperMethods.createRandomConversationID ());
     aClient.setAgreementRefValue (null);
 
+    // Backend or gateway?
     aClient.setFromRole ("http://www.toop.eu/edelivery/backend");
     aClient.setFromPartyID (TCConfig.getMEMAS4TcPartyid ());
-    aClient.setToRole ("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
+    if (true)
+      aClient.setToRole ("http://www.toop.eu/edelivery/gateway");
+    else
+      aClient.setToRole ("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
     aClient.setToPartyID (_getCN (aTheirCert.getSubjectDN ().getName ()));
     aClient.setPayload (null);
 
@@ -276,6 +279,8 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
         else
           LOGGER.error ("Error writing response file to '" + aResponseFile.getAbsolutePath () + "'");
       }
+      else
+        LOGGER.info ("ResponseEntity is empty");
     }
     catch (final Exception ex)
     {
