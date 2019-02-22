@@ -102,13 +102,13 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
     // Surely no DP here
     ToopKafkaClient.send (aErrorLevel, () -> sLogPrefix + "[" + aErrorCode.getID () + "] " + sErrorText);
     return ToopMessageBuilder140.createError (null,
-                                           EToopErrorOrigin.REQUEST_SUBMISSION,
-                                           eCategory,
-                                           aErrorCode,
-                                           aErrorLevel.isError () ? EToopErrorSeverity.FAILURE
-                                                                  : EToopErrorSeverity.WARNING,
-                                           new MultilingualText (Locale.US, sErrorText),
-                                           t == null ? null : StackTraceHelper.getStackAsString (t));
+                                              EToopErrorOrigin.REQUEST_SUBMISSION,
+                                              eCategory,
+                                              aErrorCode,
+                                              aErrorLevel.isError () ? EToopErrorSeverity.FAILURE
+                                                                     : EToopErrorSeverity.WARNING,
+                                              new MultilingualText (Locale.US, sErrorText),
+                                              t == null ? null : StackTraceHelper.getStackAsString (t));
   }
 
   @Nonnull
@@ -182,12 +182,10 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
       final IIdentifierFactory aIF = TCSettings.getIdentifierFactory ();
       final TDERoutingInformationType aRoutingInfo = aRequest.getRoutingInformation ();
       final IParticipantIdentifier aSenderID = aRoutingInfo == null ? null
-                                                                    : aIF.createParticipantIdentifier (aRequest.getDataConsumer ()
-                                                                                                               .getDCElectronicAddressIdentifier ()
-                                                                                                               .getSchemeID (),
-                                                                                                       aRequest.getDataConsumer ()
-                                                                                                               .getDCElectronicAddressIdentifier ()
-                                                                                                               .getValue ());
+                                                                    : aIF.createParticipantIdentifier (aRoutingInfo.getDataConsumerElectronicAddressIdentifier ()
+                                                                                                                   .getSchemeID (),
+                                                                                                       aRoutingInfo.getDataConsumerElectronicAddressIdentifier ()
+                                                                                                                   .getValue ());
       final IDocumentTypeIdentifier aDocTypeID = aRoutingInfo == null ? null
                                                                       : aIF.createDocumentTypeIdentifier (aRoutingInfo.getDocumentTypeIdentifier ()
                                                                                                                       .getSchemeID (),
@@ -295,7 +293,7 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
                   aToopConcept.setConceptTypeCode (ToopXSDHelper140.createCode (EConceptType.TC.getID ()));
                   aToopConcept.setSemanticMappingExecutionIndicator (ToopXSDHelper140.createIndicator (false));
                   aToopConcept.setConceptNamespace (ToopXSDHelper140.createIdentifier (aMV.getDestination ()
-                                                                                       .getNamespace ()));
+                                                                                          .getNamespace ()));
                   aToopConcept.setConceptName (ToopXSDHelper140.createText (aMV.getDestination ().getValue ()));
                   aSrcConcept.addConceptRequest (aToopConcept);
                 }

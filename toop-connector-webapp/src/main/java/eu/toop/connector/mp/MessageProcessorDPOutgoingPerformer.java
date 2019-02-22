@@ -54,6 +54,7 @@ import com.helger.schematron.svrl.AbstractSVRLMessage;
 
 import eu.toop.commons.dataexchange.v140.TDEDataProviderType;
 import eu.toop.commons.dataexchange.v140.TDEErrorType;
+import eu.toop.commons.dataexchange.v140.TDERoutingInformationType;
 import eu.toop.commons.dataexchange.v140.TDETOOPResponseType;
 import eu.toop.commons.error.EToopErrorCategory;
 import eu.toop.commons.error.EToopErrorCode;
@@ -95,13 +96,13 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
   {
     ToopKafkaClient.send (aErrorLevel, () -> sLogPrefix + "[" + aErrorCode.getID () + "] " + sErrorText);
     return ToopMessageBuilder140.createError (null,
-                                           EToopErrorOrigin.RESPONSE_SUBMISSION,
-                                           eCategory,
-                                           aErrorCode,
-                                           aErrorLevel.isError () ? EToopErrorSeverity.FAILURE
-                                                                  : EToopErrorSeverity.WARNING,
-                                           new MultilingualText (Locale.US, sErrorText),
-                                           t == null ? null : StackTraceHelper.getStackAsString (t));
+                                              EToopErrorOrigin.RESPONSE_SUBMISSION,
+                                              eCategory,
+                                              aErrorCode,
+                                              aErrorLevel.isError () ? EToopErrorSeverity.FAILURE
+                                                                     : EToopErrorSeverity.WARNING,
+                                              new MultilingualText (Locale.US, sErrorText),
+                                              t == null ? null : StackTraceHelper.getStackAsString (t));
   }
 
   @Nonnull
@@ -219,24 +220,19 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
 
         // invoke R2D2 client with a single endpoint
         // The destination EP is the sender of the original document!
-        final IParticipantIdentifier aDCParticipantID = aIDFactory.createParticipantIdentifier (aResponse.getDataConsumer ()
-                                                                                                         .getDCElectronicAddressIdentifier ()
-                                                                                                         .getSchemeID (),
-                                                                                                aResponse.getDataConsumer ()
-                                                                                                         .getDCElectronicAddressIdentifier ()
-                                                                                                         .getValue ());
-        final IDocumentTypeIdentifier aDocTypeID = aIDFactory.createDocumentTypeIdentifier (aResponse.getRoutingInformation ()
-                                                                                                     .getDocumentTypeIdentifier ()
-                                                                                                     .getSchemeID (),
-                                                                                            aResponse.getRoutingInformation ()
-                                                                                                     .getDocumentTypeIdentifier ()
-                                                                                                     .getValue ());
-        final IProcessIdentifier aProcessID = aIDFactory.createProcessIdentifier (aResponse.getRoutingInformation ()
-                                                                                           .getProcessIdentifier ()
-                                                                                           .getSchemeID (),
-                                                                                  aResponse.getRoutingInformation ()
-                                                                                           .getProcessIdentifier ()
-                                                                                           .getValue ());
+        final TDERoutingInformationType aRoutingInfo = aResponse.getRoutingInformation ();
+        final IParticipantIdentifier aDCParticipantID = aIDFactory.createParticipantIdentifier (aRoutingInfo.getDataConsumerElectronicAddressIdentifier ()
+                                                                                                            .getSchemeID (),
+                                                                                                aRoutingInfo.getDataConsumerElectronicAddressIdentifier ()
+                                                                                                            .getValue ());
+        final IDocumentTypeIdentifier aDocTypeID = aIDFactory.createDocumentTypeIdentifier (aRoutingInfo.getDocumentTypeIdentifier ()
+                                                                                                        .getSchemeID (),
+                                                                                            aRoutingInfo.getDocumentTypeIdentifier ()
+                                                                                                        .getValue ());
+        final IProcessIdentifier aProcessID = aIDFactory.createProcessIdentifier (aRoutingInfo.getProcessIdentifier ()
+                                                                                              .getSchemeID (),
+                                                                                  aRoutingInfo.getProcessIdentifier ()
+                                                                                              .getValue ());
 
         ICommonsList <IR2D2Endpoint> aEndpoints;
         {
@@ -256,10 +252,10 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
 
         // 3. start message exchange to DC
         // The sender of the response is the DP
-        final IParticipantIdentifier aDPParticipantID = aIDFactory.createParticipantIdentifier (aDataProvider.getDPElectronicAddressIdentifier ()
-                                                                                                             .getSchemeID (),
-                                                                                                aDataProvider.getDPElectronicAddressIdentifier ()
-                                                                                                             .getValue ());
+        final IParticipantIdentifier aDPParticipantID = aIDFactory.createParticipantIdentifier (aRoutingInfo.getDataProviderElectronicAddressIdentifier ()
+                                                                                                            .getSchemeID (),
+                                                                                                aRoutingInfo.getDataProviderElectronicAddressIdentifier ()
+                                                                                                            .getValue ());
 
         if (aEndpoints.isEmpty ())
         {
@@ -287,7 +283,9 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
                                                                                 TCConfig.getDebugToDCDumpPathIfEnabled (),
                                                                                 "to-dc.asic"))
             {
-              ToopMessageBuilder140.createResponseMessageAsic (aResponse, aDumpOS, MPWebAppConfig.getSignatureHelper ());
+              ToopMessageBuilder140.createResponseMessageAsic (aResponse,
+                                                               aDumpOS,
+                                                               MPWebAppConfig.getSignatureHelper ());
             }
             catch (final ToopErrorException ex)
             {
