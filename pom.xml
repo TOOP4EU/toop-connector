@@ -94,7 +94,7 @@
       <dependency>
         <groupId>com.helger</groupId>
         <artifactId>ph-as4-parent-pom</artifactId>
-        <version>0.8.2-SNAPSHOT</version>
+        <version>0.8.2</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
