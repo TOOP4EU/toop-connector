@@ -20,7 +20,7 @@ import java.io.Serializable;
 import javax.annotation.Nonnull;
 import javax.servlet.ServletContext;
 
-import com.helger.commons.annotation.IsSPIImplementation;
+import com.helger.commons.annotation.IsSPIInterface;
 import com.helger.commons.annotation.Nonempty;
 
 import eu.toop.commons.dataexchange.v140.TDETOOPRequestType;
@@ -31,7 +31,7 @@ import eu.toop.commons.dataexchange.v140.TDETOOPResponseType;
  *
  * @author Philip Helger
  */
-@IsSPIImplementation
+@IsSPIInterface
 public interface IMessageExchangeSPI
 {
   public interface IIncomingHandler extends Serializable
@@ -58,9 +58,9 @@ public interface IMessageExchangeSPI
   }
 
   /**
-   * @return The unique ID of the SPI implementation, so that it can be referenced
-   *         from a configuration file. The implementer must ensure the uniqueness
-   *         of the ID.
+   * @return The unique ID of the SPI implementation, so that it can be
+   *         referenced from a configuration file. The implementer must ensure
+   *         the uniqueness of the ID.
    */
   @Nonnull
   @Nonempty
@@ -70,10 +70,10 @@ public interface IMessageExchangeSPI
    * Register an incoming handler that takes the request/response to handle. The
    * differentiation between step 2/4 and 4/4 must be inside of the SPI
    * implementation. This method is only called once for the chosen
-   * implementation, so the implementation can act as an "init" method and perform
-   * further implementation activities. If this method is not called, it is
-   * ensured that {@link #sendDCOutgoing(IMERoutingInformation, MEMessage)} and
-   * {@link #sendDPOutgoing(IMERoutingInformation, MEMessage)} of this
+   * implementation, so the implementation can act as an "init" method and
+   * perform further implementation activities. If this method is not called, it
+   * is ensured that {@link #sendDCOutgoing(IMERoutingInformation, MEMessage)}
+   * and {@link #sendDPOutgoing(IMERoutingInformation, MEMessage)} of this
    * implementation are also never called.
    *
    * @param aServletContext
@@ -113,7 +113,7 @@ public interface IMessageExchangeSPI
 
   /**
    * Shutdown the Message Exchange.
-   * 
+   *
    * @param aServletContext
    *        The servlet context in which the handler should be registered. Never
    *        <code>null</code>.
