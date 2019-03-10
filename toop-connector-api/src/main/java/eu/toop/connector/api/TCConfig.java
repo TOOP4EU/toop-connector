@@ -50,7 +50,7 @@ import eu.toop.connector.api.as4.MessageExchangeManager;
 @Immutable
 public final class TCConfig
 {
-  private static final Logger s_aLogger = LoggerFactory.getLogger (TCConfig.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger (TCConfig.class);
   private static final SimpleReadWriteLock s_aRWLock = new SimpleReadWriteLock ();
   @GuardedBy ("s_aRWLock")
   private static ConfigFile s_aConfigFile;
@@ -99,7 +99,7 @@ public final class TCConfig
       s_aConfigFile = aCFB.build ();
       if (!s_aConfigFile.isRead ())
       {
-        s_aLogger.warn ("Failed to read TOOP Connector server properties from " + aCFB.getAllPaths ());
+        LOGGER.warn ("Failed to read TOOP Connector server properties from " + aCFB.getAllPaths ());
         return ESuccess.FAILURE;
       }
 
@@ -116,7 +116,7 @@ public final class TCConfig
         FileOperationManager.INSTANCE.createDirRecursiveIfNotExisting (getDebugFromDPDumpPath ());
       }
 
-      s_aLogger.info ("Read TOOP Connector server properties from " + s_aConfigFile.getReadResource ().getPath ());
+      LOGGER.info ("Read TOOP Connector server properties from " + s_aConfigFile.getReadResource ().getPath ());
       return ESuccess.SUCCESS;
     });
   }

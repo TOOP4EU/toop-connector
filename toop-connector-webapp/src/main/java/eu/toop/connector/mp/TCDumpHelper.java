@@ -42,7 +42,7 @@ import com.helger.commons.io.stream.WrappedOutputStream;
 @Immutable
 public final class TCDumpHelper
 {
-  private static final Logger s_aLogger = LoggerFactory.getLogger (TCDumpHelper.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger (TCDumpHelper.class);
 
   private TCDumpHelper ()
   {}
@@ -101,7 +101,7 @@ public final class TCDumpHelper
         };
       }
 
-      s_aLogger.warn ("Failed to open dump file '" + aDumpFile.getAbsolutePath () + "' for writing");
+      LOGGER.warn ("Failed to open dump file '" + aDumpFile.getAbsolutePath () + "' for writing");
     }
 
     return aSrcIS;
@@ -170,7 +170,7 @@ public final class TCDumpHelper
         };
       }
 
-      s_aLogger.warn ("Failed to open dump file '" + aDumpFile.getAbsolutePath () + "' for writing");
+      LOGGER.warn ("Failed to open dump file '" + aDumpFile.getAbsolutePath () + "' for writing");
     }
 
     return aSrcOS;

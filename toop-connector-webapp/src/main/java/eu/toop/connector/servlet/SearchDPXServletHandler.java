@@ -41,9 +41,9 @@ import com.helger.xservlet.handler.simple.IXServletSimpleHandler;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.app.CTC;
 
-public class TCStatusXServletHandler implements IXServletSimpleHandler
+public class SearchDPXServletHandler implements IXServletSimpleHandler
 {
-  private static final Logger LOGGER = LoggerFactory.getLogger (TCStatusXServletHandler.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger (SearchDPXServletHandler.class);
   private static final Charset CHARSET = StandardCharsets.UTF_8;
 
   @Nonnull
