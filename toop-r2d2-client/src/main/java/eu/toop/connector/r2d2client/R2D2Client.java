@@ -73,6 +73,8 @@ import eu.toop.kafkaclient.ToopKafkaClient;
 @Immutable
 public class R2D2Client implements IR2D2Client
 {
+  private static final int MAX_RESULTS_PER_PAGE = 100;
+
   @Nullable
   private static IJsonObject _fetchJsonObject (@Nonnull final String sLogPrefix,
                                                @Nonnull final HttpClientManager aMgr,
@@ -116,11 +118,10 @@ public class R2D2Client implements IR2D2Client
     try (final HttpClientManager aMgr = new HttpClientManager (aHCFactory))
     {
       // Build base URL and fetch x records per HTTP request
-      final int nMaxResultsPerPage = 100;
       final SimpleURL aBaseURL = new SimpleURL (TCConfig.getR2D2DirectoryBaseUrl () +
                                                 "/search/1.0/json").add ("doctype", aDocumentTypeID.getURIEncoded ())
                                                                    .add ("country", sCountryCode)
-                                                                   .add ("rpc", nMaxResultsPerPage);
+                                                                   .add ("rpc", MAX_RESULTS_PER_PAGE);
 
       // Fetch first object
       IJsonObject aResult = _fetchJsonObject (sLogPrefix, aMgr, aBaseURL);
@@ -163,13 +164,13 @@ public class R2D2Client implements IR2D2Client
           else
             ToopKafkaClient.send (EErrorLevel.WARN, () -> sLogPrefix + "JSON response contains no 'matches'");
 
-          if (nMatchCount < nMaxResultsPerPage)
+          if (nMatchCount < MAX_RESULTS_PER_PAGE)
           {
             // Got less results than expected - end of list
             break;
           }
 
-          if (++nLoops > 100)
+          if (++nLoops > MAX_RESULTS_PER_PAGE)
           {
             // Avoid endless loop
             ToopKafkaClient.send (EErrorLevel.ERROR, () -> sLogPrefix + "Endless loop in PD fetching?");
