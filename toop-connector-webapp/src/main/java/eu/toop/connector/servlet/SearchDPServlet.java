@@ -27,7 +27,7 @@ import com.helger.xservlet.AbstractXServlet;
  *
  * @author Philip Helger
  */
-@WebServlet ("/search-dp")
+@WebServlet ("/search-dp/*")
 public class SearchDPServlet extends AbstractXServlet
 {
   public static final String SERVLET_DEFAULT_NAME = "search-dp";

@@ -25,7 +25,7 @@ import com.helger.xservlet.AbstractXServlet;
  *
  * @author Philip Helger
  */
-@WebServlet ("/tc-status")
+@WebServlet ("/tc-status/*")
 public class TCStatusServlet extends AbstractXServlet
 {
   public static final String SERVLET_DEFAULT_NAME = "tc-status";

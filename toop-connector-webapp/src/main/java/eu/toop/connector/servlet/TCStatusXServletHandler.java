@@ -41,7 +41,12 @@ import com.helger.xservlet.handler.simple.IXServletSimpleHandler;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.app.CTC;
 
-public class TCStatusXServletHandler implements IXServletSimpleHandler
+/**
+ * Main handler for the /tc-status servlet
+ *
+ * @author Philip Helger
+ */
+final class TCStatusXServletHandler implements IXServletSimpleHandler
 {
   private static final Logger LOGGER = LoggerFactory.getLogger (TCStatusXServletHandler.class);
   private static final Charset CHARSET = StandardCharsets.UTF_8;

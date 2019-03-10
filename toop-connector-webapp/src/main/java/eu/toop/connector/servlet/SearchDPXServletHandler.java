@@ -17,80 +17,41 @@ package eu.toop.connector.servlet;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 
 import javax.annotation.Nonnull;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.helger.commons.annotation.ReturnsMutableCopy;
-import com.helger.commons.datetime.PDTFactory;
-import com.helger.commons.datetime.PDTWebDateHelper;
-import com.helger.commons.debug.GlobalDebug;
 import com.helger.commons.mime.CMimeType;
 import com.helger.commons.mime.MimeType;
-import com.helger.commons.system.SystemProperties;
-import com.helger.json.IJsonObject;
-import com.helger.json.JsonObject;
 import com.helger.servlet.response.UnifiedResponse;
-import com.helger.settings.ISettings;
 import com.helger.web.scope.IRequestWebScopeWithoutResponse;
 import com.helger.xservlet.handler.simple.IXServletSimpleHandler;
 
-import eu.toop.connector.api.TCConfig;
-import eu.toop.connector.app.CTC;
-
-public class SearchDPXServletHandler implements IXServletSimpleHandler
+/**
+ * Main handler for the /sarch-dp servlet
+ *
+ * @author Philip Helger
+ */
+final class SearchDPXServletHandler implements IXServletSimpleHandler
 {
   private static final Logger LOGGER = LoggerFactory.getLogger (SearchDPXServletHandler.class);
   private static final Charset CHARSET = StandardCharsets.UTF_8;
 
-  @Nonnull
-  @ReturnsMutableCopy
-  public static IJsonObject getDefaultStatusData ()
-  {
-    final ISettings aSettings = TCConfig.getConfigFile ().getSettings ();
-
-    final IJsonObject aStatusData = new JsonObject ();
-    aStatusData.add ("status.datetime", PDTWebDateHelper.getAsStringXSD (PDTFactory.getCurrentZonedDateTimeUTC ()));
-    aStatusData.add ("version.toop-connector", CTC.getVersionNumber ());
-    aStatusData.add ("version.java", SystemProperties.getJavaVersion ());
-    aStatusData.add ("global.debug", GlobalDebug.isDebugMode ());
-    aStatusData.add ("global.production", GlobalDebug.isProductionMode ());
-
-    // Add all entries except the password entries
-    for (final Map.Entry <String, Object> aEntry : aSettings.entrySet ())
-    {
-      final String sKey = aEntry.getKey ();
-      if (!sKey.contains ("password"))
-        aStatusData.add (sKey, aEntry.getValue ());
-    }
-
-    return aStatusData;
-  }
-
   public void handleRequest (@Nonnull final IRequestWebScopeWithoutResponse aRequestScope,
                              @Nonnull final UnifiedResponse aUnifiedResponse) throws Exception
   {
-    if (LOGGER.isDebugEnabled ())
-      LOGGER.debug ("Status information requested");
+    if (LOGGER.isInfoEnabled ())
+      LOGGER.info ("/search-dp" + aRequestScope.getPathWithinServlet () + " executed");
 
-    // Build data to provide
-    IJsonObject aStatusData;
-    if (TCConfig.isStatusEnabled ())
-      aStatusData = getDefaultStatusData ();
-    else
-    {
-      // Status is disabled in the configuration
-      aStatusData = new JsonObject ();
-      aStatusData.add ("status.enabled", false);
-    }
+    // TODO
+    final String sResponse = "<xml />";
 
     // Put JSON on response
     aUnifiedResponse.disableCaching ();
-    aUnifiedResponse.setMimeType (new MimeType (CMimeType.APPLICATION_JSON).addParameter (CMimeType.PARAMETER_NAME_CHARSET,
-                                                                                          CHARSET.name ()));
-    aUnifiedResponse.setContentAndCharset (aStatusData.getAsJsonString (), CHARSET);
+    aUnifiedResponse.setMimeType (new MimeType (CMimeType.APPLICATION_XML).addParameter (CMimeType.PARAMETER_NAME_CHARSET,
+                                                                                         CHARSET.name ()));
+    aUnifiedResponse.setContentAndCharset (sResponse, CHARSET);
   }
 }
