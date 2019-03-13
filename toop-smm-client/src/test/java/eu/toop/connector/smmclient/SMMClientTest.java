@@ -21,11 +21,13 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Comparator;
 
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.helger.commons.collection.CollectionHelper;
 import com.helger.commons.collection.impl.ICommonsOrderedSet;
 import com.helger.xml.microdom.IMicroDocument;
 import com.helger.xml.microdom.IMicroElement;
@@ -33,28 +35,32 @@ import com.helger.xml.microdom.MicroDocument;
 import com.helger.xml.microdom.serialize.MicroWriter;
 
 import eu.toop.commons.concept.ConceptValue;
+import eu.toop.commons.usecase.regorg.ERegOrgConcept;
 
 /**
  * Test class for class {@link SMMClient}.
  *
  * @author Philip Helger
  */
-public final class SMMClientTest {
+public final class SMMClientTest
+{
   private static final Logger LOGGER = LoggerFactory.getLogger (SMMClientTest.class);
 
   private static final ConceptValue CONCEPT_TOOP_1 = new ConceptValue (CMockSMM.NS_TOOP, "CompanyCode");
   private static final ConceptValue CONCEPT_FR_1 = new ConceptValue (CMockSMM.NS_FREEDONIA, "FreedoniaBusinessCode");
 
   // Use with cache and remote
-  private static final ISMMConceptProvider[] CP = new ISMMConceptProvider[] { SMMConceptProviderGRLCRemote::getAllMappedValues,
-                                                                              SMMConceptProviderGRLCRemote::remoteQueryAllMappedValues };
+  private static final ISMMConceptProvider [] CP = new ISMMConceptProvider [] { SMMConceptProviderGRLCRemote::getAllMappedValues,
+                                                                                SMMConceptProviderGRLCRemote::remoteQueryAllMappedValues };
   private static final IUnmappableCallback UCB = (sLogPrefix, aSourceNamespace, aSourceValue, aDestNamespace) -> {
     // Do nothing
   };
 
   @Test
-  public void testEmpty () throws IOException {
-    for (final ISMMConceptProvider aCP : CP) {
+  public void testEmpty () throws IOException
+  {
+    for (final ISMMConceptProvider aCP : CP)
+    {
       LOGGER.info ("Starting testEmpty");
       final SMMClient aClient = new SMMClient ();
       final IMappedValueList ret = aClient.performMapping (CMockSMM.LOG_PREFIX, CMockSMM.NS_FREEDONIA, aCP, UCB);
@@ -65,8 +71,10 @@ public final class SMMClientTest {
   }
 
   @Test
-  public void testOneMatch () throws IOException {
-    for (final ISMMConceptProvider aCP : CP) {
+  public void testOneMatch () throws IOException
+  {
+    for (final ISMMConceptProvider aCP : CP)
+    {
       LOGGER.info ("Starting testOneMatch");
       final SMMClient aClient = new SMMClient ();
       aClient.addConceptToBeMapped (CONCEPT_TOOP_1);
@@ -86,8 +94,10 @@ public final class SMMClientTest {
   }
 
   @Test
-  public void testOneMatchOneNotFound () throws IOException {
-    for (final ISMMConceptProvider aCP : CP) {
+  public void testOneMatchOneNotFound () throws IOException
+  {
+    for (final ISMMConceptProvider aCP : CP)
+    {
       LOGGER.info ("Starting testOneMatchOneNotFound");
       final SMMClient aClient = new SMMClient ();
       aClient.addConceptToBeMapped (CONCEPT_TOOP_1);
@@ -109,8 +119,10 @@ public final class SMMClientTest {
   }
 
   @Test
-  public void testNoMappingNeeded () throws IOException {
-    for (final ISMMConceptProvider aCP : CP) {
+  public void testNoMappingNeeded () throws IOException
+  {
+    for (final ISMMConceptProvider aCP : CP)
+    {
       LOGGER.info ("Starting testNoMappingNeeded");
       final SMMClient aClient = new SMMClient ();
       aClient.addConceptToBeMapped (CONCEPT_FR_1);
@@ -130,25 +142,36 @@ public final class SMMClientTest {
   }
 
   @Test
-  public void testCreateAllMappings () throws IOException {
+  public void testCreateAllMappings () throws IOException
+  {
     final IMicroDocument aDoc = new MicroDocument ();
     final IMicroElement eRoot = aDoc.appendElement ("root");
     // Get all namespaces
-    final ICommonsOrderedSet<String> aNSs = SMMConceptProviderGRLCRemote.remoteQueryAllNamespaces (CMockSMM.LOG_PREFIX);
+    final ICommonsOrderedSet <String> aNSs = SMMConceptProviderGRLCRemote.remoteQueryAllNamespaces (CMockSMM.LOG_PREFIX);
 
     // For all namespaces
     for (final String sSrc : aNSs)
-      if (!sSrc.equals (CMockSMM.NS_TOOP)) {
+      if (!sSrc.equals (CMockSMM.NS_TOOP))
+      {
         final IMicroElement eValueList = eRoot.appendElement ("value-list");
         eValueList.setAttribute ("srcns", sSrc);
         eValueList.setAttribute ("dstns", CMockSMM.NS_TOOP);
 
-        final MappedValueList aMVL = SMMConceptProviderGRLCRemote.getAllMappedValues (CMockSMM.LOG_PREFIX, sSrc,
+        final MappedValueList aMVL = SMMConceptProviderGRLCRemote.getAllMappedValues (CMockSMM.LOG_PREFIX,
+                                                                                      sSrc,
                                                                                       CMockSMM.NS_TOOP);
-        for (final MappedValue aItem : aMVL) {
+        for (final MappedValue aItem : CollectionHelper.getSorted (aMVL,
+                                                                   Comparator.comparing (x -> x.getSource ()
+                                                                                               .getValue ())))
+        {
           final IMicroElement eItem = eValueList.appendElement ("item");
           eItem.setAttribute ("srcval", aItem.getSource ().getValue ());
-          eItem.setAttribute ("dstval", aItem.getDestination ().getValue ());
+
+          final String sTOOPConcept = aItem.getDestination ().getValue ();
+          eItem.setAttribute ("dstval", sTOOPConcept);
+
+          if (ERegOrgConcept.getFromIDOrNull (sTOOPConcept) == null)
+            LOGGER.warn ("The TOOP concept '" + sTOOPConcept + "' is unknown!");
         }
       }
     MicroWriter.writeToFile (aDoc, new File ("src/test/resources/existing-smm-mappings.xml"));
