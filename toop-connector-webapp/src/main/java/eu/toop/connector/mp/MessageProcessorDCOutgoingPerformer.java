@@ -78,6 +78,7 @@ import eu.toop.connector.r2d2client.IR2D2Endpoint;
 import eu.toop.connector.r2d2client.R2D2Client;
 import eu.toop.connector.smmclient.IMappedValueList;
 import eu.toop.connector.smmclient.MappedValue;
+import eu.toop.connector.smmclient.MappedValueList;
 import eu.toop.connector.smmclient.SMMClient;
 import eu.toop.kafkaclient.ToopKafkaClient;
 import oasis.names.specification.ubl.schema.xsd.unqualifieddatatypes_21.IdentifierType;
@@ -130,8 +131,8 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
   public void runAsync (@Nonnull final TDETOOPRequestType aRequest)
   {
     /*
-     * This is the unique ID of this request message and must be used throughout the
-     * whole process for identification
+     * This is the unique ID of this request message and must be used throughout
+     * the whole process for identification
      */
     final String sRequestID = aRequest != null &&
                               aRequest.getDocumentUniversalUniqueIdentifier () != null ? aRequest.getDocumentUniversalUniqueIdentifier ().getValue () : "temp-tc1-id-" + GlobalIDFactory.getNewIntID ();
@@ -215,7 +216,8 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
       else
       {
         // Don't do this:
-        // DataRequestIdentifier: "A reference to the universally unique identifier of
+        // DataRequestIdentifier: "A reference to the universally unique
+        // identifier of
         // the corresponding Toop data request."
         // -> so set only in step 3/4
         if (false)
@@ -246,23 +248,32 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
           try
           {
             // send back error if some value could not be mapped
-            aMappedValues = aClient.performMapping (sLogPrefix,
-                                                    SMMDocumentTypeMapping.getToopSMNamespace (eDocType),
-                                                    MPWebAppConfig.getSMMConceptProvider (),
-                                                    (sLogPrefix1, sSourceNamespace, sSourceValue, sDestNamespace) -> {
-                                                      final String sErrorMsg = "Found no mapping for '" +
-                                                                               sSourceNamespace +
-                                                                               '#' +
-                                                                               sSourceValue +
-                                                                               "' to destination namespace '" +
-                                                                               sDestNamespace +
-                                                                               "'";
-                                                      aErrors.add (_createError (sLogPrefix1,
-                                                                                 EToopErrorCategory.SEMANTIC_MAPPING,
-                                                                                 EToopErrorCode.SM_002,
-                                                                                 sErrorMsg,
-                                                                                 null));
-                                                    });
+            final String sSMMDomain = SMMDocumentTypeMapping.getToopSMDomain (eDocType);
+            if (sSMMDomain != null)
+            {
+              // No mapping for this document type
+              aMappedValues = new MappedValueList ();
+            }
+            else
+            {
+              aMappedValues = aClient.performMapping (sLogPrefix,
+                                                      sSMMDomain,
+                                                      MPWebAppConfig.getSMMConceptProvider (),
+                                                      (sLogPrefix1, sSourceNamespace, sSourceValue, sDestNamespace) -> {
+                                                        final String sErrorMsg = "Found no mapping for '" +
+                                                                                 sSourceNamespace +
+                                                                                 '#' +
+                                                                                 sSourceValue +
+                                                                                 "' to destination namespace '" +
+                                                                                 sDestNamespace +
+                                                                                 "'";
+                                                        aErrors.add (_createError (sLogPrefix1,
+                                                                                   EToopErrorCategory.SEMANTIC_MAPPING,
+                                                                                   EToopErrorCode.SM_002,
+                                                                                   sErrorMsg,
+                                                                                   null));
+                                                      });
+            }
           }
           catch (final IOException ex)
           {
@@ -407,9 +418,10 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
           try (final NonBlockingByteArrayOutputStream aBAOS = new NonBlockingByteArrayOutputStream ())
           {
             // Ensure flush/close of DumpOS!
-            try (final OutputStream aDumpOS = TCDumpHelper.getDumpOutputStream (aBAOS,
-                                                                                TCConfig.getDebugToDPDumpPathIfEnabled (),
-                                                                                "to-dp.asic"))
+            try (
+                final OutputStream aDumpOS = TCDumpHelper.getDumpOutputStream (aBAOS,
+                                                                               TCConfig.getDebugToDPDumpPathIfEnabled (),
+                                                                               "to-dp.asic"))
             {
               ToopMessageBuilder140.createRequestMessageAsic (aRequest, aBAOS, MPWebAppConfig.getSignatureHelper ());
             }
@@ -468,8 +480,8 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
               }
 
               /*
-               * XXX just send to the first one, to mimic, that this is how it will be in the
-               * final version (where step 4/4 will aggregate)
+               * XXX just send to the first one, to mimic, that this is how it
+               * will be in the final version (where step 4/4 will aggregate)
                */
               break;
             }
