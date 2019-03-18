@@ -48,23 +48,27 @@
     <item srcval="Telefono" dstval="TelephoneNumber" />
   </value-list>
   <value-list srcns="http://toop.elo/elonia-business-register" dstns="http://toop.eu/registered-organization">
-    <item srcval="Citizen" dstval="Person" />
-    <item srcval="Company" dstval="RegisteredOrganization" />
-    <item srcval="EloniaActivityDeclaration" dstval="activityDescription" />
-    <item srcval="EloniaBusinessCode" dstval="CompanyCode" />
+    <item srcval="EloniaActivityDescription" dstval="activityDescription" />
+    <item srcval="EloniaBirthDate" dstval="birthDate" />
     <item srcval="EloniaCapitalType" dstval="capitalType" />
-    <item srcval="EloniaCompanyNaceCode" dstval="naceCode" />
+    <item srcval="EloniaCompanyCode" dstval="CompanyCode" />
     <item srcval="EloniaCompanyName" dstval="companyName" />
     <item srcval="EloniaCompanyType" dstval="companyType" />
     <item srcval="EloniaCountryName" dstval="countryName" />
     <item srcval="EloniaEmailAddress" dstval="EmailAddress" />
+    <item srcval="EloniaFamilyName" dstval="familyName" />
     <item srcval="EloniaFaxNumber" dstval="FaxNumber" />
     <item srcval="EloniaFoundationDate" dstval="foundationDate" />
+    <item srcval="EloniaGivenName" dstval="givenName" />
+    <item srcval="EloniaHasLegalRepresentative" dstval="hasLegalRepresentative" />
     <item srcval="EloniaLegalStatus" dstval="legalStatus" />
     <item srcval="EloniaLegalStatusEffectiveDate" dstval="legalStatusEffectiveDate" />
     <item srcval="EloniaLocality" dstval="locality" />
+    <item srcval="EloniaNaceCode" dstval="naceCode" />
+    <item srcval="EloniaPerson" dstval="Person" />
     <item srcval="EloniaPostalCode" dstval="postalCode" />
     <item srcval="EloniaRegion" dstval="region" />
+    <item srcval="EloniaRegisteredOrganization" dstval="RegisteredOrganization" />
     <item srcval="EloniaRegistrationAuthority" dstval="RegistrationAuthority" />
     <item srcval="EloniaRegistrationDate" dstval="registrationDate" />
     <item srcval="EloniaRegistrationNumber" dstval="RegistrationNumber" />
@@ -72,29 +76,29 @@
     <item srcval="EloniaStreetAddress" dstval="streetAddress" />
     <item srcval="EloniaTelephoneNumber" dstval="TelephoneNumber" />
     <item srcval="EloniaVATNumber" dstval="VATNumber" />
-    <item srcval="birthdate" dstval="birthDate" />
-    <item srcval="givenName" dstval="givenName" />
-    <item srcval="hasLegalRepresentationBy" dstval="hasLegalRepresentative" />
-    <item srcval="surName" dstval="familyName" />
   </value-list>
   <value-list srcns="http://toop.fre/freedonia-business-register" dstns="http://toop.eu/registered-organization">
-    <item srcval="Company" dstval="RegisteredOrganization" />
-    <item srcval="FreedoniaActivityDeclaration" dstval="activityDescription" />
-    <item srcval="FreedoniaBusinessCode" dstval="CompanyCode" />
+    <item srcval="FreedoniaActivityDescription" dstval="activityDescription" />
+    <item srcval="FreedoniaBirthDate" dstval="birthDate" />
     <item srcval="FreedoniaCapitalType" dstval="capitalType" />
-    <item srcval="FreedoniaCitizen" dstval="Person" />
-    <item srcval="FreedoniaCompanyNaceCode" dstval="naceCode" />
+    <item srcval="FreedoniaCompanyCode" dstval="CompanyCode" />
     <item srcval="FreedoniaCompanyName" dstval="companyName" />
     <item srcval="FreedoniaCompanyType" dstval="companyType" />
     <item srcval="FreedoniaCountryName" dstval="countryName" />
     <item srcval="FreedoniaEmailAddress" dstval="EmailAddress" />
+    <item srcval="FreedoniaFamilyName" dstval="familyName" />
     <item srcval="FreedoniaFaxNumber" dstval="FaxNumber" />
     <item srcval="FreedoniaFoundationDate" dstval="foundationDate" />
+    <item srcval="FreedoniaGivenName" dstval="givenName" />
+    <item srcval="FreedoniaHasLegalRepresentative" dstval="hasLegalRepresentative" />
     <item srcval="FreedoniaLegalStatus" dstval="legalStatus" />
     <item srcval="FreedoniaLegalStatusEffectiveDate" dstval="legalStatusEffectiveDate" />
     <item srcval="FreedoniaLocality" dstval="locality" />
+    <item srcval="FreedoniaNaceCode" dstval="naceCode" />
+    <item srcval="FreedoniaPerson" dstval="Person" />
     <item srcval="FreedoniaPostalCode" dstval="postalCode" />
     <item srcval="FreedoniaRegion" dstval="region" />
+    <item srcval="FreedoniaRegisteredOrganization" dstval="RegisteredOrganization" />
     <item srcval="FreedoniaRegistrationAuthority" dstval="RegistrationAuthority" />
     <item srcval="FreedoniaRegistrationDate" dstval="registrationDate" />
     <item srcval="FreedoniaRegistrationNumber" dstval="RegistrationNumber" />
@@ -102,9 +106,5 @@
     <item srcval="FreedoniaStreetAddress" dstval="streetAddress" />
     <item srcval="FreedoniaTelephoneNumber" dstval="TelephoneNumber" />
     <item srcval="FreedoniaVATNumber" dstval="VATNumber" />
-    <item srcval="birthdate" dstval="birthDate" />
-    <item srcval="givenName" dstval="givenName" />
-    <item srcval="isRepresentedBy" dstval="hasLegalRepresentative" />
-    <item srcval="surName" dstval="familyName" />
   </value-list>
 </root>

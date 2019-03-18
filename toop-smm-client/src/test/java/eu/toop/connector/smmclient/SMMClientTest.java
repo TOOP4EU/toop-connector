@@ -47,7 +47,7 @@ public final class SMMClientTest
   private static final Logger LOGGER = LoggerFactory.getLogger (SMMClientTest.class);
 
   private static final ConceptValue CONCEPT_TOOP_1 = new ConceptValue (CMockSMM.NS_TOOP, "CompanyCode");
-  private static final ConceptValue CONCEPT_FR_1 = new ConceptValue (CMockSMM.NS_FREEDONIA, "FreedoniaBusinessCode");
+  private static final ConceptValue CONCEPT_FR_1 = new ConceptValue (CMockSMM.NS_FREEDONIA, "FreedoniaCompanyCode");
 
   // Use with cache and remote
   private static final ISMMConceptProvider [] CP = new ISMMConceptProvider [] { SMMConceptProviderGRLCRemote::getAllMappedValues,
