@@ -19,7 +19,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
 import com.helger.peppol.identifier.factory.IIdentifierFactory;
-import com.helger.peppol.identifier.factory.SimpleIdentifierFactory;
 import com.helger.peppol.url.EsensURLProvider;
 import com.helger.peppol.url.IPeppolURLProvider;
 
@@ -37,7 +36,7 @@ public final class TCSettings
   @Nonnull
   public static IIdentifierFactory getIdentifierFactory ()
   {
-    return SimpleIdentifierFactory.INSTANCE;
+    return TCIdentifierFactory.INSTANCE_TC;
   }
 
   @Nonnull
