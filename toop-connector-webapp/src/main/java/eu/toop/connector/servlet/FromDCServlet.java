@@ -29,6 +29,7 @@ import com.helger.commons.error.level.EErrorLevel;
 import com.helger.commons.mime.CMimeType;
 
 import eu.toop.commons.dataexchange.v140.TDETOOPRequestType;
+import eu.toop.commons.dataexchange.v140.TDETOOPResponseType;
 import eu.toop.commons.exchange.ToopMessageBuilder140;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.mp.MessageProcessorDCOutgoing;
@@ -51,21 +52,21 @@ public class FromDCServlet extends HttpServlet
   protected void doPost (@Nonnull final HttpServletRequest aHttpServletRequest,
                          @Nonnull final HttpServletResponse aHttpServletResponse) throws ServletException, IOException
   {
-    ToopKafkaClient.send (EErrorLevel.INFO, () -> "MP got /from-dc request (1/4)");
+    ToopKafkaClient.send (EErrorLevel.INFO, () -> "MP got /from-dc HTTP request (1/4)");
 
     final TCUnifiedResponse aUR = new TCUnifiedResponse (aHttpServletRequest);
 
     // Parse POST data
     final TDETOOPRequestType aRequestMsg = ToopMessageBuilder140.parseRequestMessage (TCDumpHelper.getDumpInputStream (aHttpServletRequest.getInputStream (),
-                                                                                                                    TCConfig.getDebugFromDCDumpPathIfEnabled (),
-                                                                                                                    "from-dc.asic"));
+                                                                                                                       TCConfig.getDebugFromDCDumpPathIfEnabled (),
+                                                                                                                       "from-dc.asic"));
 
     if (aRequestMsg == null)
     {
       // The message content is invalid
       // Synchronous error
       ToopKafkaClient.send (EErrorLevel.ERROR,
-                            () -> "The request does not contain an ASiC archive, or the ASiC archive does not contain a TOOP DataRequest!");
+                            () -> "The /from-dc request does not contain an ASiC archive, or the ASiC archive does not contain a TOOP DataRequest!");
       aUR.setContentAndCharset ("The provided ASIC container could not be interpreted as a valid TOOP request.",
                                 StandardCharsets.UTF_8);
       aUR.setMimeType (CMimeType.TEXT_PLAIN);
@@ -73,6 +74,10 @@ public class FromDCServlet extends HttpServlet
     }
     else
     {
+      if (aRequestMsg instanceof TDETOOPResponseType)
+        ToopKafkaClient.send (EErrorLevel.WARN,
+                              () -> "The /from-dc request contains a TOOP Response, but needs a TOOP Request only. Please check your endpoint configuration.");
+
       // Enqueue to processor and we're good
       MessageProcessorDCOutgoing.getInstance ().enqueue (aRequestMsg);
 

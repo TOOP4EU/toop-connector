@@ -51,21 +51,21 @@ public class FromDPServlet extends HttpServlet
   protected void doPost (@Nonnull final HttpServletRequest aHttpServletRequest,
                          @Nonnull final HttpServletResponse aHttpServletResponse) throws ServletException, IOException
   {
-    ToopKafkaClient.send (EErrorLevel.INFO, () -> "MP got /from-dp request (3/4)");
+    ToopKafkaClient.send (EErrorLevel.INFO, () -> "MP got /from-dp HTTP request (3/4)");
 
     final TCUnifiedResponse aUR = new TCUnifiedResponse (aHttpServletRequest);
 
     // Parse POST data
     // No IToopDataResponse contained here
     final TDETOOPResponseType aResponseMsg = ToopMessageBuilder140.parseResponseMessage (TCDumpHelper.getDumpInputStream (aHttpServletRequest.getInputStream (),
-                                                                                                                       TCConfig.getDebugFromDPDumpPathIfEnabled (),
-                                                                                                                       "from-dp.asic"));
+                                                                                                                          TCConfig.getDebugFromDPDumpPathIfEnabled (),
+                                                                                                                          "from-dp.asic"));
 
     if (aResponseMsg == null)
     {
       // The message content is invalid
       ToopKafkaClient.send (EErrorLevel.ERROR,
-                            () -> "The request does not contain an ASiC archive or the ASiC archive does not contain a TOOP Response Message!");
+                            () -> "The /from-dp request does not contain an ASiC archive or the ASiC archive does not contain a TOOP Response Message!");
       aUR.setContentAndCharset ("The provided ASIC container could not be interpreted as a valid TOOP response.",
                                 StandardCharsets.UTF_8);
       aUR.setMimeType (CMimeType.TEXT_PLAIN);

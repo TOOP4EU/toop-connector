@@ -122,13 +122,13 @@ public class TCWebAppListener extends WebScopeListener
                           {
                             public void handleIncomingRequest (@Nonnull final TDETOOPRequestType aRequest) throws MEException
                             {
-                              ToopKafkaClient.send (EErrorLevel.INFO, () -> "TC got DP incoming request (2/4)");
+                              ToopKafkaClient.send (EErrorLevel.INFO, () -> "TC got DP incoming MEM request (2/4)");
                               MessageProcessorDPIncoming.getInstance ().enqueue (aRequest);
                             }
 
                             public void handleIncomingResponse (@Nonnull final TDETOOPResponseType aResponse) throws MEException
                             {
-                              ToopKafkaClient.send (EErrorLevel.INFO, () -> "TC got DC incoming request (4/4)");
+                              ToopKafkaClient.send (EErrorLevel.INFO, () -> "TC got DC incoming MEM request (4/4)");
                               MessageProcessorDCIncoming.getInstance ().enqueue (aResponse);
                             }
                           });
