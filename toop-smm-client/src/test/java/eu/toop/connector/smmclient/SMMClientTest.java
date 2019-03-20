@@ -35,7 +35,7 @@ import com.helger.xml.microdom.MicroDocument;
 import com.helger.xml.microdom.serialize.MicroWriter;
 
 import eu.toop.commons.concept.ConceptValue;
-import eu.toop.commons.usecase.regorg.ERegOrgConcept;
+import eu.toop.commons.usecase.EToopConcept;
 
 /**
  * Test class for class {@link SMMClient}.
@@ -170,7 +170,7 @@ public final class SMMClientTest
           final String sTOOPConcept = aItem.getDestination ().getValue ();
           eItem.setAttribute ("dstval", sTOOPConcept);
 
-          if (ERegOrgConcept.getFromIDOrNull (sTOOPConcept) == null)
+          if (EToopConcept.getFromIDOrNull (sTOOPConcept) == null)
             LOGGER.warn ("The TOOP concept '" + sTOOPConcept + "' is unknown!");
         }
       }
