@@ -24,7 +24,7 @@
     <version>1.1.0</version>
   </parent>
   <artifactId>toop-connector-parent-pom</artifactId>
-  <version>0.10.1-SNAPSHOT</version>
+  <version>0.10.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>toop-connector-parent-pom</name>
   <description>Base POM to build the toop-connector projects</description>
