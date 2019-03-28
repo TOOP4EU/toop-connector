@@ -77,6 +77,7 @@ import eu.toop.connector.api.as4.MessageExchangeManager;
 import eu.toop.connector.r2d2client.IR2D2Endpoint;
 import eu.toop.connector.r2d2client.R2D2Client;
 import eu.toop.connector.smmclient.IMappedValueList;
+import eu.toop.connector.smmclient.IUnmappableCallback;
 import eu.toop.connector.smmclient.MappedValue;
 import eu.toop.connector.smmclient.MappedValueList;
 import eu.toop.connector.smmclient.SMMClient;
@@ -235,6 +236,7 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
           for (final TDEDataElementRequestType aDER : aRequest.getDataElementRequest ())
           {
             final TDEConceptRequestType aSrcConcept = aDER.getConceptRequest ();
+
             // Only if not yet mapped
             if (!aSrcConcept.getSemanticMappingExecutionIndicator ().isValue ())
             {
@@ -250,28 +252,38 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
             final String sSMMDomain = SMMDocumentTypeMapping.getToopSMDomain (eDocType);
             if (sSMMDomain == null)
             {
-              // No mapping for this document type
+              // No SMM mapping for this document type
               aMappedValues = new MappedValueList ();
+              ToopKafkaClient.send (EErrorLevel.INFO,
+                                    () -> sLogPrefix +
+                                          "Found no SMM document type mapping for document type " +
+                                          eDocType);
             }
             else
             {
+              final IUnmappableCallback aUnmappableCallback = (sLogPrefix1,
+                                                               sSourceNamespace,
+                                                               sSourceValue,
+                                                               sDestNamespace) -> {
+                final String sErrorMsg = "Found no mapping for '" +
+                                         sSourceNamespace +
+                                         '#' +
+                                         sSourceValue +
+                                         "' to destination namespace '" +
+                                         sDestNamespace +
+                                         "'";
+                aErrors.add (_createError (sLogPrefix1,
+                                           EToopErrorCategory.SEMANTIC_MAPPING,
+                                           EToopErrorCode.SM_002,
+                                           sErrorMsg,
+                                           null));
+              };
+
+              // Logging happens internally
               aMappedValues = aClient.performMapping (sLogPrefix,
                                                       sSMMDomain,
                                                       MPWebAppConfig.getSMMConceptProvider (),
-                                                      (sLogPrefix1, sSourceNamespace, sSourceValue, sDestNamespace) -> {
-                                                        final String sErrorMsg = "Found no mapping for '" +
-                                                                                 sSourceNamespace +
-                                                                                 '#' +
-                                                                                 sSourceValue +
-                                                                                 "' to destination namespace '" +
-                                                                                 sDestNamespace +
-                                                                                 "'";
-                                                        aErrors.add (_createError (sLogPrefix1,
-                                                                                   EToopErrorCategory.SEMANTIC_MAPPING,
-                                                                                   EToopErrorCode.SM_002,
-                                                                                   sErrorMsg,
-                                                                                   null));
-                                                      });
+                                                      aUnmappableCallback);
             }
           }
           catch (final IOException ex)
