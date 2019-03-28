@@ -217,8 +217,7 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
       {
         // Don't do this:
         // DataRequestIdentifier: "A reference to the universally unique
-        // identifier of
-        // the corresponding Toop data request."
+        // identifier of the corresponding Toop data request."
         // -> so set only in step 3/4
         if (false)
         {
@@ -249,7 +248,7 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
           {
             // send back error if some value could not be mapped
             final String sSMMDomain = SMMDocumentTypeMapping.getToopSMDomain (eDocType);
-            if (sSMMDomain != null)
+            if (sSMMDomain == null)
             {
               // No mapping for this document type
               aMappedValues = new MappedValueList ();
