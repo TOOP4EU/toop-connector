@@ -2,7 +2,7 @@
 
 The joint message process for both sides of the process
 
-Latest release: **0.9.3** (2018-12-10)
+Latest release: **0.10.0** (2019-03-20)
 
 ## Done
 
@@ -26,5 +26,3 @@ Latest release: **0.9.3** (2018-12-10)
   * Use `MEMDelegate.registerMessageHandler` - `IMSDataRequest`, `IToopDataRequest`, `IMSDataResponse` and `IToopDataResponse` must be contained
   * Handler for this is initialized in `MPWebAppListener`
     * ASiC container is parsed and message is forwarded to `MessageProcessorDCIncoming`
-
-  
