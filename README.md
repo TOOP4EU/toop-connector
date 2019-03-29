@@ -2,9 +2,9 @@
 
 The joint message process for both sides of the process
 
-Latest release: **0.10.0** (2019-03-20)
+Latest release: **0.10.1** (2019-03-29)
 
-## Done
+# How it works
 
 * Handle the way on DC side from DC backend to AS4 (1/4)
   * Input from DC is received via Servlet `/from-dc` (from Demo UI - `HttpClientInvoker`)
@@ -26,3 +26,26 @@ Latest release: **0.10.0** (2019-03-20)
   * Use `MEMDelegate.registerMessageHandler` - `IMSDataRequest`, `IToopDataRequest`, `IMSDataResponse` and `IToopDataResponse` must be contained
   * Handler for this is initialized in `MPWebAppListener`
     * ASiC container is parsed and message is forwarded to `MessageProcessorDCIncoming`
+
+# News and noteworthy
+
+* v0.10.1 - 2019-03-29
+    * Fixed an error that prevented semantic mapping from being invoked
+    * Fixed potential startup time delays because of long random number initialization time on Linux
+* v0.10.0 - 2019-03-20
+    * Updated to data model v1.40
+    * Added mandatory Schematron validation for steps 1/4 and 3/4 (that can be turned off)
+    * Improved internal logging
+    * Made AS4 message exchange more customizable (via SPI interfaces)
+    * New subproject `toop-mem-phase4` to use `ph-as4` as AS4 message exchange module
+        * perform build with Maven profile `phase4`
+        * Set property `toop.mem.implementation` with value `mem-phase4` in file `toop-connector.properties` to use it at runtime
+        * Add property `toop.phase4.datapath` with an absolute writable path into `toop-connector.properties` file
+        * Ensure to create a ph-as4 configuration file (`as4.properties`) and reference it either via the environment variable `AS4_SERVER_CONFIG` or via the system property `as4.server.configfile`. See https://github.com/phax/ph-as4#as4properties for details.
+        * Create a file `crypto.properties` (name is important) and add it to your classpath. See https://github.com/phax/ph-as4#cryptoproperties for details. 
+* v0.9.3 - 2018-12-10
+    * Backwards compatible update
+* v0.9.2 - 2018-11-09
+    * Non-backwards compatible update
+* v0.9.1 - 2018-06-08
+* v0.9.0 - 2018-05-17
