@@ -16,6 +16,7 @@
 package eu.toop.mem.phase4.servlet;
 
 import java.io.InputStream;
+import java.io.Serializable;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -34,6 +35,7 @@ import com.helger.as4lib.ebms3header.Ebms3SignalMessage;
 import com.helger.as4lib.ebms3header.Ebms3UserMessage;
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.IsSPIImplementation;
+import com.helger.commons.collection.impl.CommonsArrayList;
 import com.helger.commons.collection.impl.ICommonsList;
 import com.helger.commons.error.level.EErrorLevel;
 import com.helger.commons.io.stream.StreamHelper;
@@ -41,6 +43,7 @@ import com.helger.xml.serialize.write.XMLWriter;
 
 import eu.toop.commons.dataexchange.v140.TDETOOPRequestType;
 import eu.toop.commons.dataexchange.v140.TDETOOPResponseType;
+import eu.toop.commons.exchange.AsicReadEntry;
 import eu.toop.commons.exchange.ToopMessageBuilder140;
 import eu.toop.connector.api.as4.IMessageExchangeSPI.IIncomingHandler;
 import eu.toop.kafkaclient.ToopKafkaClient;
@@ -110,20 +113,22 @@ public class AS4MessageProcessorSPI implements IAS4ServletMessageProcessorSPI
       final WSS4JAttachment aAttachment = aIncomingAttachments.getFirst ();
       try
       {
-        // Extract from ASiC
-        final Object aMsg = ToopMessageBuilder140.parseRequestOrResponse (aAttachment.getSourceStream ());
+        // Extract from ASiC and keep attachments
+        final ICommonsList <AsicReadEntry> aAttachments = new CommonsArrayList <> ();
+        final Serializable aMsg = ToopMessageBuilder140.parseRequestOrResponse (aAttachment.getSourceStream (),
+                                                                                aAttachments::add);
 
         // Response before Request because it is derived from Request!
         if (aMsg instanceof TDETOOPResponseType)
         {
           // This is the way from DP back to DC; we're in DC incoming mode
-          s_aIncomingHandler.handleIncomingResponse ((TDETOOPResponseType) aMsg);
+          s_aIncomingHandler.handleIncomingResponse ((TDETOOPResponseType) aMsg, aAttachments);
         }
         else
           if (aMsg instanceof TDETOOPRequestType)
           {
             // This is the way from DC to DP; we're in DP incoming mode
-            s_aIncomingHandler.handleIncomingRequest ((TDETOOPRequestType) aMsg);
+            s_aIncomingHandler.handleIncomingRequest ((TDETOOPRequestType) aMsg, aAttachments);
           }
           else
             ToopKafkaClient.send (EErrorLevel.ERROR, () -> "Unsuspported Message: " + aMsg);

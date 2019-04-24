@@ -15,16 +15,21 @@
  */
 package eu.toop.connector.me.spi;
 
+import java.io.Serializable;
+
 import javax.annotation.Nonnull;
 import javax.servlet.ServletContext;
 
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.IsSPIImplementation;
 import com.helger.commons.annotation.Nonempty;
+import com.helger.commons.collection.impl.CommonsArrayList;
+import com.helger.commons.collection.impl.ICommonsList;
 import com.helger.commons.error.level.EErrorLevel;
 
 import eu.toop.commons.dataexchange.v140.TDETOOPRequestType;
 import eu.toop.commons.dataexchange.v140.TDETOOPResponseType;
+import eu.toop.commons.exchange.AsicReadEntry;
 import eu.toop.commons.exchange.ToopMessageBuilder140;
 import eu.toop.connector.api.as4.IMERoutingInformation;
 import eu.toop.connector.api.as4.IMessageExchangeSPI;
@@ -40,7 +45,7 @@ import eu.toop.kafkaclient.ToopKafkaClient;
 /**
  * Implementation of {@link IMessageExchangeSPI} using the "TOOP AS4 Gateway
  * back-end interface".
- * 
+ *
  * @author Philip Helger
  */
 @IsSPIImplementation
@@ -58,7 +63,7 @@ public final class DefaultMessageExchangeSPI implements IMessageExchangeSPI
     return MessageExchangeManager.DEFAULT_ID;
   }
 
-  public void registerIncomingHandler (@Nonnull ServletContext aServletContext,
+  public void registerIncomingHandler (@Nonnull final ServletContext aServletContext,
                                        @Nonnull final IIncomingHandler aIncomingHandler) throws MEException
   {
     ValueEnforcer.notNull (aServletContext, "ServletContext");
@@ -95,19 +100,20 @@ public final class DefaultMessageExchangeSPI implements IMessageExchangeSPI
       if (aPayload != null)
       {
         // Extract from ASiC
-        final Object aMsg = ToopMessageBuilder140.parseRequestOrResponse (aPayload.getData ().getInputStream ());
+        final ICommonsList <AsicReadEntry> aAttachments = new CommonsArrayList <> ();
+        final Serializable aMsg = ToopMessageBuilder140.parseRequestOrResponse (aPayload.getData ().getInputStream (), aAttachments::add);
 
         // Response before Request because it is derived from Request!
         if (aMsg instanceof TDETOOPResponseType)
         {
           // This is the way from DP back to DC; we're in DC incoming mode
-          m_aIncomingHandler.handleIncomingResponse ((TDETOOPResponseType) aMsg);
+          m_aIncomingHandler.handleIncomingResponse ((TDETOOPResponseType) aMsg, aAttachments);
         }
         else
           if (aMsg instanceof TDETOOPRequestType)
           {
             // This is the way from DC to DP; we're in DP incoming mode
-            m_aIncomingHandler.handleIncomingRequest ((TDETOOPRequestType) aMsg);
+            m_aIncomingHandler.handleIncomingRequest ((TDETOOPRequestType) aMsg, aAttachments);
           }
           else
             ToopKafkaClient.send (EErrorLevel.ERROR, () -> "Unsuspported Message: " + aMsg);

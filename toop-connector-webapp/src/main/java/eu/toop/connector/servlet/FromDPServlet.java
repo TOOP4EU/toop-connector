@@ -25,10 +25,13 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.helger.commons.collection.impl.CommonsArrayList;
+import com.helger.commons.collection.impl.ICommonsList;
 import com.helger.commons.error.level.EErrorLevel;
 import com.helger.commons.mime.CMimeType;
 
 import eu.toop.commons.dataexchange.v140.TDETOOPResponseType;
+import eu.toop.commons.exchange.AsicReadEntry;
 import eu.toop.commons.exchange.ToopMessageBuilder140;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.mp.MessageProcessorDPOutgoing;
@@ -57,9 +60,11 @@ public class FromDPServlet extends HttpServlet
 
     // Parse POST data
     // No IToopDataResponse contained here
+    final ICommonsList <AsicReadEntry> aAttachments = new CommonsArrayList <> ();
     final TDETOOPResponseType aResponseMsg = ToopMessageBuilder140.parseResponseMessage (TCDumpHelper.getDumpInputStream (aHttpServletRequest.getInputStream (),
                                                                                                                           TCConfig.getDebugFromDPDumpPathIfEnabled (),
-                                                                                                                          "from-dp.asic"));
+                                                                                                                          "from-dp.asic"),
+                                                                                         aAttachments::add);
 
     if (aResponseMsg == null)
     {
