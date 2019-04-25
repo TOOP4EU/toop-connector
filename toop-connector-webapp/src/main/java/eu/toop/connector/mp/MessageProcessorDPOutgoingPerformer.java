@@ -43,7 +43,6 @@ import com.helger.commons.id.factory.GlobalIDFactory;
 import com.helger.commons.io.ByteArrayWrapper;
 import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 import com.helger.commons.lang.StackTraceHelper;
-import com.helger.commons.mime.CMimeType;
 import com.helger.commons.text.MultilingualText;
 import com.helger.httpclient.HttpClientManager;
 import com.helger.jaxb.validation.WrappedCollectingValidationEventHandler;
@@ -144,9 +143,7 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
         // Convert read to write attachments
         final ICommonsList <AsicWriteEntry> aWriteAttachments = new CommonsArrayList <> ();
         for (final AsicReadEntry aEntry : aResponseWA.attachments ())
-          aWriteAttachments.add (new AsicWriteEntry (aEntry.getEntryName (),
-                                                     aEntry.payload (),
-                                                     CMimeType.APPLICATION_OCTET_STREAM));
+          aWriteAttachments.add (AsicWriteEntry.create (aEntry));
 
         ToopMessageBuilder140.createResponseMessageAsic (aResponseWA.getResponse (), aBAOS, aSH, aWriteAttachments);
 
@@ -300,9 +297,15 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
                                                                                TCConfig.getDebugToDCDumpPathIfEnabled (),
                                                                                "to-dc.asic"))
             {
+              // Convert read to write attachments
+              final ICommonsList <AsicWriteEntry> aWriteAttachments = new CommonsArrayList <> ();
+              for (final AsicReadEntry aEntry : aResponseWA.attachments ())
+                aWriteAttachments.add (AsicWriteEntry.create (aEntry));
+
               ToopMessageBuilder140.createResponseMessageAsic (aResponse,
                                                                aDumpOS,
-                                                               MPWebAppConfig.getSignatureHelper ());
+                                                               MPWebAppConfig.getSignatureHelper (),
+                                                               aWriteAttachments);
             }
             catch (final ToopErrorException ex)
             {

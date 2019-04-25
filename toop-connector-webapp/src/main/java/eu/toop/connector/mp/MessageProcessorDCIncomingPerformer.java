@@ -23,6 +23,8 @@ import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.util.EntityUtils;
 
 import com.helger.asic.SignatureHelper;
+import com.helger.commons.collection.impl.CommonsArrayList;
+import com.helger.commons.collection.impl.ICommonsList;
 import com.helger.commons.concurrent.collector.IConcurrentPerformer;
 import com.helger.commons.error.level.EErrorLevel;
 import com.helger.commons.id.factory.GlobalIDFactory;
@@ -30,6 +32,8 @@ import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 import com.helger.httpclient.HttpClientManager;
 
 import eu.toop.commons.dataexchange.v140.TDETOOPResponseType;
+import eu.toop.commons.exchange.AsicReadEntry;
+import eu.toop.commons.exchange.AsicWriteEntry;
 import eu.toop.commons.exchange.ToopMessageBuilder140;
 import eu.toop.commons.exchange.ToopResponseWithAttachments140;
 import eu.toop.connector.api.TCConfig;
@@ -70,7 +74,12 @@ final class MessageProcessorDCIncomingPerformer implements IConcurrentPerformer 
 
       try (final NonBlockingByteArrayOutputStream aBAOS = new NonBlockingByteArrayOutputStream ())
       {
-        ToopMessageBuilder140.createResponseMessageAsic (aResponse, aBAOS, aSH);
+        // Convert read to write attachments
+        final ICommonsList <AsicWriteEntry> aWriteAttachments = new CommonsArrayList <> ();
+        for (final AsicReadEntry aEntry : aResponseWA.attachments ())
+          aWriteAttachments.add (AsicWriteEntry.create (aEntry));
+
+        ToopMessageBuilder140.createResponseMessageAsic (aResponse, aBAOS, aSH, aWriteAttachments);
 
         ToopKafkaClient.send (EErrorLevel.INFO,
                               () -> "Start posting signed ASiC response to '" + sDestinationUrl + "'");
