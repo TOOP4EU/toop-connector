@@ -31,7 +31,7 @@ import com.helger.commons.state.ESuccess;
 import com.helger.scope.IScope;
 import com.helger.web.scope.singleton.AbstractGlobalWebSingleton;
 
-import eu.toop.commons.dataexchange.v140.TDETOOPResponseType;
+import eu.toop.commons.exchange.ToopResponseWithAttachments140;
 import eu.toop.kafkaclient.ToopKafkaClient;
 
 /**
@@ -41,20 +41,22 @@ import eu.toop.kafkaclient.ToopKafkaClient;
  *
  * @author Philip Helger
  */
-public final class MessageProcessorDCIncoming extends AbstractGlobalWebSingleton {
+public final class MessageProcessorDCIncoming extends AbstractGlobalWebSingleton
+{
   // Just to have custom named threads....
-  private static final ThreadFactory s_aThreadFactory = new BasicThreadFactory.Builder().setNamingPattern("MP-DC-In-%d")
-      .setDaemon(true)
-      .build();
-  private final ConcurrentCollectorSingle<TDETOOPResponseType> m_aCollector = new ConcurrentCollectorSingle<>();
+  private static final ThreadFactory s_aThreadFactory = new BasicThreadFactory.Builder ().setNamingPattern ("MP-DC-In-%d")
+                                                                                         .setDaemon (true)
+                                                                                         .build ();
+  private final ConcurrentCollectorSingle <ToopResponseWithAttachments140> m_aCollector = new ConcurrentCollectorSingle <> ();
   private final ExecutorService m_aExecutorPool;
 
   @Deprecated
   @UsedViaReflection
-  public MessageProcessorDCIncoming() {
-    m_aCollector.setPerformer(new MessageProcessorDCIncomingPerformer());
-    m_aExecutorPool = Executors.newSingleThreadExecutor(s_aThreadFactory);
-    m_aExecutorPool.submit(m_aCollector::collect);
+  public MessageProcessorDCIncoming ()
+  {
+    m_aCollector.setPerformer (new MessageProcessorDCIncomingPerformer ());
+    m_aExecutorPool = Executors.newSingleThreadExecutor (s_aThreadFactory);
+    m_aExecutorPool.submit (m_aCollector::collect);
   }
 
   /**
@@ -63,17 +65,19 @@ public final class MessageProcessorDCIncoming extends AbstractGlobalWebSingleton
    * @return The one and only {@link MessageProcessorDCIncoming} instance.
    */
   @Nonnull
-  public static MessageProcessorDCIncoming getInstance() {
-    return getGlobalSingleton(MessageProcessorDCIncoming.class);
+  public static MessageProcessorDCIncoming getInstance ()
+  {
+    return getGlobalSingleton (MessageProcessorDCIncoming.class);
   }
 
   @Override
-  protected void onDestroy(@Nonnull final IScope aScopeInDestruction) throws Exception {
+  protected void onDestroy (@Nonnull final IScope aScopeInDestruction) throws Exception
+  {
     // Avoid another enqueue call
-    m_aCollector.stopQueuingNewObjects();
+    m_aCollector.stopQueuingNewObjects ();
 
     // Shutdown executor service
-    ExecutorServiceHelper.shutdownAndWaitUntilAllTasksAreFinished(m_aExecutorPool);
+    ExecutorServiceHelper.shutdownAndWaitUntilAllTasksAreFinished (m_aExecutorPool);
   }
 
   /**
@@ -84,14 +88,18 @@ public final class MessageProcessorDCIncoming extends AbstractGlobalWebSingleton
    * @return {@link ESuccess}. Never <code>null</code>.
    */
   @Nonnull
-  public ESuccess enqueue(@Nonnull final TDETOOPResponseType aMsg) {
-    ValueEnforcer.notNull(aMsg, "Msg");
-    try {
-      m_aCollector.queueObject(aMsg);
+  public ESuccess enqueue (@Nonnull final ToopResponseWithAttachments140 aMsg)
+  {
+    ValueEnforcer.notNull (aMsg, "Msg");
+    try
+    {
+      m_aCollector.queueObject (aMsg);
       return ESuccess.SUCCESS;
-    } catch (final IllegalStateException ex) {
+    }
+    catch (final IllegalStateException ex)
+    {
       // Queue is stopped!
-      ToopKafkaClient.send(EErrorLevel.WARN, () -> "Cannot enqueue " + aMsg, ex);
+      ToopKafkaClient.send (EErrorLevel.WARN, () -> "Cannot enqueue " + aMsg, ex);
       return ESuccess.FAILURE;
     }
   }

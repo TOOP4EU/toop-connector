@@ -22,11 +22,9 @@ import javax.servlet.ServletContext;
 
 import com.helger.commons.annotation.IsSPIInterface;
 import com.helger.commons.annotation.Nonempty;
-import com.helger.commons.collection.impl.ICommonsList;
 
-import eu.toop.commons.dataexchange.v140.TDETOOPRequestType;
-import eu.toop.commons.dataexchange.v140.TDETOOPResponseType;
-import eu.toop.commons.exchange.AsicReadEntry;
+import eu.toop.commons.exchange.ToopRequestWithAttachments140;
+import eu.toop.commons.exchange.ToopResponseWithAttachments140;
 
 /**
  * Abstract API to be implemented for sending and receiving messages.
@@ -43,28 +41,20 @@ public interface IMessageExchangeSPI
      *
      * @param aRequest
      *        The request to handle. Never <code>null</code>.
-     * @param aAttachments
-     *        A non-<code>null</code> but maybe empty list with all attachments
-     *        of the ASiC container.
      * @throws MEException
      *         In case of error.
      */
-    void handleIncomingRequest (@Nonnull TDETOOPRequestType aRequest,
-                                @Nonnull ICommonsList <AsicReadEntry> aAttachments) throws MEException;
+    void handleIncomingRequest (@Nonnull ToopRequestWithAttachments140 aRequest) throws MEException;
 
     /**
      * Handle an incoming response for step 4/4.
      *
      * @param aResponse
      *        The response to handle. Never <code>null</code>.
-     * @param aAttachments
-     *        A non-<code>null</code> but maybe empty list with all attachments
-     *        of the ASiC container.
      * @throws MEException
      *         In case of error.
      */
-    void handleIncomingResponse (@Nonnull TDETOOPResponseType aResponse,
-                                 @Nonnull ICommonsList <AsicReadEntry> aAttachments) throws MEException;
+    void handleIncomingResponse (@Nonnull ToopResponseWithAttachments140 aResponse) throws MEException;
   }
 
   /**

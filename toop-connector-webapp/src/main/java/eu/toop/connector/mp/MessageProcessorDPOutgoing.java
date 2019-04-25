@@ -31,7 +31,7 @@ import com.helger.commons.state.ESuccess;
 import com.helger.scope.IScope;
 import com.helger.web.scope.singleton.AbstractGlobalWebSingleton;
 
-import eu.toop.commons.dataexchange.v140.TDETOOPResponseType;
+import eu.toop.commons.exchange.ToopResponseWithAttachments140;
 import eu.toop.kafkaclient.ToopKafkaClient;
 
 /**
@@ -47,7 +47,7 @@ public final class MessageProcessorDPOutgoing extends AbstractGlobalWebSingleton
   private static final ThreadFactory s_aThreadFactory = new BasicThreadFactory.Builder ().setNamingPattern ("MP-DP-Out-%d")
                                                                                          .setDaemon (true)
                                                                                          .build ();
-  private final ConcurrentCollectorSingle <TDETOOPResponseType> m_aCollector = new ConcurrentCollectorSingle <> ();
+  private final ConcurrentCollectorSingle <ToopResponseWithAttachments140> m_aCollector = new ConcurrentCollectorSingle <> ();
   private final ExecutorService m_aExecutorPool;
 
   @Deprecated
@@ -88,7 +88,7 @@ public final class MessageProcessorDPOutgoing extends AbstractGlobalWebSingleton
    * @return {@link ESuccess}. Never <code>null</code>.
    */
   @Nonnull
-  public ESuccess enqueue (@Nonnull final TDETOOPResponseType aMsg)
+  public ESuccess enqueue (@Nonnull final ToopResponseWithAttachments140 aMsg)
   {
     ValueEnforcer.notNull (aMsg, "Msg");
     try

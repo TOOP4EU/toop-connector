@@ -63,6 +63,8 @@ import eu.toop.commons.error.EToopErrorSeverity;
 import eu.toop.commons.error.IToopErrorCode;
 import eu.toop.commons.error.ToopErrorException;
 import eu.toop.commons.exchange.ToopMessageBuilder140;
+import eu.toop.commons.exchange.ToopRequestWithAttachments140;
+import eu.toop.commons.exchange.ToopResponseWithAttachments140;
 import eu.toop.commons.jaxb.ToopWriter;
 import eu.toop.commons.jaxb.ToopXSDHelper140;
 import eu.toop.commons.schematron.TOOPSchematron140Validator;
@@ -89,7 +91,7 @@ import oasis.names.specification.ubl.schema.xsd.unqualifieddatatypes_21.Identifi
  *
  * @author Philip Helger
  */
-final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer <TDETOOPRequestType>
+final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer <ToopRequestWithAttachments140>
 {
   private static final Logger LOGGER = LoggerFactory.getLogger (MessageProcessorDCOutgoingPerformer.class);
 
@@ -129,14 +131,18 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
     return _createError (sLogPrefix, EToopErrorCategory.TECHNICAL_ERROR, EToopErrorCode.GEN, t.getMessage (), t);
   }
 
-  public void runAsync (@Nonnull final TDETOOPRequestType aRequest)
+  public void runAsync (@Nonnull final ToopRequestWithAttachments140 aRequestWA)
   {
+    final TDETOOPRequestType aRequest = aRequestWA.getRequest ();
+
     /*
      * This is the unique ID of this request message and must be used throughout
      * the whole process for identification
      */
-    final String sRequestID = aRequest != null &&
-                              aRequest.getDocumentUniversalUniqueIdentifier () != null ? aRequest.getDocumentUniversalUniqueIdentifier ().getValue () : "temp-tc1-id-" + GlobalIDFactory.getNewIntID ();
+    final String sRequestID = aRequest.getDocumentUniversalUniqueIdentifier () != null ? aRequest.getDocumentUniversalUniqueIdentifier ()
+                                                                                                 .getValue ()
+                                                                                       : "temp-tc1-id-" +
+                                                                                         GlobalIDFactory.getNewIntID ();
     final String sLogPrefix = "[" + sRequestID + "] ";
     final ICommonsList <TDEErrorType> aErrors = new CommonsArrayList <> ();
 
@@ -510,8 +516,10 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
       // Create an error response
       final TDETOOPResponseType aResponseMsg = ToopMessageBuilder140.createResponse (aRequest);
       aResponseMsg.getError ().addAll (aErrors);
+      final ToopResponseWithAttachments140 aResponse = new ToopResponseWithAttachments140 (aResponseMsg,
+                                                                                           aRequestWA.attachments ());
       // Put the error in queue 4/4
-      MessageProcessorDCIncoming.getInstance ().enqueue (aResponseMsg);
+      MessageProcessorDCIncoming.getInstance ().enqueue (aResponse);
     }
   }
 }

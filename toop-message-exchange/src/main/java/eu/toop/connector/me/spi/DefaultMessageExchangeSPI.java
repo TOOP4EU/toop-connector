@@ -31,6 +31,8 @@ import eu.toop.commons.dataexchange.v140.TDETOOPRequestType;
 import eu.toop.commons.dataexchange.v140.TDETOOPResponseType;
 import eu.toop.commons.exchange.AsicReadEntry;
 import eu.toop.commons.exchange.ToopMessageBuilder140;
+import eu.toop.commons.exchange.ToopRequestWithAttachments140;
+import eu.toop.commons.exchange.ToopResponseWithAttachments140;
 import eu.toop.connector.api.as4.IMERoutingInformation;
 import eu.toop.connector.api.as4.IMessageExchangeSPI;
 import eu.toop.connector.api.as4.MEException;
@@ -107,13 +109,17 @@ public final class DefaultMessageExchangeSPI implements IMessageExchangeSPI
         if (aMsg instanceof TDETOOPResponseType)
         {
           // This is the way from DP back to DC; we're in DC incoming mode
-          m_aIncomingHandler.handleIncomingResponse ((TDETOOPResponseType) aMsg, aAttachments);
+          final ToopResponseWithAttachments140 aResponse = new ToopResponseWithAttachments140 ((TDETOOPResponseType) aMsg,
+                                                                                         aAttachments);
+          m_aIncomingHandler.handleIncomingResponse (aResponse);
         }
         else
           if (aMsg instanceof TDETOOPRequestType)
           {
             // This is the way from DC to DP; we're in DP incoming mode
-            m_aIncomingHandler.handleIncomingRequest ((TDETOOPRequestType) aMsg, aAttachments);
+            final ToopRequestWithAttachments140 aRequest = new ToopRequestWithAttachments140 ((TDETOOPRequestType) aMsg,
+                                                                                        aAttachments);
+            m_aIncomingHandler.handleIncomingRequest (aRequest);
           }
           else
             ToopKafkaClient.send (EErrorLevel.ERROR, () -> "Unsuspported Message: " + aMsg);

@@ -52,6 +52,8 @@ import eu.toop.commons.error.EToopErrorSeverity;
 import eu.toop.commons.error.IToopErrorCode;
 import eu.toop.commons.error.ToopErrorException;
 import eu.toop.commons.exchange.ToopMessageBuilder140;
+import eu.toop.commons.exchange.ToopRequestWithAttachments140;
+import eu.toop.commons.exchange.ToopResponseWithAttachments140;
 import eu.toop.commons.jaxb.ToopXSDHelper140;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.http.TCHttpClientFactory;
@@ -65,7 +67,7 @@ import eu.toop.kafkaclient.ToopKafkaClient;
  *
  * @author Philip Helger
  */
-final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer <TDETOOPRequestType>
+final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer <ToopRequestWithAttachments140>
 {
   @Nonnull
   private static TDEErrorType _createError (@Nonnull final String sLogPrefix,
@@ -77,12 +79,12 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
     // Surely no DP here
     ToopKafkaClient.send (EErrorLevel.ERROR, () -> sLogPrefix + "[" + aErrorCode.getID () + "] " + sErrorText);
     return ToopMessageBuilder140.createError (null,
-                                           EToopErrorOrigin.REQUEST_RECEPTION,
-                                           eCategory,
-                                           aErrorCode,
-                                           EToopErrorSeverity.FAILURE,
-                                           new MultilingualText (Locale.US, sErrorText),
-                                           t == null ? null : StackTraceHelper.getStackAsString (t));
+                                              EToopErrorOrigin.REQUEST_RECEPTION,
+                                              eCategory,
+                                              aErrorCode,
+                                              EToopErrorSeverity.FAILURE,
+                                              new MultilingualText (Locale.US, sErrorText),
+                                              t == null ? null : StackTraceHelper.getStackAsString (t));
   }
 
   @Nonnull
@@ -125,10 +127,14 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
     }
   }
 
-  public void runAsync (@Nonnull final TDETOOPRequestType aRequest) throws Exception
+  public void runAsync (@Nonnull final ToopRequestWithAttachments140 aRequestWA) throws Exception
   {
-    final String sRequestID = aRequest != null &&
-                              aRequest.getDocumentUniversalUniqueIdentifier () != null ? aRequest.getDocumentUniversalUniqueIdentifier ().getValue () : "temp-tc2-id-" + GlobalIDFactory.getNewIntID ();
+    final TDETOOPRequestType aRequest = aRequestWA.getRequest ();
+
+    final String sRequestID = aRequest.getDocumentUniversalUniqueIdentifier () != null ? aRequest.getDocumentUniversalUniqueIdentifier ()
+                                                                                                 .getValue ()
+                                                                                       : "temp-tc2-id-" +
+                                                                                         GlobalIDFactory.getNewIntID ();
     final String sLogPrefix = "[" + sRequestID + "] ";
     final ICommonsList <TDEErrorType> aErrors = new CommonsArrayList <> ();
 
@@ -197,7 +203,7 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
                 aDstConcept.setConceptTypeCode (ToopXSDHelper140.createCode (EConceptType.DP.getID ()));
                 aDstConcept.setSemanticMappingExecutionIndicator (ToopXSDHelper140.createIndicator (false));
                 aDstConcept.setConceptNamespace (ToopXSDHelper140.createIdentifier (aMV.getDestination ()
-                                                                                    .getNamespace ()));
+                                                                                       .getNamespace ()));
                 aDstConcept.setConceptName (ToopXSDHelper140.createText (aMV.getDestination ().getValue ()));
                 aToopConcept.addConceptRequest (aDstConcept);
               }
@@ -241,8 +247,10 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
       // We have errors
       final TDETOOPResponseType aResponseMsg = ToopMessageBuilder140.createResponse (aRequest);
       aResponseMsg.getError ().addAll (aErrors);
+      final ToopResponseWithAttachments140 aResponse = new ToopResponseWithAttachments140 (aResponseMsg,
+                                                                                           aRequestWA.attachments ());
       // Put the error in queue 3/4
-      MessageProcessorDPOutgoing.getInstance ().enqueue (aResponseMsg);
+      MessageProcessorDPOutgoing.getInstance ().enqueue (aResponse);
     }
   }
 }

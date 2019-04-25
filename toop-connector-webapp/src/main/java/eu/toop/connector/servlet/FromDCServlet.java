@@ -34,6 +34,7 @@ import eu.toop.commons.dataexchange.v140.TDETOOPRequestType;
 import eu.toop.commons.dataexchange.v140.TDETOOPResponseType;
 import eu.toop.commons.exchange.AsicReadEntry;
 import eu.toop.commons.exchange.ToopMessageBuilder140;
+import eu.toop.commons.exchange.ToopRequestWithAttachments140;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.mp.MessageProcessorDCOutgoing;
 import eu.toop.connector.mp.TCDumpHelper;
@@ -84,7 +85,8 @@ public class FromDCServlet extends HttpServlet
                               () -> "The /from-dc request contains a TOOP Response, but needs a TOOP Request only. Please check your endpoint configuration.");
 
       // Enqueue to processor and we're good
-      MessageProcessorDCOutgoing.getInstance ().enqueue (aRequestMsg);
+      final ToopRequestWithAttachments140 aRequest = new ToopRequestWithAttachments140 (aRequestMsg, aAttachments);
+      MessageProcessorDCOutgoing.getInstance ().enqueue (aRequest);
 
       // Done - no content
       aUR.setStatus (HttpServletResponse.SC_ACCEPTED);

@@ -31,6 +31,7 @@ import com.helger.httpclient.HttpClientManager;
 
 import eu.toop.commons.dataexchange.v140.TDETOOPResponseType;
 import eu.toop.commons.exchange.ToopMessageBuilder140;
+import eu.toop.commons.exchange.ToopResponseWithAttachments140;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.http.TCHttpClientFactory;
 import eu.toop.kafkaclient.ToopKafkaClient;
@@ -40,12 +41,16 @@ import eu.toop.kafkaclient.ToopKafkaClient;
  *
  * @author Philip Helger
  */
-final class MessageProcessorDCIncomingPerformer implements IConcurrentPerformer <TDETOOPResponseType>
+final class MessageProcessorDCIncomingPerformer implements IConcurrentPerformer <ToopResponseWithAttachments140>
 {
-  public void runAsync (@Nonnull final TDETOOPResponseType aResponse) throws Exception
+  public void runAsync (@Nonnull final ToopResponseWithAttachments140 aResponseWA) throws Exception
   {
-    final String sRequestID = aResponse != null &&
-                              aResponse.getDataRequestIdentifier () != null ? aResponse.getDataRequestIdentifier ().getValue () : "temp-tc4-id-" + GlobalIDFactory.getNewIntID ();
+    final TDETOOPResponseType aResponse = aResponseWA.getResponse ();
+
+    final String sRequestID = aResponse.getDataRequestIdentifier () != null ? aResponse.getDataRequestIdentifier ()
+                                                                                       .getValue ()
+                                                                            : "temp-tc4-id-" +
+                                                                              GlobalIDFactory.getNewIntID ();
     final String sLogPrefix = "[" + sRequestID + "] ";
     ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "Received DC Incoming Request (4/4)");
 

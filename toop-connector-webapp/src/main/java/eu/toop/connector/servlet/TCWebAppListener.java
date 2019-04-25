@@ -23,7 +23,6 @@ import javax.annotation.Nonnull;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.annotation.WebListener;
 
-import com.helger.commons.collection.impl.ICommonsList;
 import com.helger.commons.debug.GlobalDebug;
 import com.helger.commons.error.level.EErrorLevel;
 import com.helger.commons.exception.InitializationException;
@@ -32,9 +31,8 @@ import com.helger.commons.id.factory.StringIDFromGlobalLongIDFactory;
 import com.helger.commons.string.StringHelper;
 import com.helger.web.servlets.scope.WebScopeListener;
 
-import eu.toop.commons.dataexchange.v140.TDETOOPRequestType;
-import eu.toop.commons.dataexchange.v140.TDETOOPResponseType;
-import eu.toop.commons.exchange.AsicReadEntry;
+import eu.toop.commons.exchange.ToopRequestWithAttachments140;
+import eu.toop.commons.exchange.ToopResponseWithAttachments140;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.as4.IMessageExchangeSPI.IIncomingHandler;
 import eu.toop.connector.api.as4.MEException;
@@ -122,22 +120,20 @@ public class TCWebAppListener extends WebScopeListener
     MessageExchangeManager.getConfiguredImplementation ()
                           .registerIncomingHandler (aEvent.getServletContext (), new IIncomingHandler ()
                           {
-                            public void handleIncomingRequest (@Nonnull final TDETOOPRequestType aRequest,
-                                                               @Nonnull final ICommonsList <AsicReadEntry> aAttachments) throws MEException
+                            public void handleIncomingRequest (@Nonnull final ToopRequestWithAttachments140 aRequest) throws MEException
                             {
                               ToopKafkaClient.send (EErrorLevel.INFO,
                                                     () -> "TC got DP incoming MEM request (2/4) with " +
-                                                          aAttachments.size () +
+                                                          aRequest.attachments ().size () +
                                                           " attachments");
                               MessageProcessorDPIncoming.getInstance ().enqueue (aRequest);
                             }
 
-                            public void handleIncomingResponse (@Nonnull final TDETOOPResponseType aResponse,
-                                                                @Nonnull final ICommonsList <AsicReadEntry> aAttachments) throws MEException
+                            public void handleIncomingResponse (@Nonnull final ToopResponseWithAttachments140 aResponse) throws MEException
                             {
                               ToopKafkaClient.send (EErrorLevel.INFO,
                                                     () -> "TC got DC incoming MEM request (4/4) with " +
-                                                          aAttachments.size () +
+                                                          aResponse.attachments ().size () +
                                                           " attachments");
                               MessageProcessorDCIncoming.getInstance ().enqueue (aResponse);
                             }

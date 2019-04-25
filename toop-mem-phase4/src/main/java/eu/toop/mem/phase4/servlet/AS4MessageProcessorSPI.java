@@ -45,6 +45,8 @@ import eu.toop.commons.dataexchange.v140.TDETOOPRequestType;
 import eu.toop.commons.dataexchange.v140.TDETOOPResponseType;
 import eu.toop.commons.exchange.AsicReadEntry;
 import eu.toop.commons.exchange.ToopMessageBuilder140;
+import eu.toop.commons.exchange.ToopRequestWithAttachments140;
+import eu.toop.commons.exchange.ToopResponseWithAttachments140;
 import eu.toop.connector.api.as4.IMessageExchangeSPI.IIncomingHandler;
 import eu.toop.kafkaclient.ToopKafkaClient;
 
@@ -122,13 +124,17 @@ public class AS4MessageProcessorSPI implements IAS4ServletMessageProcessorSPI
         if (aMsg instanceof TDETOOPResponseType)
         {
           // This is the way from DP back to DC; we're in DC incoming mode
-          s_aIncomingHandler.handleIncomingResponse ((TDETOOPResponseType) aMsg, aAttachments);
+          final ToopResponseWithAttachments140 aResponse = new ToopResponseWithAttachments140 ((TDETOOPResponseType) aMsg,
+                                                                                         aAttachments);
+          s_aIncomingHandler.handleIncomingResponse (aResponse);
         }
         else
           if (aMsg instanceof TDETOOPRequestType)
           {
             // This is the way from DC to DP; we're in DP incoming mode
-            s_aIncomingHandler.handleIncomingRequest ((TDETOOPRequestType) aMsg, aAttachments);
+            final ToopRequestWithAttachments140 aRequest = new ToopRequestWithAttachments140 ((TDETOOPRequestType) aMsg,
+                                                                                        aAttachments);
+            s_aIncomingHandler.handleIncomingRequest (aRequest);
           }
           else
             ToopKafkaClient.send (EErrorLevel.ERROR, () -> "Unsuspported Message: " + aMsg);

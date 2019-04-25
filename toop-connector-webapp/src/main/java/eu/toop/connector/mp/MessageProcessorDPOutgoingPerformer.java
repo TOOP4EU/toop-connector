@@ -43,6 +43,7 @@ import com.helger.commons.id.factory.GlobalIDFactory;
 import com.helger.commons.io.ByteArrayWrapper;
 import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 import com.helger.commons.lang.StackTraceHelper;
+import com.helger.commons.mime.CMimeType;
 import com.helger.commons.text.MultilingualText;
 import com.helger.httpclient.HttpClientManager;
 import com.helger.jaxb.validation.WrappedCollectingValidationEventHandler;
@@ -62,7 +63,10 @@ import eu.toop.commons.error.EToopErrorOrigin;
 import eu.toop.commons.error.EToopErrorSeverity;
 import eu.toop.commons.error.IToopErrorCode;
 import eu.toop.commons.error.ToopErrorException;
+import eu.toop.commons.exchange.AsicReadEntry;
+import eu.toop.commons.exchange.AsicWriteEntry;
 import eu.toop.commons.exchange.ToopMessageBuilder140;
+import eu.toop.commons.exchange.ToopResponseWithAttachments140;
 import eu.toop.commons.jaxb.ToopWriter;
 import eu.toop.commons.schematron.TOOPSchematron140Validator;
 import eu.toop.connector.api.TCConfig;
@@ -82,7 +86,7 @@ import eu.toop.kafkaclient.ToopKafkaClient;
  *
  * @author Philip Helger
  */
-final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer <TDETOOPResponseType>
+final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer <ToopResponseWithAttachments140>
 {
   private static final Logger LOGGER = LoggerFactory.getLogger (MessageProcessorDPOutgoingPerformer.class);
 
@@ -121,7 +125,8 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
     return _createError (sLogPrefix, EToopErrorCategory.TECHNICAL_ERROR, EToopErrorCode.GEN, t.getMessage (), t);
   }
 
-  public static void sendTo_to_dp (@Nonnull final TDETOOPResponseType aResponse) throws ToopErrorException, IOException
+  public static void sendTo_to_dp (@Nonnull final ToopResponseWithAttachments140 aResponseWA) throws ToopErrorException,
+                                                                                              IOException
   {
     // Forward to the DP at /to-dp interface
     final TCHttpClientFactory aHCFactory = new TCHttpClientFactory ();
@@ -136,7 +141,14 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
 
       try (final NonBlockingByteArrayOutputStream aBAOS = new NonBlockingByteArrayOutputStream ())
       {
-        ToopMessageBuilder140.createResponseMessageAsic (aResponse, aBAOS, aSH);
+        // Convert read to write attachments
+        final ICommonsList <AsicWriteEntry> aWriteAttachments = new CommonsArrayList <> ();
+        for (final AsicReadEntry aEntry : aResponseWA.attachments ())
+          aWriteAttachments.add (new AsicWriteEntry (aEntry.getEntryName (),
+                                                     aEntry.payload (),
+                                                     CMimeType.APPLICATION_OCTET_STREAM));
+
+        ToopMessageBuilder140.createResponseMessageAsic (aResponseWA.getResponse (), aBAOS, aSH, aWriteAttachments);
 
         // Send to DP (see ToDPServlet in toop-interface)
         final String sDestinationUrl = TCConfig.getMPToopInterfaceDPUrl ();
@@ -156,10 +168,14 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
     }
   }
 
-  public void runAsync (@Nonnull final TDETOOPResponseType aResponse) throws Exception
+  public void runAsync (@Nonnull final ToopResponseWithAttachments140 aResponseWA) throws Exception
   {
-    final String sRequestID = aResponse != null &&
-                              aResponse.getDataRequestIdentifier () != null ? aResponse.getDataRequestIdentifier ().getValue () : "temp-tc3-id-" + GlobalIDFactory.getNewIntID ();
+    final TDETOOPResponseType aResponse = aResponseWA.getResponse ();
+
+    final String sRequestID = aResponse.getDataRequestIdentifier () != null ? aResponse.getDataRequestIdentifier ()
+                                                                                       .getValue ()
+                                                                            : "temp-tc3-id-" +
+                                                                              GlobalIDFactory.getNewIntID ();
     final String sLogPrefix = "[" + sRequestID + "] ";
     ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "Received DP outgoing response (3/4)");
     final ICommonsList <TDEErrorType> aErrors = new CommonsArrayList <> ();
@@ -279,9 +295,10 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
           try (final NonBlockingByteArrayOutputStream aBAOS = new NonBlockingByteArrayOutputStream ())
           {
             // Ensure flush/close of DumpOS!
-            try (final OutputStream aDumpOS = TCDumpHelper.getDumpOutputStream (aBAOS,
-                                                                                TCConfig.getDebugToDCDumpPathIfEnabled (),
-                                                                                "to-dc.asic"))
+            try (
+                final OutputStream aDumpOS = TCDumpHelper.getDumpOutputStream (aBAOS,
+                                                                               TCConfig.getDebugToDCDumpPathIfEnabled (),
+                                                                               "to-dc.asic"))
             {
               ToopMessageBuilder140.createResponseMessageAsic (aResponse,
                                                                aDumpOS,
@@ -351,7 +368,7 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
       aResponse.getError ().addAll (aErrors);
       try
       {
-        sendTo_to_dp (aResponse);
+        sendTo_to_dp (aResponseWA);
       }
       catch (final IOException | ToopErrorException ex)
       {

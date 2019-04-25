@@ -33,6 +33,7 @@ import com.helger.commons.mime.CMimeType;
 import eu.toop.commons.dataexchange.v140.TDETOOPResponseType;
 import eu.toop.commons.exchange.AsicReadEntry;
 import eu.toop.commons.exchange.ToopMessageBuilder140;
+import eu.toop.commons.exchange.ToopResponseWithAttachments140;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.mp.MessageProcessorDPOutgoing;
 import eu.toop.connector.mp.TCDumpHelper;
@@ -79,7 +80,8 @@ public class FromDPServlet extends HttpServlet
     else
     {
       // Enqueue to processor and we're good
-      MessageProcessorDPOutgoing.getInstance ().enqueue (aResponseMsg);
+      final ToopResponseWithAttachments140 aResponse = new ToopResponseWithAttachments140 (aResponseMsg, aAttachments);
+      MessageProcessorDPOutgoing.getInstance ().enqueue (aResponse);
 
       // Done - no content
       aUR.setStatus (HttpServletResponse.SC_NO_CONTENT);
