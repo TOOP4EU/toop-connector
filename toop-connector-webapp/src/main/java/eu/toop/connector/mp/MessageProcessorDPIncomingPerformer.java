@@ -246,6 +246,8 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
 
       // We have errors
       final TDETOOPResponseType aResponseMsg = ToopMessageBuilder140.createResponse (aRequest);
+      // Hard coded value
+      aRequest.setSpecificationIdentifier (ToopXSDHelper140.createSpecificationIdentifierResponse ());
       aResponseMsg.getError ().addAll (aErrors);
       final ToopResponseWithAttachments140 aResponse = new ToopResponseWithAttachments140 (aResponseMsg,
                                                                                            aRequestWA.attachments ());
