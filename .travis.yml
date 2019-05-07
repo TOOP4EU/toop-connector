@@ -10,6 +10,7 @@ nxLk9JblGU9POMAWklXCw6+3lb1K4Hf31CR2HRRV5oi2GokMFBQKNR2fcDHg2e9cheV/c3NLmn936e85
 21dtsHVeTu3eBYgtbvdYmyDu2/PNxnko4OUkB8AD4hmWZLgeOn/W7A9wNbA1aC650zQR5mCS6DgLs8b7RTSKTzw1HnItuINKOIsPmWeQSDmjt66dWe9tETR5CTiJ2/YVbmvmCXRS6HN8gkevGm5P/JAjP9vjBdcm
 /AQ+MsnxjxzNictJCyjbzfWx9mczDIv925bFiKidG9AaAiBdpaoNisB/SeiioeSH25dNt2FUcSdlYjianmcaTtoidHDO4QLzVsy6puJSt0Poauln1/wivvlRxVA4AQlxZuSD6QuYQt/LaJ6J6mTlo6p3Hn9tcfnI
 iDFdPKTsMVS9Rx5AzdfLy7/z1sZEayGFmXqlGwKOwyRk7mkIGubfxM="
+    - DOCKER_USERNAME=yerlibilgin
 
 addons:
   sonarcloud:
@@ -42,7 +43,9 @@ jobs:
       after_success:
         - mvn deploy --settings travis-settings.xml -DskipTests=true -B -P travis-deploy
         - docker pull toop/tomcat-jdk-image:1
-        - docker build --build-arg TOOP_CONNECTOR_VERSION=$version -t toop/toop-connector-webapp:$version .
+        - docker build --build-arg TOOP_CONNECTOR_VERSION=0.10.2-SNAPSHOT -t toop/toop-connector-webapp:0.10.2-SNAPSHOT .
+        - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+        - docker push toop/toop-connector-webapp:0.10.2-SNAPSHOT
         - bash <(curl -s https://codecov.io/bash)
     - stage: test
       jdk: openjdk11
