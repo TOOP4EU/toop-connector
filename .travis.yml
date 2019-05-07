@@ -41,6 +41,8 @@ jobs:
         - mvn test -B -P coverage sonar:sonar
       after_success:
         - mvn deploy --settings travis-settings.xml -DskipTests=true -B -P travis-deploy
+        - docker pull toop/tomcat-jdk-image:1
+        - docker build --build-arg TOOP_CONNECTOR_VERSION=$version -t toop/toop-connector-webapp:$version .
         - bash <(curl -s https://codecov.io/bash)
     - stage: test
       jdk: openjdk11

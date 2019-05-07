@@ -219,13 +219,15 @@ public final class EBMSUtils {
         {
           final IMicroElement eFrom = ePartyInfo.appendElement(NS_EBMS, "From");
           eFrom.appendElement(NS_EBMS, "PartyId")
-              // .setAttribute ("type", "urn:oasis:names:tc:ebcore:partyid-type:unregistered")
+              .setAttribute ("type", "urn:oasis:names:tc:ebcore:partyid-type:unregistered")
               .appendText(TCConfig.getMEMAS4TcPartyid());
           eFrom.appendElement(NS_EBMS, "Role").appendText(MEMConstants.MEM_PARTY_ROLE);
         }
         {
           final IMicroElement eTo = ePartyInfo.appendElement(NS_EBMS, "To");
-          eTo.appendElement(NS_EBMS, "PartyId").appendText(TCConfig.getMEMAS4GwPartyID());
+          eTo.appendElement(NS_EBMS, "PartyId")
+              .setAttribute ("type", "urn:oasis:names:tc:ebcore:partyid-type:unregistered")
+              .appendText(TCConfig.getMEMAS4GwPartyID());
           eTo.appendElement(NS_EBMS, "Role").appendText(MEMConstants.GW_PARTY_ROLE);
         }
       }
@@ -247,6 +249,8 @@ public final class EBMSUtils {
         eMessageProperties.appendChild(_property("ToPartyId", metadata.toPartyId));
         eMessageProperties.appendChild(_property("ToPartyIdType", metadata.toPartyIdType));
         eMessageProperties.appendChild(_property("ToPartyRole", metadata.toPartyRole));
+        eMessageProperties.appendChild(_property("originalSender", "sender"));
+        eMessageProperties.appendChild(_property("finalRecipient", "receiver"));
         // NOTE: ToPartyCertificate is the DER+BASE64 encoded X509 certificate.
         // First decode as byte array, then parse it using
         // CertificateFactory.getInstance("X509", "BC")

@@ -1,12 +1,12 @@
 /**
  * Copyright (C) 2018-2019 toop.eu
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *         http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -60,6 +60,8 @@ public class InternalNotificationHandler {
   protected void handleNotification(final Notification notification) {
     Wrapper<Notification> carrier;
 
+
+    LOG.info("Received a notification " + notification.getMessageID() + "\n\t" + notification.getRefToMessageID());
     //check the message quee and see if the new object is already there
     synchronized (messageQueue) {
       final String submitMessageID = notification.getRefToMessageID();
@@ -93,17 +95,17 @@ public class InternalNotificationHandler {
 
     Wrapper<Notification> carrier = null;
 
-    if (LOG.isDebugEnabled ())
-    LOG.debug("Wait for a " + targetTypeName + " with a messageID: " + submitMessageID);
+    if (LOG.isDebugEnabled())
+      LOG.debug("Wait for a " + targetTypeName + " with a messageID: " + submitMessageID);
 
     synchronized (messageQueue) {
       if (messageQueue.containsKey(submitMessageID)) {
-        if (LOG.isDebugEnabled ())
+        if (LOG.isDebugEnabled())
           LOG.debug("we already have a " + targetTypeName + " message for " + submitMessageID);
         carrier = messageQueue.remove(submitMessageID);
       } else {
         //we don't have a carrier yet. Create one
-        if (LOG.isDebugEnabled ())
+        if (LOG.isDebugEnabled())
           LOG.debug("We don't have a " + targetTypeName + " waiter for " + submitMessageID + ". Create a waiter for it");
 
         carrier = new Wrapper<>();
@@ -118,9 +120,9 @@ public class InternalNotificationHandler {
         try {
           carrier.wait(timeout);
         } catch (final InterruptedException e) {
-          if (LOG.isWarnEnabled ())
+          if (LOG.isWarnEnabled())
             LOG.warn("Wait for message " + submitMessageID + " was interrupted.");
-          Thread.currentThread ().interrupt ();
+          Thread.currentThread().interrupt();
           throw new MEException("Wait for message " + submitMessageID + " was interrupted.", e);
         }
       }
@@ -143,8 +145,8 @@ public class InternalNotificationHandler {
       final ArrayList<String> trash = new ArrayList<>();
 
       for (final Map.Entry<String, Wrapper<Notification>> entry : messageQueue.entrySet()) {
-        final String messageID = entry.getKey ();
-        final Wrapper<Notification> carrier =entry.getValue ();
+        final String messageID = entry.getKey();
+        final Wrapper<Notification> carrier = entry.getValue();
         if (carrier != null && carrier.get() != null && carrier.get().isExpired(currentTime)) {
           trash.add(messageID);
         }
