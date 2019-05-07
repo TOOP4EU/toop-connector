@@ -1,61 +1,55 @@
 dist: xenial
 sudo: required
 language: java
-
 env:
   global:
-    - SONATYPE_USERNAME=ph@phloc.com
-    - secure: "yTKGeg0/BNIJzE7UJm7sNvSnvHBcf2wKo/lwvFrQbKrKCBMP92mD68R7Clf8ckt76g+J+TGHoW0DuxlRS8xBpuMhHW7ocG50R+YynTZVWJfhOwLvaGfzZJPXpJANToouT9NqLeDp2TzUpm4X+A5s7
-nxLk9JblGU9POMAWklXCw6+3lb1K4Hf31CR2HRRV5oi2GokMFBQKNR2fcDHg2e9cheV/c3NLmn936e858HRlSq9IOQR8qlM8UsB+Qci6sQ67MHkvGflLwcDnH5FxvsK9CsdEJUu5asycsgLdm4O/RJJ/1zgPz0RI
-21dtsHVeTu3eBYgtbvdYmyDu2/PNxnko4OUkB8AD4hmWZLgeOn/W7A9wNbA1aC650zQR5mCS6DgLs8b7RTSKTzw1HnItuINKOIsPmWeQSDmjt66dWe9tETR5CTiJ2/YVbmvmCXRS6HN8gkevGm5P/JAjP9vjBdcm
-/AQ+MsnxjxzNictJCyjbzfWx9mczDIv925bFiKidG9AaAiBdpaoNisB/SeiioeSH25dNt2FUcSdlYjianmcaTtoidHDO4QLzVsy6puJSt0Poauln1/wivvlRxVA4AQlxZuSD6QuYQt/LaJ6J6mTlo6p3Hn9tcfnI
-iDFdPKTsMVS9Rx5AzdfLy7/z1sZEayGFmXqlGwKOwyRk7mkIGubfxM="
-
+  - SONATYPE_USERNAME=ph@phloc.com
+  - secure: yTKGeg0/BNIJzE7UJm7sNvSnvHBcf2wKo/lwvFrQbKrKCBMP92mD68R7Clf8ckt76g+J+TGHoW0DuxlRS8xBpuMhHW7ocG50R+YynTZVWJfhOwLvaGfzZJPXpJANToouT9NqLeDp2TzUpm4X+A5s7
+      nxLk9JblGU9POMAWklXCw6+3lb1K4Hf31CR2HRRV5oi2GokMFBQKNR2fcDHg2e9cheV/c3NLmn936e858HRlSq9IOQR8qlM8UsB+Qci6sQ67MHkvGflLwcDnH5FxvsK9CsdEJUu5asycsgLdm4O/RJJ/1zgPz0RI
+      21dtsHVeTu3eBYgtbvdYmyDu2/PNxnko4OUkB8AD4hmWZLgeOn/W7A9wNbA1aC650zQR5mCS6DgLs8b7RTSKTzw1HnItuINKOIsPmWeQSDmjt66dWe9tETR5CTiJ2/YVbmvmCXRS6HN8gkevGm5P/JAjP9vjBdcm
+      /AQ+MsnxjxzNictJCyjbzfWx9mczDIv925bFiKidG9AaAiBdpaoNisB/SeiioeSH25dNt2FUcSdlYjianmcaTtoidHDO4QLzVsy6puJSt0Poauln1/wivvlRxVA4AQlxZuSD6QuYQt/LaJ6J6mTlo6p3Hn9tcfnI
+      iDFdPKTsMVS9Rx5AzdfLy7/z1sZEayGFmXqlGwKOwyRk7mkIGubfxM=
+  - DOCKER_USERNAME=toop4eu
 addons:
   sonarcloud:
-    organization: "toop4eu"
+    organization: toop4eu
     token:
-      secure: "fOcK+E1V/Lw4Dln7Mjoy7+YQmXJPz0vrl/6xAcBHtxtZY833Wv6KORXjl9PLGQTFam6oIXeuND95iU75yXmwP+fuDfRCasvKL1UDIn0kl5HbOTudGBTC32OmC7/XaXxZAjNO7Fcrra/O3jjBCLf2N
-22sOHFJxdRlhkUOq+Mgm9pSKWAsPtQdEL9iGKKi9KIiG6wCHUeN/kR514aqcGevj5nEnMPcVZNUOd4hDDEia3ANwqcOqqtCcSozZN93g8Qq6/t6y0qtsW7MlJ27DA0TrrPBE9+BDnSs1fKot+p5Fh7cZqHWbl4Jo
-EmXu5Mg39p2fYQvUM0EoPAWer02ZaMUpQ6CaVYd2ecGqWo08l3gKG9LlhEGjBCJidIP+rd2b1Q1qJ/8ATKn3gI8wdBOY75N4/q1QNhh7b+IoVbTCLbZbTbHarOOoq7ZfkwYpJIJFIMFjH6QRPnUcwMgEVsTJH/yH
-TjcAuXimpxV5y/3BTA3HgrgqGPAVbFbSkhzEudgUCf9MBO1ZQn02wQdDG+Rtuklj6o+uvzaxyDgqZv7eb6eBfFyHtjWpdkTJ+mkS3HWQ6x3ZQui+a3WMeoHPfH3bXGZ+bSwboSBmUTm5VBBgsiqFUhsyiv6vu66j
-6SOSX+IUO59jgngs2AzCBRWdlqVPSk1vVH/qBe8Fxv7qkaABH0Kztc="
-   
+      secure: fOcK+E1V/Lw4Dln7Mjoy7+YQmXJPz0vrl/6xAcBHtxtZY833Wv6KORXjl9PLGQTFam6oIXeuND95iU75yXmwP+fuDfRCasvKL1UDIn0kl5HbOTudGBTC32OmC7/XaXxZAjNO7Fcrra/O3jjBCLf2N
+        22sOHFJxdRlhkUOq+Mgm9pSKWAsPtQdEL9iGKKi9KIiG6wCHUeN/kR514aqcGevj5nEnMPcVZNUOd4hDDEia3ANwqcOqqtCcSozZN93g8Qq6/t6y0qtsW7MlJ27DA0TrrPBE9+BDnSs1fKot+p5Fh7cZqHWbl4Jo
+        EmXu5Mg39p2fYQvUM0EoPAWer02ZaMUpQ6CaVYd2ecGqWo08l3gKG9LlhEGjBCJidIP+rd2b1Q1qJ/8ATKn3gI8wdBOY75N4/q1QNhh7b+IoVbTCLbZbTbHarOOoq7ZfkwYpJIJFIMFjH6QRPnUcwMgEVsTJH/yH
+        TjcAuXimpxV5y/3BTA3HgrgqGPAVbFbSkhzEudgUCf9MBO1ZQn02wQdDG+Rtuklj6o+uvzaxyDgqZv7eb6eBfFyHtjWpdkTJ+mkS3HWQ6x3ZQui+a3WMeoHPfH3bXGZ+bSwboSBmUTm5VBBgsiqFUhsyiv6vu66j
+        6SOSX+IUO59jgngs2AzCBRWdlqVPSk1vVH/qBe8Fxv7qkaABH0Kztc=
 install:
-#  - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V -U -P jdeps
-  - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V -U
-
+- mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V -U
 cache:
   directories:
-    - $HOME/.m2
-
+  - "$HOME/.m2"
 branches:
   only:
-    - master
-
+  - master
 jobs:
   include:
-    - stage: test
-      jdk: openjdk8
-      script:
-        - mvn test -B -P coverage sonar:sonar
-      after_success:
-        - mvn deploy --settings travis-settings.xml -DskipTests=true -B -P travis-deploy
-        - docker pull toop/tomcat-jdk-image:1
-        - docker build --build-arg TOOP_CONNECTOR_VERSION=0.10.2-SNAPSHOT -t toop/toop-connector-webapp:0.10.2-SNAPSHOT .
-        - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-        - docker push toop/toop-connector-webapp:0.10.2-SNAPSHOT
-        - bash <(curl -s https://codecov.io/bash)
-    - stage: test
-      jdk: openjdk11
-      script:
-        - mvn test -B
-    - stage: test
-      jdk: oraclejdk11
-      script:
-        - mvn test -B
-    - stage: test
-      jdk: openjdk12
-      script:
-        - mvn test -B
-  
+  - stage: test
+    jdk: openjdk8
+    script:
+    - mvn test -B -P coverage sonar:sonar
+    after_success:
+    - mvn deploy --settings travis-settings.xml -DskipTests=true -B -P travis-deploy
+    - docker pull toop/tomcat-jdk-image:1
+    - docker build --build-arg TOOP_CONNECTOR_VERSION=0.10.2-SNAPSHOT -t toop/toop-connector-webapp:0.10.2-SNAPSHOT
+      .
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+    - docker push toop/toop-connector-webapp:0.10.2-SNAPSHOT
+    - bash <(curl -s https://codecov.io/bash)
+  - stage: test
+    jdk: openjdk11
+    script:
+    - mvn test -B
+  - stage: test
+    jdk: oraclejdk11
+    script:
+    - mvn test -B
+  - stage: test
+    jdk: openjdk12
+    script:
+    - mvn test -B
