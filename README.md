@@ -2,7 +2,7 @@
 
 The joint message process for both sides of the process
 
-Latest release: **0.10.1** (2019-03-29)
+Latest release: **0.10.2** (2019-05-13)
 
 # How it works
 
@@ -29,6 +29,11 @@ Latest release: **0.10.1** (2019-03-29)
 
 # News and noteworthy
 
+* v0.10.2 - 2019-05-13
+    * Fixed an error that semantic mapping on DP side was not performed, if the source concept was of type "TC"
+    * Added Java 12 support
+    * Improved debug logging
+    * Added support for handling attachments in TOOP request and response (for 'Document' request and response) 
 * v0.10.1 - 2019-03-29
     * Fixed an error that prevented semantic mapping from being invoked
     * Fixed potential startup time delays because of long random number initialization time on Linux
