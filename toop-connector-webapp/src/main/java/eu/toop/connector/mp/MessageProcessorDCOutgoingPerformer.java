@@ -18,6 +18,7 @@ package eu.toop.connector.mp;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Locale;
+import java.util.function.Consumer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -129,6 +130,22 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
   private static TDEErrorType _createGenericError (@Nonnull final String sLogPrefix, @Nonnull final Throwable t)
   {
     return _createError (sLogPrefix, EToopErrorCategory.TECHNICAL_ERROR, EToopErrorCode.GEN, t.getMessage (), t);
+  }
+
+  private static void _iterateNonTCConcepts (@Nonnull final TDETOOPRequestType aRequest,
+                                             @Nonnull final Consumer <TDEConceptRequestType> aConsumer)
+  {
+    for (final TDEDataElementRequestType aDER1 : aRequest.getDataElementRequest ())
+    {
+      final TDEConceptRequestType aConcept1 = aDER1.getConceptRequest ();
+
+      // Only handle TC type codes
+      if (!aConcept1.getSemanticMappingExecutionIndicator ().isValue () &&
+          !EConceptType.TC.getID ().equals (aConcept1.getConceptTypeCode ().getValue ()))
+      {
+        aConsumer.accept (aConcept1);
+      }
+    }
   }
 
   public void runAsync (@Nonnull final ToopRequestWithAttachments140 aRequestWA)
@@ -247,17 +264,7 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
         {
           // Map to TOOP concepts
           final SMMClient aClient = new SMMClient ();
-          for (final TDEDataElementRequestType aDER : aRequest.getDataElementRequest ())
-          {
-            final TDEConceptRequestType aConcept1 = aDER.getConceptRequest ();
-
-            // Only if not yet mapped
-            if (!aConcept1.getSemanticMappingExecutionIndicator ().isValue () &&
-                !EConceptType.TC.getID ().equals (aConcept1.getConceptTypeCode ().getValue ()))
-            {
-              aClient.addConceptToBeMapped (ConceptValue.create (aConcept1));
-            }
-          }
+          _iterateNonTCConcepts (aRequest, c -> aClient.addConceptToBeMapped (ConceptValue.create (c)));
 
           if (LOGGER.isDebugEnabled ())
             LOGGER.debug (sLogPrefix +
@@ -323,28 +330,25 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
             if (LOGGER.isDebugEnabled ())
               LOGGER.debug (sLogPrefix + "Starting to add mapped SMM concepts to the TOOP request");
 
-            // add all the mapped values in the request
-            for (final TDEDataElementRequestType aDER : aRequest.getDataElementRequest ())
-            {
-              final TDEConceptRequestType aSrcConcept = aDER.getConceptRequest ();
-              if (!aSrcConcept.getSemanticMappingExecutionIndicator ().isValue ())
-              {
-                // Now the source was mapped
-                aSrcConcept.getSemanticMappingExecutionIndicator ().setValue (true);
+            final IMappedValueList aFinalMappedValues = aMappedValues;
 
-                final ConceptValue aSrcCV = ConceptValue.create (aSrcConcept);
-                for (final MappedValue aMV : aMappedValues.getAllBySource (x -> x.equals (aSrcCV)))
-                {
-                  final TDEConceptRequestType aToopConcept = new TDEConceptRequestType ();
-                  aToopConcept.setConceptTypeCode (ToopXSDHelper140.createCode (EConceptType.TC.getID ()));
-                  aToopConcept.setSemanticMappingExecutionIndicator (ToopXSDHelper140.createIndicator (false));
-                  aToopConcept.setConceptNamespace (ToopXSDHelper140.createIdentifier (aMV.getDestination ()
-                                                                                          .getNamespace ()));
-                  aToopConcept.setConceptName (ToopXSDHelper140.createText (aMV.getDestination ().getValue ()));
-                  aSrcConcept.addConceptRequest (aToopConcept);
-                }
+            // add all the mapped values in the request
+            _iterateNonTCConcepts (aRequest, c -> {
+              // Now the source was mapped
+              c.getSemanticMappingExecutionIndicator ().setValue (true);
+
+              final ConceptValue aSrcCV = ConceptValue.create (c);
+              for (final MappedValue aMV : aFinalMappedValues.getAllBySource (x -> x.equals (aSrcCV)))
+              {
+                final TDEConceptRequestType aToopConcept = new TDEConceptRequestType ();
+                aToopConcept.setConceptTypeCode (ToopXSDHelper140.createCode (EConceptType.TC.getID ()));
+                aToopConcept.setSemanticMappingExecutionIndicator (ToopXSDHelper140.createIndicator (false));
+                aToopConcept.setConceptNamespace (ToopXSDHelper140.createIdentifier (aMV.getDestination ()
+                                                                                        .getNamespace ()));
+                aToopConcept.setConceptName (ToopXSDHelper140.createText (aMV.getDestination ().getValue ()));
+                c.addConceptRequest (aToopConcept);
               }
-            }
+            });
           }
         }
 

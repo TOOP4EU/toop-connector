@@ -60,6 +60,7 @@ import eu.toop.commons.jaxb.ToopXSDHelper140;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.http.TCHttpClientFactory;
 import eu.toop.connector.smmclient.IMappedValueList;
+import eu.toop.connector.smmclient.IUnmappableCallback;
 import eu.toop.connector.smmclient.MappedValue;
 import eu.toop.connector.smmclient.SMMClient;
 import eu.toop.kafkaclient.ToopKafkaClient;
@@ -178,26 +179,24 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
                       " concepts need to be mapped");
 
       // Main mapping
+      final IUnmappableCallback aUnmappableCallback = (sLogPrefix1, sSourceNamespace, sSourceValue, sDestNamespace) -> {
+        final String sErrorMsg = "Found no mapping for '" +
+                                 sSourceNamespace +
+                                 '#' +
+                                 sSourceValue +
+                                 "' to destination namespace '" +
+                                 sDestNamespace +
+                                 "'";
+        aErrors.add (_createError (sLogPrefix1,
+                                   EToopErrorCategory.SEMANTIC_MAPPING,
+                                   EToopErrorCode.SM_002,
+                                   sErrorMsg,
+                                   null));
+      };
       final IMappedValueList aMappedValues = aClient.performMapping (sLogPrefix,
                                                                      sDestinationMappingURI,
                                                                      MPWebAppConfig.getSMMConceptProvider (),
-                                                                     (sLogPrefix1,
-                                                                      sSourceNamespace,
-                                                                      sSourceValue,
-                                                                      sDestNamespace) -> {
-                                                                       final String sErrorMsg = "Found no mapping for '" +
-                                                                                                sSourceNamespace +
-                                                                                                '#' +
-                                                                                                sSourceValue +
-                                                                                                "' to destination namespace '" +
-                                                                                                sDestNamespace +
-                                                                                                "'";
-                                                                       aErrors.add (_createError (sLogPrefix1,
-                                                                                                  EToopErrorCategory.SEMANTIC_MAPPING,
-                                                                                                  EToopErrorCode.SM_002,
-                                                                                                  sErrorMsg,
-                                                                                                  null));
-                                                                     });
+                                                                     aUnmappableCallback);
 
       // add all the mapped values in the request
       _iterateTCConcepts (aRequest, c -> {
