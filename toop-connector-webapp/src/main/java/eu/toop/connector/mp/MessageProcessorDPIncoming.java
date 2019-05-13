@@ -21,6 +21,9 @@ import java.util.concurrent.ThreadFactory;
 
 import javax.annotation.Nonnull;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.UsedViaReflection;
 import com.helger.commons.concurrent.BasicThreadFactory;
@@ -43,6 +46,7 @@ import eu.toop.kafkaclient.ToopKafkaClient;
  */
 public final class MessageProcessorDPIncoming extends AbstractGlobalWebSingleton
 {
+  private static final Logger LOGGER = LoggerFactory.getLogger (MessageProcessorDPIncoming.class);
   // Just to have custom named threads....
   private static final ThreadFactory s_aThreadFactory = new BasicThreadFactory.Builder ().setNamingPattern ("MP-DP-In-%d")
                                                                                          .setDaemon (true)
@@ -91,6 +95,10 @@ public final class MessageProcessorDPIncoming extends AbstractGlobalWebSingleton
   public ESuccess enqueue (@Nonnull final ToopRequestWithAttachments140 aMsg)
   {
     ValueEnforcer.notNull (aMsg, "Msg");
+
+    if (LOGGER.isDebugEnabled ())
+      LOGGER.debug ("Enqueueing new object for step 2/4: " + aMsg);
+
     try
     {
       m_aCollector.queueObject (aMsg);
@@ -99,7 +107,7 @@ public final class MessageProcessorDPIncoming extends AbstractGlobalWebSingleton
     catch (final IllegalStateException ex)
     {
       // Queue is stopped!
-      ToopKafkaClient.send (EErrorLevel.WARN, () -> "Cannot enqueue " + aMsg, ex);
+      ToopKafkaClient.send (EErrorLevel.ERROR, () -> "Cannot enqueue " + aMsg, ex);
       return ESuccess.FAILURE;
     }
   }

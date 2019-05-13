@@ -79,7 +79,7 @@ public class SMMClient
   }
 
   @Nonnegative
-  private int _getTotalCount ()
+  public int getTotalCountConceptsToBeMapped ()
   {
     int ret = 0;
     for (final ICommonsList <?> aList : m_aSrcMap.values ())
@@ -122,7 +122,7 @@ public class SMMClient
     ToopKafkaClient.send (EErrorLevel.INFO,
                           () -> sLogPrefix +
                                 "SMM client mapping " +
-                                _getTotalCount () +
+                                getTotalCountConceptsToBeMapped () +
                                 " concept(s) from " +
                                 m_aSrcMap.size () +
                                 " source namespace(s) to '" +

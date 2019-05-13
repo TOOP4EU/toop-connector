@@ -146,9 +146,15 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
     final String sLogPrefix = "[" + sRequestID + "] ";
     final ICommonsList <TDEErrorType> aErrors = new CommonsArrayList <> ();
 
+    ToopKafkaClient.send (EErrorLevel.INFO, () -> "Created new unique request ID [" + sRequestID + "]");
+    ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "Received DC Request (1/4)");
+
     // Schematron validation
     if (TCConfig.isMPSchematronValidationEnabled ())
     {
+      if (LOGGER.isDebugEnabled ())
+        LOGGER.debug (sLogPrefix + "Performing Schematron validation on incoming TOOP request");
+
       final ErrorList aErrorList = new ErrorList ();
       // XML creation
       final Document aDoc = ToopWriter.request140 ()
@@ -179,6 +185,8 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
                                      null));
         }
       }
+      if (LOGGER.isDebugEnabled ())
+        LOGGER.debug (sLogPrefix + "Finished Schematron validation with the following results: " + aErrorList);
     }
     else
     {
@@ -222,6 +230,9 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
       }
       else
       {
+        if (LOGGER.isDebugEnabled ())
+          LOGGER.debug (sLogPrefix + "Selected document type: " + eDocType);
+
         // Don't do this:
         // DataRequestIdentifier: "A reference to the universally unique
         // identifier of the corresponding Toop data request."
@@ -232,23 +243,27 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
           aRequest.setDataRequestIdentifier (ToopXSDHelper140.createIdentifier (sRequestID));
         }
 
-        ToopKafkaClient.send (EErrorLevel.INFO, () -> "Created new unique request ID [" + sRequestID + "]");
-        ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "Received DC Request (1/4)");
-
         // 1. invoke SMM
         {
           // Map to TOOP concepts
           final SMMClient aClient = new SMMClient ();
           for (final TDEDataElementRequestType aDER : aRequest.getDataElementRequest ())
           {
-            final TDEConceptRequestType aSrcConcept = aDER.getConceptRequest ();
+            final TDEConceptRequestType aConcept1 = aDER.getConceptRequest ();
 
             // Only if not yet mapped
-            if (!aSrcConcept.getSemanticMappingExecutionIndicator ().isValue ())
+            if (!aConcept1.getSemanticMappingExecutionIndicator ().isValue () &&
+                !EConceptType.TC.getID ().equals (aConcept1.getConceptTypeCode ().getValue ()))
             {
-              aClient.addConceptToBeMapped (ConceptValue.create (aSrcConcept));
+              aClient.addConceptToBeMapped (ConceptValue.create (aConcept1));
             }
           }
+
+          if (LOGGER.isDebugEnabled ())
+            LOGGER.debug (sLogPrefix +
+                          "A total of " +
+                          aClient.getTotalCountConceptsToBeMapped () +
+                          " concepts need to be mapped");
 
           // Main mapping
           IMappedValueList aMappedValues = null;
@@ -305,6 +320,9 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
 
           if (aErrors.isEmpty ())
           {
+            if (LOGGER.isDebugEnabled ())
+              LOGGER.debug (sLogPrefix + "Starting to add mapped SMM concepts to the TOOP request");
+
             // add all the mapped values in the request
             for (final TDEDataElementRequestType aDER : aRequest.getDataElementRequest ())
             {
@@ -338,9 +356,14 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
           final String sTransportProfileID = TCConfig.getMEMProtocol ().getTransportProfileID ();
 
           final IdentifierType aExplicitQueryAddress = aRoutingInfo.getDataProviderElectronicAddressIdentifier ();
-          final boolean bIsSingleParticipant = aExplicitQueryAddress != null;
-          if (bIsSingleParticipant)
+          final boolean bIsExplicitParticipant = aExplicitQueryAddress != null;
+          if (bIsExplicitParticipant)
           {
+            if (LOGGER.isDebugEnabled ())
+              LOGGER.debug (sLogPrefix +
+                            "Starting SMP lookup for an explicit participant: " +
+                            aExplicitQueryAddress.toString ());
+
             // Query one participant only
             final IParticipantIdentifier aRecipientID = aIF.createParticipantIdentifier (aExplicitQueryAddress.getSchemeID (),
                                                                                          aExplicitQueryAddress.getValue ());
@@ -366,6 +389,9 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
           }
           else
           {
+            if (LOGGER.isDebugEnabled ())
+              LOGGER.debug (sLogPrefix + "Starting SMP lookup with country code and document type");
+
             // Find destination country code
             final String sDestinationCountryCode = aRoutingInfo.getDataProviderCountryCode ().getValue ();
             if (StringHelper.hasNoText (sDestinationCountryCode))
@@ -408,7 +434,7 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
                                         "R2D2 found " +
                                         nEnpointCount +
                                         " endpoints for " +
-                                        (bIsSingleParticipant ? "single participant" : "multi participant") +
+                                        (bIsExplicitParticipant ? "single participant" : "multi participant") +
                                         " lookup");
             if (LOGGER.isDebugEnabled ())
               LOGGER.debug (sLogPrefix + "Endpoint details: " + aEndpoints);
@@ -428,6 +454,9 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
 
         if (aErrors.isEmpty ())
         {
+          if (LOGGER.isDebugEnabled ())
+            LOGGER.debug (sLogPrefix + "Started creating TOOP request ASIC container");
+
           // 3. start message exchange to DC
           // Combine MS data and TOOP data into a single ASiC message
           // Do this only once and not for every endpoint
@@ -456,6 +485,9 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
             }
 
             aPayloadBytes = ByteArrayWrapper.create (aBAOS, false);
+
+            if (LOGGER.isDebugEnabled ())
+              LOGGER.debug (sLogPrefix + "Created TOOP request ASIC container has " + aPayloadBytes.size () + " bytes");
           }
 
           if (aErrors.isEmpty ())
@@ -475,7 +507,7 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
                                           aEP.getTransportProtocol () +
                                           "'");
 
-              // Main message exchange
+              // Message exchange information
               final MERoutingInformation aMERoutingInfo = new MERoutingInformation (aSenderID,
                                                                                     aEP.getParticipantID (),
                                                                                     aDocTypeID,
@@ -485,7 +517,11 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
                                                                                     aEP.getCertificate ());
               try
               {
+                // Main message exchange
                 MessageExchangeManager.getConfiguredImplementation ().sendDCOutgoing (aMERoutingInfo, aMEMessage);
+
+                if (LOGGER.isDebugEnabled ())
+                  LOGGER.debug (sLogPrefix + "sendDCOutgoing returned without exception");
               }
               catch (final MEException ex)
               {
@@ -523,5 +559,8 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
       // Put the error in queue 4/4
       MessageProcessorDCIncoming.getInstance ().enqueue (aResponse);
     }
+
+    if (LOGGER.isDebugEnabled ())
+      LOGGER.debug (sLogPrefix + "End of processing");
   }
 }

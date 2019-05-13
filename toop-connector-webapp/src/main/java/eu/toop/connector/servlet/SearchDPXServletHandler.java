@@ -167,7 +167,7 @@ final class SearchDPXServletHandler implements IXServletSimpleHandler
         // Build base URL and fetch all records per HTTP request
         final SimpleURL aBaseURL = new SimpleURL (TCConfig.getR2D2DirectoryBaseUrl () + "/search/1.0/xml");
         // More than 1000 is not allowed
-        aBaseURL.add ("rpc", 1000);
+        aBaseURL.add ("rpc", 1_000);
         // Constant defined in CCTF-103
         aBaseURL.add ("identifierScheme", "DataSubjectIdentifierScheme");
         // Parameters to this servlet
@@ -175,7 +175,8 @@ final class SearchDPXServletHandler implements IXServletSimpleHandler
         if (aInputParams.hasDocumentTypeID ())
           aBaseURL.add ("doctype", aInputParams.getDocumentTypeID ().getURIEncoded ());
 
-        LOGGER.info ("Querying " + aBaseURL.getAsStringWithEncodedParameters ());
+        if (LOGGER.isInfoEnabled ())
+          LOGGER.info ("Querying " + aBaseURL.getAsStringWithEncodedParameters ());
 
         final HttpGet aGet = new HttpGet (aBaseURL.getAsURI ());
         final ResponseHandlerMicroDom aRH = new ResponseHandlerMicroDom ();

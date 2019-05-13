@@ -97,5 +97,8 @@ final class TCStatusXServletHandler implements IXServletSimpleHandler
     aUnifiedResponse.setMimeType (new MimeType (CMimeType.APPLICATION_JSON).addParameter (CMimeType.PARAMETER_NAME_CHARSET,
                                                                                           CHARSET.name ()));
     aUnifiedResponse.setContentAndCharset (aStatusData.getAsJsonString (), CHARSET);
+
+    if (LOGGER.isTraceEnabled ())
+      LOGGER.trace ("Return status JSON: " + aStatusData.getAsJsonString ());
   }
 }

@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 import com.helger.asic.AsicUtils;
-import com.helger.asic.SignatureHelper;
 import com.helger.commons.collection.impl.CommonsArrayList;
 import com.helger.commons.collection.impl.ICommonsList;
 import com.helger.commons.concurrent.collector.IConcurrentPerformer;
@@ -130,38 +129,32 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
     // Forward to the DP at /to-dp interface
     final TCHttpClientFactory aHCFactory = new TCHttpClientFactory ();
 
-    try (final HttpClientManager aMgr = new HttpClientManager (aHCFactory))
+    try (final HttpClientManager aMgr = new HttpClientManager (aHCFactory);
+        final NonBlockingByteArrayOutputStream aBAOS = new NonBlockingByteArrayOutputStream ())
     {
-      final SignatureHelper aSH = new SignatureHelper (TCConfig.getKeystoreType (),
-                                                       TCConfig.getKeystorePath (),
-                                                       TCConfig.getKeystorePassword (),
-                                                       TCConfig.getKeystoreKeyAlias (),
-                                                       TCConfig.getKeystoreKeyPassword ());
+      // Convert read to write attachments
+      final ICommonsList <AsicWriteEntry> aWriteAttachments = new CommonsArrayList <> ();
+      for (final AsicReadEntry aEntry : aResponseWA.attachments ())
+        aWriteAttachments.add (AsicWriteEntry.create (aEntry));
 
-      try (final NonBlockingByteArrayOutputStream aBAOS = new NonBlockingByteArrayOutputStream ())
+      ToopMessageBuilder140.createResponseMessageAsic (aResponseWA.getResponse (),
+                                                       aBAOS,
+                                                       MPWebAppConfig.getSignatureHelper (),
+                                                       aWriteAttachments);
+
+      // Send to DP (see ToDPServlet in toop-interface)
+      final String sDestinationUrl = TCConfig.getMPToopInterfaceDPUrl ();
+
+      ToopKafkaClient.send (EErrorLevel.INFO, () -> "Start posting signed ASiC response to '" + sDestinationUrl + "'");
+
+      final HttpPost aHttpPost = new HttpPost (sDestinationUrl);
+      aHttpPost.setEntity (new InputStreamEntity (aBAOS.getAsInputStream ()));
+      try (final CloseableHttpResponse aHttpResponse = aMgr.execute (aHttpPost))
       {
-        // Convert read to write attachments
-        final ICommonsList <AsicWriteEntry> aWriteAttachments = new CommonsArrayList <> ();
-        for (final AsicReadEntry aEntry : aResponseWA.attachments ())
-          aWriteAttachments.add (AsicWriteEntry.create (aEntry));
-
-        ToopMessageBuilder140.createResponseMessageAsic (aResponseWA.getResponse (), aBAOS, aSH, aWriteAttachments);
-
-        // Send to DP (see ToDPServlet in toop-interface)
-        final String sDestinationUrl = TCConfig.getMPToopInterfaceDPUrl ();
-
-        ToopKafkaClient.send (EErrorLevel.INFO,
-                              () -> "Start posting signed ASiC response to '" + sDestinationUrl + "'");
-
-        final HttpPost aHttpPost = new HttpPost (sDestinationUrl);
-        aHttpPost.setEntity (new InputStreamEntity (aBAOS.getAsInputStream ()));
-        try (final CloseableHttpResponse aHttpResponse = aMgr.execute (aHttpPost))
-        {
-          EntityUtils.consume (aHttpResponse.getEntity ());
-        }
-
-        ToopKafkaClient.send (EErrorLevel.INFO, () -> "Done posting signed ASiC response to '" + sDestinationUrl + "'");
+        EntityUtils.consume (aHttpResponse.getEntity ());
       }
+
+      ToopKafkaClient.send (EErrorLevel.INFO, () -> "Done posting signed ASiC response to '" + sDestinationUrl + "'");
     }
   }
 
@@ -174,12 +167,17 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
                                                                             : "temp-tc3-id-" +
                                                                               GlobalIDFactory.getNewIntID ();
     final String sLogPrefix = "[" + sRequestID + "] ";
+
     ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "Received DP outgoing response (3/4)");
+
     final ICommonsList <TDEErrorType> aErrors = new CommonsArrayList <> ();
 
     // Schematron validation
     if (TCConfig.isMPSchematronValidationEnabled ())
     {
+      if (LOGGER.isDebugEnabled ())
+        LOGGER.debug (sLogPrefix + "Performing Schematron validation on incoming TOOP response");
+
       final ErrorList aErrorList = new ErrorList ();
       // XML creation
       final Document aDoc = ToopWriter.response140 ()
@@ -210,6 +208,9 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
                                      null));
         }
       }
+
+      if (LOGGER.isDebugEnabled ())
+        LOGGER.debug (sLogPrefix + "Finished Schematron validation with the following results: " + aErrorList);
     }
     else
     {
@@ -246,6 +247,11 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
                                                                                               .getSchemeID (),
                                                                                   aRoutingInfo.getProcessIdentifier ()
                                                                                               .getValue ());
+
+        if (LOGGER.isDebugEnabled ())
+          LOGGER.debug (sLogPrefix +
+                        "Starting SMP lookup for an source participant: " +
+                        aDCParticipantID.getURIEncoded ());
 
         ICommonsList <IR2D2Endpoint> aEndpoints;
         {
@@ -286,6 +292,9 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
 
         if (aErrors.isEmpty ())
         {
+          if (LOGGER.isDebugEnabled ())
+            LOGGER.debug (sLogPrefix + "Started creating TOOP response ASIC container");
+
           // Combine MS data and TOOP data into a single ASiC message
           // Do this only once and not for every endpoint
           ByteArrayWrapper aPayloadBytes = null;
@@ -321,6 +330,12 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
             }
 
             aPayloadBytes = ByteArrayWrapper.create (aBAOS, false);
+
+            if (LOGGER.isDebugEnabled ())
+              LOGGER.debug (sLogPrefix +
+                            "Created TOOP response ASIC container has " +
+                            aPayloadBytes.size () +
+                            " bytes");
           }
 
           if (aErrors.isEmpty ())
@@ -339,7 +354,7 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
                                           aEP.getTransportProtocol () +
                                           "'");
 
-              // Main message exchange
+              // Message exchange information
               final MERoutingInformation aMERoutingInfo = new MERoutingInformation (aDPParticipantID,
                                                                                     aEP.getParticipantID (),
                                                                                     aDocTypeID,
@@ -349,7 +364,11 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
                                                                                     aEP.getCertificate ());
               try
               {
+                // Main message exchange
                 MessageExchangeManager.getConfiguredImplementation ().sendDPOutgoing (aMERoutingInfo, aMEMessage);
+
+                if (LOGGER.isDebugEnabled ())
+                  LOGGER.debug (sLogPrefix + "sendDPOutgoing returned without exception");
               }
               catch (final MEException ex)
               {
@@ -365,8 +384,12 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
       }
     }
 
-    if (aErrors.isNotEmpty ())
+    final int nErrorCount = aErrors.size ();
+    if (nErrorCount > 0)
     {
+      ToopKafkaClient.send (EErrorLevel.INFO,
+                            () -> sLogPrefix + nErrorCount + " error(s) were found - posting errors back to DP.");
+
       // send back to DP including errors
       aResponse.getError ().addAll (aErrors);
       try
@@ -378,5 +401,8 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
         ToopKafkaClient.send (EErrorLevel.ERROR, () -> sLogPrefix + "Error sending response back to DP", ex);
       }
     }
+
+    if (LOGGER.isDebugEnabled ())
+      LOGGER.debug (sLogPrefix + "End of processing");
   }
 }

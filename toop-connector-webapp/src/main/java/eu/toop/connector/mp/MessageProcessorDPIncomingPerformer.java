@@ -17,6 +17,7 @@ package eu.toop.connector.mp;
 
 import java.io.IOException;
 import java.util.Locale;
+import java.util.function.Consumer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -25,8 +26,9 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.util.EntityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.helger.asic.SignatureHelper;
 import com.helger.commons.collection.impl.CommonsArrayList;
 import com.helger.commons.collection.impl.ICommonsList;
 import com.helger.commons.concurrent.collector.IConcurrentPerformer;
@@ -69,6 +71,8 @@ import eu.toop.kafkaclient.ToopKafkaClient;
  */
 final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer <ToopRequestWithAttachments140>
 {
+  private static final Logger LOGGER = LoggerFactory.getLogger (MessageProcessorDPIncomingPerformer.class);
+
   @Nonnull
   private static TDEErrorType _createError (@Nonnull final String sLogPrefix,
                                             @Nonnull final EToopErrorCategory eCategory,
@@ -98,31 +102,50 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
     // Forward to the DP at /to-dp interface
     final TCHttpClientFactory aHCFactory = new TCHttpClientFactory ();
 
-    try (final HttpClientManager aMgr = new HttpClientManager (aHCFactory))
+    try (final HttpClientManager aMgr = new HttpClientManager (aHCFactory);
+        final NonBlockingByteArrayOutputStream aBAOS = new NonBlockingByteArrayOutputStream ())
     {
-      final SignatureHelper aSH = new SignatureHelper (TCConfig.getKeystoreType (),
-                                                       TCConfig.getKeystorePath (),
-                                                       TCConfig.getKeystorePassword (),
-                                                       TCConfig.getKeystoreKeyAlias (),
-                                                       TCConfig.getKeystoreKeyPassword ());
+      ToopMessageBuilder140.createRequestMessageAsic (aRequest, aBAOS, MPWebAppConfig.getSignatureHelper ());
 
-      try (final NonBlockingByteArrayOutputStream aBAOS = new NonBlockingByteArrayOutputStream ())
+      // Send to DP (see ToDPServlet in toop-interface)
+      final String sDestinationUrl = TCConfig.getMPToopInterfaceDPUrl ();
+
+      ToopKafkaClient.send (EErrorLevel.INFO, () -> "Posting signed ASiC request to " + sDestinationUrl);
+
+      final HttpPost aHttpPost = new HttpPost (sDestinationUrl);
+      aHttpPost.setEntity (new InputStreamEntity (aBAOS.getAsInputStream ()));
+      try (final CloseableHttpResponse aHttpResponse = aMgr.execute (aHttpPost))
       {
-        ToopMessageBuilder140.createRequestMessageAsic (aRequest, aBAOS, aSH);
+        EntityUtils.consume (aHttpResponse.getEntity ());
+      }
 
-        // Send to DP (see ToDPServlet in toop-interface)
-        final String sDestinationUrl = TCConfig.getMPToopInterfaceDPUrl ();
+      ToopKafkaClient.send (EErrorLevel.INFO, () -> "Done posting signed ASiC request to " + sDestinationUrl);
+    }
+  }
 
-        ToopKafkaClient.send (EErrorLevel.INFO, () -> "Posting signed ASiC request to " + sDestinationUrl);
+  private static void _iterateTCConcepts (@Nonnull final TDETOOPRequestType aRequest,
+                                          @Nonnull final Consumer <TDEConceptRequestType> aConsumer)
+  {
+    for (final TDEDataElementRequestType aDER1 : aRequest.getDataElementRequest ())
+    {
+      final TDEConceptRequestType aConcept1 = aDER1.getConceptRequest ();
 
-        final HttpPost aHttpPost = new HttpPost (sDestinationUrl);
-        aHttpPost.setEntity (new InputStreamEntity (aBAOS.getAsInputStream ()));
-        try (final CloseableHttpResponse aHttpResponse = aMgr.execute (aHttpPost))
-        {
-          EntityUtils.consume (aHttpResponse.getEntity ());
-        }
-
-        ToopKafkaClient.send (EErrorLevel.INFO, () -> "Done posting signed ASiC request to " + sDestinationUrl);
+      // Only handle TC type codes
+      if (!aConcept1.getSemanticMappingExecutionIndicator ().isValue () &&
+          EConceptType.TC.getID ().equals (aConcept1.getConceptTypeCode ().getValue ()))
+      {
+        aConsumer.accept (aConcept1);
+      }
+      else
+      {
+        // Descend one level
+        for (final TDEConceptRequestType aConcept2 : aConcept1.getConceptRequest ())
+          // Only if not yet mapped
+          if (!aConcept2.getSemanticMappingExecutionIndicator ().isValue () &&
+              EConceptType.TC.getID ().equals (aConcept2.getConceptTypeCode ().getValue ()))
+          {
+            aConsumer.accept (aConcept2);
+          }
       }
     }
   }
@@ -146,20 +169,13 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
     if (StringHelper.hasText (sDestinationMappingURI))
     {
       final SMMClient aClient = new SMMClient ();
-      for (final TDEDataElementRequestType aDER : aRequest.getDataElementRequest ())
-      {
-        final TDEConceptRequestType aSrcConcept = aDER.getConceptRequest ();
-        // ignore all DC source concepts
-        if (aSrcConcept.getSemanticMappingExecutionIndicator ().isValue ())
-        {
-          for (final TDEConceptRequestType aToopConcept : aSrcConcept.getConceptRequest ())
-            // Only if not yet mapped
-            if (!aToopConcept.getSemanticMappingExecutionIndicator ().isValue ())
-            {
-              aClient.addConceptToBeMapped (ConceptValue.create (aToopConcept));
-            }
-        }
-      }
+      _iterateTCConcepts (aRequest, c -> aClient.addConceptToBeMapped (ConceptValue.create (c)));
+
+      if (LOGGER.isDebugEnabled ())
+        LOGGER.debug (sLogPrefix +
+                      "A total of " +
+                      aClient.getTotalCountConceptsToBeMapped () +
+                      " concepts need to be mapped");
 
       // Main mapping
       final IMappedValueList aMappedValues = aClient.performMapping (sLogPrefix,
@@ -184,32 +200,22 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
                                                                      });
 
       // add all the mapped values in the request
-      for (final TDEDataElementRequestType aDER : aRequest.getDataElementRequest ())
-      {
-        final TDEConceptRequestType aSrcConcept = aDER.getConceptRequest ();
-        if (aSrcConcept.getSemanticMappingExecutionIndicator ().isValue ())
-        {
-          for (final TDEConceptRequestType aToopConcept : aSrcConcept.getConceptRequest ())
-            // Only if not yet mapped
-            if (!aToopConcept.getSemanticMappingExecutionIndicator ().isValue ())
-            {
-              // Now the toop concept was mapped
-              aToopConcept.getSemanticMappingExecutionIndicator ().setValue (true);
+      _iterateTCConcepts (aRequest, c -> {
+        // Now the toop concept was mapped
+        c.getSemanticMappingExecutionIndicator ().setValue (true);
 
-              final ConceptValue aToopCV = ConceptValue.create (aToopConcept);
-              for (final MappedValue aMV : aMappedValues.getAllBySource (x -> x.equals (aToopCV)))
-              {
-                final TDEConceptRequestType aDstConcept = new TDEConceptRequestType ();
-                aDstConcept.setConceptTypeCode (ToopXSDHelper140.createCode (EConceptType.DP.getID ()));
-                aDstConcept.setSemanticMappingExecutionIndicator (ToopXSDHelper140.createIndicator (false));
-                aDstConcept.setConceptNamespace (ToopXSDHelper140.createIdentifier (aMV.getDestination ()
-                                                                                       .getNamespace ()));
-                aDstConcept.setConceptName (ToopXSDHelper140.createText (aMV.getDestination ().getValue ()));
-                aToopConcept.addConceptRequest (aDstConcept);
-              }
-            }
+        // Add all mapped values as child concepts
+        final ConceptValue aToopCV = ConceptValue.create (c);
+        for (final MappedValue aMV : aMappedValues.getAllBySource (x -> x.equals (aToopCV)))
+        {
+          final TDEConceptRequestType aDstConcept = new TDEConceptRequestType ();
+          aDstConcept.setConceptTypeCode (ToopXSDHelper140.createCode (EConceptType.DP.getID ()));
+          aDstConcept.setSemanticMappingExecutionIndicator (ToopXSDHelper140.createIndicator (false));
+          aDstConcept.setConceptNamespace (ToopXSDHelper140.createIdentifier (aMV.getDestination ().getNamespace ()));
+          aDstConcept.setConceptName (ToopXSDHelper140.createText (aMV.getDestination ().getValue ()));
+          c.addConceptRequest (aDstConcept);
         }
-      }
+      });
       ToopKafkaClient.send (EErrorLevel.INFO,
                             () -> sLogPrefix +
                                   "Finished mapping concepts to namespace '" +
@@ -224,6 +230,9 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
 
     if (aErrors.isEmpty ())
     {
+      if (LOGGER.isDebugEnabled ())
+        LOGGER.debug (sLogPrefix + "No errors found. Now forwarding to the DP");
+
       try
       {
         sendTo_to_dp (aRequest);
@@ -254,5 +263,8 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
       // Put the error in queue 3/4
       MessageProcessorDPOutgoing.getInstance ().enqueue (aResponse);
     }
+
+    if (LOGGER.isDebugEnabled ())
+      LOGGER.debug (sLogPrefix + "End of processing");
   }
 }

@@ -21,8 +21,9 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.util.EntityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.helger.asic.SignatureHelper;
 import com.helger.commons.collection.impl.CommonsArrayList;
 import com.helger.commons.collection.impl.ICommonsList;
 import com.helger.commons.concurrent.collector.IConcurrentPerformer;
@@ -47,6 +48,8 @@ import eu.toop.kafkaclient.ToopKafkaClient;
  */
 final class MessageProcessorDCIncomingPerformer implements IConcurrentPerformer <ToopResponseWithAttachments140>
 {
+  private static final Logger LOGGER = LoggerFactory.getLogger (MessageProcessorDCIncomingPerformer.class);
+
   public void runAsync (@Nonnull final ToopResponseWithAttachments140 aResponseWA) throws Exception
   {
     final TDETOOPResponseType aResponse = aResponseWA.getResponse ();
@@ -56,6 +59,7 @@ final class MessageProcessorDCIncomingPerformer implements IConcurrentPerformer 
                                                                             : "temp-tc4-id-" +
                                                                               GlobalIDFactory.getNewIntID ();
     final String sLogPrefix = "[" + sRequestID + "] ";
+
     ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "Received DC Incoming Request (4/4)");
 
     // Forward to the DC at /to-dc interface
@@ -64,35 +68,29 @@ final class MessageProcessorDCIncomingPerformer implements IConcurrentPerformer 
     // Send to DC (see ToDCServlet in toop-interface)
     final String sDestinationUrl = TCConfig.getMPToopInterfaceDCUrl ();
 
-    try (final HttpClientManager aMgr = new HttpClientManager (aHCFactory))
+    try (final HttpClientManager aMgr = new HttpClientManager (aHCFactory);
+        final NonBlockingByteArrayOutputStream aBAOS = new NonBlockingByteArrayOutputStream ())
     {
-      final SignatureHelper aSH = new SignatureHelper (TCConfig.getKeystoreType (),
-                                                       TCConfig.getKeystorePath (),
-                                                       TCConfig.getKeystorePassword (),
-                                                       TCConfig.getKeystoreKeyAlias (),
-                                                       TCConfig.getKeystoreKeyPassword ());
+      // Convert read to write attachments
+      final ICommonsList <AsicWriteEntry> aWriteAttachments = new CommonsArrayList <> ();
+      for (final AsicReadEntry aEntry : aResponseWA.attachments ())
+        aWriteAttachments.add (AsicWriteEntry.create (aEntry));
 
-      try (final NonBlockingByteArrayOutputStream aBAOS = new NonBlockingByteArrayOutputStream ())
+      ToopMessageBuilder140.createResponseMessageAsic (aResponse,
+                                                       aBAOS,
+                                                       MPWebAppConfig.getSignatureHelper (),
+                                                       aWriteAttachments);
+
+      ToopKafkaClient.send (EErrorLevel.INFO, () -> "Start posting signed ASiC response to '" + sDestinationUrl + "'");
+
+      final HttpPost aHttpPost = new HttpPost (sDestinationUrl);
+      aHttpPost.setEntity (new InputStreamEntity (aBAOS.getAsInputStream ()));
+      try (final CloseableHttpResponse aHttpResponse = aMgr.execute (aHttpPost))
       {
-        // Convert read to write attachments
-        final ICommonsList <AsicWriteEntry> aWriteAttachments = new CommonsArrayList <> ();
-        for (final AsicReadEntry aEntry : aResponseWA.attachments ())
-          aWriteAttachments.add (AsicWriteEntry.create (aEntry));
-
-        ToopMessageBuilder140.createResponseMessageAsic (aResponse, aBAOS, aSH, aWriteAttachments);
-
-        ToopKafkaClient.send (EErrorLevel.INFO,
-                              () -> "Start posting signed ASiC response to '" + sDestinationUrl + "'");
-
-        final HttpPost aHttpPost = new HttpPost (sDestinationUrl);
-        aHttpPost.setEntity (new InputStreamEntity (aBAOS.getAsInputStream ()));
-        try (final CloseableHttpResponse aHttpResponse = aMgr.execute (aHttpPost))
-        {
-          EntityUtils.consume (aHttpResponse.getEntity ());
-        }
-
-        ToopKafkaClient.send (EErrorLevel.INFO, () -> "Done posting signed ASiC response to '" + sDestinationUrl + "'");
+        EntityUtils.consume (aHttpResponse.getEntity ());
       }
+
+      ToopKafkaClient.send (EErrorLevel.INFO, () -> "Done posting signed ASiC response to '" + sDestinationUrl + "'");
     }
     catch (final Exception ex)
     {
@@ -100,5 +98,8 @@ final class MessageProcessorDCIncomingPerformer implements IConcurrentPerformer 
                             () -> "Error posting signed ASiC response to '" + sDestinationUrl + "'",
                             ex);
     }
+
+    if (LOGGER.isDebugEnabled ())
+      LOGGER.debug (sLogPrefix + "End of processing");
   }
 }

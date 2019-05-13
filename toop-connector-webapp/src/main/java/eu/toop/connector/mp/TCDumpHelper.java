@@ -61,6 +61,9 @@ public final class TCDumpHelper
       final String sFilename = Long.toString (System.nanoTime ()) + sContextAndExtension;
       final File aDumpFile = new File (aDumpDirectory, sFilename);
 
+      if (LOGGER.isDebugEnabled ())
+        LOGGER.debug ("Trying to open DumpInputStream file " + aDumpFile.getAbsolutePath ());
+
       // Open log file
       final FileOutputStream aDebugFOS = FileHelper.getOutputStream (aDumpFile);
       if (aDebugFOS != null)
@@ -101,7 +104,7 @@ public final class TCDumpHelper
         };
       }
 
-      LOGGER.warn ("Failed to open dump file '" + aDumpFile.getAbsolutePath () + "' for writing");
+      LOGGER.warn ("Failed to open DumpInputStream file '" + aDumpFile.getAbsolutePath () + "' for writing");
     }
 
     return aSrcIS;
@@ -120,6 +123,9 @@ public final class TCDumpHelper
       // Only if the dump directory is present and existing
       final String sFilename = Long.toString (System.nanoTime ()) + sContextAndExtension;
       final File aDumpFile = new File (aDumpDirectory, sFilename);
+
+      if (LOGGER.isDebugEnabled ())
+        LOGGER.debug ("Trying to open DumpOutputStream file " + aDumpFile.getAbsolutePath ());
 
       // Open log file
       final FileOutputStream aDebugFOS = FileHelper.getOutputStream (aDumpFile);
@@ -170,7 +176,7 @@ public final class TCDumpHelper
         };
       }
 
-      LOGGER.warn ("Failed to open dump file '" + aDumpFile.getAbsolutePath () + "' for writing");
+      LOGGER.warn ("Failed to open DumpOutputStream file '" + aDumpFile.getAbsolutePath () + "' for writing");
     }
 
     return aSrcOS;
