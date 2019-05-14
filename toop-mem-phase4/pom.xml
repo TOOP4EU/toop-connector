@@ -29,6 +29,7 @@
   <description>Contains the TOOP Message Exchange Module implementation with ph-as4</description>
   <url>https://github.com/toop4eu/toop-connector/toop-mem-phase4</url>
   <inceptionYear>2018</inceptionYear>
+  
   <licenses>
     <license>
       <name>Apache 2</name>
@@ -36,10 +37,12 @@
       <distribution>repo</distribution>
     </license>
   </licenses>
+  
   <organization>
     <name>toop.eu</name>
     <url>http://www.toop.eu</url>
   </organization>
+  
   <developers>
     <developer>
       <id>philip</id>
@@ -47,6 +50,7 @@
       <email>ph(at)helger.com</email>
     </developer>
   </developers>
+  
   <dependencies>
     <dependency>
       <groupId>eu.toop</groupId>
@@ -68,20 +72,18 @@
       <groupId>com.helger</groupId>
       <artifactId>ph-as4-servlet</artifactId>
     </dependency>
-      
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
       <scope>provided</scope>
     </dependency>
-  
-    <!-- Test only -->
-    <dependency>
+    <!-- Test only -->    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
+  
   <build>
     <plugins>
       <plugin>
@@ -92,6 +94,10 @@
             <Automatic-Module-Name>eu.toop.connector.r2d2client</Automatic-Module-Name>
             <Export-Package>eu.toop.connector.r2d2client.*</Export-Package>
             <Import-Package>!javax.annotation.*,*</Import-Package>
+            <Require-Capability>osgi.extender; filter:="(osgi.extender=osgi.serviceloader.registrar)"</Require-Capability>
+            <Provide-Capability>osgi.serviceloader; osgi.serviceloader=com.helger.as4.profile.IAS4ProfileRegistrarSPI,
+osgi.serviceloader; osgi.serviceloader=com.helger.as4.servlet.spi.IAS4ServletMessageProcessorSPI,
+osgi.serviceloader; osgi.serviceloader=eu.toop.connector.api.as4.IMessageExchangeSPI</Provide-Capability>
           </instructions>
         </configuration>
       </plugin>
