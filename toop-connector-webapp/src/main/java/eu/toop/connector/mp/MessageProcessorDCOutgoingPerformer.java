@@ -265,90 +265,94 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
           // Map to TOOP concepts
           final SMMClient aClient = new SMMClient ();
           _iterateNonTCConcepts (aRequest, c -> aClient.addConceptToBeMapped (ConceptValue.create (c)));
+          final int nConceptsToBeMapped = aClient.getTotalCountConceptsToBeMapped ();
 
           if (LOGGER.isDebugEnabled ())
-            LOGGER.debug (sLogPrefix +
-                          "A total of " +
-                          aClient.getTotalCountConceptsToBeMapped () +
-                          " concepts need to be mapped");
+            LOGGER.debug (sLogPrefix + "A total of " + nConceptsToBeMapped + " concepts need to be mapped");
 
-          // Main mapping
-          IMappedValueList aMappedValues = null;
-          try
+          // 0.10.3 - invoke SMM only when concepts are present
+          if (nConceptsToBeMapped > 0)
           {
-            // send back error if some value could not be mapped
-            final String sSMMDomain = SMMDocumentTypeMapping.getToopSMDomain (eDocType);
-            if (sSMMDomain == null)
+            // Main mapping
+            IMappedValueList aMappedValues = null;
+            try
             {
-              // No SMM mapping for this document type
-              aMappedValues = new MappedValueList ();
-              ToopKafkaClient.send (EErrorLevel.INFO,
-                                    () -> sLogPrefix +
-                                          "Found no SMM document type mapping for document type " +
-                                          eDocType);
-            }
-            else
-            {
-              final IUnmappableCallback aUnmappableCallback = (sLogPrefix1,
-                                                               sSourceNamespace,
-                                                               sSourceValue,
-                                                               sDestNamespace) -> {
-                final String sErrorMsg = "Found no mapping for '" +
-                                         sSourceNamespace +
-                                         '#' +
-                                         sSourceValue +
-                                         "' to destination namespace '" +
-                                         sDestNamespace +
-                                         "'";
-                aErrors.add (_createError (sLogPrefix1,
-                                           EToopErrorCategory.SEMANTIC_MAPPING,
-                                           EToopErrorCode.SM_002,
-                                           sErrorMsg,
-                                           null));
-              };
-
-              // Logging happens internally
-              aMappedValues = aClient.performMapping (sLogPrefix,
-                                                      sSMMDomain,
-                                                      MPWebAppConfig.getSMMConceptProvider (),
-                                                      aUnmappableCallback);
-            }
-          }
-          catch (final IOException ex)
-          {
-            // send back async error
-            final String sErrorMsg = "Failed to invoke semantic mapping";
-            aErrors.add (_createError (sLogPrefix,
-                                       EToopErrorCategory.SEMANTIC_MAPPING,
-                                       EToopErrorCode.SM_001,
-                                       sErrorMsg,
-                                       ex));
-          }
-
-          if (aErrors.isEmpty ())
-          {
-            if (LOGGER.isDebugEnabled ())
-              LOGGER.debug (sLogPrefix + "Starting to add mapped SMM concepts to the TOOP request");
-
-            final IMappedValueList aFinalMappedValues = aMappedValues;
-
-            // add all the mapped values in the request
-            _iterateNonTCConcepts (aRequest, c -> {
-              // Now the source was mapped
-              c.getSemanticMappingExecutionIndicator ().setValue (true);
-
-              final ConceptValue aSrcCV = ConceptValue.create (c);
-              for (final MappedValue aMV : aFinalMappedValues.getAllBySource (x -> x.equals (aSrcCV)))
+              // send back error if some value could not be mapped
+              final String sSMMDomain = SMMDocumentTypeMapping.getToopSMDomain (eDocType);
+              if (sSMMDomain == null)
               {
-                final TDEConceptRequestType aToopConcept = new TDEConceptRequestType ();
-                aToopConcept.setConceptTypeCode (ToopXSDHelper140.createCode (EConceptType.TC.getID ()));
-                aToopConcept.setSemanticMappingExecutionIndicator (ToopXSDHelper140.createIndicator (false));
-                aToopConcept.setConceptNamespace (ToopXSDHelper140.createIdentifier (aMV.getDestination ()
-                                                                                        .getNamespace ()));
-                aToopConcept.setConceptName (ToopXSDHelper140.createText (aMV.getDestination ().getValue ()));
-                c.addConceptRequest (aToopConcept);
+                // No SMM mapping for this document type
+                aMappedValues = new MappedValueList ();
+                ToopKafkaClient.send (EErrorLevel.INFO,
+                                      () -> sLogPrefix +
+                                            "Found no SMM document type mapping for document type " +
+                                            eDocType);
               }
-            });
+              else
+              {
+                final IUnmappableCallback aUnmappableCallback = (sLogPrefix1,
+                                                                 sSourceNamespace,
+                                                                 sSourceValue,
+                                                                 sDestNamespace) -> {
+                  final String sErrorMsg = "Found no mapping for '" +
+                                           sSourceNamespace +
+                                           '#' +
+                                           sSourceValue +
+                                           "' to destination namespace '" +
+                                           sDestNamespace +
+                                           "'";
+                  aErrors.add (_createError (sLogPrefix1,
+                                             EToopErrorCategory.SEMANTIC_MAPPING,
+                                             EToopErrorCode.SM_002,
+                                             sErrorMsg,
+                                             null));
+                };
+
+                // Logging happens internally
+                aMappedValues = aClient.performMapping (sLogPrefix,
+                                                        sSMMDomain,
+                                                        MPWebAppConfig.getSMMConceptProvider (),
+                                                        aUnmappableCallback);
+              }
+            }
+            catch (final IllegalArgumentException | IOException ex)
+            {
+              // send back async error
+              final String sErrorMsg = "Failed to invoke semantic mapping";
+              aErrors.add (_createError (sLogPrefix,
+                                         EToopErrorCategory.SEMANTIC_MAPPING,
+                                         EToopErrorCode.SM_001,
+                                         sErrorMsg,
+                                         ex));
+            }
+
+            if (aErrors.isEmpty ())
+            {
+              if (LOGGER.isDebugEnabled ())
+                LOGGER.debug (sLogPrefix + "Starting to add mapped SMM concepts to the TOOP request");
+
+              final IMappedValueList aFinalMappedValues = aMappedValues;
+
+              // add all the mapped values in the request
+              _iterateNonTCConcepts (aRequest, c -> {
+                // Now the source was mapped
+                c.getSemanticMappingExecutionIndicator ().setValue (true);
+
+                final ConceptValue aSrcCV = ConceptValue.create (c);
+                for (final MappedValue aMV : aFinalMappedValues.getAllBySource (x -> x.equals (aSrcCV)))
+                {
+                  final TDEConceptRequestType aToopConcept = new TDEConceptRequestType ();
+                  aToopConcept.setConceptTypeCode (ToopXSDHelper140.createCode (EConceptType.TC.getID ()));
+                  aToopConcept.setSemanticMappingExecutionIndicator (ToopXSDHelper140.createIndicator (false));
+                  aToopConcept.setConceptNamespace (ToopXSDHelper140.createIdentifier (aMV.getDestination ()
+                                                                                          .getNamespace ()));
+                  aToopConcept.setConceptName (ToopXSDHelper140.createText (aMV.getDestination ().getValue ()));
+                  c.addConceptRequest (aToopConcept);
+                }
+              });
+
+              ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "Finished mapping to shared concept");
+            }
           }
         }
 
