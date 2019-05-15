@@ -37,10 +37,10 @@ jobs:
     after_success:
     - mvn deploy --settings travis-settings.xml -DskipTests=true -B -P travis-deploy
     - docker pull toop/tomcat-jdk-image:1
-    - docker build --build-arg TOOP_CONNECTOR_VERSION=0.10.2-SNAPSHOT -t toop/toop-connector-webapp:0.10.2-SNAPSHOT
-      .
+    - docker build --build-arg TOOP_CONNECTOR_VERSION=0.10.2-SNAPSHOT -t toop/toop-connector-webapp:0.10.2-SNAPSHOT .
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
     - docker push toop/toop-connector-webapp:0.10.2-SNAPSHOT
+    - docker logout
     - bash <(curl -s https://codecov.io/bash)
   - stage: test
     jdk: openjdk11

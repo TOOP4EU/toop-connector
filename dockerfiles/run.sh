@@ -1,20 +1,4 @@
 #!/bin/bash
-#
-# Copyright (C) 2018-2019 toop.eu
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#         http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-
 
 
 
@@ -40,6 +24,10 @@ for i ; do
             network=$2 ; echo "set network"; shift 2;;
         -t)
             toop_dir=$2 ; shift 2;;
+        -s)
+            smp_container_name_to_link=$2; shift 2;;
+        -m)
+            smp_network_name=$2; shift 2;;
         -c) 
             container_name=$2 ; shift 2;;
         -p) 
@@ -70,20 +58,37 @@ then
 fi
 
 
-echo "toop_dir            : $toop_dir"
-echo "NETWORK_OPT         : $NETWORK_OPT"
-echo "CONTAINER_NAME_OPT  : $CONTAINER_NAME_OPT"
-echo "NET_ALIAS_OPT       : $NET_ALIAS_OPT"
-echo "PORT_OPT            : $PORT_OPT"
+if [[ $smp_container_name_to_link != "" ]]
+then
+   SMP_CONTAINER_NAME_OPT="--link $smp_container_name_to_link"
+fi
+
+
+
+echo "toop_dir                : $toop_dir"
+echo "NETWORK_OPT             : $NETWORK_OPT"
+echo "CONTAINER_NAME_OPT      : $CONTAINER_NAME_OPT"
+echo "SMP_CONTAINER_NAME_OPT  : $SMP_CONTAINER_NAME_OPT"
+echo "NET_ALIAS_OPT           : $NET_ALIAS_OPT"
+echo "PORT_OPT                : $PORT_OPT"
 
 echo "   ./run.sh $jdk_volume $toop_dir $external_port"
     
     
-docker run -d \
+containerId=`docker run -d \
            $CONTAINER_NAME_OPT \
+           $SMP_CONTAINER_NAME_OPT \
            $NETWORK_OPT \
            $NET_ALIAS_OPT \
            $PORT_OPT \
            -v $toop_dir:/toop-dir \
-           toop/toop-connector-webapp:0.9.3
+           toop/toop-connector-webapp:0.10.2`
 
+
+echo "Container ID is $containerId"
+
+if [[ $containerId != "" && $smp_network_name != "" ]]
+then
+   echo "Connect to SMP $smp_network_name "
+   docker network connect $smp_network_name $containerId
+fi
