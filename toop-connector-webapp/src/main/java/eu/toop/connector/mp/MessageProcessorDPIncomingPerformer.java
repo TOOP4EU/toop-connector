@@ -81,8 +81,7 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
                                             @Nonnull final String sErrorText,
                                             @Nullable final Throwable t)
   {
-    // Surely no DP here
-    ToopKafkaClient.send (EErrorLevel.ERROR, () -> sLogPrefix + "[" + aErrorCode.getID () + "] " + sErrorText);
+    ToopKafkaClient.send (EErrorLevel.ERROR, () -> sLogPrefix + "[" + aErrorCode.getID () + "] " + sErrorText, t);
     return ToopMessageBuilder140.createError (null,
                                               EToopErrorOrigin.REQUEST_RECEPTION,
                                               eCategory,
@@ -169,9 +168,9 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
     final String sDestinationMappingURI = TCConfig.getSMMMappingNamespaceURIForDP ();
     if (StringHelper.hasText (sDestinationMappingURI))
     {
-      final SMMClient aClient = new SMMClient ();
-      _iterateTCConcepts (aRequest, c -> aClient.addConceptToBeMapped (ConceptValue.create (c)));
-      final int nConceptsToBeMapped = aClient.getTotalCountConceptsToBeMapped ();
+      final SMMClient aSMMClient = new SMMClient ();
+      _iterateTCConcepts (aRequest, c -> aSMMClient.addConceptToBeMapped (ConceptValue.create (c)));
+      final int nConceptsToBeMapped = aSMMClient.getTotalCountConceptsToBeMapped ();
 
       if (LOGGER.isDebugEnabled ())
         LOGGER.debug (sLogPrefix + "A total of " + nConceptsToBeMapped + " concepts need to be mapped");
@@ -197,10 +196,10 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
                                      sErrorMsg,
                                      null));
         };
-        final IMappedValueList aMappedValues = aClient.performMapping (sLogPrefix,
-                                                                       sDestinationMappingURI,
-                                                                       MPWebAppConfig.getSMMConceptProvider (),
-                                                                       aUnmappableCallback);
+        final IMappedValueList aMappedValues = aSMMClient.performMapping (sLogPrefix,
+                                                                          sDestinationMappingURI,
+                                                                          MPWebAppConfig.getSMMConceptProvider (),
+                                                                          aUnmappableCallback);
 
         // add all the mapped values in the request
         _iterateTCConcepts (aRequest, c -> {

@@ -96,7 +96,7 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
                                             @Nonnull final String sErrorText,
                                             @Nullable final Throwable t)
   {
-    ToopKafkaClient.send (aErrorLevel, () -> sLogPrefix + "[" + aErrorCode.getID () + "] " + sErrorText);
+    ToopKafkaClient.send (aErrorLevel, () -> sLogPrefix + "[" + aErrorCode.getID () + "] " + sErrorText, t);
     return ToopMessageBuilder140.createError (null,
                                               EToopErrorOrigin.RESPONSE_SUBMISSION,
                                               eCategory,
