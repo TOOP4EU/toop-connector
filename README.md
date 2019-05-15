@@ -2,7 +2,7 @@
 
 The joint message process for both sides of the process
 
-Latest release: **0.10.2** (2019-05-13)
+Latest release: **0.10.3** (2019-05-15)
 
 # How it works
 
@@ -29,6 +29,8 @@ Latest release: **0.10.2** (2019-05-13)
 
 # News and noteworthy
 
+* v0.10.3 - 2019-05-05
+    * Fixed a regression in communication with the AS4 gateways
 * v0.10.2 - 2019-05-13
     * Fixed an error that semantic mapping on DP side was not performed, if the source concept was of type "TC"
     * Added Java 12 support
