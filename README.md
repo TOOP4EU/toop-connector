@@ -29,8 +29,9 @@ Latest release: **0.10.3** (2019-05-15)
 
 # News and noteworthy
 
-* v0.10.3 - 2019-05-05
+* v0.10.3 - 2019-05-15
     * Fixed a regression in communication with the AS4 gateways
+    * Fixed an exception because semantic mapping was partially involved even though it was not supported
 * v0.10.2 - 2019-05-13
     * Fixed an error that semantic mapping on DP side was not performed, if the source concept was of type "TC"
     * Added Java 12 support
