@@ -253,14 +253,17 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
     final int nErrorCount = aErrors.size ();
     if (nErrorCount > 0)
     {
+      // We have errors
+
       ToopKafkaClient.send (EErrorLevel.INFO,
                             () -> sLogPrefix + nErrorCount + " error(s) were found - directly pushing to queue 3/4.");
 
-      // We have errors
       final TDETOOPResponseType aResponseMsg = ToopMessageBuilder140.createResponse (aRequest);
-      // Hard coded value
-      aResponseMsg.setSpecificationIdentifier (ToopXSDHelper140.createSpecificationIdentifierResponse ());
+      MPHelper.fillDefaultResponseFields (aResponseMsg);
+      // add all errors
       aResponseMsg.getError ().addAll (aErrors);
+
+      // Wrap with source attachments
       final ToopResponseWithAttachments140 aResponse = new ToopResponseWithAttachments140 (aResponseMsg,
                                                                                            aRequestWA.attachments ());
       // Put the error in queue 3/4

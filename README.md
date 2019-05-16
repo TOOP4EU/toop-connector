@@ -29,6 +29,8 @@ Latest release: **0.10.3** (2019-05-15)
 
 # News and noteworthy
 
+* v0.10.4 - work in progress
+    * Fixed error with TOOP Response object layout when pushing back to queues in 1/4 and 2/4
 * v0.10.3 - 2019-05-15
     * Fixed a regression in communication with the AS4 gateways
     * Fixed an exception because semantic mapping was partially involved even though it was not supported
