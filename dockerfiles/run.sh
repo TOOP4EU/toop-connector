@@ -82,7 +82,7 @@ containerId=`docker run -d \
            $NET_ALIAS_OPT \
            $PORT_OPT \
            -v $toop_dir:/toop-dir \
-           toop/toop-connector-webapp:0.10.2`
+           toop/toop-connector-webapp:0.10.4`
 
 
 echo "Container ID is $containerId"
