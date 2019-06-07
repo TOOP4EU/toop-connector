@@ -29,6 +29,7 @@
   <description>Contains the TOOP Semantic Mapping Module client</description>
   <url>https://github.com/toop4eu/toop-connector/toop-smm-client</url>
   <inceptionYear>2018</inceptionYear>
+
   <licenses>
     <license>
       <name>Apache 2</name>
@@ -36,10 +37,12 @@
       <distribution>repo</distribution>
     </license>
   </licenses>
+
   <organization>
     <name>toop.eu</name>
     <url>http://www.toop.eu</url>
   </organization>
+
   <developers>
     <developer>
       <id>philip</id>
@@ -58,6 +61,7 @@
       <url>http://www.tno.nl</url>
     </developer>
   </developers>
+
   <dependencies>
     <dependency>
       <groupId>com.helger</groupId>
@@ -79,6 +83,7 @@
       <groupId>eu.toop</groupId>
       <artifactId>toop-connector-api</artifactId>
     </dependency>
+
 		<!-- Test only -->
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -86,6 +91,7 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
   <build>
     <plugins>
       <plugin>
@@ -97,6 +103,17 @@
             <Export-Package>eu.toop.connector.smmclient.*</Export-Package>
             <Import-Package>!javax.annotation.*,*</Import-Package>
           </instructions>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>com.mycila</groupId>
+        <artifactId>license-maven-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <exclude>**/LICENSE</exclude>
+            <exclude>**/NOTICE</exclude>
+            <exclude>src/test/resources/existing-smm-mappings.xml</exclude>
+          </excludes>
         </configuration>
       </plugin>
     </plugins>
