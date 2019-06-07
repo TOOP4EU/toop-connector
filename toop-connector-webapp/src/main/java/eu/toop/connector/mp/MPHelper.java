@@ -20,12 +20,12 @@ import javax.annotation.Nonnull;
 import com.helger.commons.error.level.EErrorLevel;
 
 import eu.toop.commons.codelist.EPredefinedDocumentTypeIdentifier;
-import eu.toop.commons.codelist.EPredefinedParticipantIdentifierScheme;
 import eu.toop.commons.dataexchange.v140.TDEAddressType;
 import eu.toop.commons.dataexchange.v140.TDEDataProviderType;
 import eu.toop.commons.dataexchange.v140.TDETOOPResponseType;
 import eu.toop.commons.jaxb.ToopXSDHelper140;
 import eu.toop.commons.usecase.ReverseDocumentTypeMapping;
+import eu.toop.connector.api.TCConfig;
 import eu.toop.kafkaclient.ToopKafkaClient;
 import oasis.names.specification.ubl.schema.xsd.unqualifieddatatypes_21.IdentifierType;
 
@@ -41,18 +41,15 @@ public final class MPHelper
     aResponse.setSpecificationIdentifier (ToopXSDHelper140.createSpecificationIdentifierResponse ());
 
     // Required for response
-    // TODO would be good in configuration file
     aResponse.getRoutingInformation ()
-             .setDataProviderElectronicAddressIdentifier (ToopXSDHelper140.createIdentifier ("error@toop-connector.toop.eu"));
+             .setDataProviderElectronicAddressIdentifier (ToopXSDHelper140.createIdentifier (TCConfig.getMPAutoResponseDPAddressID ()));
 
     {
       final TDEDataProviderType p = new TDEDataProviderType ();
-      // TODO would be good in configuration file
       p.setDPIdentifier (ToopXSDHelper140.createIdentifier ("demo-agency",
-                                                            EPredefinedParticipantIdentifierScheme.EU_NAL.getID (),
-                                                            "0000000000"));
-      // TODO would be good in configuration file
-      p.setDPName (ToopXSDHelper140.createText ("Error@ToopConnector"));
+                                                            TCConfig.getMPAutoResponseDPIDScheme (),
+                                                            TCConfig.getMPAutoResponseDPIDValue ()));
+      p.setDPName (ToopXSDHelper140.createText (TCConfig.getMPAutoResponseDPName ()));
       final TDEAddressType pa = new TDEAddressType ();
       // DataProviderCountryCode is mandatory
       pa.setCountryCode (ToopXSDHelper140.createCodeWithLOA (aResponse.getRoutingInformation ()

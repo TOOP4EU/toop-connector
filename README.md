@@ -35,6 +35,7 @@ Handle the way on DP side from AS4 to DC (4/4)
 * v0.10.5 - work in progress
     * In case of errors, that lead to an immediate response, the document type is now correctly reversed
     * Added new configuration item `toop.keystore.type` with the default value `JKS`.
+    * Added new optional configuration items `toop.mp.autoresponse.dpaddressid`, `toop.mp.autoresponse.dpidscheme`, `toop.mp.autoresponse.dpidvalue` and `toop.mp.autoresponse.dpname`
 * v0.10.4 - 2019-05-20
     * Fixed error with TOOP Response object layout when pushing back to queues in 1/4 and 2/4
 * v0.10.3 - 2019-05-15

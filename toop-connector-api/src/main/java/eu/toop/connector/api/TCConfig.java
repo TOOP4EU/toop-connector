@@ -40,6 +40,7 @@ import com.helger.security.keystore.IKeyStoreType;
 import com.helger.settings.exchange.configfile.ConfigFile;
 import com.helger.settings.exchange.configfile.ConfigFileBuilder;
 
+import eu.toop.commons.codelist.EPredefinedParticipantIdentifierScheme;
 import eu.toop.connector.api.as4.MessageExchangeManager;
 
 /**
@@ -184,6 +185,7 @@ public final class TCConfig
     // E.g.
     // http://localhost:8001/
     // https://hamster.tno.nl/plasido-grlc/
+    // http://sms.acc.exchange.toop.eu/
     return getConfigFile ().getAsString ("toop.smm.grlc.url");
   }
 
@@ -341,6 +343,48 @@ public final class TCConfig
   public static String getMPToopInterfaceDCUrl ()
   {
     return getConfigFile ().getAsString ("toop.mp.dc.url");
+  }
+
+  /**
+   * @return The value of automatically created responses element
+   *         <code>RoutingInformation/DataProviderElectronicAddressIdentifier</code>
+   * @since 0.10.5
+   */
+  @Nonnull
+  public static String getMPAutoResponseDPAddressID ()
+  {
+    return getConfigFile ().getAsString ("toop.mp.autoresponse.dpaddressid", "error@toop-connector.toop.eu");
+  }
+
+  /**
+   * @return The ID scheme for the DP in case of automatic responses
+   * @since 0.10.5
+   */
+  @Nonnull
+  public static String getMPAutoResponseDPIDScheme ()
+  {
+    return getConfigFile ().getAsString ("toop.mp.autoresponse.dpidscheme",
+                                         EPredefinedParticipantIdentifierScheme.EU_NAL.getID ());
+  }
+
+  /**
+   * @return The ID value for the DP in case of automatic responses
+   * @since 0.10.5
+   */
+  @Nonnull
+  public static String getMPAutoResponseDPIDValue ()
+  {
+    return getConfigFile ().getAsString ("toop.mp.autoresponse.dpidvalue", "0000000000");
+  }
+
+  /**
+   * @return The name for the DP in case of automatic responses
+   * @since 0.10.5
+   */
+  @Nonnull
+  public static String getMPAutoResponseDPName ()
+  {
+    return getConfigFile ().getAsString ("toop.mp.autoresponse.dpname", "Error@ToopConnector");
   }
 
   @Nullable
