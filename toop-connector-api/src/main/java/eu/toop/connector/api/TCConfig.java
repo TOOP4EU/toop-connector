@@ -80,10 +80,10 @@ public final class TCConfig
   /**
    * Reload the configuration file. It checks if the environment variable
    * <code>TOOP_CONNECTOR_CONFIG</code> the system property
-   * {@link #SYSTEM_PROPERTY_TOOP_CONNECTOR_SERVER_PROPERTIES_PATH} is present and
-   * if so, tries it first, than {@link #PATH_PRIVATE_TOOP_CONNECTOR_PROPERTIES}
-   * is checked and finally the {@link #PATH_TOOP_CONNECTOR_PROPERTIES} path is
-   * checked.
+   * {@link #SYSTEM_PROPERTY_TOOP_CONNECTOR_SERVER_PROPERTIES_PATH} is present
+   * and if so, tries it first, than
+   * {@link #PATH_PRIVATE_TOOP_CONNECTOR_PROPERTIES} is checked and finally the
+   * {@link #PATH_TOOP_CONNECTOR_PROPERTIES} path is checked.
    *
    * @return {@link ESuccess}
    */
@@ -197,7 +197,8 @@ public final class TCConfig
   }
 
   /**
-   * @return The TOOP Directory base URL for R2D2. Should never end with a slash.
+   * @return The TOOP Directory base URL for R2D2. Should never end with a
+   *         slash.
    */
   @Nullable
   public static String getR2D2DirectoryBaseUrl ()
@@ -206,7 +207,8 @@ public final class TCConfig
   }
 
   /**
-   * @return <code>true</code> to use SML lookup, <code>false</code> to not do it.
+   * @return <code>true</code> to use SML lookup, <code>false</code> to not do
+   *         it.
    * @see #getR2D2SML()
    * @see #getR2D2SMPUrl()
    */
@@ -273,8 +275,8 @@ public final class TCConfig
   }
 
   /**
-   * Get the overall protocol to be used. Depending on that output different other
-   * properties might be queried.
+   * Get the overall protocol to be used. Depending on that output different
+   * other properties might be queried.
    *
    * @return The overall protocol to use. Never <code>null</code>.
    */
@@ -344,8 +346,9 @@ public final class TCConfig
   @Nullable
   public static IKeyStoreType getKeystoreType ()
   {
-    // TODO make configurable
-    return EKeyStoreType.JKS;
+    /** Configurable since 0.10.5 */
+    final String sKeystoreType = getConfigFile ().getAsString ("toop.keystore.type");
+    return EKeyStoreType.getFromIDCaseInsensitiveOrDefault (sKeystoreType, EKeyStoreType.JKS);
   }
 
   @Nullable
