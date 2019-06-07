@@ -17,18 +17,25 @@ package eu.toop.connector.mp;
 
 import javax.annotation.Nonnull;
 
+import com.helger.commons.error.level.EErrorLevel;
+
+import eu.toop.commons.codelist.EPredefinedDocumentTypeIdentifier;
 import eu.toop.commons.codelist.EPredefinedParticipantIdentifierScheme;
 import eu.toop.commons.dataexchange.v140.TDEAddressType;
 import eu.toop.commons.dataexchange.v140.TDEDataProviderType;
 import eu.toop.commons.dataexchange.v140.TDETOOPResponseType;
 import eu.toop.commons.jaxb.ToopXSDHelper140;
+import eu.toop.commons.usecase.ReverseDocumentTypeMapping;
+import eu.toop.kafkaclient.ToopKafkaClient;
+import oasis.names.specification.ubl.schema.xsd.unqualifieddatatypes_21.IdentifierType;
 
 public final class MPHelper
 {
   private MPHelper ()
   {}
 
-  public static void fillDefaultResponseFields (@Nonnull final TDETOOPResponseType aResponse)
+  public static void fillDefaultResponseFields (@Nonnull final String sLogPrefix,
+                                                @Nonnull final TDETOOPResponseType aResponse)
   {
     // Hard coded value
     aResponse.setSpecificationIdentifier (ToopXSDHelper140.createSpecificationIdentifierResponse ());
@@ -53,6 +60,42 @@ public final class MPHelper
                                                                       .getValue ()));
       p.setDPLegalAddress (pa);
       aResponse.addDataProvider (p);
+    }
+
+    // Document type must be switch from request to response
+    {
+      final IdentifierType aDocTypeID = aResponse.getRoutingInformation ().getDocumentTypeIdentifier ();
+      final EPredefinedDocumentTypeIdentifier eRequestDocType = EPredefinedDocumentTypeIdentifier.getFromDocumentTypeIdentifierOrNull (aDocTypeID.getSchemeID (),
+                                                                                                                                       aDocTypeID.getValue ());
+      if (eRequestDocType != null)
+      {
+        final EPredefinedDocumentTypeIdentifier eResponseDocType = ReverseDocumentTypeMapping.getReverseDocumentTypeOrNull (eRequestDocType);
+        if (eResponseDocType == null)
+        {
+          // Found no reverse document type
+          ToopKafkaClient.send (EErrorLevel.ERROR,
+                                () -> sLogPrefix +
+                                      "Found no response document type for '" +
+                                      aDocTypeID.getSchemeID () +
+                                      "::" +
+                                      aDocTypeID.getValue () +
+                                      "'");
+        }
+        else
+        {
+          // Set new doc type in response
+          ToopKafkaClient.send (EErrorLevel.INFO,
+                                () -> sLogPrefix +
+                                      "Switching document type '" +
+                                      eRequestDocType.getURIEncoded () +
+                                      "' to '" +
+                                      eResponseDocType.getURIEncoded () +
+                                      "'");
+          aResponse.getRoutingInformation ()
+                   .setDocumentTypeIdentifier (ToopXSDHelper140.createIdentifier (eResponseDocType.getScheme (),
+                                                                                  eResponseDocType.getID ()));
+        }
+      }
     }
   }
 }

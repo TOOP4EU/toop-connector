@@ -558,7 +558,7 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
                             () -> sLogPrefix + nErrorCount + " error(s) were found - directly pushing to queue 4/4.");
 
       final TDETOOPResponseType aResponseMsg = ToopMessageBuilder140.createResponse (aRequest);
-      MPHelper.fillDefaultResponseFields (aResponseMsg);
+      MPHelper.fillDefaultResponseFields (sLogPrefix, aResponseMsg);
 
       // Wrap with source attachments
       aResponseMsg.getError ().addAll (aErrors);

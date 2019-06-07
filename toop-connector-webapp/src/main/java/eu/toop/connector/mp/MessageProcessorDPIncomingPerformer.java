@@ -179,6 +179,8 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
       if (nConceptsToBeMapped > 0)
       {
         // Main mapping
+        // TODO make configurable?
+        final boolean bUnmappableConceptLeadsToError = true;
         final IUnmappableCallback aUnmappableCallback = (sLogPrefix1,
                                                          sSourceNamespace,
                                                          sSourceValue,
@@ -190,11 +192,19 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
                                    "' to destination namespace '" +
                                    sDestNamespace +
                                    "'";
-          aErrors.add (_createError (sLogPrefix1,
-                                     EToopErrorCategory.SEMANTIC_MAPPING,
-                                     EToopErrorCode.SM_002,
-                                     sErrorMsg,
-                                     null));
+          if (bUnmappableConceptLeadsToError)
+          {
+            aErrors.add (_createError (sLogPrefix1,
+                                       EToopErrorCategory.SEMANTIC_MAPPING,
+                                       EToopErrorCode.SM_002,
+                                       sErrorMsg,
+                                       null));
+          }
+          else
+          {
+            if (LOGGER.isWarnEnabled ())
+              LOGGER.warn (sLogPrefix1 + sErrorMsg + " (continuing anyway)");
+          }
         };
         final IMappedValueList aMappedValues = aSMMClient.performMapping (sLogPrefix,
                                                                           sDestinationMappingURI,
@@ -259,7 +269,7 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
                             () -> sLogPrefix + nErrorCount + " error(s) were found - directly pushing to queue 3/4.");
 
       final TDETOOPResponseType aResponseMsg = ToopMessageBuilder140.createResponse (aRequest);
-      MPHelper.fillDefaultResponseFields (aResponseMsg);
+      MPHelper.fillDefaultResponseFields (sLogPrefix, aResponseMsg);
       // add all errors
       aResponseMsg.getError ().addAll (aErrors);
 
