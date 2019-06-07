@@ -199,6 +199,17 @@ public final class TCConfig
   }
 
   /**
+   * @return <code>true</code> if an unmappable concept on DP side breaks the
+   *         operation, <code>false</code> if not
+   * @since 0.10.5
+   */
+  public static boolean isSMMDPMappingErrorFatal ()
+  {
+    // true for backwards compatibility
+    return getConfigFile ().getAsBoolean ("toop.smm.dp.mapping.error.fatal", true);
+  }
+
+  /**
    * @return The TOOP Directory base URL for R2D2. Should never end with a
    *         slash.
    */

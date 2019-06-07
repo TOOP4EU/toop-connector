@@ -179,8 +179,7 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
       if (nConceptsToBeMapped > 0)
       {
         // Main mapping
-        // TODO make configurable?
-        final boolean bUnmappableConceptLeadsToError = true;
+        final boolean bUnmappableConceptLeadsToError = TCConfig.isSMMDPMappingErrorFatal ();
         final IUnmappableCallback aUnmappableCallback = (sLogPrefix1,
                                                          sSourceNamespace,
                                                          sSourceValue,
