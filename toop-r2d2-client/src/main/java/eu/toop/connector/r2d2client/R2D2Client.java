@@ -44,18 +44,19 @@ import com.helger.httpclient.response.ResponseHandlerJson;
 import com.helger.json.IJson;
 import com.helger.json.IJsonArray;
 import com.helger.json.IJsonObject;
-import com.helger.peppol.bdxr.EndpointType;
-import com.helger.peppol.bdxr.ProcessType;
-import com.helger.peppol.bdxr.ServiceInformationType;
-import com.helger.peppol.bdxr.SignedServiceMetadataType;
 import com.helger.peppol.bdxrclient.BDXRClient;
 import com.helger.peppol.bdxrclient.BDXRClientReadOnly;
-import com.helger.peppol.identifier.generic.doctype.IDocumentTypeIdentifier;
-import com.helger.peppol.identifier.generic.participant.IParticipantIdentifier;
-import com.helger.peppol.identifier.generic.process.IProcessIdentifier;
 import com.helger.peppol.smpclient.exception.SMPClientException;
 import com.helger.peppol.url.PeppolDNSResolutionException;
+import com.helger.peppolid.IDocumentTypeIdentifier;
+import com.helger.peppolid.IParticipantIdentifier;
+import com.helger.peppolid.IProcessIdentifier;
+import com.helger.peppolid.simple.process.SimpleProcessIdentifier;
 import com.helger.security.certificate.CertificateHelper;
+import com.helger.xsds.bdxr.smp1.EndpointType;
+import com.helger.xsds.bdxr.smp1.ProcessType;
+import com.helger.xsds.bdxr.smp1.ServiceInformationType;
+import com.helger.xsds.bdxr.smp1.SignedServiceMetadataType;
 
 import eu.toop.commons.error.EToopErrorCode;
 import eu.toop.commons.error.ToopErrorException;
@@ -314,8 +315,8 @@ public class R2D2Client implements IR2D2Client
       {
         // Find the first process that matches (should be only one!)
         final ProcessType aProcess = CollectionHelper.findFirst (aSI.getProcessList ().getProcess (),
-                                                                 x -> x.getProcessIdentifier ()
-                                                                       .hasSameContent (aProcessID));
+                                                                 x -> SimpleProcessIdentifier.wrap (x.getProcessIdentifier ())
+                                                                                             .hasSameContent (aProcessID));
         if (aProcess != null)
         {
           // Add all endpoints to the result list

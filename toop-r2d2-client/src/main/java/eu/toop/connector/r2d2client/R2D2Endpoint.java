@@ -25,7 +25,7 @@ import com.helger.commons.annotation.MustImplementEqualsAndHashcode;
 import com.helger.commons.annotation.Nonempty;
 import com.helger.commons.hashcode.HashCodeGenerator;
 import com.helger.commons.string.ToStringGenerator;
-import com.helger.peppol.identifier.generic.participant.IParticipantIdentifier;
+import com.helger.peppolid.IParticipantIdentifier;
 
 /**
  * This class contains a single result endpoint for an R2D2 query. Default

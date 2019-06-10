@@ -18,10 +18,10 @@ package eu.toop.connector.api;
 import javax.annotation.Nullable;
 
 import com.helger.commons.string.StringHelper;
-import com.helger.peppol.identifier.factory.SimpleIdentifierFactory;
-import com.helger.peppol.identifier.generic.doctype.SimpleDocumentTypeIdentifier;
-import com.helger.peppol.identifier.generic.participant.SimpleParticipantIdentifier;
-import com.helger.peppol.identifier.generic.process.SimpleProcessIdentifier;
+import com.helger.peppolid.factory.SimpleIdentifierFactory;
+import com.helger.peppolid.simple.doctype.SimpleDocumentTypeIdentifier;
+import com.helger.peppolid.simple.participant.SimpleParticipantIdentifier;
+import com.helger.peppolid.simple.process.SimpleProcessIdentifier;
 
 /**
  * A special {@link TCIdentifierFactory} that trims values.

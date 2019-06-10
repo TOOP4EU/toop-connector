@@ -26,7 +26,7 @@ import java.security.cert.X509Certificate;
 import org.junit.Test;
 
 import com.helger.commons.exception.InitializationException;
-import com.helger.peppol.identifier.generic.participant.IParticipantIdentifier;
+import com.helger.peppolid.IParticipantIdentifier;
 import com.helger.security.certificate.CertificateHelper;
 
 import eu.toop.connector.api.TCSettings;

@@ -40,6 +40,7 @@
     <item srcval="Email" dstval="EmailAddress" />
     <item srcval="Fax" dstval="FaxNumber" />
     <item srcval="FormaGiuridica" dstval="companyType" />
+    <item srcval="ITSSNumber" dstval="SSNumber" />
     <item srcval="Indirizzo" dstval="streetAddress" />
     <item srcval="Nome" dstval="givenName" />
     <item srcval="PartitaIVA" dstval="VATNumber" />

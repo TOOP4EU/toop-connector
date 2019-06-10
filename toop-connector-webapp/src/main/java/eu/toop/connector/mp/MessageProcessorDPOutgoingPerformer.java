@@ -45,10 +45,10 @@ import com.helger.commons.lang.StackTraceHelper;
 import com.helger.commons.text.MultilingualText;
 import com.helger.httpclient.HttpClientManager;
 import com.helger.jaxb.validation.WrappedCollectingValidationEventHandler;
-import com.helger.peppol.identifier.factory.IIdentifierFactory;
-import com.helger.peppol.identifier.generic.doctype.IDocumentTypeIdentifier;
-import com.helger.peppol.identifier.generic.participant.IParticipantIdentifier;
-import com.helger.peppol.identifier.generic.process.IProcessIdentifier;
+import com.helger.peppolid.IDocumentTypeIdentifier;
+import com.helger.peppolid.IParticipantIdentifier;
+import com.helger.peppolid.IProcessIdentifier;
+import com.helger.peppolid.factory.IIdentifierFactory;
 import com.helger.schematron.svrl.AbstractSVRLMessage;
 
 import eu.toop.commons.dataexchange.v140.TDEDataProviderType;

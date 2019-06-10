@@ -22,7 +22,7 @@ import javax.annotation.Nonnull;
 
 import com.helger.commons.annotation.MustImplementEqualsAndHashcode;
 import com.helger.commons.annotation.Nonempty;
-import com.helger.peppol.identifier.generic.participant.IParticipantIdentifier;
+import com.helger.peppolid.IParticipantIdentifier;
 
 /**
  * Read-only base interface for a single result endpoint. See

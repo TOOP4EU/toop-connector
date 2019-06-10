@@ -18,9 +18,9 @@ package eu.toop.connector.api;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
-import com.helger.peppol.identifier.factory.IIdentifierFactory;
-import com.helger.peppol.url.EsensURLProvider;
+import com.helger.peppol.url.BDXLURLProvider;
 import com.helger.peppol.url.IPeppolURLProvider;
+import com.helger.peppolid.factory.IIdentifierFactory;
 
 /**
  * This class contains global settings for the TOOP Connector.
@@ -42,6 +42,6 @@ public final class TCSettings
   @Nonnull
   public static IPeppolURLProvider getSMPUrlProvider ()
   {
-    return EsensURLProvider.INSTANCE;
+    return BDXLURLProvider.INSTANCE;
   }
 }
