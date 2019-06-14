@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.Nonempty;
 import com.helger.commons.io.file.FileHelper;
+import com.helger.commons.io.stream.StreamHelper;
 import com.helger.commons.io.stream.WrappedInputStream;
 import com.helger.commons.io.stream.WrappedOutputStream;
 
@@ -96,8 +97,8 @@ public final class TCDumpHelper
           {
             try
             {
-              // Close dump file as well
-              aDebugFOS.close ();
+              // Close and flush dump file as well
+              StreamHelper.close (aDebugFOS);
             }
             finally
             {
