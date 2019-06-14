@@ -55,7 +55,7 @@ public final class TCDumpHelper
     ValueEnforcer.notNull (aSrcIS, "SrcIS");
     ValueEnforcer.notEmpty (sContextAndExtension, "ContextAndExtension");
 
-    if (aDumpDirectory != null && aDumpDirectory.exists ())
+    if (aDumpDirectory != null)
     {
       // Only if the dump directory is present and existing
       final String sFilename = Long.toString (System.nanoTime ()) + sContextAndExtension;
@@ -64,10 +64,13 @@ public final class TCDumpHelper
       if (LOGGER.isDebugEnabled ())
         LOGGER.debug ("Trying to open DumpInputStream file " + aDumpFile.getAbsolutePath ());
 
-      // Open log file
+      // Open log file (creates parent directories if necessary)
       final FileOutputStream aDebugFOS = FileHelper.getOutputStream (aDumpFile);
       if (aDebugFOS != null)
       {
+        if (LOGGER.isInfoEnabled ())
+          LOGGER.info ("Dumping InputStream to " + aDumpFile.getAbsolutePath ());
+
         return new WrappedInputStream (aSrcIS)
         {
           @Override
@@ -104,7 +107,8 @@ public final class TCDumpHelper
         };
       }
 
-      LOGGER.warn ("Failed to open DumpInputStream file '" + aDumpFile.getAbsolutePath () + "' for writing");
+      if (LOGGER.isWarnEnabled ())
+        LOGGER.warn ("Failed to open DumpInputStream file '" + aDumpFile.getAbsolutePath () + "' for writing");
     }
 
     return aSrcIS;
@@ -118,19 +122,22 @@ public final class TCDumpHelper
     ValueEnforcer.notNull (aSrcOS, "SrcOS");
     ValueEnforcer.notEmpty (sContextAndExtension, "ContextAndExtension");
 
-    if (aDumpDirectory != null && aDumpDirectory.exists ())
+    if (aDumpDirectory != null)
     {
-      // Only if the dump directory is present and existing
+      // Only if the dump directory is set
       final String sFilename = Long.toString (System.nanoTime ()) + sContextAndExtension;
       final File aDumpFile = new File (aDumpDirectory, sFilename);
 
       if (LOGGER.isDebugEnabled ())
         LOGGER.debug ("Trying to open DumpOutputStream file " + aDumpFile.getAbsolutePath ());
 
-      // Open log file
+      // Open log file (creates parent directories if necessary)
       final FileOutputStream aDebugFOS = FileHelper.getOutputStream (aDumpFile);
       if (aDebugFOS != null)
       {
+        if (LOGGER.isInfoEnabled ())
+          LOGGER.info ("Dumping OutputStream to " + aDumpFile.getAbsolutePath ());
+
         return new WrappedOutputStream (aSrcOS)
         {
           @Override
@@ -176,7 +183,8 @@ public final class TCDumpHelper
         };
       }
 
-      LOGGER.warn ("Failed to open DumpOutputStream file '" + aDumpFile.getAbsolutePath () + "' for writing");
+      if (LOGGER.isWarnEnabled ())
+        LOGGER.warn ("Failed to open DumpOutputStream file '" + aDumpFile.getAbsolutePath () + "' for writing");
     }
 
     return aSrcOS;
