@@ -2,7 +2,7 @@
 
 The joint message process for both sides of the process
 
-Latest release: **0.10.4** (2019-05-20)
+Latest release: **0.10.5** (2019-06-24)
 
 # How it works
 
