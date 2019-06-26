@@ -20,19 +20,19 @@ import javax.annotation.concurrent.Immutable;
 import com.helger.photon.jetty.JettyStarter;
 
 /**
- * Run as a standalone web application in Jetty on port 8091.<br>
- * http://localhost:8091/
+ * Run as a standalone web application in Jetty on port 8090.<br>
+ * http://localhost:8090/
  *
  * @author Philip Helger
  */
 @Immutable
-public final class RunInJettyToopTC_DP
+public final class RunInJettyToopTC
 {
   public static void main (final String [] args) throws Exception
   {
-    final JettyStarter js = new JettyStarter (RunInJettyToopTC_DP.class).setPort (8091)
-                                                                        .setStopPort (9091)
-                                                                        .setSessionCookieName ("TOOP_TC_DP_SESSION")
+    final JettyStarter js = new JettyStarter (RunInJettyToopTC.class).setPort (8090)
+                                                                        .setStopPort (9090)
+                                                                        .setSessionCookieName ("TOOP_TC_DC_SESSION")
                                                                         .setContainerIncludeJarPattern (".*/classes/.*");
     js.run ();
   }

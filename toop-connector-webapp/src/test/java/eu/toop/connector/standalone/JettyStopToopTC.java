@@ -19,10 +19,10 @@ import java.io.IOException;
 
 import com.helger.photon.jetty.JettyStopper;
 
-public final class JettyStopToopTC_DP
+public final class JettyStopToopTC
 {
   public static void main (final String [] args) throws IOException
   {
-    new JettyStopper ().setStopPort (9091).run ();
+    new JettyStopper ().setStopPort (9090).run ();
   }
 }
