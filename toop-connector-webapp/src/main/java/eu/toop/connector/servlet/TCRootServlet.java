@@ -16,15 +16,23 @@
 package eu.toop.connector.servlet;
 
 import java.io.IOException;
+import java.util.Map;
 
 import javax.annotation.Nonnull;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRegistration;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.helger.commons.string.StringHelper;
+import com.helger.commons.collection.CollectionHelper;
+import com.helger.commons.datetime.PDTFactory;
+import com.helger.commons.debug.GlobalDebug;
+import com.helger.commons.http.CHttpHeader;
+import com.helger.commons.mime.CMimeType;
+
+import eu.toop.connector.app.CTC;
 
 /**
  * Servlet for handling the initial calls without any path. This servlet
@@ -39,12 +47,35 @@ public class TCRootServlet extends HttpServlet
   protected void doGet (@Nonnull final HttpServletRequest req,
                         @Nonnull final HttpServletResponse resp) throws ServletException, IOException
   {
-    String sRedirectURL = req.getContextPath () + "/index.html";
+    final String sCSS = "* { font-family: sans-serif; }" + " a:link, a:visited, a:hover, a:active { color: #2255ff; }";
 
-    final String sQueryString = req.getQueryString ();
-    if (StringHelper.hasText (sQueryString))
-      sRedirectURL += "?" + sQueryString;
+    final StringBuilder aSB = new StringBuilder ();
+    aSB.append ("<html><head><title>TOOP Connector</title><style>").append (sCSS).append ("</style></head><body>");
+    aSB.append ("<h1>TOOP Connector</h1>");
+    aSB.append ("<div>Version: ").append (CTC.getVersionNumber ()).append ("</div>");
+    aSB.append ("<div>Build timestamp: ").append (CTC.getBuildTimestamp ()).append ("</div>");
+    aSB.append ("<div>Current time: ").append (PDTFactory.getCurrentZonedDateTimeUTC ().toString ()).append ("</div>");
+    aSB.append ("<a href='tc-status'>Check /tc-status</a>");
 
-    resp.sendRedirect (sRedirectURL);
+    if (GlobalDebug.isDebugMode ())
+    {
+      aSB.append ("<h2>Debug information</h2>");
+      for (final Map.Entry <String, ? extends ServletRegistration> aEntry : CollectionHelper.getSortedByKey (req.getServletContext ()
+                                                                                                                .getServletRegistrations ())
+                                                                                            .entrySet ())
+      {
+        aSB.append ("<div>Servlet <code>")
+           .append (aEntry.getKey ())
+           .append ("</code> mapped to ")
+           .append (aEntry.getValue ().getMappings ())
+           .append ("</div>");
+      }
+    }
+
+    aSB.append ("</body></html>");
+
+    resp.addHeader (CHttpHeader.CONTENT_TYPE, CMimeType.TEXT_HTML.getAsString ());
+    resp.getWriter ().write (aSB.toString ());
+    resp.getWriter ().flush ();
   }
 }

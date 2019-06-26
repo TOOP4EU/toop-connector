@@ -60,6 +60,7 @@ final class TCStatusXServletHandler implements IXServletSimpleHandler
     final IJsonObject aStatusData = new JsonObject ();
     aStatusData.add ("status.datetime", PDTWebDateHelper.getAsStringXSD (PDTFactory.getCurrentZonedDateTimeUTC ()));
     aStatusData.add ("version.toop-connector", CTC.getVersionNumber ());
+    aStatusData.add ("version.build-datetime", CTC.getBuildTimestamp ());
     aStatusData.add ("version.java", SystemProperties.getJavaVersion ());
     aStatusData.add ("global.debug", GlobalDebug.isDebugMode ());
     aStatusData.add ("global.production", GlobalDebug.isProductionMode ());
