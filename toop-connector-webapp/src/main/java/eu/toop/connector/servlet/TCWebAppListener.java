@@ -23,6 +23,8 @@ import javax.annotation.Nonnull;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.annotation.WebListener;
 
+import org.apache.kafka.clients.producer.ProducerConfig;
+
 import com.helger.commons.debug.GlobalDebug;
 import com.helger.commons.error.level.EErrorLevel;
 import com.helger.commons.exception.InitializationException;
@@ -93,7 +95,7 @@ public class TCWebAppListener extends WebScopeListener
       final String sToopTrackerUrl = TCConfig.getToopTrackerUrl ();
       if (StringHelper.hasNoText (sToopTrackerUrl))
         throw new InitializationException ("If the tracker is enabled, the tracker URL MUST be provided in the configuration file!");
-      ToopKafkaSettings.defaultProperties ().put ("bootstrap.servers", sToopTrackerUrl);
+      ToopKafkaSettings.defaultProperties ().put (ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, sToopTrackerUrl);
 
       final String sToopTrackerTopic = TCConfig.getToopTrackerTopic ();
       ToopKafkaSettings.setKafkaTopic (sToopTrackerTopic);
