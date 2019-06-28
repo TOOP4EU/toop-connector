@@ -26,7 +26,7 @@ import com.helger.commons.annotation.IsSPIImplementation;
 import com.helger.commons.functional.ISupplier;
 
 /**
- * Library specific implementation of {@link IAS4ProfileRegistrarSPI}.
+ * TOOP specific implementation of {@link IAS4ProfileRegistrarSPI}.
  *
  * @author Philip Helger
  */

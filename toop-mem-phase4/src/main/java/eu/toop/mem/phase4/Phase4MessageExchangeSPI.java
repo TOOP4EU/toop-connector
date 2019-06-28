@@ -79,7 +79,7 @@ import eu.toop.mem.phase4.config.TOOPPMode;
 import eu.toop.mem.phase4.servlet.AS4MessageProcessorSPI;
 
 /**
- * {@link IMessageExchangeSPI} implementation using ph-as4
+ * TOOP {@link IMessageExchangeSPI} implementation using ph-as4.
  *
  * @author Philip Helger
  */
@@ -135,6 +135,10 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
 
     // Remember handler
     AS4MessageProcessorSPI.setIncomingHandler (aIncomingHandler);
+
+    // Enable debug (incoming and outgoing)
+    if (Phase4Config.isHttpDebugEnabled ())
+      AS4HttpDebug.setEnabled (true);
   }
 
   @Nonnull
@@ -235,9 +239,6 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
 
     // Proxy config etc
     aClient.setHttpClientFactory (new TCHttpClientFactory ());
-
-    if (Phase4Config.isHttpDebugEnabled ())
-      AS4HttpDebug.setEnabled (true);
 
     try
     {

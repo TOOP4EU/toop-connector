@@ -22,7 +22,8 @@ import com.helger.commons.http.EHttpMethod;
 import com.helger.xservlet.AbstractXServlet;
 
 /**
- * Local AS4 servlet
+ * Local AS4 servlet. This endpoint must be used in the SMP for receiving
+ * messages.
  *
  * @author Philip Helger
  */
