@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStore.PrivateKeyEntry;
 import java.security.cert.X509Certificate;
+import java.util.Locale;
 
 import javax.annotation.Nonnull;
 import javax.naming.InvalidNameException;
@@ -52,7 +53,6 @@ import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.IsSPIImplementation;
 import com.helger.commons.annotation.Nonempty;
 import com.helger.commons.exception.InitializationException;
-import com.helger.commons.io.file.FileOperationManager;
 import com.helger.commons.io.file.FilenameHelper;
 import com.helger.commons.io.file.SimpleFileIO;
 import com.helger.commons.io.resource.ClassPathResource;
@@ -64,10 +64,11 @@ import com.helger.datetime.util.PDTIOHelper;
 import com.helger.httpclient.response.ResponseHandlerByteArray;
 import com.helger.photon.basic.app.io.WebFileIO;
 import com.helger.security.keystore.KeyStoreHelper;
+import com.helger.security.keystore.LoadedKey;
+import com.helger.security.keystore.LoadedKeyStore;
 import com.helger.servlet.ServletHelper;
 
 import eu.toop.commons.error.EToopErrorCode;
-import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.as4.IMERoutingInformation;
 import eu.toop.connector.api.as4.IMessageExchangeSPI;
 import eu.toop.connector.api.as4.MEException;
@@ -104,14 +105,12 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
     ValueEnforcer.notNull (aServletContext, "ServletContext");
     ValueEnforcer.notNull (aIncomingHandler, "IncomingHandler");
 
-    // TODO register for servlet
-
     {
       // Get the ServletContext base path
       final String sServletContextPath = ServletHelper.getServletContextBasePath (aServletContext);
 
       // Get the data path
-      final String sDataPath = TCConfig.getConfigFile ().getAsString ("toop.phase4.datapath");
+      final String sDataPath = Phase4Config.getDataPath ();
       if (StringHelper.hasNoText (sDataPath))
         throw new InitializationException ("No data path was provided!");
       final File aDataPath = new File (sDataPath).getAbsoluteFile ();
@@ -119,18 +118,11 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
       WebFileIO.initPaths (aDataPath, sServletContextPath, false);
     }
 
+    // Register server once
     AS4ServerInitializer.initAS4Server ();
 
     final PModeManager aPModeMgr = MetaAS4Manager.getPModeMgr ();
     {
-      // SIMPLE_ONEWAY
-      // 1. MEP: One way - push
-      // 2. Compress: Yes
-      // 3. Retry: None
-      // 4. Sign: Yes
-      // 5. Encrypt: Yes
-      // 6. Service: SRV_SIMPLE_ONEWAY
-      // 7. Action: ACT_SIMPLE_ONEWAY
       final PMode aPMode = TOOPPMode.createTOOPMode ("AnyInitiatorID",
                                                      "AnyResponderID",
                                                      "AnyResponderAddress",
@@ -172,20 +164,21 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
     final CryptoProperties aCP = AS4ServerSettings.getAS4CryptoFactory ().getCryptoProperties ();
     {
       // Sanity check
-      final KeyStore aOurKS = KeyStoreHelper.loadKeyStore (aCP.getKeyStoreType (),
-                                                           aCP.getKeyStorePath (),
-                                                           aCP.getKeyStorePassword ())
-                                            .getKeyStore ();
+      final LoadedKeyStore aLKS = KeyStoreHelper.loadKeyStore (aCP.getKeyStoreType (),
+                                                               aCP.getKeyStorePath (),
+                                                               aCP.getKeyStorePassword ());
+      final KeyStore aOurKS = aLKS.getKeyStore ();
       if (aOurKS == null)
-        throw new InitializationException ("Failed to load keystore");
+        throw new InitializationException ("Failed to load keystore: " + aLKS.getErrorText (Locale.US));
 
-      final PrivateKeyEntry aOurCert = KeyStoreHelper.loadPrivateKey (aOurKS,
-                                                                      aCP.getKeyStorePath (),
-                                                                      aCP.getKeyAlias (),
-                                                                      aCP.getKeyPassword ().toCharArray ())
-                                                     .getKeyEntry ();
+      final LoadedKey <KeyStore.PrivateKeyEntry> aLK = KeyStoreHelper.loadPrivateKey (aOurKS,
+                                                                                      aCP.getKeyStorePath (),
+                                                                                      aCP.getKeyAlias (),
+                                                                                      aCP.getKeyPassword ()
+                                                                                         .toCharArray ());
+      final PrivateKeyEntry aOurCert = aLK.getKeyEntry ();
       if (aOurCert == null)
-        throw new InitializationException ("Failed to load key");
+        throw new InitializationException ("Failed to load key: " + aLK.getErrorText (Locale.US));
     }
 
     final AS4ResourceManager aResMgr = new AS4ResourceManager ();
@@ -213,11 +206,8 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
 
     // Backend or gateway?
     aClient.setFromRole ("http://www.toop.eu/edelivery/backend");
-    aClient.setFromPartyID (TCConfig.getMEMAS4TcPartyid ());
-    if (true)
-      aClient.setToRole ("http://www.toop.eu/edelivery/gateway");
-    else
-      aClient.setToRole ("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
+    aClient.setFromPartyID (Phase4Config.getFromPartyID ());
+    aClient.setToRole ("http://www.toop.eu/edelivery/gateway");
     aClient.setToPartyID (_getCN (aTheirCert.getSubjectDN ().getName ()));
     aClient.setPayload (null);
 
@@ -246,8 +236,7 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
     // Proxy config etc
     aClient.setHttpClientFactory (new TCHttpClientFactory ());
 
-    // Debug only!!!
-    if (true)
+    if (Phase4Config.isHttpDebugEnabled ())
       AS4HttpDebug.setEnabled (true);
 
     try
@@ -272,8 +261,7 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
                                  "-" +
                                  FilenameHelper.getAsSecureValidASCIIFilename (sMessageID) +
                                  "-response.xml";
-        final File aResponseFile = new File ("as4-responses", sFilename);
-        FileOperationManager.INSTANCE.createDirIfNotExisting (aResponseFile.getParentFile ());
+        final File aResponseFile = new File (Phase4Config.getSendResponseFolderName (), sFilename);
         if (SimpleFileIO.writeFile (aResponseFile, aResponseEntity.getResponse ()).isSuccess ())
           LOGGER.info ("Response file was written to '" + aResponseFile.getAbsolutePath () + "'");
         else
@@ -287,7 +275,6 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
       LOGGER.error ("Error sending message", ex);
       throw new MEException (EToopErrorCode.ME_001, ex);
     }
-
   }
 
   public void sendDCOutgoing (@Nonnull final IMERoutingInformation aRoutingInfo,
@@ -307,5 +294,7 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
   }
 
   public void shutdown (@Nonnull final ServletContext aServletContext)
-  {}
+  {
+    // Nothing to do here
+  }
 }

@@ -31,6 +31,7 @@ import com.helger.as4.model.pmode.PModeParty;
 import com.helger.as4.model.pmode.PModePayloadService;
 import com.helger.as4.model.pmode.PModeReceptionAwareness;
 import com.helger.as4.model.pmode.leg.EPModeSendReceiptReplyPattern;
+import com.helger.as4.model.pmode.leg.PModeAddressList;
 import com.helger.as4.model.pmode.leg.PModeLeg;
 import com.helger.as4.model.pmode.leg.PModeLegBusinessInformation;
 import com.helger.as4.model.pmode.leg.PModeLegErrorHandling;
@@ -99,10 +100,10 @@ public class TOOPPMode
                                     new PModeLeg (PModeLegProtocol.createForDefaultSOAPVersion (sResponderAddress),
                                                   new PModeLegBusinessInformation ("http://www.toop.eu/edelivery/bit",
                                                                                    "Deliver",
-                                                                                   null,
+                                                                                   (Long) null,
                                                                                    CAS4.DEFAULT_MPC_ID),
-                                                  new PModeLegErrorHandling (null,
-                                                                             null,
+                                                  new PModeLegErrorHandling ((PModeAddressList) null,
+                                                                             (PModeAddressList) null,
                                                                              ETriState.TRUE,
                                                                              ETriState.TRUE,
                                                                              ETriState.UNDEFINED,

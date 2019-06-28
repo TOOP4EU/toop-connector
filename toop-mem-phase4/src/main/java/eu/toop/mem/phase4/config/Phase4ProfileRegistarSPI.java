@@ -21,7 +21,9 @@ import com.helger.as4.model.pmode.IPModeIDProvider;
 import com.helger.as4.profile.AS4Profile;
 import com.helger.as4.profile.IAS4ProfileRegistrar;
 import com.helger.as4.profile.IAS4ProfileRegistrarSPI;
+import com.helger.as4.profile.IAS4ProfileValidator;
 import com.helger.commons.annotation.IsSPIImplementation;
+import com.helger.commons.functional.ISupplier;
 
 /**
  * Library specific implementation of {@link IAS4ProfileRegistrarSPI}.
@@ -36,10 +38,11 @@ public final class Phase4ProfileRegistarSPI implements IAS4ProfileRegistrarSPI
 
   public void registerAS4Profile (@Nonnull final IAS4ProfileRegistrar aRegistrar)
   {
+    final ISupplier <? extends IAS4ProfileValidator> aProfileValidatorProvider = () -> null;
     final IPModeIDProvider aPModeIDProvider = IPModeIDProvider.DEFAULT_DYNAMIC;
     aRegistrar.registerProfile (new AS4Profile (AS4_PROFILE_ID,
                                                 AS4_PROFILE_NAME,
-                                                () -> null,
+                                                aProfileValidatorProvider,
                                                 (i, r, a) -> TOOPPMode.createTOOPMode (i, r, a, aPModeIDProvider, true),
                                                 aPModeIDProvider));
   }

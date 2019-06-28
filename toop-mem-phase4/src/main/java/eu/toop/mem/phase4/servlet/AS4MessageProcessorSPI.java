@@ -49,6 +49,7 @@ import eu.toop.commons.exchange.ToopRequestWithAttachments140;
 import eu.toop.commons.exchange.ToopResponseWithAttachments140;
 import eu.toop.connector.api.as4.IMessageExchangeSPI.IIncomingHandler;
 import eu.toop.kafkaclient.ToopKafkaClient;
+import eu.toop.mem.phase4.Phase4Config;
 
 /**
  * Test implementation of {@link IAS4ServletMessageProcessorSPI}
@@ -77,8 +78,7 @@ public class AS4MessageProcessorSPI implements IAS4ServletMessageProcessorSPI
                                                           @Nullable final ICommonsList <WSS4JAttachment> aIncomingAttachments,
                                                           @Nonnull final IAS4MessageState aState)
   {
-    // Needed for AS4_TA13 because we want to force a decompression failure and
-    // for that to happen the stream has to be read
+    if (Phase4Config.isDebugIncoming ())
     {
       LOGGER.info ("Received AS4 message:");
       LOGGER.info ("  UserMessage: " + aUserMessage);
@@ -125,7 +125,7 @@ public class AS4MessageProcessorSPI implements IAS4ServletMessageProcessorSPI
         {
           // This is the way from DP back to DC; we're in DC incoming mode
           final ToopResponseWithAttachments140 aResponse = new ToopResponseWithAttachments140 ((TDETOOPResponseType) aMsg,
-                                                                                         aAttachments);
+                                                                                               aAttachments);
           s_aIncomingHandler.handleIncomingResponse (aResponse);
         }
         else
@@ -133,7 +133,7 @@ public class AS4MessageProcessorSPI implements IAS4ServletMessageProcessorSPI
           {
             // This is the way from DC to DP; we're in DP incoming mode
             final ToopRequestWithAttachments140 aRequest = new ToopRequestWithAttachments140 ((TDETOOPRequestType) aMsg,
-                                                                                        aAttachments);
+                                                                                              aAttachments);
             s_aIncomingHandler.handleIncomingRequest (aRequest);
           }
           else
