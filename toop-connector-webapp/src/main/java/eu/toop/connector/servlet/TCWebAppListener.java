@@ -92,13 +92,18 @@ public class TCWebAppListener extends WebScopeListener
     {
       // Init tracker client
       ToopKafkaSettings.setKafkaEnabled (TCConfig.isToopTrackerEnabled ());
-      final String sToopTrackerUrl = TCConfig.getToopTrackerUrl ();
-      if (StringHelper.hasNoText (sToopTrackerUrl))
-        throw new InitializationException ("If the tracker is enabled, the tracker URL MUST be provided in the configuration file!");
-      ToopKafkaSettings.defaultProperties ().put (ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, sToopTrackerUrl);
+      if (TCConfig.isToopTrackerEnabled ())
+      {
+        final String sToopTrackerUrl = TCConfig.getToopTrackerUrl ();
+        if (StringHelper.hasNoText (sToopTrackerUrl))
+          throw new InitializationException ("If the tracker is enabled, the tracker URL MUST be provided in the configuration file!");
+        if (sToopTrackerUrl.startsWith ("http://") || sToopTrackerUrl.startsWith ("https://"))
+          throw new InitializationException ("The tracker URL MUST NOT start with a protocol like 'http://'!");
+        ToopKafkaSettings.defaultProperties ().put (ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, sToopTrackerUrl);
 
-      final String sToopTrackerTopic = TCConfig.getToopTrackerTopic ();
-      ToopKafkaSettings.setKafkaTopic (sToopTrackerTopic);
+        final String sToopTrackerTopic = TCConfig.getToopTrackerTopic ();
+        ToopKafkaSettings.setKafkaTopic (sToopTrackerTopic);
+      }
     }
 
     {
