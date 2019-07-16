@@ -44,7 +44,7 @@ import eu.toop.kafkaclient.ToopKafkaClient;
  *
  * @author Philip Helger
  */
-public final class MessageProcessorDPIncoming extends AbstractGlobalWebSingleton
+final class MessageProcessorDPIncoming extends AbstractGlobalWebSingleton
 {
   private static final Logger LOGGER = LoggerFactory.getLogger (MessageProcessorDPIncoming.class);
   // Just to have custom named threads....
@@ -66,7 +66,7 @@ public final class MessageProcessorDPIncoming extends AbstractGlobalWebSingleton
   /**
    * The global accessor method.
    *
-   * @return The one and only {@link MessageProcessorDPIncoming} instance.
+   * @return The one and only instance. Never <code>null</code>.
    */
   @Nonnull
   public static MessageProcessorDPIncoming getInstance ()

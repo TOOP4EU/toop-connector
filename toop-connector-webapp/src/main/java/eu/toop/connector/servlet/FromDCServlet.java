@@ -34,18 +34,16 @@ import eu.toop.commons.dataexchange.v140.TDETOOPRequestType;
 import eu.toop.commons.dataexchange.v140.TDETOOPResponseType;
 import eu.toop.commons.exchange.AsicReadEntry;
 import eu.toop.commons.exchange.ToopMessageBuilder140;
-import eu.toop.commons.exchange.ToopRequestWithAttachments140;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.app.TCDumpHelper;
-import eu.toop.connector.app.mp.MessageProcessorDCOutgoing;
+import eu.toop.connector.app.mp.MPTrigger;
 import eu.toop.kafkaclient.ToopKafkaClient;
 
 /**
  * This method is called by the <code>toop-interface</code> project in the
  * direction DC to DP.<br>
  * The input is an ASiC archive that contains a {@link TDETOOPRequestType}. If
- * extracted successfully it is put in {@link MessageProcessorDCOutgoing} for
- * further processing.
+ * extracted successfully it is put in DC outgoing queue for further processing.
  *
  * @author Philip Helger
  */
@@ -85,8 +83,7 @@ public class FromDCServlet extends HttpServlet
                               () -> "The /from-dc request contains a TOOP Response, but needs a TOOP Request only. Please check your endpoint configuration.");
 
       // Enqueue to processor and we're good
-      final ToopRequestWithAttachments140 aRequest = new ToopRequestWithAttachments140 (aRequestMsg, aAttachments);
-      MessageProcessorDCOutgoing.getInstance ().enqueue (aRequest);
+      MPTrigger.fromDC_1_of_4 (aRequestMsg, aAttachments);
 
       // Done - no content
       aUR.setStatus (HttpServletResponse.SC_ACCEPTED);

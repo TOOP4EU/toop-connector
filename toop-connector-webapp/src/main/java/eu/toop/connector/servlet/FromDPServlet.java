@@ -33,18 +33,17 @@ import com.helger.commons.mime.CMimeType;
 import eu.toop.commons.dataexchange.v140.TDETOOPResponseType;
 import eu.toop.commons.exchange.AsicReadEntry;
 import eu.toop.commons.exchange.ToopMessageBuilder140;
-import eu.toop.commons.exchange.ToopResponseWithAttachments140;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.app.TCDumpHelper;
-import eu.toop.connector.app.mp.MessageProcessorDPOutgoing;
+import eu.toop.connector.app.mp.MPTrigger;
 import eu.toop.kafkaclient.ToopKafkaClient;
 
 /**
  * This method is called by the <code>toop-interface</code> project in the
  * direction DP to DC.<br>
  * The input is an ASiC archive that contains a {@link TDETOOPResponseType}. If
- * extracted successfully it is put in {@link MessageProcessorDPOutgoing} for
- * further processing.
+ * extracted successfully it is put in the DP outgoing queue for further
+ * processing.
  *
  * @author Philip Helger
  */
@@ -80,8 +79,7 @@ public class FromDPServlet extends HttpServlet
     else
     {
       // Enqueue to processor and we're good
-      final ToopResponseWithAttachments140 aResponse = new ToopResponseWithAttachments140 (aResponseMsg, aAttachments);
-      MessageProcessorDPOutgoing.getInstance ().enqueue (aResponse);
+      MPTrigger.fromDP_3_of_4 (aResponseMsg, aAttachments);
 
       // Done - no content
       aUR.setStatus (HttpServletResponse.SC_NO_CONTENT);

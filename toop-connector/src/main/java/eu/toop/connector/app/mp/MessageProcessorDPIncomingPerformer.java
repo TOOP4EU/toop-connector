@@ -105,7 +105,7 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
     try (final HttpClientManager aMgr = new HttpClientManager (aHCFactory);
         final NonBlockingByteArrayOutputStream aBAOS = new NonBlockingByteArrayOutputStream ())
     {
-      ToopMessageBuilder140.createRequestMessageAsic (aRequest, aBAOS, MPWebAppConfig.getSignatureHelper ());
+      ToopMessageBuilder140.createRequestMessageAsic (aRequest, aBAOS, MPConfig.getSignatureHelper ());
 
       // Send to DP (see ToDPServlet in toop-interface)
       final String sDestinationUrl = TCConfig.getMPToopInterfaceDPUrl ();
@@ -207,7 +207,7 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
         };
         final IMappedValueList aMappedValues = aSMMClient.performMapping (sLogPrefix,
                                                                           sDestinationMappingURI,
-                                                                          MPWebAppConfig.getSMMConceptProvider (),
+                                                                          MPConfig.getSMMConceptProvider (),
                                                                           aUnmappableCallback);
 
         // add all the mapped values in the request

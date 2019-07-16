@@ -78,7 +78,7 @@ final class MessageProcessorDCIncomingPerformer implements IConcurrentPerformer 
 
       ToopMessageBuilder140.createResponseMessageAsic (aResponse,
                                                        aBAOS,
-                                                       MPWebAppConfig.getSignatureHelper (),
+                                                       MPConfig.getSignatureHelper (),
                                                        aWriteAttachments);
 
       ToopKafkaClient.send (EErrorLevel.INFO, () -> "Start posting signed ASiC response to '" + sDestinationUrl + "'");

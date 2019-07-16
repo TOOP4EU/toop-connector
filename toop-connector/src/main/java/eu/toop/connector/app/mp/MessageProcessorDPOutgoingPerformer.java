@@ -140,7 +140,7 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
 
       ToopMessageBuilder140.createResponseMessageAsic (aResponseWA.getResponse (),
                                                        aBAOS,
-                                                       MPWebAppConfig.getSignatureHelper (),
+                                                       MPConfig.getSignatureHelper (),
                                                        aWriteAttachments);
 
       // Send to DP (see ToDPServlet in toop-interface)
@@ -314,7 +314,7 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
 
               ToopMessageBuilder140.createResponseMessageAsic (aResponse,
                                                                aDumpOS,
-                                                               MPWebAppConfig.getSignatureHelper (),
+                                                               MPConfig.getSignatureHelper (),
                                                                aWriteAttachments);
             }
             catch (final ToopErrorException ex)

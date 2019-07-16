@@ -311,7 +311,7 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
               // Logging happens internally
               aMappedValues = aSMMClient.performMapping (sLogPrefix,
                                                          sSMMDomain,
-                                                         MPWebAppConfig.getSMMConceptProvider (),
+                                                         MPConfig.getSMMConceptProvider (),
                                                          aUnmappableCallback);
             }
           }
@@ -476,7 +476,7 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
                                                                                TCConfig.getDebugToDPDumpPathIfEnabled (),
                                                                                "to-dp.asic"))
             {
-              ToopMessageBuilder140.createRequestMessageAsic (aRequest, aBAOS, MPWebAppConfig.getSignatureHelper ());
+              ToopMessageBuilder140.createRequestMessageAsic (aRequest, aBAOS, MPConfig.getSignatureHelper ());
             }
             catch (final ToopErrorException ex)
             {

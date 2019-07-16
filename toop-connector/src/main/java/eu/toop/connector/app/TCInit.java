@@ -24,10 +24,9 @@ import eu.toop.commons.exchange.ToopRequestWithAttachments140;
 import eu.toop.commons.exchange.ToopResponseWithAttachments140;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.as4.IMessageExchangeSPI.IIncomingHandler;
+import eu.toop.connector.app.mp.MPTrigger;
 import eu.toop.connector.api.as4.MEException;
 import eu.toop.connector.api.as4.MessageExchangeManager;
-import eu.toop.connector.app.mp.MessageProcessorDCIncoming;
-import eu.toop.connector.app.mp.MessageProcessorDPIncoming;
 import eu.toop.kafkaclient.ToopKafkaClient;
 import eu.toop.kafkaclient.ToopKafkaSettings;
 
@@ -140,7 +139,7 @@ public class TCInit
                                                           "TC got DP incoming MEM request (2/4) with " +
                                                           aRequest.attachments ().size () +
                                                           " attachments");
-                              MessageProcessorDPIncoming.getInstance ().enqueue (aRequest);
+                              MPTrigger.incomingGatewayDP_2_of_4 (aRequest);
                             }
 
                             public void handleIncomingResponse (@Nonnull final ToopResponseWithAttachments140 aResponse) throws MEException
@@ -150,7 +149,7 @@ public class TCInit
                                                           "TC got DC incoming MEM request (4/4) with " +
                                                           aResponse.attachments ().size () +
                                                           " attachments");
-                              MessageProcessorDCIncoming.getInstance ().enqueue (aResponse);
+                              MPTrigger.incomingGatewayDC_4_of_4 (aResponse);
                             }
                           });
 

@@ -44,7 +44,7 @@ import eu.toop.commons.codelist.EPredefinedParticipantIdentifierScheme;
 import eu.toop.connector.api.as4.MessageExchangeManager;
 
 /**
- * This class contains global configuration elements for the TOOP COnnector.
+ * This class contains global configuration elements for the TOOP Connector.
  *
  * @author Philip Helger, BRZ, AT
  */
