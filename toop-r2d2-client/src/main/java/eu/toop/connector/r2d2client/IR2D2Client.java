@@ -15,6 +15,8 @@
  */
 package eu.toop.connector.r2d2client;
 
+import java.io.Serializable;
+
 import javax.annotation.Nonnull;
 
 import com.helger.commons.annotation.Nonempty;
@@ -31,7 +33,7 @@ import eu.toop.commons.error.ToopErrorException;
  *
  * @author Philip Helger, BRZ, AT
  */
-public interface IR2D2Client
+public interface IR2D2Client extends Serializable
 {
   /**
    * Get a list of all endpoints that match the specified requirements. This is
@@ -41,8 +43,8 @@ public interface IR2D2Client
    * Internally country code and document type are queried against the correct
    * PEPPOL Directory instance (depending on the production or test flag). The
    * SMPs of the resulting service group IDs are than queried in a loop for all
-   * matching endpoints (of participant ID and document type ID) which are parsed
-   * and converted to simpler R2D2Endpoint instances.<br>
+   * matching endpoints (of participant ID and document type ID) which are
+   * parsed and converted to simpler R2D2Endpoint instances.<br>
    * Note: this method returns endpoints for all found transport protocols, so
    * this must be filtered externally.
    *
@@ -56,8 +58,8 @@ public interface IR2D2Client
    * @param aProcessID
    *        The process ID to be queried. May not be <code>null</code>.
    * @param sTransportProfileID
-   *        The transport profile ID to be used. May neither be <code>null</code>
-   *        nor empty.
+   *        The transport profile ID to be used. May neither be
+   *        <code>null</code> nor empty.
    * @return A non-<code>null</code> but maybe empty list of all matching
    *         endpoints.
    * @throws ToopErrorException
@@ -72,8 +74,8 @@ public interface IR2D2Client
 
   /**
    * Get a list of all endpoints that match the specified requirements. This is
-   * the API that is to be invoked in the case, where the ServiceGroup IDs of the
-   * receiver is known and NO PEPPOL Directory invocation is needed.<br>
+   * the API that is to be invoked in the case, where the ServiceGroup IDs of
+   * the receiver is known and NO PEPPOL Directory invocation is needed.<br>
    * Internally the SMP of the service group ID is queried and all matching
    * endpoints are parsed and converted to simpler R2D2Endpoint instances.<br>
    * Note: this method returns endpoints for all found transport protocols, so
@@ -89,8 +91,8 @@ public interface IR2D2Client
    * @param aProcessID
    *        The process ID to be queried. May not be <code>null</code>.
    * @param sTransportProfileID
-   *        The transport profile ID to be used. May neither be <code>null</code>
-   *        nor empty.
+   *        The transport profile ID to be used. May neither be
+   *        <code>null</code> nor empty.
    * @return A non-<code>null</code> but maybe empty list of all matching
    *         endpoints.
    * @throws ToopErrorException
