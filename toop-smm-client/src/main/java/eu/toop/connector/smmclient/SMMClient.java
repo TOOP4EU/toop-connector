@@ -72,7 +72,7 @@ public class SMMClient implements ISMMClient
   public IMappedValueList performMapping (@Nonnull final String sLogPrefix,
                                           @Nonnull @Nonempty final String sDestNamespace,
                                           @Nonnull final ISMMConceptProvider aConceptProvider,
-                                          @Nullable final IUnmappableCallback aUnmappableCallback) throws IOException
+                                          @Nullable final ISMMUnmappableCallback aUnmappableCallback) throws IOException
   {
 
     ValueEnforcer.notNull (sLogPrefix, "LogPrefix");

@@ -15,13 +15,33 @@
  */
 package eu.toop.connector.smmclient;
 
+import java.io.Serializable;
+
 import javax.annotation.Nonnull;
 
 import com.helger.commons.annotation.Nonempty;
 
+/**
+ * Callback interface to customize the handling of failed SMM mappings at
+ * runtime.
+ * 
+ * @author Philip Helger
+ */
 @FunctionalInterface
-public interface IUnmappableCallback
+public interface ISMMUnmappableCallback extends Serializable
 {
+  /**
+   * Invoked for every unmappable value.
+   *
+   * @param sLogPrefix
+   *        Logging prefix
+   * @param aSourceNamespace
+   *        Source namespace URI
+   * @param aSourceValue
+   *        Source value
+   * @param aDestNamespace
+   *        Destination namespace URI
+   */
   void onUnmappableValue (@Nonnull String sLogPrefix,
                           @Nonnull @Nonempty String aSourceNamespace,
                           @Nonnull @Nonempty String aSourceValue,

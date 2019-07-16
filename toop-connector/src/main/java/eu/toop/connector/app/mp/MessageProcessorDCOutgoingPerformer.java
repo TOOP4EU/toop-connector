@@ -82,7 +82,7 @@ import eu.toop.connector.r2d2client.IR2D2Endpoint;
 import eu.toop.connector.r2d2client.R2D2Client;
 import eu.toop.connector.smmclient.IMappedValueList;
 import eu.toop.connector.smmclient.ISMMClient;
-import eu.toop.connector.smmclient.IUnmappableCallback;
+import eu.toop.connector.smmclient.ISMMUnmappableCallback;
 import eu.toop.connector.smmclient.MappedValue;
 import eu.toop.connector.smmclient.MappedValueList;
 import eu.toop.connector.smmclient.SMMClient;
@@ -291,10 +291,10 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
             }
             else
             {
-              final IUnmappableCallback aUnmappableCallback = (sLogPrefix1,
-                                                               sSourceNamespace,
-                                                               sSourceValue,
-                                                               sDestNamespace) -> {
+              final ISMMUnmappableCallback aUnmappableCallback = (sLogPrefix1,
+                                                                  sSourceNamespace,
+                                                                  sSourceValue,
+                                                                  sDestNamespace) -> {
                 final String sErrorMsg = "Found no mapping for '" +
                                          sSourceNamespace +
                                          '#' +

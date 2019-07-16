@@ -33,6 +33,7 @@ import com.helger.commons.collection.impl.CommonsArrayList;
 import com.helger.commons.collection.impl.ICommonsList;
 import com.helger.commons.concurrent.collector.IConcurrentPerformer;
 import com.helger.commons.error.level.EErrorLevel;
+import com.helger.commons.error.level.IErrorLevel;
 import com.helger.commons.id.factory.GlobalIDFactory;
 import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 import com.helger.commons.lang.StackTraceHelper;
@@ -61,7 +62,7 @@ import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.http.TCHttpClientFactory;
 import eu.toop.connector.smmclient.IMappedValueList;
 import eu.toop.connector.smmclient.ISMMClient;
-import eu.toop.connector.smmclient.IUnmappableCallback;
+import eu.toop.connector.smmclient.ISMMUnmappableCallback;
 import eu.toop.connector.smmclient.MappedValue;
 import eu.toop.connector.smmclient.SMMClient;
 import eu.toop.kafkaclient.ToopKafkaClient;
@@ -76,13 +77,14 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
   private static final Logger LOGGER = LoggerFactory.getLogger (MessageProcessorDPIncomingPerformer.class);
 
   @Nonnull
-  private static TDEErrorType _createError (@Nonnull final String sLogPrefix,
+  private static TDEErrorType _createError (@Nonnull final IErrorLevel aErrorLevel,
+                                            @Nonnull final String sLogPrefix,
                                             @Nonnull final EToopErrorCategory eCategory,
                                             @Nonnull final IToopErrorCode aErrorCode,
                                             @Nonnull final String sErrorText,
                                             @Nullable final Throwable t)
   {
-    ToopKafkaClient.send (EErrorLevel.ERROR, () -> sLogPrefix + "[" + aErrorCode.getID () + "] " + sErrorText, t);
+    ToopKafkaClient.send (aErrorLevel, () -> sLogPrefix + "[" + aErrorCode.getID () + "] " + sErrorText, t);
     return ToopMessageBuilder140.createError (null,
                                               EToopErrorOrigin.REQUEST_RECEPTION,
                                               eCategory,
@@ -95,7 +97,12 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
   @Nonnull
   private static TDEErrorType _createGenericError (@Nonnull final String sLogPrefix, @Nonnull final Throwable t)
   {
-    return _createError (sLogPrefix, EToopErrorCategory.TECHNICAL_ERROR, EToopErrorCode.GEN, t.getMessage (), t);
+    return _createError (EErrorLevel.ERROR,
+                         sLogPrefix,
+                         EToopErrorCategory.TECHNICAL_ERROR,
+                         EToopErrorCode.GEN,
+                         t.getMessage (),
+                         t);
   }
 
   public static void sendTo_to_dp (@Nonnull final TDETOOPRequestType aRequest) throws ToopErrorException, IOException
@@ -181,10 +188,10 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
       {
         // Main mapping
         final boolean bUnmappableConceptLeadsToError = TCConfig.isSMMDPMappingErrorFatal ();
-        final IUnmappableCallback aUnmappableCallback = (sLogPrefix1,
-                                                         sSourceNamespace,
-                                                         sSourceValue,
-                                                         sDestNamespace) -> {
+        final ISMMUnmappableCallback aUnmappableCallback = (sLogPrefix1,
+                                                            sSourceNamespace,
+                                                            sSourceValue,
+                                                            sDestNamespace) -> {
           final String sErrorMsg = "Found no mapping for '" +
                                    sSourceNamespace +
                                    '#' +
@@ -194,7 +201,8 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
                                    "'";
           if (bUnmappableConceptLeadsToError)
           {
-            aErrors.add (_createError (sLogPrefix1,
+            aErrors.add (_createError (EErrorLevel.ERROR,
+                                       sLogPrefix1,
                                        EToopErrorCategory.SEMANTIC_MAPPING,
                                        EToopErrorCode.SM_002,
                                        sErrorMsg,
@@ -252,7 +260,8 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
       }
       catch (final IOException | ToopErrorException ex)
       {
-        aErrors.add (_createError (sLogPrefix,
+        aErrors.add (_createError (EErrorLevel.ERROR,
+                                   sLogPrefix,
                                    EToopErrorCategory.E_DELIVERY,
                                    EToopErrorCode.GEN,
                                    "Error sending request to DP",

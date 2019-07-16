@@ -50,9 +50,9 @@ public final class SMMClientTest
   private static final ConceptValue CONCEPT_FR_1 = new ConceptValue (CMockSMM.NS_FREEDONIA, "FreedoniaCompanyCode");
 
   // Use with cache and remote
-  private static final ISMMConceptProvider [] CP = new ISMMConceptProvider [] { SMMConceptProviderGRLCRemote::getAllMappedValues,
-                                                                                SMMConceptProviderGRLCRemote::remoteQueryAllMappedValues };
-  private static final IUnmappableCallback UCB = (sLogPrefix, aSourceNamespace, aSourceValue, aDestNamespace) -> {
+  private static final ISMMConceptProvider [] CP = new ISMMConceptProvider [] { new SMMConceptProviderGRLCWithCache (),
+                                                                                new SMMConceptProviderGRLCRemote () };
+  private static final ISMMUnmappableCallback UCB = (sLogPrefix, aSourceNamespace, aSourceValue, aDestNamespace) -> {
     // Do nothing
   };
 
@@ -148,6 +148,7 @@ public final class SMMClientTest
     final IMicroElement eRoot = aDoc.appendElement ("root");
     // Get all namespaces
     final ICommonsOrderedSet <String> aNSs = SMMConceptProviderGRLCRemote.remoteQueryAllNamespaces (CMockSMM.LOG_PREFIX);
+    final ISMMConceptProvider aCP = new SMMConceptProviderGRLCWithCache ();
 
     // For all namespaces
     for (final String sSrc : aNSs)
@@ -157,9 +158,7 @@ public final class SMMClientTest
         eValueList.setAttribute ("srcns", sSrc);
         eValueList.setAttribute ("dstns", CMockSMM.NS_TOOP);
 
-        final MappedValueList aMVL = SMMConceptProviderGRLCRemote.getAllMappedValues (CMockSMM.LOG_PREFIX,
-                                                                                      sSrc,
-                                                                                      CMockSMM.NS_TOOP);
+        final MappedValueList aMVL = aCP.getAllMappedValues (CMockSMM.LOG_PREFIX, sSrc, CMockSMM.NS_TOOP);
         for (final MappedValue aItem : CollectionHelper.getSorted (aMVL,
                                                                    Comparator.comparing (x -> x.getSource ()
                                                                                                .getValue ())))

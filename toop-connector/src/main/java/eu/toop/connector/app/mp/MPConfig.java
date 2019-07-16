@@ -25,7 +25,7 @@ import com.helger.commons.concurrent.SimpleReadWriteLock;
 
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.smmclient.ISMMConceptProvider;
-import eu.toop.connector.smmclient.SMMConceptProviderGRLCRemote;
+import eu.toop.connector.smmclient.SMMConceptProviderGRLCWithCache;
 
 /**
  * Message Processor WebApp configuration
@@ -43,7 +43,7 @@ public final class MPConfig
                                                               TCConfig.getKeystoreKeyAlias (),
                                                               TCConfig.getKeystoreKeyPassword ());
   @GuardedBy ("s_aRWLock")
-  private static ISMMConceptProvider s_aCP = SMMConceptProviderGRLCRemote::getAllMappedValues;
+  private static ISMMConceptProvider s_aCP = new SMMConceptProviderGRLCWithCache ();
 
   private MPConfig ()
   {}

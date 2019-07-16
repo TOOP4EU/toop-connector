@@ -46,7 +46,7 @@ public interface ISMMClient extends Serializable
   @Nonnull
   default ISMMClient addConceptToBeMapped (@Nonnull final ConceptValue aConceptValue)
   {
-    ValueEnforcer.notNull (aConceptValue, "aConceptValue");
+    ValueEnforcer.notNull (aConceptValue, "ConceptValue");
     return addConceptToBeMapped (aConceptValue.getNamespace (), aConceptValue.getValue ());
   }
 
@@ -81,5 +81,5 @@ public interface ISMMClient extends Serializable
   IMappedValueList performMapping (@Nonnull String sLogPrefix,
                                    @Nonnull @Nonempty String sDestNamespace,
                                    @Nonnull ISMMConceptProvider aConceptProvider,
-                                   @Nullable IUnmappableCallback aUnmappableCallback) throws IOException;
+                                   @Nullable ISMMUnmappableCallback aUnmappableCallback) throws IOException;
 }
