@@ -60,6 +60,7 @@ public final class MPConfig
   /**
    * @param aSH
    *        The {@link SignatureHelper} to use. May not be <code>null</code>.
+   * @since 0.10.6
    */
   public static void setSignatureHelper (@Nonnull final SignatureHelper aSH)
   {
@@ -80,6 +81,7 @@ public final class MPConfig
    * @param aCP
    *        The {@link ISMMConceptProvider} to use. May not be
    *        <code>null</code>.
+   * @since 0.10.6
    */
   public static void setSMMConceptProvider (@Nonnull final ISMMConceptProvider aCP)
   {
