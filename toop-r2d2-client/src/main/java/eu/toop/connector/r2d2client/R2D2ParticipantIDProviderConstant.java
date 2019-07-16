@@ -23,6 +23,7 @@ import com.helger.commons.annotation.ReturnsMutableCopy;
 import com.helger.commons.collection.impl.CommonsLinkedHashSet;
 import com.helger.commons.collection.impl.ICommonsOrderedSet;
 import com.helger.commons.collection.impl.ICommonsSet;
+import com.helger.commons.string.ToStringGenerator;
 import com.helger.peppolid.IDocumentTypeIdentifier;
 import com.helger.peppolid.IParticipantIdentifier;
 
@@ -91,5 +92,11 @@ public class R2D2ParticipantIDProviderConstant implements IR2D2ParticipantIDProv
                                                                     @Nonnull final IDocumentTypeIdentifier aDocumentTypeID) throws ToopErrorException
   {
     return m_aSet.getClone ();
+  }
+
+  @Override
+  public String toString ()
+  {
+    return new ToStringGenerator (this).append ("ParticipantIDs", m_aSet).getToString ();
   }
 }

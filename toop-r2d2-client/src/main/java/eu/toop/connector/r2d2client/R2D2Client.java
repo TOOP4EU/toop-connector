@@ -79,7 +79,7 @@ public class R2D2Client implements IR2D2Client
 
     ToopKafkaClient.send (EErrorLevel.INFO,
                           () -> sLogPrefix +
-                                "MultiParticipant lookup (" +
+                                "Participant ID lookup (" +
                                 sCountryCode +
                                 ", " +
                                 aDocumentTypeID.getURIEncoded () +
@@ -87,7 +87,8 @@ public class R2D2Client implements IR2D2Client
                                 aProcessID.getURIEncoded () +
                                 ", " +
                                 sTransportProfileID +
-                                ")");
+                                ") using " +
+                                aParticipantIDProvider);
 
     final ICommonsList <IR2D2Endpoint> ret = new CommonsArrayList <> ();
 
@@ -98,13 +99,13 @@ public class R2D2Client implements IR2D2Client
 
     ToopKafkaClient.send (EErrorLevel.INFO,
                           () -> sLogPrefix +
-                                "MultiParticipant lookup result[" +
+                                "Participant ID lookup result[" +
                                 aPIs.size () +
                                 "]: " +
                                 StringHelper.getImplodedMapped (", ", aPIs, IParticipantIdentifier::getURIEncoded));
 
     if (aPIs.isEmpty ())
-      throw new ToopErrorException ("TOOP Directory lookup returned no matches", EToopErrorCode.DD_004);
+      throw new ToopErrorException ("Participant ID lookup returned no matches", EToopErrorCode.DD_004);
 
     // For all matching IDs (if any)
     for (final IParticipantIdentifier aPI : aPIs)

@@ -22,10 +22,12 @@ import javax.annotation.Nullable;
 
 import org.apache.http.client.methods.HttpGet;
 
+import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.Nonempty;
 import com.helger.commons.collection.impl.CommonsHashSet;
 import com.helger.commons.collection.impl.ICommonsSet;
 import com.helger.commons.error.level.EErrorLevel;
+import com.helger.commons.string.ToStringGenerator;
 import com.helger.commons.url.ISimpleURL;
 import com.helger.commons.url.SimpleURL;
 import com.helger.httpclient.HttpClientManager;
@@ -54,8 +56,38 @@ public class R2D2ParticipantIDProviderTOOPDirectory implements IR2D2ParticipantI
 {
   private static final int MAX_RESULTS_PER_PAGE = 100;
 
+  private final String m_sBaseURL;
+
+  /**
+   * Constructor using the TOOP Directory URL from the configuration file.
+   */
   public R2D2ParticipantIDProviderTOOPDirectory ()
-  {}
+  {
+    this (TCConfig.getR2D2DirectoryBaseUrl ());
+  }
+
+  /**
+   * Constructor with an arbitrary TOOP Directory URL.
+   *
+   * @param sBaseURL
+   *        The base URL to be used. May neither be <code>null</code> nor empty.
+   */
+  public R2D2ParticipantIDProviderTOOPDirectory (@Nonnull final String sBaseURL)
+  {
+    ValueEnforcer.notEmpty (sBaseURL, "BaseURL");
+    m_sBaseURL = sBaseURL;
+  }
+
+  /**
+   * @return The TOOP Directory Base URL as provided in the constructor. Neither
+   *         <code>null</code> nor empty.
+   */
+  @Nonnull
+  @Nonempty
+  public final String getBaseURL ()
+  {
+    return m_sBaseURL;
+  }
 
   @Nullable
   private static IJsonObject _fetchJsonObject (@Nonnull final String sLogPrefix,
@@ -88,10 +120,11 @@ public class R2D2ParticipantIDProviderTOOPDirectory implements IR2D2ParticipantI
     try (final HttpClientManager aMgr = new HttpClientManager (aHCFactory))
     {
       // Build base URL and fetch x records per HTTP request
-      final SimpleURL aBaseURL = new SimpleURL (TCConfig.getR2D2DirectoryBaseUrl () +
-                                                "/search/1.0/json").add ("doctype", aDocumentTypeID.getURIEncoded ())
-                                                                   .add ("country", sCountryCode)
-                                                                   .add ("rpc", MAX_RESULTS_PER_PAGE);
+      final SimpleURL aBaseURL = new SimpleURL (m_sBaseURL + "/search/1.0/json")
+                                                                                .add ("doctype",
+                                                                                      aDocumentTypeID.getURIEncoded ())
+                                                                                .add ("country", sCountryCode)
+                                                                                .add ("rpc", MAX_RESULTS_PER_PAGE);
 
       // Fetch first object
       IJsonObject aResult = _fetchJsonObject (sLogPrefix, aMgr, aBaseURL);
@@ -172,5 +205,11 @@ public class R2D2ParticipantIDProviderTOOPDirectory implements IR2D2ParticipantI
     }
 
     return ret;
+  }
+
+  @Override
+  public String toString ()
+  {
+    return new ToStringGenerator (this).append ("BaseURL", m_sBaseURL).getToString ();
   }
 }
