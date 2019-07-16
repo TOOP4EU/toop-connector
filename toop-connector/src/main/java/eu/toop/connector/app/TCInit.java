@@ -38,8 +38,8 @@ import com.helger.commons.url.URLProtocolRegistry;
 import eu.toop.commons.exchange.ToopRequestWithAttachments140;
 import eu.toop.commons.exchange.ToopResponseWithAttachments140;
 import eu.toop.connector.api.TCConfig;
-import eu.toop.connector.api.as4.IMessageExchangeSPI.IIncomingHandler;
 import eu.toop.connector.app.mp.MPTrigger;
+import eu.toop.connector.api.as4.IMEIncomingHandler;
 import eu.toop.connector.api.as4.MEException;
 import eu.toop.connector.api.as4.MessageExchangeManager;
 import eu.toop.kafkaclient.ToopKafkaClient;
@@ -145,7 +145,7 @@ public class TCInit
 
     // Init incoming message handler
     MessageExchangeManager.getConfiguredImplementation ()
-                          .registerIncomingHandler (aServletContext, new IIncomingHandler ()
+                          .registerIncomingHandler (aServletContext, new IMEIncomingHandler ()
                           {
                             public void handleIncomingRequest (@Nonnull final ToopRequestWithAttachments140 aRequest) throws MEException
                             {

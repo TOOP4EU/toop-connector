@@ -34,6 +34,7 @@ import eu.toop.commons.exchange.ToopMessageBuilder140;
 import eu.toop.commons.exchange.ToopRequestWithAttachments140;
 import eu.toop.commons.exchange.ToopResponseWithAttachments140;
 import eu.toop.connector.api.as4.IMERoutingInformation;
+import eu.toop.connector.api.as4.IMEIncomingHandler;
 import eu.toop.connector.api.as4.IMessageExchangeSPI;
 import eu.toop.connector.api.as4.MEException;
 import eu.toop.connector.api.as4.MEMessage;
@@ -53,7 +54,7 @@ import eu.toop.kafkaclient.ToopKafkaClient;
 @IsSPIImplementation
 public final class DefaultMessageExchangeSPI implements IMessageExchangeSPI
 {
-  private IIncomingHandler m_aIncomingHandler;
+  private IMEIncomingHandler m_aIncomingHandler;
 
   public DefaultMessageExchangeSPI ()
   {}
@@ -66,7 +67,7 @@ public final class DefaultMessageExchangeSPI implements IMessageExchangeSPI
   }
 
   public void registerIncomingHandler (@Nonnull final ServletContext aServletContext,
-                                       @Nonnull final IIncomingHandler aIncomingHandler) throws MEException
+                                       @Nonnull final IMEIncomingHandler aIncomingHandler) throws MEException
   {
     ValueEnforcer.notNull (aServletContext, "ServletContext");
     ValueEnforcer.notNull (aIncomingHandler, "IncomingHandler");

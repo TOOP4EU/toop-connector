@@ -47,14 +47,14 @@ import eu.toop.commons.exchange.AsicReadEntry;
 import eu.toop.commons.exchange.ToopMessageBuilder140;
 import eu.toop.commons.exchange.ToopRequestWithAttachments140;
 import eu.toop.commons.exchange.ToopResponseWithAttachments140;
-import eu.toop.connector.api.as4.IMessageExchangeSPI;
+import eu.toop.connector.api.as4.IMEIncomingHandler;
 import eu.toop.kafkaclient.ToopKafkaClient;
 import eu.toop.mem.phase4.Phase4Config;
 
 /**
  * TOOP specific implementation of {@link IAS4ServletMessageProcessorSPI}. It
  * takes incoming AS4 messages and forwards it accordingly to the correct TOOP
- * {@link eu.toop.connector.api.as4.IMessageExchangeSPI.IIncomingHandler}.
+ * {@link eu.toop.connector.api.as4.IMEIncomingHandler}.
  *
  * @author Philip Helger
  */
@@ -64,9 +64,9 @@ public class AS4MessageProcessorSPI implements IAS4ServletMessageProcessorSPI
   public static final String ACTION_FAILURE = "Failure";
   private static final Logger LOGGER = LoggerFactory.getLogger (AS4MessageProcessorSPI.class);
 
-  private static IMessageExchangeSPI.IIncomingHandler s_aIncomingHandler;
+  private static IMEIncomingHandler s_aIncomingHandler;
 
-  public static void setIncomingHandler (@Nonnull final IMessageExchangeSPI.IIncomingHandler aIncomingHandler)
+  public static void setIncomingHandler (@Nonnull final IMEIncomingHandler aIncomingHandler)
   {
     ValueEnforcer.notNull (aIncomingHandler, "IncomingHandler");
     ValueEnforcer.isNull (s_aIncomingHandler, "s_aIncomingHandler");

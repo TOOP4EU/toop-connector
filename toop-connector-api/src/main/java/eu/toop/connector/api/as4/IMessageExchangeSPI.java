@@ -15,16 +15,11 @@
  */
 package eu.toop.connector.api.as4;
 
-import java.io.Serializable;
-
 import javax.annotation.Nonnull;
 import javax.servlet.ServletContext;
 
 import com.helger.commons.annotation.IsSPIInterface;
 import com.helger.commons.annotation.Nonempty;
-
-import eu.toop.commons.exchange.ToopRequestWithAttachments140;
-import eu.toop.commons.exchange.ToopResponseWithAttachments140;
 
 /**
  * Abstract API to be implemented for sending and receiving messages.
@@ -34,29 +29,6 @@ import eu.toop.commons.exchange.ToopResponseWithAttachments140;
 @IsSPIInterface
 public interface IMessageExchangeSPI
 {
-  public interface IIncomingHandler extends Serializable
-  {
-    /**
-     * Handle an incoming request for step 2/4.
-     *
-     * @param aRequest
-     *        The request to handle. Never <code>null</code>.
-     * @throws MEException
-     *         In case of error.
-     */
-    void handleIncomingRequest (@Nonnull ToopRequestWithAttachments140 aRequest) throws MEException;
-
-    /**
-     * Handle an incoming response for step 4/4.
-     *
-     * @param aResponse
-     *        The response to handle. Never <code>null</code>.
-     * @throws MEException
-     *         In case of error.
-     */
-    void handleIncomingResponse (@Nonnull ToopResponseWithAttachments140 aResponse) throws MEException;
-  }
-
   /**
    * @return The unique ID of the SPI implementation, so that it can be
    *         referenced from a configuration file. The implementer must ensure
@@ -85,7 +57,7 @@ public interface IMessageExchangeSPI
    *         In case of error.
    */
   void registerIncomingHandler (@Nonnull ServletContext aServletContext,
-                                @Nonnull IIncomingHandler aIncomingHandler) throws MEException;
+                                @Nonnull IMEIncomingHandler aIncomingHandler) throws MEException;
 
   /**
    * Trigger the message transmission in step 1/4. This method acts synchronous.

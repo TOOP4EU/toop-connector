@@ -70,6 +70,7 @@ import com.helger.servlet.ServletHelper;
 
 import eu.toop.commons.error.EToopErrorCode;
 import eu.toop.connector.api.as4.IMERoutingInformation;
+import eu.toop.connector.api.as4.IMEIncomingHandler;
 import eu.toop.connector.api.as4.IMessageExchangeSPI;
 import eu.toop.connector.api.as4.MEException;
 import eu.toop.connector.api.as4.MEMessage;
@@ -100,7 +101,7 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
   }
 
   public void registerIncomingHandler (@Nonnull final ServletContext aServletContext,
-                                       @Nonnull final IIncomingHandler aIncomingHandler) throws MEException
+                                       @Nonnull final IMEIncomingHandler aIncomingHandler) throws MEException
   {
     ValueEnforcer.notNull (aServletContext, "ServletContext");
     ValueEnforcer.notNull (aIncomingHandler, "IncomingHandler");
