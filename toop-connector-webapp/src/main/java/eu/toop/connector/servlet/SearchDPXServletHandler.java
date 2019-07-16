@@ -15,26 +15,16 @@
  */
 package eu.toop.connector.servlet;
 
-import java.io.Serializable;
-import java.util.Locale;
-
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.http.client.methods.HttpGet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.helger.commons.locale.country.CountryCache;
 import com.helger.commons.mime.CMimeType;
 import com.helger.commons.mime.MimeType;
-import com.helger.commons.state.ESuccess;
 import com.helger.commons.string.StringHelper;
-import com.helger.commons.url.SimpleURL;
-import com.helger.httpclient.HttpClientManager;
-import com.helger.httpclient.response.ResponseHandlerMicroDom;
-import com.helger.peppolid.IDocumentTypeIdentifier;
+import com.helger.commons.url.ISimpleURL;
 import com.helger.servlet.response.UnifiedResponse;
 import com.helger.web.scope.IRequestWebScopeWithoutResponse;
 import com.helger.xml.microdom.IMicroDocument;
@@ -43,104 +33,18 @@ import com.helger.xml.namespace.MapBasedNamespaceContext;
 import com.helger.xml.serialize.write.XMLWriterSettings;
 import com.helger.xservlet.handler.simple.IXServletSimpleHandler;
 
-import eu.toop.connector.api.TCConfig;
-import eu.toop.connector.api.TCSettings;
-import eu.toop.connector.api.http.TCHttpClientFactory;
+import eu.toop.connector.app.searchdp.ISearchDPCallback;
+import eu.toop.connector.app.searchdp.SearchDPHandler;
+import eu.toop.connector.app.searchdp.SearchDPInputParams;
 
 /**
- * Main handler for the /sarch-dp servlet
+ * Main handler for the /search-dp servlet
  *
  * @author Philip Helger
  */
 final class SearchDPXServletHandler implements IXServletSimpleHandler
 {
-  private static final Logger LOGGER = LoggerFactory.getLogger (SearchDPXServletHandler.class);
-
-  private static final class InputParams implements Serializable
-  {
-    private Locale m_aCountryCode;
-    private IDocumentTypeIdentifier m_aDocTypeID;
-
-    @Nonnull
-    public ESuccess setCountryCode (@Nullable final String sCountryCode)
-    {
-      if (StringHelper.hasText (sCountryCode))
-      {
-        final String sTrimmedCountryCode = sCountryCode.trim ();
-        final Locale aCountry = CountryCache.getInstance ().getCountry (sTrimmedCountryCode);
-        if (aCountry != null)
-        {
-          m_aCountryCode = aCountry;
-          if (LOGGER.isInfoEnabled ())
-            LOGGER.info ("Using country code '" + sTrimmedCountryCode + "' for /search-dp");
-          return ESuccess.SUCCESS;
-        }
-        if (LOGGER.isWarnEnabled ())
-          LOGGER.warn ("Country code '" + sTrimmedCountryCode + "' could not be resolved to a valid country");
-      }
-      return ESuccess.FAILURE;
-    }
-
-    @Nullable
-    public Locale getCountryCode ()
-    {
-      return m_aCountryCode;
-    }
-
-    public boolean hasCountryCode ()
-    {
-      return m_aCountryCode != null;
-    }
-
-    @Nonnull
-    public ESuccess setDocumentType (@Nullable final String sDocTypeID)
-    {
-      if (StringHelper.hasText (sDocTypeID))
-      {
-        final String sTrimmedDocTypeID = sDocTypeID.trim ();
-        final IDocumentTypeIdentifier aDocTypeID = TCSettings.getIdentifierFactory ()
-                                                             .parseDocumentTypeIdentifier (sTrimmedDocTypeID);
-        if (aDocTypeID != null)
-        {
-          m_aDocTypeID = aDocTypeID;
-          if (LOGGER.isInfoEnabled ())
-            LOGGER.info ("Using document type ID '" + sTrimmedDocTypeID + "' for /search-dp");
-          return ESuccess.SUCCESS;
-        }
-        if (LOGGER.isWarnEnabled ())
-          LOGGER.warn ("Document type ID '" + sTrimmedDocTypeID + "' could not be parsed");
-      }
-      return ESuccess.FAILURE;
-    }
-
-    @Nullable
-    public IDocumentTypeIdentifier getDocumentTypeID ()
-    {
-      return m_aDocTypeID;
-    }
-
-    public boolean hasDocumentTypeID ()
-    {
-      return m_aDocTypeID != null;
-    }
-  }
-
-  @Nonnull
-  private static InputParams _extractInputParams (@Nonnull final String sPathWithinServlet)
-  {
-    final InputParams ret = new InputParams ();
-    final String sBase = StringHelper.trimStartAndEnd (sPathWithinServlet, '/');
-    final String [] aParts = StringHelper.getExplodedArray ('/', sBase);
-    if (aParts.length >= 1)
-    {
-      ret.setCountryCode (aParts[0]);
-      if (aParts.length >= 2)
-      {
-        ret.setDocumentType (aParts[1]);
-      }
-    }
-    return ret;
-  }
+  static final Logger LOGGER = LoggerFactory.getLogger (SearchDPXServletHandler.class);
 
   public void handleRequest (@Nonnull final IRequestWebScopeWithoutResponse aRequestScope,
                              @Nonnull final UnifiedResponse aUnifiedResponse) throws Exception
@@ -148,9 +52,8 @@ final class SearchDPXServletHandler implements IXServletSimpleHandler
     if (LOGGER.isDebugEnabled ())
       LOGGER.debug ("/search-dp" + aRequestScope.getPathWithinServlet () + " executed");
 
-    // Extract the parameters as in "/search-dp/<countryCode>[/<docType>]"
-    final InputParams aInputParams = _extractInputParams (aRequestScope.getPathWithinServlet ());
-
+    // Extract the parameters
+    final SearchDPInputParams aInputParams = SearchDPHandler.extractInputParams (aRequestScope.getPathWithinServlet ());
     if (!aInputParams.hasCountryCode ())
     {
       // Mandatory fields are missing
@@ -159,40 +62,16 @@ final class SearchDPXServletHandler implements IXServletSimpleHandler
     }
     else
     {
-      // Invoke TOOP Directory search API
-      final TCHttpClientFactory aHCFactory = new TCHttpClientFactory ();
-
-      try (final HttpClientManager aMgr = new HttpClientManager (aHCFactory))
+      // Search result callback
+      final ISearchDPCallback aCallback = new ISearchDPCallback ()
       {
-        // Build base URL and fetch all records per HTTP request
-        final SimpleURL aBaseURL = new SimpleURL (TCConfig.getR2D2DirectoryBaseUrl () + "/search/1.0/xml");
-        // More than 1000 is not allowed
-        aBaseURL.add ("rpc", 1_000);
-        // Constant defined in CCTF-103
-        aBaseURL.add ("identifierScheme", "DataSubjectIdentifierScheme");
-        // Parameters to this servlet
-        aBaseURL.add ("country", aInputParams.getCountryCode ().getCountry ());
-        if (aInputParams.hasDocumentTypeID ())
-          aBaseURL.add ("doctype", aInputParams.getDocumentTypeID ().getURIEncoded ());
-
-        if (LOGGER.isInfoEnabled ())
-          LOGGER.info ("Querying " + aBaseURL.getAsStringWithEncodedParameters ());
-
-        final HttpGet aGet = new HttpGet (aBaseURL.getAsURI ());
-        final ResponseHandlerMicroDom aRH = new ResponseHandlerMicroDom ();
-        final IMicroDocument aDoc = aMgr.execute (aGet, aRH);
-        if (aDoc == null || aDoc.getDocumentElement () == null)
+        public void onQueryDirectoryError (@Nonnull final ISimpleURL aQueryURL)
         {
-          // Mandatory fields are missing
-          if (LOGGER.isErrorEnabled ())
-            LOGGER.error ("Failed to invoke the Directory query '" +
-                          aBaseURL.getAsStringWithEncodedParameters () +
-                          "'");
-
           aUnifiedResponse.disableCaching ();
           aUnifiedResponse.setStatus (HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
-        else
+
+        public void onQueryDirectorySuccess (@Nonnull final IMicroDocument aDoc)
         {
           // Return "as is"
           final XMLWriterSettings aXWS = new XMLWriterSettings ();
@@ -214,7 +93,10 @@ final class SearchDPXServletHandler implements IXServletSimpleHandler
                                                                                                    .name ()));
           aUnifiedResponse.setContentAndCharset (sResponse, aXWS.getCharset ());
         }
-      }
+      };
+
+      // Perform the search
+      SearchDPHandler.performSearch (aInputParams, aCallback);
     }
   }
 }
