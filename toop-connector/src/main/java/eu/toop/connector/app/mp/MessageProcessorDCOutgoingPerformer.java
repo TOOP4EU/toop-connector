@@ -81,6 +81,7 @@ import eu.toop.connector.app.TCDumpHelper;
 import eu.toop.connector.r2d2client.IR2D2Endpoint;
 import eu.toop.connector.r2d2client.R2D2Client;
 import eu.toop.connector.smmclient.IMappedValueList;
+import eu.toop.connector.smmclient.ISMMClient;
 import eu.toop.connector.smmclient.IUnmappableCallback;
 import eu.toop.connector.smmclient.MappedValue;
 import eu.toop.connector.smmclient.MappedValueList;
@@ -263,7 +264,7 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
 
         // 1. invoke SMM
         // Map to TOOP concepts
-        final SMMClient aSMMClient = new SMMClient ();
+        final ISMMClient aSMMClient = new SMMClient ();
         _iterateNonTCConcepts (aRequest, c -> aSMMClient.addConceptToBeMapped (ConceptValue.create (c)));
         final int nConceptsToBeMapped = aSMMClient.getTotalCountConceptsToBeMapped ();
 

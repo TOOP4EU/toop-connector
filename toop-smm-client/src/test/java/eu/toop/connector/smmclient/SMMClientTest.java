@@ -62,7 +62,7 @@ public final class SMMClientTest
     for (final ISMMConceptProvider aCP : CP)
     {
       LOGGER.info ("Starting testEmpty");
-      final SMMClient aClient = new SMMClient ();
+      final ISMMClient aClient = new SMMClient ();
       final IMappedValueList ret = aClient.performMapping (CMockSMM.LOG_PREFIX, CMockSMM.NS_FREEDONIA, aCP, UCB);
       assertNotNull (ret);
       assertTrue (ret.isEmpty ());
@@ -76,7 +76,7 @@ public final class SMMClientTest
     for (final ISMMConceptProvider aCP : CP)
     {
       LOGGER.info ("Starting testOneMatch");
-      final SMMClient aClient = new SMMClient ();
+      final ISMMClient aClient = new SMMClient ();
       aClient.addConceptToBeMapped (CONCEPT_TOOP_1);
       final IMappedValueList ret = aClient.performMapping (CMockSMM.LOG_PREFIX, CMockSMM.NS_FREEDONIA, aCP, UCB);
       assertNotNull (ret);
@@ -99,7 +99,7 @@ public final class SMMClientTest
     for (final ISMMConceptProvider aCP : CP)
     {
       LOGGER.info ("Starting testOneMatchOneNotFound");
-      final SMMClient aClient = new SMMClient ();
+      final ISMMClient aClient = new SMMClient ();
       aClient.addConceptToBeMapped (CONCEPT_TOOP_1);
       aClient.addConceptToBeMapped (CMockSMM.NS_TOOP, "NonExistingField");
       aClient.addConceptToBeMapped ("SourceNamespace", "NonExistingField");
@@ -124,7 +124,7 @@ public final class SMMClientTest
     for (final ISMMConceptProvider aCP : CP)
     {
       LOGGER.info ("Starting testNoMappingNeeded");
-      final SMMClient aClient = new SMMClient ();
+      final ISMMClient aClient = new SMMClient ();
       aClient.addConceptToBeMapped (CONCEPT_FR_1);
       final IMappedValueList ret = aClient.performMapping (CMockSMM.LOG_PREFIX, CMockSMM.NS_FREEDONIA, aCP, UCB);
       assertNotNull (ret);

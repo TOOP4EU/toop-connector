@@ -60,6 +60,7 @@ import eu.toop.commons.jaxb.ToopXSDHelper140;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.http.TCHttpClientFactory;
 import eu.toop.connector.smmclient.IMappedValueList;
+import eu.toop.connector.smmclient.ISMMClient;
 import eu.toop.connector.smmclient.IUnmappableCallback;
 import eu.toop.connector.smmclient.MappedValue;
 import eu.toop.connector.smmclient.SMMClient;
@@ -168,7 +169,7 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
     final String sDestinationMappingURI = TCConfig.getSMMMappingNamespaceURIForDP ();
     if (StringHelper.hasText (sDestinationMappingURI))
     {
-      final SMMClient aSMMClient = new SMMClient ();
+      final ISMMClient aSMMClient = new SMMClient ();
       _iterateTCConcepts (aRequest, c -> aSMMClient.addConceptToBeMapped (ConceptValue.create (c)));
       final int nConceptsToBeMapped = aSMMClient.getTotalCountConceptsToBeMapped ();
 

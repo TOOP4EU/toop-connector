@@ -35,25 +35,19 @@ import com.helger.commons.error.level.EErrorLevel;
 import eu.toop.commons.concept.ConceptValue;
 import eu.toop.kafkaclient.ToopKafkaClient;
 
+/**
+ * Default implementation of {@link ISMMClient}.
+ * 
+ * @author Philip Helger
+ */
 @NotThreadSafe
-public class SMMClient
+public class SMMClient implements ISMMClient
 {
   private final ICommonsMap <String, ICommonsList <String>> m_aSrcMap = new CommonsHashMap <> ();
 
   public SMMClient ()
   {}
 
-  /**
-   * Add a new concept that requires mapping
-   *
-   * @param sConceptNamespace
-   *        The concept namespace to be used. May neither be <code>null</code>
-   *        nor empty.
-   * @param sConceptValue
-   *        The concept value to be used. May neither be <code>null</code> nor
-   *        empty.
-   * @return this for chaining
-   */
   @Nonnull
   public SMMClient addConceptToBeMapped (@Nonnull @Nonempty final String sConceptNamespace,
                                          @Nonnull @Nonempty final String sConceptValue)
@@ -62,20 +56,6 @@ public class SMMClient
     ValueEnforcer.notEmpty (sConceptValue, "Value");
     m_aSrcMap.computeIfAbsent (sConceptNamespace, k -> new CommonsArrayList <> ()).add (sConceptValue);
     return this;
-  }
-
-  /**
-   * Add a new concept that requires mapping
-   *
-   * @param aConceptValue
-   *        The concept value to be mapped. May not be <code>null</code>.
-   * @return this for chaining
-   */
-  @Nonnull
-  public SMMClient addConceptToBeMapped (@Nonnull final ConceptValue aConceptValue)
-  {
-    ValueEnforcer.notNull (aConceptValue, "aConceptValue");
-    return addConceptToBeMapped (aConceptValue.getNamespace (), aConceptValue.getValue ());
   }
 
   @Nonnegative
@@ -87,26 +67,6 @@ public class SMMClient
     return ret;
   }
 
-  /**
-   * Perform a mapping of all provided source values to the provided destination
-   * namespace.
-   *
-   * @param sLogPrefix
-   *        Logging prefix to easily fit together what belongs together. May not
-   *        be <code>null</code> but may be empty.
-   * @param sDestNamespace
-   *        Destination namespace to map the concepts to. May neither be
-   *        <code>null</code> nor empty.
-   * @param aConceptProvider
-   *        The concept provider implementation to use. May not be
-   *        <code>null</code>.
-   * @param aUnmappableCallback
-   *        Callback to be invoked if a non-mappable entry was found. May be
-   *        <code>null</code>.
-   * @return A non-<code>null</code> but maybe empty list of mappings.
-   * @throws IOException
-   *         in case of HTTP IO error
-   */
   @Nonnull
   @ReturnsMutableCopy
   public IMappedValueList performMapping (@Nonnull final String sLogPrefix,
