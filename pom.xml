@@ -134,6 +134,11 @@
       </dependency>
       <dependency>
         <groupId>eu.toop</groupId>
+        <artifactId>toop-connector</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>eu.toop</groupId>
         <artifactId>toop-connector-webapp</artifactId>
         <version>${project.version}</version>
       </dependency>
@@ -147,6 +152,7 @@
     <module>toop-r2d2-client</module>
     <module>toop-message-exchange</module>
     <module>toop-mem-phase4</module>
+    <module>toop-connector</module>
     <module>toop-connector-webapp</module>
   </modules>
   
