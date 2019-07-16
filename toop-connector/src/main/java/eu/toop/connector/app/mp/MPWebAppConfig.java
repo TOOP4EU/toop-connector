@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package eu.toop.connector.mp;
+package eu.toop.connector.app.mp;
 
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;

@@ -17,29 +17,22 @@ package eu.toop.connector.servlet;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 
 import javax.annotation.Nonnull;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.helger.commons.annotation.ReturnsMutableCopy;
-import com.helger.commons.datetime.PDTFactory;
-import com.helger.commons.datetime.PDTWebDateHelper;
-import com.helger.commons.debug.GlobalDebug;
 import com.helger.commons.mime.CMimeType;
 import com.helger.commons.mime.MimeType;
-import com.helger.commons.system.SystemProperties;
 import com.helger.json.IJsonObject;
 import com.helger.json.JsonObject;
 import com.helger.servlet.response.UnifiedResponse;
-import com.helger.settings.ISettings;
 import com.helger.web.scope.IRequestWebScopeWithoutResponse;
 import com.helger.xservlet.handler.simple.IXServletSimpleHandler;
 
 import eu.toop.connector.api.TCConfig;
-import eu.toop.connector.app.CTC;
+import eu.toop.connector.app.TCStatusHelper;
 
 /**
  * Main handler for the /tc-status servlet
@@ -51,31 +44,6 @@ final class TCStatusXServletHandler implements IXServletSimpleHandler
   private static final Logger LOGGER = LoggerFactory.getLogger (TCStatusXServletHandler.class);
   private static final Charset CHARSET = StandardCharsets.UTF_8;
 
-  @Nonnull
-  @ReturnsMutableCopy
-  public static IJsonObject getDefaultStatusData ()
-  {
-    final ISettings aSettings = TCConfig.getConfigFile ().getSettings ();
-
-    final IJsonObject aStatusData = new JsonObject ();
-    aStatusData.add ("status.datetime", PDTWebDateHelper.getAsStringXSD (PDTFactory.getCurrentZonedDateTimeUTC ()));
-    aStatusData.add ("version.toop-connector", CTC.getVersionNumber ());
-    aStatusData.add ("version.build-datetime", CTC.getBuildTimestamp ());
-    aStatusData.add ("version.java", SystemProperties.getJavaVersion ());
-    aStatusData.add ("global.debug", GlobalDebug.isDebugMode ());
-    aStatusData.add ("global.production", GlobalDebug.isProductionMode ());
-
-    // Add all entries except the password entries
-    for (final Map.Entry <String, Object> aEntry : aSettings.entrySet ())
-    {
-      final String sKey = aEntry.getKey ();
-      if (!sKey.contains ("password"))
-        aStatusData.add (sKey, aEntry.getValue ());
-    }
-
-    return aStatusData;
-  }
-
   public void handleRequest (@Nonnull final IRequestWebScopeWithoutResponse aRequestScope,
                              @Nonnull final UnifiedResponse aUnifiedResponse) throws Exception
   {
@@ -85,7 +53,7 @@ final class TCStatusXServletHandler implements IXServletSimpleHandler
     // Build data to provide
     IJsonObject aStatusData;
     if (TCConfig.isStatusEnabled ())
-      aStatusData = getDefaultStatusData ();
+      aStatusData = TCStatusHelper.getDefaultStatusData ();
     else
     {
       // Status is disabled in the configuration

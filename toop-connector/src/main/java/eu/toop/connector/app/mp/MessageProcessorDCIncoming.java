@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package eu.toop.connector.mp;
+package eu.toop.connector.app.mp;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -34,31 +34,32 @@ import com.helger.commons.state.ESuccess;
 import com.helger.scope.IScope;
 import com.helger.web.scope.singleton.AbstractGlobalWebSingleton;
 
-import eu.toop.commons.exchange.ToopRequestWithAttachments140;
+import eu.toop.commons.exchange.ToopResponseWithAttachments140;
 import eu.toop.kafkaclient.ToopKafkaClient;
 
 /**
- * The global message processor that handles DC to DP (= DP incoming) requests
- * (step 2/4). This is only the queue and it spawns external threads for
+ * The global message processor that handles DP to DC (= DC incoming) requests
+ * (step 4/4). This is only the queue and it spawns external threads for
  * processing the incoming data.
  *
  * @author Philip Helger
  */
-public final class MessageProcessorDPIncoming extends AbstractGlobalWebSingleton
+public final class MessageProcessorDCIncoming extends AbstractGlobalWebSingleton
 {
-  private static final Logger LOGGER = LoggerFactory.getLogger (MessageProcessorDPIncoming.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger (MessageProcessorDCIncoming.class);
+
   // Just to have custom named threads....
-  private static final ThreadFactory s_aThreadFactory = new BasicThreadFactory.Builder ().setNamingPattern ("MP-DP-In-%d")
+  private static final ThreadFactory s_aThreadFactory = new BasicThreadFactory.Builder ().setNamingPattern ("MP-DC-In-%d")
                                                                                          .setDaemon (true)
                                                                                          .build ();
-  private final ConcurrentCollectorSingle <ToopRequestWithAttachments140> m_aCollector = new ConcurrentCollectorSingle <> ();
+  private final ConcurrentCollectorSingle <ToopResponseWithAttachments140> m_aCollector = new ConcurrentCollectorSingle <> ();
   private final ExecutorService m_aExecutorPool;
 
   @Deprecated
   @UsedViaReflection
-  public MessageProcessorDPIncoming ()
+  public MessageProcessorDCIncoming ()
   {
-    m_aCollector.setPerformer (new MessageProcessorDPIncomingPerformer ());
+    m_aCollector.setPerformer (new MessageProcessorDCIncomingPerformer ());
     m_aExecutorPool = Executors.newSingleThreadExecutor (s_aThreadFactory);
     m_aExecutorPool.submit (m_aCollector::collect);
   }
@@ -66,12 +67,12 @@ public final class MessageProcessorDPIncoming extends AbstractGlobalWebSingleton
   /**
    * The global accessor method.
    *
-   * @return The one and only {@link MessageProcessorDPIncoming} instance.
+   * @return The one and only {@link MessageProcessorDCIncoming} instance.
    */
   @Nonnull
-  public static MessageProcessorDPIncoming getInstance ()
+  public static MessageProcessorDCIncoming getInstance ()
   {
-    return getGlobalSingleton (MessageProcessorDPIncoming.class);
+    return getGlobalSingleton (MessageProcessorDCIncoming.class);
   }
 
   @Override
@@ -85,19 +86,19 @@ public final class MessageProcessorDPIncoming extends AbstractGlobalWebSingleton
   }
 
   /**
-   * Queue a new Toop Response.
+   * Queue a new Toop Response message.
    *
    * @param aMsg
    *        The data to be queued. May not be <code>null</code>.
    * @return {@link ESuccess}. Never <code>null</code>.
    */
   @Nonnull
-  public ESuccess enqueue (@Nonnull final ToopRequestWithAttachments140 aMsg)
+  public ESuccess enqueue (@Nonnull final ToopResponseWithAttachments140 aMsg)
   {
     ValueEnforcer.notNull (aMsg, "Msg");
 
     if (LOGGER.isDebugEnabled ())
-      LOGGER.debug ("Enqueueing new object for step 2/4: " + aMsg);
+      LOGGER.debug ("Enqueueing new object for step 4/4: " + aMsg);
 
     try
     {

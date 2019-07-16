@@ -87,10 +87,6 @@
     </dependency>
     <dependency>
       <groupId>com.helger</groupId>
-      <artifactId>ph-web</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.helger</groupId>
       <artifactId>ph-xservlet</artifactId>
     </dependency>
     <dependency>
@@ -135,18 +131,6 @@
       <resource>
         <directory>${basedir}/src/main/resources</directory>
         <targetPath>${project.build.directory}/classes</targetPath>
-        <filtering>true</filtering>
-        <includes>
-          <include>**/*.properties</include>
-        </includes>
-      </resource>
-      <resource>
-        <directory>${basedir}/src/main/resources</directory>
-        <targetPath>${project.build.directory}/classes</targetPath>
-        <filtering>false</filtering>
-        <excludes>
-          <exclude>**/*.properties</exclude>
-        </excludes>
       </resource>
       <resource>
         <directory>${basedir}/src/main/webapp</directory>
@@ -157,6 +141,7 @@
         <targetPath>${project.build.directory}/test-classes</targetPath>
       </resource>
     </resources>
+    
     <plugins>
       <plugin>
         <artifactId>maven-war-plugin</artifactId>
@@ -168,7 +153,7 @@
       <plugin>
         <groupId>org.eclipse.jetty</groupId>
         <artifactId>jetty-maven-plugin</artifactId>
-        <version>9.4.14.v20181114</version>
+        <version>9.4.19.v20190610</version>
         <configuration>
           <scanIntervalSeconds>3</scanIntervalSeconds>
         </configuration>

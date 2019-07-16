@@ -36,8 +36,8 @@ import eu.toop.commons.exchange.AsicReadEntry;
 import eu.toop.commons.exchange.ToopMessageBuilder140;
 import eu.toop.commons.exchange.ToopRequestWithAttachments140;
 import eu.toop.connector.api.TCConfig;
-import eu.toop.connector.mp.MessageProcessorDCOutgoing;
-import eu.toop.connector.mp.TCDumpHelper;
+import eu.toop.connector.app.TCDumpHelper;
+import eu.toop.connector.app.mp.MessageProcessorDCOutgoing;
 import eu.toop.kafkaclient.ToopKafkaClient;
 
 /**

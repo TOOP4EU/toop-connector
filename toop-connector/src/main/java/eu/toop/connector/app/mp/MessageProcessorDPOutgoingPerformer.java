@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package eu.toop.connector.mp;
+package eu.toop.connector.app.mp;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -75,6 +75,7 @@ import eu.toop.connector.api.as4.MEPayload;
 import eu.toop.connector.api.as4.MERoutingInformation;
 import eu.toop.connector.api.as4.MessageExchangeManager;
 import eu.toop.connector.api.http.TCHttpClientFactory;
+import eu.toop.connector.app.TCDumpHelper;
 import eu.toop.connector.r2d2client.IR2D2Endpoint;
 import eu.toop.connector.r2d2client.R2D2Client;
 import eu.toop.kafkaclient.ToopKafkaClient;
