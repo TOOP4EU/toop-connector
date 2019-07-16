@@ -24,6 +24,8 @@ import com.helger.commons.ValueEnforcer;
 import com.helger.commons.concurrent.SimpleReadWriteLock;
 
 import eu.toop.connector.api.TCConfig;
+import eu.toop.connector.r2d2client.IR2D2ParticipantIDProvider;
+import eu.toop.connector.r2d2client.R2D2ParticipantIDProviderTOOPDirectory;
 import eu.toop.connector.smmclient.ISMMConceptProvider;
 import eu.toop.connector.smmclient.SMMConceptProviderGRLCWithCache;
 
@@ -44,6 +46,8 @@ public final class MPConfig
                                                               TCConfig.getKeystoreKeyPassword ());
   @GuardedBy ("s_aRWLock")
   private static ISMMConceptProvider s_aCP = new SMMConceptProviderGRLCWithCache ();
+  @GuardedBy ("s_aRWLock")
+  private static IR2D2ParticipantIDProvider s_aPIDP = new R2D2ParticipantIDProviderTOOPDirectory ();
 
   private MPConfig ()
   {}
@@ -87,5 +91,28 @@ public final class MPConfig
   {
     ValueEnforcer.notNull (aCP, "ConceptProvider");
     s_aRWLock.writeLocked ( () -> s_aCP = aCP);
+  }
+
+  /**
+   * @return The R2D2 participant ID provider from country code and document
+   *         type ID. Never <code>null</code>.
+   * @since 0.10.6
+   */
+  @Nonnull
+  public static IR2D2ParticipantIDProvider getParticipantIDProvider ()
+  {
+    return s_aRWLock.readLocked ( () -> s_aPIDP);
+  }
+
+  /**
+   * @param aPIDP
+   *        The R2D2 participant ID provider from country code and document type
+   *        ID to be used. May not be <code>null</code>.
+   * @since 0.10.6
+   */
+  public static void setParticipantIDProvider (@Nonnull final IR2D2ParticipantIDProvider aPIDP)
+  {
+    ValueEnforcer.notNull (aPIDP, "ParticipantIDProvider");
+    s_aRWLock.writeLocked ( () -> s_aPIDP = aPIDP);
   }
 }

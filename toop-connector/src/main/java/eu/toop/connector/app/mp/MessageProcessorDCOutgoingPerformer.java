@@ -79,6 +79,7 @@ import eu.toop.connector.api.as4.MERoutingInformation;
 import eu.toop.connector.api.as4.MessageExchangeManager;
 import eu.toop.connector.app.TCDumpHelper;
 import eu.toop.connector.r2d2client.IR2D2Endpoint;
+import eu.toop.connector.r2d2client.IR2D2ParticipantIDProvider;
 import eu.toop.connector.r2d2client.R2D2Client;
 import eu.toop.connector.smmclient.IMappedValueList;
 import eu.toop.connector.smmclient.ISMMClient;
@@ -416,9 +417,11 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
               // Find all endpoints by country
               try
               {
+                final IR2D2ParticipantIDProvider aParticipantIDProvider = MPConfig.getParticipantIDProvider ();
                 aEndpoints = new R2D2Client ().getEndpoints (sLogPrefix,
                                                              sDestinationCountryCode,
                                                              aDocTypeID,
+                                                             aParticipantIDProvider,
                                                              aProcessID,
                                                              sTransportProfileID);
               }

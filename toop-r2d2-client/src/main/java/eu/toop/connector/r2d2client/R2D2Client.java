@@ -15,35 +15,23 @@
  */
 package eu.toop.connector.r2d2client;
 
-import java.io.IOException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
-
-import org.apache.http.client.methods.HttpGet;
 
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.Nonempty;
 import com.helger.commons.annotation.ReturnsMutableCopy;
 import com.helger.commons.collection.CollectionHelper;
 import com.helger.commons.collection.impl.CommonsArrayList;
-import com.helger.commons.collection.impl.CommonsHashSet;
 import com.helger.commons.collection.impl.ICommonsList;
 import com.helger.commons.collection.impl.ICommonsSet;
 import com.helger.commons.error.level.EErrorLevel;
 import com.helger.commons.io.stream.NonBlockingByteArrayInputStream;
 import com.helger.commons.string.StringHelper;
-import com.helger.commons.url.ISimpleURL;
-import com.helger.commons.url.SimpleURL;
-import com.helger.httpclient.HttpClientManager;
-import com.helger.httpclient.response.ResponseHandlerJson;
-import com.helger.json.IJson;
-import com.helger.json.IJsonArray;
-import com.helger.json.IJsonObject;
 import com.helger.peppol.bdxrclient.BDXRClient;
 import com.helger.peppol.bdxrclient.BDXRClientReadOnly;
 import com.helger.peppol.smpclient.exception.SMPClientException;
@@ -62,7 +50,6 @@ import eu.toop.commons.error.EToopErrorCode;
 import eu.toop.commons.error.ToopErrorException;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.TCSettings;
-import eu.toop.connector.api.http.TCHttpClientFactory;
 import eu.toop.kafkaclient.ToopKafkaClient;
 
 /**
@@ -74,148 +61,19 @@ import eu.toop.kafkaclient.ToopKafkaClient;
 @Immutable
 public class R2D2Client implements IR2D2Client
 {
-  private static final int MAX_RESULTS_PER_PAGE = 100;
-
-  @Nullable
-  private static IJsonObject _fetchJsonObject (@Nonnull final String sLogPrefix,
-                                               @Nonnull final HttpClientManager aMgr,
-                                               @Nonnull final ISimpleURL aURL) throws IOException
-  {
-    final HttpGet aGet = new HttpGet (aURL.getAsURI ());
-    final ResponseHandlerJson aRH = new ResponseHandlerJson ();
-    final IJson aJson = aMgr.execute (aGet, aRH);
-    if (aJson != null && aJson.isObject ())
-      return aJson.getAsObject ();
-
-    ToopKafkaClient.send (EErrorLevel.ERROR,
-                          () -> sLogPrefix +
-                                "Failed to fetch " +
-                                aURL.getAsStringWithEncodedParameters () +
-                                " - stopping");
-    return null;
-  }
-
-  /**
-   * Query PEPPPOL Directory for all matching recipient IDs.
-   *
-   * @param sCountryCode
-   *        Country code to use. Must be a 2-digit string. May not be
-   *        <code>null</code>.
-   * @param aDocumentTypeID
-   *        Document type ID to query. May not be <code>null</code>.
-   * @return A non-<code>null</code> but maybe empty set of Participant IDs.
-   * @throws ToopErrorException
-   *         On query exception
-   */
-  @Nonnull
-  private static ICommonsSet <IParticipantIdentifier> _getAllRecipientIDsFromDirectory (@Nonnull final String sLogPrefix,
-                                                                                        @Nonnull @Nonempty final String sCountryCode,
-                                                                                        @Nonnull final IDocumentTypeIdentifier aDocumentTypeID) throws ToopErrorException
-  {
-    final ICommonsSet <IParticipantIdentifier> ret = new CommonsHashSet <> ();
-
-    final TCHttpClientFactory aHCFactory = new TCHttpClientFactory ();
-
-    try (final HttpClientManager aMgr = new HttpClientManager (aHCFactory))
-    {
-      // Build base URL and fetch x records per HTTP request
-      final SimpleURL aBaseURL = new SimpleURL (TCConfig.getR2D2DirectoryBaseUrl () +
-                                                "/search/1.0/json").add ("doctype", aDocumentTypeID.getURIEncoded ())
-                                                                   .add ("country", sCountryCode)
-                                                                   .add ("rpc", MAX_RESULTS_PER_PAGE);
-
-      // Fetch first object
-      IJsonObject aResult = _fetchJsonObject (sLogPrefix, aMgr, aBaseURL);
-      if (aResult != null)
-      {
-        // Start querying results
-        int nResultPageIndex = 0;
-        int nLoops = 0;
-        while (true)
-        {
-          int nMatchCount = 0;
-          final IJsonArray aMatches = aResult.getAsArray ("matches");
-          if (aMatches != null)
-          {
-            for (final IJson aMatch : aMatches)
-            {
-              ++nMatchCount;
-              final IJsonObject aID = aMatch.getAsObject ().getAsObject ("participantID");
-              if (aID != null)
-              {
-                final String sScheme = aID.getAsString ("scheme");
-                final String sValue = aID.getAsString ("value");
-                final IParticipantIdentifier aPI = TCSettings.getIdentifierFactory ()
-                                                             .createParticipantIdentifier (sScheme, sValue);
-                if (aPI != null)
-                  ret.add (aPI);
-                else
-                  ToopKafkaClient.send (EErrorLevel.WARN,
-                                        () -> sLogPrefix +
-                                              "Failed to create participant identifier from '" +
-                                              sScheme +
-                                              "' and '" +
-                                              sValue +
-                                              "'");
-              }
-              else
-                ToopKafkaClient.send (EErrorLevel.WARN, () -> sLogPrefix + "Match does not contain participant ID");
-            }
-          }
-          else
-            ToopKafkaClient.send (EErrorLevel.WARN, () -> sLogPrefix + "JSON response contains no 'matches'");
-
-          if (nMatchCount < MAX_RESULTS_PER_PAGE)
-          {
-            // Got less results than expected - end of list
-            break;
-          }
-
-          if (++nLoops > MAX_RESULTS_PER_PAGE)
-          {
-            // Avoid endless loop
-            ToopKafkaClient.send (EErrorLevel.ERROR, () -> sLogPrefix + "Endless loop in PD fetching?");
-            break;
-          }
-
-          // Query next page
-          nResultPageIndex++;
-          aResult = _fetchJsonObject (sLogPrefix, aMgr, aBaseURL.getClone ().add ("rpi", nResultPageIndex));
-          if (aResult == null)
-          {
-            // Unexpected error - stop querying
-            // Error was already logged
-            break;
-          }
-        }
-      }
-    }
-    catch (final IOException ex)
-    {
-      throw new ToopErrorException (sLogPrefix +
-                                    "Error querying TOOP Directory for matches (" +
-                                    sCountryCode +
-                                    ", " +
-                                    aDocumentTypeID.getURIEncoded () +
-                                    ")",
-                                    ex,
-                                    EToopErrorCode.DD_001);
-    }
-
-    return ret;
-  }
-
   @Nonnull
   @ReturnsMutableCopy
   public ICommonsList <IR2D2Endpoint> getEndpoints (@Nonnull final String sLogPrefix,
                                                     @Nonnull @Nonempty final String sCountryCode,
                                                     @Nonnull final IDocumentTypeIdentifier aDocumentTypeID,
+                                                    @Nonnull final IR2D2ParticipantIDProvider aParticipantIDProvider,
                                                     @Nonnull final IProcessIdentifier aProcessID,
                                                     @Nonnull @Nonempty final String sTransportProfileID) throws ToopErrorException
   {
     ValueEnforcer.notEmpty (sCountryCode, "CountryCode");
     ValueEnforcer.isTrue (sCountryCode.length () == 2, "CountryCode must have length 2");
     ValueEnforcer.notNull (aDocumentTypeID, "DocumentTypeID");
+    ValueEnforcer.notNull (aParticipantIDProvider, "ParticipantIDProvider");
     ValueEnforcer.notNull (aProcessID, "ProcessID");
     ValueEnforcer.notEmpty (sTransportProfileID, "TransportProfileID");
 
@@ -234,9 +92,9 @@ public class R2D2Client implements IR2D2Client
     final ICommonsList <IR2D2Endpoint> ret = new CommonsArrayList <> ();
 
     // Query TOOP Directory
-    final ICommonsSet <IParticipantIdentifier> aPIs = _getAllRecipientIDsFromDirectory (sLogPrefix,
-                                                                                        sCountryCode,
-                                                                                        aDocumentTypeID);
+    final ICommonsSet <IParticipantIdentifier> aPIs = aParticipantIDProvider.getAllParticipantIDs (sLogPrefix,
+                                                                                                   sCountryCode,
+                                                                                                   aDocumentTypeID);
 
     ToopKafkaClient.send (EErrorLevel.INFO,
                           () -> sLogPrefix +

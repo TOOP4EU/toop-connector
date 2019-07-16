@@ -41,7 +41,7 @@ public interface IR2D2Client extends Serializable
    * receiver are unknown and an additional PEPPOL Directory query needs to be
    * performed.<br>
    * Internally country code and document type are queried against the correct
-   * PEPPOL Directory instance (depending on the production or test flag). The
+   * TOOP Directory instance (depending on the production or test flag). The
    * SMPs of the resulting service group IDs are than queried in a loop for all
    * matching endpoints (of participant ID and document type ID) which are
    * parsed and converted to simpler R2D2Endpoint instances.<br>
@@ -55,6 +55,10 @@ public interface IR2D2Client extends Serializable
    *        <code>null</code>.
    * @param aDocumentTypeID
    *        The document type ID to be queried. May not be <code>null</code>.
+   * @param aParticipantIDProvider
+   *        The participant ID provider that uses country code and document type
+   *        ID to determine the set of matching participant identifiers. May not
+   *        be <code>null</code>.
    * @param aProcessID
    *        The process ID to be queried. May not be <code>null</code>.
    * @param sTransportProfileID
@@ -69,13 +73,14 @@ public interface IR2D2Client extends Serializable
   ICommonsList <IR2D2Endpoint> getEndpoints (@Nonnull String sLogPrefix,
                                              @Nonnull @Nonempty String sCountryCode,
                                              @Nonnull IDocumentTypeIdentifier aDocumentTypeID,
+                                             @Nonnull final IR2D2ParticipantIDProvider aParticipantIDProvider,
                                              @Nonnull IProcessIdentifier aProcessID,
                                              @Nonnull @Nonempty String sTransportProfileID) throws ToopErrorException;
 
   /**
    * Get a list of all endpoints that match the specified requirements. This is
    * the API that is to be invoked in the case, where the ServiceGroup IDs of
-   * the receiver is known and NO PEPPOL Directory invocation is needed.<br>
+   * the receiver is known and NO TOOP Directory invocation is needed.<br>
    * Internally the SMP of the service group ID is queried and all matching
    * endpoints are parsed and converted to simpler R2D2Endpoint instances.<br>
    * Note: this method returns endpoints for all found transport protocols, so
