@@ -70,7 +70,7 @@
     <!-- Default MEM module -->
     <dependency>
       <groupId>eu.toop</groupId>
-      <artifactId>toop-message-exchange</artifactId>
+      <artifactId>toop-mem-default</artifactId>
     </dependency>
     <!-- ph-as4 MEM module -->
     <dependency>

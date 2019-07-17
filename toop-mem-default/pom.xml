@@ -23,11 +23,11 @@
     <artifactId>toop-connector-parent-pom</artifactId>
     <version>0.10.6-SNAPSHOT</version>
   </parent>
-  <artifactId>toop-message-exchange</artifactId>
+  <artifactId>toop-mem-default</artifactId>
   <packaging>bundle</packaging>
-  <name>toop-message-exchange</name>
-  <description>Contains the TOOP message exchange</description>
-  <url>https://github.com/toop4eu/toop-connector/toop-message-exchange</url>
+  <name>toop-mem-default</name>
+  <description>Contains the default TOOP message exchange</description>
+  <url>https://github.com/toop4eu/toop-connector/toop-mem-default</url>
   <inceptionYear>2018</inceptionYear>
   
   <licenses>
