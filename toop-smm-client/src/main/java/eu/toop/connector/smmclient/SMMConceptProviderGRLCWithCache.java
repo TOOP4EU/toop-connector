@@ -29,6 +29,9 @@ import com.helger.commons.collection.impl.ICommonsMap;
 import com.helger.commons.concurrent.SimpleReadWriteLock;
 import com.helger.commons.string.ToStringGenerator;
 
+import eu.toop.connector.api.smm.ISMMConceptProvider;
+import eu.toop.connector.api.smm.MappedValueList;
+
 /**
  * Implementation of {@link ISMMConceptProvider} using caching. The retrieval of
  * remote data happens via {@link SMMConceptProviderGRLCRemote}.

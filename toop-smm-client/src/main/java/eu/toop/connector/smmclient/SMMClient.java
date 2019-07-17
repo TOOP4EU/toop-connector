@@ -33,6 +33,12 @@ import com.helger.commons.collection.impl.ICommonsMap;
 import com.helger.commons.error.level.EErrorLevel;
 
 import eu.toop.commons.concept.ConceptValue;
+import eu.toop.connector.api.smm.IMappedValueList;
+import eu.toop.connector.api.smm.ISMMClient;
+import eu.toop.connector.api.smm.ISMMConceptProvider;
+import eu.toop.connector.api.smm.ISMMUnmappableCallback;
+import eu.toop.connector.api.smm.MappedValue;
+import eu.toop.connector.api.smm.MappedValueList;
 import eu.toop.kafkaclient.ToopKafkaClient;
 
 /**

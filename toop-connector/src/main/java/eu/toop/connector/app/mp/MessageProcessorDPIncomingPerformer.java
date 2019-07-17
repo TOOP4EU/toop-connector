@@ -60,10 +60,10 @@ import eu.toop.commons.exchange.ToopResponseWithAttachments140;
 import eu.toop.commons.jaxb.ToopXSDHelper140;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.http.TCHttpClientFactory;
-import eu.toop.connector.smmclient.IMappedValueList;
-import eu.toop.connector.smmclient.ISMMClient;
-import eu.toop.connector.smmclient.ISMMUnmappableCallback;
-import eu.toop.connector.smmclient.MappedValue;
+import eu.toop.connector.api.smm.IMappedValueList;
+import eu.toop.connector.api.smm.ISMMClient;
+import eu.toop.connector.api.smm.ISMMUnmappableCallback;
+import eu.toop.connector.api.smm.MappedValue;
 import eu.toop.connector.smmclient.SMMClient;
 import eu.toop.kafkaclient.ToopKafkaClient;
 

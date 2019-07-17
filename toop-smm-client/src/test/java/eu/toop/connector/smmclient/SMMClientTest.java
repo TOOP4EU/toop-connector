@@ -36,6 +36,12 @@ import com.helger.xml.microdom.serialize.MicroWriter;
 
 import eu.toop.commons.concept.ConceptValue;
 import eu.toop.commons.usecase.EToopConcept;
+import eu.toop.connector.api.smm.IMappedValueList;
+import eu.toop.connector.api.smm.ISMMClient;
+import eu.toop.connector.api.smm.ISMMConceptProvider;
+import eu.toop.connector.api.smm.ISMMUnmappableCallback;
+import eu.toop.connector.api.smm.MappedValue;
+import eu.toop.connector.api.smm.MappedValueList;
 
 /**
  * Test class for class {@link SMMClient}.

@@ -26,6 +26,8 @@ import org.slf4j.LoggerFactory;
 
 import com.helger.commons.collection.impl.ICommonsOrderedSet;
 
+import eu.toop.connector.api.smm.MappedValueList;
+
 /**
  * Test class for class {@link SMMConceptProviderGRLCRemote}.
  *

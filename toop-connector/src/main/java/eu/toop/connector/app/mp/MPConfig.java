@@ -26,9 +26,9 @@ import com.helger.commons.concurrent.SimpleReadWriteLock;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.r2d2.IR2D2EndpointProvider;
 import eu.toop.connector.api.r2d2.IR2D2ParticipantIDProvider;
+import eu.toop.connector.api.smm.ISMMConceptProvider;
 import eu.toop.connector.r2d2client.R2D2EndpointProviderBDXRSMP1;
 import eu.toop.connector.r2d2client.R2D2ParticipantIDProviderTOOPDirectory;
-import eu.toop.connector.smmclient.ISMMConceptProvider;
 import eu.toop.connector.smmclient.SMMConceptProviderGRLCWithCache;
 
 /**

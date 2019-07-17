@@ -41,6 +41,8 @@ import com.helger.json.IJsonObject;
 
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.http.TCHttpClientFactory;
+import eu.toop.connector.api.smm.ISMMConceptProvider;
+import eu.toop.connector.api.smm.MappedValueList;
 import eu.toop.kafkaclient.ToopKafkaClient;
 
 /**

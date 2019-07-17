@@ -31,6 +31,8 @@ import com.helger.commons.collection.impl.ICommonsMap;
 import com.helger.commons.error.level.EErrorLevel;
 import com.helger.commons.string.ToStringGenerator;
 
+import eu.toop.connector.api.smm.ISMMConceptProvider;
+import eu.toop.connector.api.smm.MappedValueList;
 import eu.toop.kafkaclient.ToopKafkaClient;
 
 /**
