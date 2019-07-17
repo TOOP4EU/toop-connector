@@ -27,6 +27,9 @@ import com.helger.commons.string.ToStringGenerator;
 import com.helger.peppolid.IDocumentTypeIdentifier;
 import com.helger.peppolid.IParticipantIdentifier;
 
+import eu.toop.connector.api.r2d2.IR2D2ErrorHandler;
+import eu.toop.connector.api.r2d2.IR2D2ParticipantIDProvider;
+
 /**
  * This class implements the {@link IR2D2ParticipantIDProvider} interface using
  * a constant set of participant identifiers. This implementation is meant for

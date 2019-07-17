@@ -28,6 +28,10 @@ import com.helger.peppolid.IDocumentTypeIdentifier;
 import com.helger.peppolid.IParticipantIdentifier;
 import com.helger.peppolid.IProcessIdentifier;
 
+import eu.toop.connector.api.r2d2.IR2D2Endpoint;
+import eu.toop.connector.api.r2d2.IR2D2EndpointProvider;
+import eu.toop.connector.api.r2d2.IR2D2ErrorHandler;
+
 /**
  * This class implements the {@link IR2D2EndpointProvider} interface using a
  * constant set of endpoints. This implementation is meant for testing purposes

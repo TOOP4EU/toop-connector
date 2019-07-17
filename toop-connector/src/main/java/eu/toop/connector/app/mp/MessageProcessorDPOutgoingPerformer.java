@@ -75,9 +75,9 @@ import eu.toop.connector.api.as4.MEPayload;
 import eu.toop.connector.api.as4.MERoutingInformation;
 import eu.toop.connector.api.as4.MessageExchangeManager;
 import eu.toop.connector.api.http.TCHttpClientFactory;
+import eu.toop.connector.api.r2d2.IR2D2Endpoint;
+import eu.toop.connector.api.r2d2.IR2D2ErrorHandler;
 import eu.toop.connector.app.TCDumpHelper;
-import eu.toop.connector.r2d2client.IR2D2Endpoint;
-import eu.toop.connector.r2d2client.IR2D2ErrorHandler;
 import eu.toop.kafkaclient.ToopKafkaClient;
 
 /**

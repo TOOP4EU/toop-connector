@@ -31,6 +31,10 @@ import com.helger.peppolid.IParticipantIdentifier;
 import com.helger.peppolid.IProcessIdentifier;
 
 import eu.toop.commons.error.EToopErrorCode;
+import eu.toop.connector.api.r2d2.IR2D2Endpoint;
+import eu.toop.connector.api.r2d2.IR2D2EndpointProvider;
+import eu.toop.connector.api.r2d2.IR2D2ErrorHandler;
+import eu.toop.connector.api.r2d2.IR2D2ParticipantIDProvider;
 import eu.toop.kafkaclient.ToopKafkaClient;
 
 /**

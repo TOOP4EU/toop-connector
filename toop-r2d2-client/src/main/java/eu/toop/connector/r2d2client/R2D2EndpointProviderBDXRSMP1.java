@@ -49,6 +49,10 @@ import com.helger.xsds.bdxr.smp1.SignedServiceMetadataType;
 import eu.toop.commons.error.EToopErrorCode;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.TCSettings;
+import eu.toop.connector.api.r2d2.IR2D2Endpoint;
+import eu.toop.connector.api.r2d2.IR2D2EndpointProvider;
+import eu.toop.connector.api.r2d2.IR2D2ErrorHandler;
+import eu.toop.connector.api.r2d2.R2D2Endpoint;
 import eu.toop.kafkaclient.ToopKafkaClient;
 
 /**

@@ -30,6 +30,7 @@ import com.helger.peppolid.IParticipantIdentifier;
 import com.helger.security.certificate.CertificateHelper;
 
 import eu.toop.connector.api.TCSettings;
+import eu.toop.connector.api.r2d2.R2D2Endpoint;
 
 /**
  * Test class for class {@link R2D2Endpoint}.

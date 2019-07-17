@@ -42,6 +42,8 @@ import eu.toop.commons.error.EToopErrorCode;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.TCSettings;
 import eu.toop.connector.api.http.TCHttpClientFactory;
+import eu.toop.connector.api.r2d2.IR2D2ErrorHandler;
+import eu.toop.connector.api.r2d2.IR2D2ParticipantIDProvider;
 import eu.toop.kafkaclient.ToopKafkaClient;
 
 /**
