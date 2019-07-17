@@ -73,12 +73,8 @@
       <artifactId>toop-connector-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>eu.toop</groupId>
-      <artifactId>toop-smm-client</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>eu.toop</groupId>
-      <artifactId>toop-r2d2-client</artifactId>
+      <groupId>com.helger</groupId>
+      <artifactId>peppol-smp-client</artifactId>
     </dependency>
 
     <dependency>

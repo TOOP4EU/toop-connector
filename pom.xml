@@ -114,16 +114,6 @@
       </dependency>
       <dependency>
         <groupId>eu.toop</groupId>
-        <artifactId>toop-smm-client</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>eu.toop</groupId>
-        <artifactId>toop-r2d2-client</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>eu.toop</groupId>
         <artifactId>toop-message-exchange</artifactId>
         <version>${project.version}</version>
       </dependency>
@@ -148,8 +138,6 @@
   <!-- Sub-projects - must match child directory names; order is important! -->
   <modules>
     <module>toop-connector-api</module>
-    <module>toop-smm-client</module>
-    <module>toop-r2d2-client</module>
     <module>toop-message-exchange</module>
     <module>toop-mem-phase4</module>
     <module>toop-connector</module>

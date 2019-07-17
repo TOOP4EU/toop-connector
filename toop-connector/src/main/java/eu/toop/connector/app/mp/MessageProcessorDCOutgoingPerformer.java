@@ -86,8 +86,8 @@ import eu.toop.connector.api.smm.ISMMUnmappableCallback;
 import eu.toop.connector.api.smm.MappedValue;
 import eu.toop.connector.api.smm.MappedValueList;
 import eu.toop.connector.app.TCDumpHelper;
-import eu.toop.connector.r2d2client.R2D2Client;
-import eu.toop.connector.smmclient.SMMClient;
+import eu.toop.connector.app.r2d2.R2D2Client;
+import eu.toop.connector.app.smm.SMMClient;
 import eu.toop.kafkaclient.ToopKafkaClient;
 import oasis.names.specification.ubl.schema.xsd.unqualifieddatatypes_21.IdentifierType;
 

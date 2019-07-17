@@ -65,7 +65,7 @@ import eu.toop.connector.api.smm.ISMMClient;
 import eu.toop.connector.api.smm.ISMMMultiMappingCallback;
 import eu.toop.connector.api.smm.ISMMUnmappableCallback;
 import eu.toop.connector.api.smm.MappedValue;
-import eu.toop.connector.smmclient.SMMClient;
+import eu.toop.connector.app.smm.SMMClient;
 import eu.toop.kafkaclient.ToopKafkaClient;
 
 /**
