@@ -25,6 +25,7 @@ import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
 
 import com.helger.commons.ValueEnforcer;
+import com.helger.commons.annotation.Nonempty;
 import com.helger.commons.collection.impl.CommonsLinkedHashSet;
 import com.helger.commons.collection.impl.ICommonsOrderedSet;
 import com.helger.commons.error.level.EErrorLevel;
@@ -56,6 +57,22 @@ public class SMMConceptProviderGRLCRemote implements ISMMConceptProvider
 {
   public SMMConceptProviderGRLCRemote ()
   {}
+
+  /**
+   * @return The configured GRLC base URL from the configuration file. Never
+   *         <code>null</code>.
+   */
+  @Nonnull
+  @Nonempty
+  public static String getRemoteBaseURL ()
+  {
+    String sBaseURL = TCConfig.getSMMGRLCURL ();
+    if (StringHelper.hasNoText (sBaseURL))
+      throw new IllegalArgumentException ("SMM GRLC URL is missing!");
+    if (!sBaseURL.endsWith ("/"))
+      sBaseURL += "/";
+    return sBaseURL;
+  }
 
   @Nonnull
   public MappedValueList getAllMappedValues (@Nonnull final String sLogPrefix,
@@ -131,12 +148,7 @@ public class SMMConceptProviderGRLCRemote implements ISMMConceptProvider
                                 "'");
 
     // Build URL with params etc.
-    String sBaseURL = TCConfig.getSMMGRLCURL ();
-    if (StringHelper.hasNoText (sBaseURL))
-      throw new IllegalArgumentException ("SMM GRLC URL is missing!");
-    if (!sBaseURL.endsWith ("/"))
-      sBaseURL += "/";
-    final ISimpleURL aDestinationURL = new SimpleURL (sBaseURL +
+    final ISimpleURL aDestinationURL = new SimpleURL (getRemoteBaseURL () +
                                                       "api/JackJackie/toop-sparql/get-all-mapped-concepts-between-two-namespaces-v2").add ("sourcenamespace",
                                                                                                                                            sSourceNamespace)
                                                                                                                                      .add ("targetnamespace",
@@ -194,12 +206,8 @@ public class SMMConceptProviderGRLCRemote implements ISMMConceptProvider
     ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "Remote querying all SMM namespaces");
 
     // Build URL with params etc.
-    String sBaseURL = TCConfig.getSMMGRLCURL ();
-    if (StringHelper.hasNoText (sBaseURL))
-      throw new IllegalArgumentException ("SMM GRLC URL is missing!");
-    if (!sBaseURL.endsWith ("/"))
-      sBaseURL += "/";
-    final ISimpleURL aDestinationURL = new SimpleURL (sBaseURL + "api/JackJackie/toop-sparql/get-all-namespaces");
+    final ISimpleURL aDestinationURL = new SimpleURL (getRemoteBaseURL () +
+                                                      "api/JackJackie/toop-sparql/get-all-namespaces");
     // Always no-debug
     final ResponseHandlerJson aJsonHandler = new ResponseHandlerJson (false);
 
