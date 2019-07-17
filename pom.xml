@@ -162,7 +162,7 @@
           <excludes>
             <!-- uses Properties internally -->
             <exclude>**/MEMTest*Servlet*.class</exclude>
-            <exclude>eu/toop/connector/me/test/*.class</exclude>
+            <exclude>eu/toop/connector/mem/def/test/*.class</exclude>
           </excludes>
         </configuration>
         <!-- local executions are ignored -->
