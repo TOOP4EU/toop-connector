@@ -31,6 +31,7 @@ import com.helger.commons.collection.impl.ICommonsList;
 import com.helger.commons.error.level.EErrorLevel;
 import com.helger.commons.io.stream.NonBlockingByteArrayInputStream;
 import com.helger.commons.string.StringHelper;
+import com.helger.commons.string.ToStringGenerator;
 import com.helger.peppol.bdxrclient.BDXRClient;
 import com.helger.peppol.bdxrclient.BDXRClientReadOnly;
 import com.helger.peppol.smpclient.exception.SMPClientException;
@@ -183,5 +184,11 @@ public class R2D2EndpointProviderBDXRSMP1 implements IR2D2EndpointProvider
                              EToopErrorCode.DD_003);
     }
     return ret;
+  }
+
+  @Override
+  public String toString ()
+  {
+    return new ToStringGenerator (this).getToString ();
   }
 }
