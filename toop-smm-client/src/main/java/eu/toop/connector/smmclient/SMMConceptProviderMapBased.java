@@ -28,12 +28,10 @@ import com.helger.commons.annotation.Nonempty;
 import com.helger.commons.annotation.ReturnsMutableCopy;
 import com.helger.commons.collection.impl.CommonsHashMap;
 import com.helger.commons.collection.impl.ICommonsMap;
-import com.helger.commons.error.level.EErrorLevel;
 import com.helger.commons.string.ToStringGenerator;
 
 import eu.toop.connector.api.smm.ISMMConceptProvider;
 import eu.toop.connector.api.smm.MappedValueList;
-import eu.toop.kafkaclient.ToopKafkaClient;
 
 /**
  * Implementation of {@link ISMMConceptProvider} using a static Map. This class
@@ -103,13 +101,12 @@ public class SMMConceptProviderMapBased implements ISMMConceptProvider
                                              @Nonnull final String sSourceNamespace,
                                              @Nonnull final String sDestNamespace)
   {
-    ToopKafkaClient.send (EErrorLevel.INFO,
-                          () -> sLogPrefix +
-                                "Using static Map for SMM mappings from '" +
-                                sSourceNamespace +
-                                "' to '" +
-                                sDestNamespace +
-                                "'");
+    LOGGER.info (sLogPrefix +
+                 "Using static Map for SMM mappings from '" +
+                 sSourceNamespace +
+                 "' to '" +
+                 sDestNamespace +
+                 "'");
 
     final MappedValueList ret = new MappedValueList ();
     if (m_sSourceNamespace.equals (sSourceNamespace) && m_sDestNamespace.equals (sDestNamespace))

@@ -62,6 +62,7 @@ import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.http.TCHttpClientFactory;
 import eu.toop.connector.api.smm.IMappedValueList;
 import eu.toop.connector.api.smm.ISMMClient;
+import eu.toop.connector.api.smm.ISMMMultiMappingCallback;
 import eu.toop.connector.api.smm.ISMMUnmappableCallback;
 import eu.toop.connector.api.smm.MappedValue;
 import eu.toop.connector.smmclient.SMMClient;
@@ -187,6 +188,14 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
       if (nConceptsToBeMapped > 0)
       {
         // Main mapping
+        ToopKafkaClient.send (EErrorLevel.INFO,
+                              () -> sLogPrefix +
+                                    "SMM client is mapping " +
+                                    aSMMClient.getTotalCountConceptsToBeMapped () +
+                                    " concept(s) to namespace '" +
+                                    sDestinationMappingURI +
+                                    "'");
+
         final boolean bUnmappableConceptLeadsToError = TCConfig.isSMMDPMappingErrorFatal ();
         final ISMMUnmappableCallback aUnmappableCallback = (sLogPrefix1,
                                                             sSourceNamespace,
@@ -212,12 +221,34 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
           {
             if (LOGGER.isWarnEnabled ())
               LOGGER.warn (sLogPrefix1 + sErrorMsg + " (continuing anyway)");
+
+            ToopKafkaClient.send (EErrorLevel.WARN, () -> sLogPrefix1 + sErrorMsg);
           }
         };
+        final ISMMMultiMappingCallback aMultiMappingCallback = (sLogPrefix1,
+                                                                sSourceNamespace,
+                                                                sSourceValue,
+                                                                sDestNamespace,
+                                                                aMatching) -> ToopKafkaClient.send (EErrorLevel.WARN,
+                                                                                                    () -> sLogPrefix1 +
+                                                                                                          "Found " +
+                                                                                                          aMatching.size () +
+                                                                                                          " mappings for '" +
+                                                                                                          sSourceNamespace +
+                                                                                                          '#' +
+                                                                                                          sSourceValue +
+                                                                                                          "' to destination namespace '" +
+                                                                                                          sDestNamespace +
+                                                                                                          "'");
+
         final IMappedValueList aMappedValues = aSMMClient.performMapping (sLogPrefix,
                                                                           sDestinationMappingURI,
                                                                           MPConfig.getSMMConceptProvider (),
-                                                                          aUnmappableCallback);
+                                                                          aUnmappableCallback,
+                                                                          aMultiMappingCallback);
+
+        ToopKafkaClient.send (EErrorLevel.INFO,
+                              () -> sLogPrefix + "SMM client mapping found " + aMappedValues.size () + " mapping(s)");
 
         // add all the mapped values in the request
         _iterateTCConcepts (aRequest, c -> {

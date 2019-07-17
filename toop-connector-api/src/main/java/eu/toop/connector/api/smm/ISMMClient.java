@@ -87,6 +87,9 @@ public interface ISMMClient extends Serializable
    * @param aUnmappableCallback
    *        Callback to be invoked if a non-mappable entry was found. May be
    *        <code>null</code>.
+   * @param aMultiMappingCallback
+   *        Callback to be invoked if 1:n mappings were found. May be
+   *        <code>null</code>.
    * @return A non-<code>null</code> but maybe empty list of mappings.
    * @throws IOException
    *         in case of HTTP IO error
@@ -96,5 +99,6 @@ public interface ISMMClient extends Serializable
   IMappedValueList performMapping (@Nonnull String sLogPrefix,
                                    @Nonnull @Nonempty String sDestNamespace,
                                    @Nonnull ISMMConceptProvider aConceptProvider,
-                                   @Nullable ISMMUnmappableCallback aUnmappableCallback) throws IOException;
+                                   @Nullable ISMMUnmappableCallback aUnmappableCallback,
+                                   @Nullable ISMMMultiMappingCallback aMultiMappingCallback) throws IOException;
 }

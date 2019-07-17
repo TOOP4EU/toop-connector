@@ -81,6 +81,7 @@ import eu.toop.connector.api.r2d2.IR2D2Endpoint;
 import eu.toop.connector.api.r2d2.IR2D2ErrorHandler;
 import eu.toop.connector.api.smm.IMappedValueList;
 import eu.toop.connector.api.smm.ISMMClient;
+import eu.toop.connector.api.smm.ISMMMultiMappingCallback;
 import eu.toop.connector.api.smm.ISMMUnmappableCallback;
 import eu.toop.connector.api.smm.MappedValue;
 import eu.toop.connector.api.smm.MappedValueList;
@@ -309,12 +310,38 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
                                            sErrorMsg,
                                            null));
               };
+              final ISMMMultiMappingCallback aMultiMappingCallback = (sLogPrefix1,
+                                                                      sSourceNamespace,
+                                                                      sSourceValue,
+                                                                      sDestNamespace,
+                                                                      aMatching) -> ToopKafkaClient.send (EErrorLevel.WARN,
+                                                                                                          () -> sLogPrefix1 +
+                                                                                                                "Found " +
+                                                                                                                aMatching.size () +
+                                                                                                                " mappings for '" +
+                                                                                                                sSourceNamespace +
+                                                                                                                '#' +
+                                                                                                                sSourceValue +
+                                                                                                                "' to destination namespace '" +
+                                                                                                                sDestNamespace +
+                                                                                                                "'");
 
-              // Logging happens internally
+              ToopKafkaClient.send (EErrorLevel.INFO,
+                                    () -> sLogPrefix +
+                                          "SMM client is mapping " +
+                                          aSMMClient.getTotalCountConceptsToBeMapped () +
+                                          " concept(s) to namespace '" +
+                                          sSMMDomain +
+                                          "'");
+
               aMappedValues = aSMMClient.performMapping (sLogPrefix,
                                                          sSMMDomain,
                                                          MPConfig.getSMMConceptProvider (),
-                                                         aUnmappableCallback);
+                                                         aUnmappableCallback,
+                                                         aMultiMappingCallback);
+
+              ToopKafkaClient.send (EErrorLevel.INFO,
+                                    sLogPrefix + "SMM client mapping found " + aMappedValues.size () + " mapping(s)");
             }
           }
           catch (final IllegalArgumentException | IOException ex)

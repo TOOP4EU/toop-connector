@@ -30,20 +30,19 @@ import com.helger.commons.collection.impl.CommonsArrayList;
 import com.helger.commons.collection.impl.CommonsHashMap;
 import com.helger.commons.collection.impl.ICommonsList;
 import com.helger.commons.collection.impl.ICommonsMap;
-import com.helger.commons.error.level.EErrorLevel;
 
 import eu.toop.commons.concept.ConceptValue;
 import eu.toop.connector.api.smm.IMappedValueList;
 import eu.toop.connector.api.smm.ISMMClient;
 import eu.toop.connector.api.smm.ISMMConceptProvider;
+import eu.toop.connector.api.smm.ISMMMultiMappingCallback;
 import eu.toop.connector.api.smm.ISMMUnmappableCallback;
 import eu.toop.connector.api.smm.MappedValue;
 import eu.toop.connector.api.smm.MappedValueList;
-import eu.toop.kafkaclient.ToopKafkaClient;
 
 /**
  * Default implementation of {@link ISMMClient}.
- * 
+ *
  * @author Philip Helger
  */
 @NotThreadSafe
@@ -78,22 +77,13 @@ public class SMMClient implements ISMMClient
   public IMappedValueList performMapping (@Nonnull final String sLogPrefix,
                                           @Nonnull @Nonempty final String sDestNamespace,
                                           @Nonnull final ISMMConceptProvider aConceptProvider,
-                                          @Nullable final ISMMUnmappableCallback aUnmappableCallback) throws IOException
+                                          @Nullable final ISMMUnmappableCallback aUnmappableCallback,
+                                          @Nullable final ISMMMultiMappingCallback aMultiMappingCallback) throws IOException
   {
 
     ValueEnforcer.notNull (sLogPrefix, "LogPrefix");
     ValueEnforcer.notEmpty (sDestNamespace, "DestNamespace");
     ValueEnforcer.notNull (aConceptProvider, "ConceptProvider");
-
-    ToopKafkaClient.send (EErrorLevel.INFO,
-                          () -> sLogPrefix +
-                                "SMM client mapping " +
-                                getTotalCountConceptsToBeMapped () +
-                                " concept(s) from " +
-                                m_aSrcMap.size () +
-                                " source namespace(s) to '" +
-                                sDestNamespace +
-                                "'");
 
     final MappedValueList ret = new MappedValueList ();
     // for all source namespaces (maybe many)
@@ -127,43 +117,24 @@ public class SMMClient implements ISMMClient
             // Found no mapping
             if (aUnmappableCallback != null)
               aUnmappableCallback.onUnmappableValue (sLogPrefix, sSourceNamespace, sSourceValue, sDestNamespace);
-            else
-            {
-              ToopKafkaClient.send (EErrorLevel.WARN,
-                                    () -> sLogPrefix +
-                                          "Found no mapping for '" +
-                                          sSourceNamespace +
-                                          '#' +
-                                          sSourceValue +
-                                          "' to destination namespace '" +
-                                          sDestNamespace +
-                                          "'");
-            }
             // TODO shall we add a mapping to null?
           }
           else
           {
             if (aMatching.size () > 1)
             {
-              ToopKafkaClient.send (EErrorLevel.WARN,
-                                    () -> sLogPrefix +
-                                          "Found " +
-                                          aMatching.size () +
-                                          " mappings for '" +
-                                          sSourceNamespace +
-                                          '#' +
-                                          sSourceValue +
-                                          "' to destination namespace '" +
-                                          sDestNamespace +
-                                          "'");
+              if (aMultiMappingCallback != null)
+                aMultiMappingCallback.onMultiMapping (sLogPrefix,
+                                                      sSourceNamespace,
+                                                      sSourceValue,
+                                                      sDestNamespace,
+                                                      aMatching);
             }
             ret.addAllMappedValues (aMatching);
           }
         }
       }
     }
-    ToopKafkaClient.send (EErrorLevel.INFO,
-                          () -> sLogPrefix + "SMM client mapping found " + ret.size () + " mapping(s)");
     return ret;
   }
 }

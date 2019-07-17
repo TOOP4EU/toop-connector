@@ -39,6 +39,7 @@ import eu.toop.commons.usecase.EToopConcept;
 import eu.toop.connector.api.smm.IMappedValueList;
 import eu.toop.connector.api.smm.ISMMClient;
 import eu.toop.connector.api.smm.ISMMConceptProvider;
+import eu.toop.connector.api.smm.ISMMMultiMappingCallback;
 import eu.toop.connector.api.smm.ISMMUnmappableCallback;
 import eu.toop.connector.api.smm.MappedValue;
 import eu.toop.connector.api.smm.MappedValueList;
@@ -61,6 +62,13 @@ public final class SMMClientTest
   private static final ISMMUnmappableCallback UCB = (sLogPrefix, aSourceNamespace, aSourceValue, aDestNamespace) -> {
     // Do nothing
   };
+  private static final ISMMMultiMappingCallback MMCB = (sLogPrefix,
+                                                        aSourceNamespace,
+                                                        aSourceValue,
+                                                        aDestNamespace,
+                                                        aMappings) -> {
+    // Do nothing
+  };
 
   @Test
   public void testEmpty () throws IOException
@@ -69,7 +77,7 @@ public final class SMMClientTest
     {
       LOGGER.info ("Starting testEmpty");
       final ISMMClient aClient = new SMMClient ();
-      final IMappedValueList ret = aClient.performMapping (CMockSMM.LOG_PREFIX, CMockSMM.NS_FREEDONIA, aCP, UCB);
+      final IMappedValueList ret = aClient.performMapping (CMockSMM.LOG_PREFIX, CMockSMM.NS_FREEDONIA, aCP, UCB, MMCB);
       assertNotNull (ret);
       assertTrue (ret.isEmpty ());
       assertEquals (0, ret.size ());
@@ -84,7 +92,7 @@ public final class SMMClientTest
       LOGGER.info ("Starting testOneMatch");
       final ISMMClient aClient = new SMMClient ();
       aClient.addConceptToBeMapped (CONCEPT_TOOP_1);
-      final IMappedValueList ret = aClient.performMapping (CMockSMM.LOG_PREFIX, CMockSMM.NS_FREEDONIA, aCP, UCB);
+      final IMappedValueList ret = aClient.performMapping (CMockSMM.LOG_PREFIX, CMockSMM.NS_FREEDONIA, aCP, UCB, MMCB);
       assertNotNull (ret);
       assertEquals (1, ret.size ());
 
@@ -109,7 +117,7 @@ public final class SMMClientTest
       aClient.addConceptToBeMapped (CONCEPT_TOOP_1);
       aClient.addConceptToBeMapped (CMockSMM.NS_TOOP, "NonExistingField");
       aClient.addConceptToBeMapped ("SourceNamespace", "NonExistingField");
-      final IMappedValueList ret = aClient.performMapping (CMockSMM.LOG_PREFIX, CMockSMM.NS_FREEDONIA, aCP, UCB);
+      final IMappedValueList ret = aClient.performMapping (CMockSMM.LOG_PREFIX, CMockSMM.NS_FREEDONIA, aCP, UCB, MMCB);
       assertNotNull (ret);
       assertEquals (1, ret.size ());
 
@@ -132,7 +140,7 @@ public final class SMMClientTest
       LOGGER.info ("Starting testNoMappingNeeded");
       final ISMMClient aClient = new SMMClient ();
       aClient.addConceptToBeMapped (CONCEPT_FR_1);
-      final IMappedValueList ret = aClient.performMapping (CMockSMM.LOG_PREFIX, CMockSMM.NS_FREEDONIA, aCP, UCB);
+      final IMappedValueList ret = aClient.performMapping (CMockSMM.LOG_PREFIX, CMockSMM.NS_FREEDONIA, aCP, UCB, MMCB);
       assertNotNull (ret);
       assertEquals (1, ret.size ());
 
@@ -154,7 +162,7 @@ public final class SMMClientTest
     final IMicroElement eRoot = aDoc.appendElement ("root");
     // Get all namespaces
     final ICommonsOrderedSet <String> aNSs = SMMConceptProviderGRLCRemote.remoteQueryAllNamespaces (CMockSMM.LOG_PREFIX);
-    final ISMMConceptProvider aCP = new SMMConceptProviderGRLCWithCache ();
+    final ISMMConceptProvider aCP = new SMMConceptProviderGRLCRemote ();
 
     // For all namespaces
     for (final String sSrc : aNSs)
@@ -164,6 +172,7 @@ public final class SMMClientTest
         eValueList.setAttribute ("srcns", sSrc);
         eValueList.setAttribute ("dstns", CMockSMM.NS_TOOP);
 
+        // Get all mappings to TOOP
         final MappedValueList aMVL = aCP.getAllMappedValues (CMockSMM.LOG_PREFIX, sSrc, CMockSMM.NS_TOOP);
         for (final MappedValue aItem : CollectionHelper.getSorted (aMVL,
                                                                    Comparator.comparing (x -> x.getSource ()

@@ -22,16 +22,16 @@ import javax.annotation.Nonnull;
 import com.helger.commons.annotation.Nonempty;
 
 /**
- * Callback interface to customize the handling of failed SMM mappings at
- * runtime.
- * 
+ * Callback interface to customize the handling of 1:n mappings.
+ *
  * @author Philip Helger
+ * @since 0.10.6
  */
 @FunctionalInterface
-public interface ISMMUnmappableCallback extends Serializable
+public interface ISMMMultiMappingCallback extends Serializable
 {
   /**
-   * Invoked for every unmappable value.
+   * Invoked for every 1:n mapping.
    *
    * @param sLogPrefix
    *        Logging prefix
@@ -41,9 +41,12 @@ public interface ISMMUnmappableCallback extends Serializable
    *        Source value
    * @param sDestNamespace
    *        Destination namespace URI
+   * @param aMatching
+   *        The matching values. Never <code>null</code>.
    */
-  void onUnmappableValue (@Nonnull String sLogPrefix,
-                          @Nonnull @Nonempty String sSourceNamespace,
-                          @Nonnull @Nonempty String sSourceValue,
-                          @Nonnull @Nonempty String sDestNamespace);
+  void onMultiMapping (@Nonnull String sLogPrefix,
+                       @Nonnull @Nonempty String sSourceNamespace,
+                       @Nonnull @Nonempty String sSourceValue,
+                       @Nonnull @Nonempty String sDestNamespace,
+                       @Nonnull @Nonempty MappedValueList aMatching);
 }
