@@ -24,8 +24,6 @@ import com.helger.commons.collection.impl.ICommonsSet;
 import com.helger.peppolid.IDocumentTypeIdentifier;
 import com.helger.peppolid.IParticipantIdentifier;
 
-import eu.toop.commons.error.ToopErrorException;
-
 /**
  * Interface to resolve Country Code and Document Type ID to a set of matching
  * participant identifiers.<br>
@@ -49,12 +47,13 @@ public interface IR2D2ParticipantIDProvider extends Serializable
    *        <code>null</code>.
    * @param aDocumentTypeID
    *        Document type ID to query. May not be <code>null</code>.
+   * @param aErrorHandler
+   *        The error handler to be used. May not be <code>null</code>.
    * @return A non-<code>null</code> but maybe empty set of Participant IDs.
-   * @throws ToopErrorException
-   *         On query exception
    */
   @Nonnull
   ICommonsSet <IParticipantIdentifier> getAllParticipantIDs (@Nonnull String sLogPrefix,
                                                              @Nonnull @Nonempty String sCountryCode,
-                                                             @Nonnull IDocumentTypeIdentifier aDocumentTypeID) throws ToopErrorException;
+                                                             @Nonnull IDocumentTypeIdentifier aDocumentTypeID,
+                                                             @Nonnull IR2D2ErrorHandler aErrorHandler);
 }

@@ -39,7 +39,6 @@ import com.helger.peppolid.IDocumentTypeIdentifier;
 import com.helger.peppolid.IParticipantIdentifier;
 
 import eu.toop.commons.error.EToopErrorCode;
-import eu.toop.commons.error.ToopErrorException;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.TCSettings;
 import eu.toop.connector.api.http.TCHttpClientFactory;
@@ -111,7 +110,8 @@ public class R2D2ParticipantIDProviderTOOPDirectory implements IR2D2ParticipantI
   @Nonnull
   public ICommonsSet <IParticipantIdentifier> getAllParticipantIDs (@Nonnull final String sLogPrefix,
                                                                     @Nonnull @Nonempty final String sCountryCode,
-                                                                    @Nonnull final IDocumentTypeIdentifier aDocumentTypeID) throws ToopErrorException
+                                                                    @Nonnull final IDocumentTypeIdentifier aDocumentTypeID,
+                                                                    @Nonnull final IR2D2ErrorHandler aErrorHandler)
   {
     final ICommonsSet <IParticipantIdentifier> ret = new CommonsHashSet <> ();
 
@@ -194,14 +194,14 @@ public class R2D2ParticipantIDProviderTOOPDirectory implements IR2D2ParticipantI
     }
     catch (final IOException ex)
     {
-      throw new ToopErrorException (sLogPrefix +
-                                    "Error querying TOOP Directory for matches (" +
-                                    sCountryCode +
-                                    ", " +
-                                    aDocumentTypeID.getURIEncoded () +
-                                    ")",
-                                    ex,
-                                    EToopErrorCode.DD_001);
+      aErrorHandler.onError (sLogPrefix +
+                             "Error querying TOOP Directory for matches (" +
+                             sCountryCode +
+                             ", " +
+                             aDocumentTypeID.getURIEncoded () +
+                             ")",
+                             ex,
+                             EToopErrorCode.DD_001);
     }
 
     return ret;

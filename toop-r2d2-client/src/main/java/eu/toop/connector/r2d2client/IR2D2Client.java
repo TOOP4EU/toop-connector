@@ -25,8 +25,6 @@ import com.helger.peppolid.IDocumentTypeIdentifier;
 import com.helger.peppolid.IParticipantIdentifier;
 import com.helger.peppolid.IProcessIdentifier;
 
-import eu.toop.commons.error.ToopErrorException;
-
 /**
  * Resilient Registry-based Dynamic Discovery (R2D2) client interface for
  * Message Processor
@@ -44,9 +42,7 @@ public interface IR2D2Client extends Serializable
    * TOOP Directory instance (depending on the production or test flag). The
    * SMPs of the resulting service group IDs are than queried in a loop for all
    * matching endpoints (of participant ID and document type ID) which are
-   * parsed and converted to simpler R2D2Endpoint instances.<br>
-   * Note: this method returns endpoints for all found transport protocols, so
-   * this must be filtered externally.
+   * parsed and converted to simpler R2D2Endpoint instances.
    *
    * @param sLogPrefix
    *        Log prefix to use. May not be <code>null</code> but maybe empty.
@@ -64,27 +60,26 @@ public interface IR2D2Client extends Serializable
    * @param sTransportProfileID
    *        The transport profile ID to be used. May neither be
    *        <code>null</code> nor empty.
+   * @param aErrorHandler
+   *        The error handler to be used. May not be <code>null</code>.
    * @return A non-<code>null</code> but maybe empty list of all matching
    *         endpoints.
-   * @throws ToopErrorException
-   *         On error including the respective error code
    */
   @Nonnull
   ICommonsList <IR2D2Endpoint> getEndpoints (@Nonnull String sLogPrefix,
                                              @Nonnull @Nonempty String sCountryCode,
                                              @Nonnull IDocumentTypeIdentifier aDocumentTypeID,
-                                             @Nonnull final IR2D2ParticipantIDProvider aParticipantIDProvider,
+                                             @Nonnull IR2D2ParticipantIDProvider aParticipantIDProvider,
                                              @Nonnull IProcessIdentifier aProcessID,
-                                             @Nonnull @Nonempty String sTransportProfileID) throws ToopErrorException;
+                                             @Nonnull @Nonempty String sTransportProfileID,
+                                             @Nonnull IR2D2ErrorHandler aErrorHandler);
 
   /**
    * Get a list of all endpoints that match the specified requirements. This is
    * the API that is to be invoked in the case, where the ServiceGroup IDs of
    * the receiver is known and NO TOOP Directory invocation is needed.<br>
    * Internally the SMP of the service group ID is queried and all matching
-   * endpoints are parsed and converted to simpler R2D2Endpoint instances.<br>
-   * Note: this method returns endpoints for all found transport protocols, so
-   * this must be filtered externally.
+   * endpoints are parsed and converted to simpler R2D2Endpoint instances.
    *
    * @param sLogPrefix
    *        Log prefix. May not be <code>null</code> but maybe empty.
@@ -98,15 +93,16 @@ public interface IR2D2Client extends Serializable
    * @param sTransportProfileID
    *        The transport profile ID to be used. May neither be
    *        <code>null</code> nor empty.
+   * @param aErrorHandler
+   *        The error handler to be used. May not be <code>null</code>.
    * @return A non-<code>null</code> but maybe empty list of all matching
    *         endpoints.
-   * @throws ToopErrorException
-   *         On error including the respective error code
    */
   @Nonnull
   ICommonsList <IR2D2Endpoint> getEndpoints (@Nonnull String sLogPrefix,
                                              @Nonnull IParticipantIdentifier aRecipientID,
                                              @Nonnull IDocumentTypeIdentifier aDocumentTypeID,
                                              @Nonnull IProcessIdentifier aProcessID,
-                                             @Nonnull @Nonempty String sTransportProfileID) throws ToopErrorException;
+                                             @Nonnull @Nonempty String sTransportProfileID,
+                                             @Nonnull IR2D2ErrorHandler aErrorHandler);
 }

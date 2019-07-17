@@ -47,7 +47,6 @@ import com.helger.xsds.bdxr.smp1.ServiceInformationType;
 import com.helger.xsds.bdxr.smp1.SignedServiceMetadataType;
 
 import eu.toop.commons.error.EToopErrorCode;
-import eu.toop.commons.error.ToopErrorException;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.TCSettings;
 import eu.toop.kafkaclient.ToopKafkaClient;
@@ -68,7 +67,8 @@ public class R2D2Client implements IR2D2Client
                                                     @Nonnull final IDocumentTypeIdentifier aDocumentTypeID,
                                                     @Nonnull final IR2D2ParticipantIDProvider aParticipantIDProvider,
                                                     @Nonnull final IProcessIdentifier aProcessID,
-                                                    @Nonnull @Nonempty final String sTransportProfileID) throws ToopErrorException
+                                                    @Nonnull @Nonempty final String sTransportProfileID,
+                                                    @Nonnull final IR2D2ErrorHandler aErrorHandler)
   {
     ValueEnforcer.notEmpty (sCountryCode, "CountryCode");
     ValueEnforcer.isTrue (sCountryCode.length () == 2, "CountryCode must have length 2");
@@ -76,6 +76,7 @@ public class R2D2Client implements IR2D2Client
     ValueEnforcer.notNull (aParticipantIDProvider, "ParticipantIDProvider");
     ValueEnforcer.notNull (aProcessID, "ProcessID");
     ValueEnforcer.notEmpty (sTransportProfileID, "TransportProfileID");
+    ValueEnforcer.notNull (aErrorHandler, "ErrorHandler");
 
     ToopKafkaClient.send (EErrorLevel.INFO,
                           () -> sLogPrefix +
@@ -95,7 +96,8 @@ public class R2D2Client implements IR2D2Client
     // Query TOOP Directory
     final ICommonsSet <IParticipantIdentifier> aPIs = aParticipantIDProvider.getAllParticipantIDs (sLogPrefix,
                                                                                                    sCountryCode,
-                                                                                                   aDocumentTypeID);
+                                                                                                   aDocumentTypeID,
+                                                                                                   aErrorHandler);
 
     ToopKafkaClient.send (EErrorLevel.INFO,
                           () -> sLogPrefix +
@@ -105,25 +107,37 @@ public class R2D2Client implements IR2D2Client
                                 StringHelper.getImplodedMapped (", ", aPIs, IParticipantIdentifier::getURIEncoded));
 
     if (aPIs.isEmpty ())
-      throw new ToopErrorException ("Participant ID lookup returned no matches", EToopErrorCode.DD_004);
-
-    // For all matching IDs (if any)
-    for (final IParticipantIdentifier aPI : aPIs)
+      aErrorHandler.onError ("Participant ID lookup returned no matches", EToopErrorCode.DD_004);
+    else
     {
-      // Single SMP query
-      final ICommonsList <IR2D2Endpoint> aLocal = getEndpoints (sLogPrefix,
-                                                                aPI,
-                                                                aDocumentTypeID,
-                                                                aProcessID,
-                                                                sTransportProfileID);
-      ret.addAll (aLocal);
-
-      if (aLocal.isEmpty ())
+      // For all matching IDs (if any)
+      for (final IParticipantIdentifier aPI : aPIs)
       {
-        // TODO somehow emit warning DD_005
+        // Single SMP query
+        final ICommonsList <IR2D2Endpoint> aLocal = getEndpoints (sLogPrefix,
+                                                                  aPI,
+                                                                  aDocumentTypeID,
+                                                                  aProcessID,
+                                                                  sTransportProfileID,
+                                                                  aErrorHandler);
+        ret.addAll (aLocal);
+
+        if (aLocal.isEmpty ())
+        {
+          // emit warning DD_005
+          aErrorHandler.onWarning ("SMP lookup for '" +
+                                   aPI.getURIEncoded () +
+                                   "' and document type ID '" +
+                                   aDocumentTypeID.getURIEncoded () +
+                                   "' and process ID '" +
+                                   aProcessID.getURIEncoded () +
+                                   "' and transport profile '" +
+                                   sTransportProfileID +
+                                   "' returned in no endpoints",
+                                   EToopErrorCode.DD_005);
+        }
       }
     }
-
     return ret;
   }
 
@@ -133,12 +147,14 @@ public class R2D2Client implements IR2D2Client
                                                     @Nonnull final IParticipantIdentifier aRecipientID,
                                                     @Nonnull final IDocumentTypeIdentifier aDocumentTypeID,
                                                     @Nonnull final IProcessIdentifier aProcessID,
-                                                    @Nonnull @Nonempty final String sTransportProfileID) throws ToopErrorException
+                                                    @Nonnull @Nonempty final String sTransportProfileID,
+                                                    @Nonnull final IR2D2ErrorHandler aErrorHandler)
   {
     ValueEnforcer.notNull (aRecipientID, "Recipient");
     ValueEnforcer.notNull (aDocumentTypeID, "DocumentTypeID");
     ValueEnforcer.notNull (aProcessID, "ProcessID");
     ValueEnforcer.notEmpty (sTransportProfileID, "TransportProfileID");
+    ValueEnforcer.notNull (aErrorHandler, "ErrorHandler");
 
     ToopKafkaClient.send (EErrorLevel.INFO,
                           () -> sLogPrefix +
@@ -194,7 +210,7 @@ public class R2D2Client implements IR2D2Client
 
               if (StringHelper.hasNoText (aEP.getEndpointURI ()))
               {
-                ToopKafkaClient.send (EErrorLevel.WARN, () -> sLogPrefix + "SMP lookup result: endpoint has not URI");
+                ToopKafkaClient.send (EErrorLevel.WARN, () -> sLogPrefix + "SMP lookup result: endpoint has no URI");
                 continue;
               }
 
@@ -222,27 +238,27 @@ public class R2D2Client implements IR2D2Client
     }
     catch (final PeppolDNSResolutionException | SMPClientException ex)
     {
-      throw new ToopErrorException (sLogPrefix +
-                                    "Error fetching SMP endpoint " +
-                                    aRecipientID.getURIEncoded () +
-                                    "/" +
-                                    aDocumentTypeID.getURIEncoded () +
-                                    "/" +
-                                    aProcessID.getURIEncoded (),
-                                    ex,
-                                    EToopErrorCode.DD_002);
+      aErrorHandler.onError (sLogPrefix +
+                             "Error fetching SMP endpoint " +
+                             aRecipientID.getURIEncoded () +
+                             "/" +
+                             aDocumentTypeID.getURIEncoded () +
+                             "/" +
+                             aProcessID.getURIEncoded (),
+                             ex,
+                             EToopErrorCode.DD_002);
     }
     catch (final CertificateException ex)
     {
-      throw new ToopErrorException (sLogPrefix +
-                                    "Error validating the signature from SMP response for endpoint " +
-                                    aRecipientID.getURIEncoded () +
-                                    "/" +
-                                    aDocumentTypeID.getURIEncoded () +
-                                    "/" +
-                                    aProcessID.getURIEncoded (),
-                                    ex,
-                                    EToopErrorCode.DD_003);
+      aErrorHandler.onError (sLogPrefix +
+                             "Error validating the signature from SMP response for endpoint " +
+                             aRecipientID.getURIEncoded () +
+                             "/" +
+                             aDocumentTypeID.getURIEncoded () +
+                             "/" +
+                             aProcessID.getURIEncoded (),
+                             ex,
+                             EToopErrorCode.DD_003);
     }
     return ret;
   }

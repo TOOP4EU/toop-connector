@@ -77,6 +77,7 @@ import eu.toop.connector.api.as4.MessageExchangeManager;
 import eu.toop.connector.api.http.TCHttpClientFactory;
 import eu.toop.connector.app.TCDumpHelper;
 import eu.toop.connector.r2d2client.IR2D2Endpoint;
+import eu.toop.connector.r2d2client.IR2D2ErrorHandler;
 import eu.toop.connector.r2d2client.R2D2Client;
 import eu.toop.kafkaclient.ToopKafkaClient;
 
@@ -257,11 +258,25 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
         ICommonsList <IR2D2Endpoint> aEndpoints;
         {
           final String sTransportProfileID = TCConfig.getMEMProtocol ().getTransportProfileID ();
+
+          // The R2D2 error handler that converts R2D2 errors into response
+          // errors
+          final IR2D2ErrorHandler aErrHdl = (eErrorLevel,
+                                             sMsg,
+                                             aCause,
+                                             eErrorCode) -> aErrors.add (_createError (eErrorLevel,
+                                                                                       sLogPrefix,
+                                                                                       EToopErrorCategory.DYNAMIC_DISCOVERY,
+                                                                                       eErrorCode,
+                                                                                       sMsg,
+                                                                                       aCause));
+
           aEndpoints = new R2D2Client ().getEndpoints (sLogPrefix,
                                                        aDCParticipantID,
                                                        aDocTypeID,
                                                        aProcessID,
-                                                       sTransportProfileID);
+                                                       sTransportProfileID,
+                                                       aErrHdl);
 
           // Expecting exactly one endpoint!
           ToopKafkaClient.send (aEndpoints.size () == 1 ? EErrorLevel.INFO : EErrorLevel.ERROR,

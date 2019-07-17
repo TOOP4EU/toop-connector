@@ -27,8 +27,6 @@ import com.helger.commons.string.ToStringGenerator;
 import com.helger.peppolid.IDocumentTypeIdentifier;
 import com.helger.peppolid.IParticipantIdentifier;
 
-import eu.toop.commons.error.ToopErrorException;
-
 /**
  * This class implements the {@link IR2D2ParticipantIDProvider} interface using
  * a constant set of participant identifiers. This implementation is meant for
@@ -89,7 +87,8 @@ public class R2D2ParticipantIDProviderConstant implements IR2D2ParticipantIDProv
   @ReturnsMutableCopy
   public ICommonsSet <IParticipantIdentifier> getAllParticipantIDs (@Nonnull final String sLogPrefix,
                                                                     @Nonnull @Nonempty final String sCountryCode,
-                                                                    @Nonnull final IDocumentTypeIdentifier aDocumentTypeID) throws ToopErrorException
+                                                                    @Nonnull final IDocumentTypeIdentifier aDocumentTypeID,
+                                                                    @Nonnull final IR2D2ErrorHandler aErrorHandler)
   {
     return m_aSet.getClone ();
   }

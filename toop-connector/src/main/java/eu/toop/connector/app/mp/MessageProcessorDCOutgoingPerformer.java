@@ -79,6 +79,7 @@ import eu.toop.connector.api.as4.MERoutingInformation;
 import eu.toop.connector.api.as4.MessageExchangeManager;
 import eu.toop.connector.app.TCDumpHelper;
 import eu.toop.connector.r2d2client.IR2D2Endpoint;
+import eu.toop.connector.r2d2client.IR2D2ErrorHandler;
 import eu.toop.connector.r2d2client.IR2D2ParticipantIDProvider;
 import eu.toop.connector.r2d2client.R2D2Client;
 import eu.toop.connector.smmclient.IMappedValueList;
@@ -364,6 +365,18 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
           // 2. invoke R2D2 client
           final String sTransportProfileID = TCConfig.getMEMProtocol ().getTransportProfileID ();
 
+          // The R2D2 error handler that converts R2D2 errors into response
+          // errors
+          final IR2D2ErrorHandler aErrHdl = (eErrorLevel,
+                                             sMsg,
+                                             aCause,
+                                             eErrorCode) -> aErrors.add (_createError (eErrorLevel,
+                                                                                       sLogPrefix,
+                                                                                       EToopErrorCategory.DYNAMIC_DISCOVERY,
+                                                                                       eErrorCode,
+                                                                                       sMsg,
+                                                                                       aCause));
+
           final IdentifierType aExplicitQueryAddress = aRoutingInfo.getDataProviderElectronicAddressIdentifier ();
           final boolean bIsExplicitParticipant = aExplicitQueryAddress != null;
           if (bIsExplicitParticipant)
@@ -378,23 +391,12 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
                                                                                          aExplicitQueryAddress.getValue ());
 
             // Find all endpoints of recipient
-            try
-            {
-              aEndpoints = new R2D2Client ().getEndpoints (sLogPrefix,
-                                                           aRecipientID,
-                                                           aDocTypeID,
-                                                           aProcessID,
-                                                           sTransportProfileID);
-            }
-            catch (final ToopErrorException ex)
-            {
-              // send back async error
-              aErrors.add (_createError (sLogPrefix,
-                                         EToopErrorCategory.DYNAMIC_DISCOVERY,
-                                         ex.getErrorCode (),
-                                         ex.getMessage (),
-                                         ex.getCause ()));
-            }
+            aEndpoints = new R2D2Client ().getEndpoints (sLogPrefix,
+                                                         aRecipientID,
+                                                         aDocTypeID,
+                                                         aProcessID,
+                                                         sTransportProfileID,
+                                                         aErrHdl);
           }
           else
           {
@@ -415,25 +417,14 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
             if (aErrors.isEmpty ())
             {
               // Find all endpoints by country
-              try
-              {
-                final IR2D2ParticipantIDProvider aParticipantIDProvider = MPConfig.getParticipantIDProvider ();
-                aEndpoints = new R2D2Client ().getEndpoints (sLogPrefix,
-                                                             sDestinationCountryCode,
-                                                             aDocTypeID,
-                                                             aParticipantIDProvider,
-                                                             aProcessID,
-                                                             sTransportProfileID);
-              }
-              catch (final ToopErrorException ex)
-              {
-                // send back async error
-                aErrors.add (_createError (sLogPrefix,
-                                           EToopErrorCategory.DYNAMIC_DISCOVERY,
-                                           ex.getErrorCode (),
-                                           ex.getMessage (),
-                                           ex.getCause ()));
-              }
+              final IR2D2ParticipantIDProvider aParticipantIDProvider = MPConfig.getParticipantIDProvider ();
+              aEndpoints = new R2D2Client ().getEndpoints (sLogPrefix,
+                                                           sDestinationCountryCode,
+                                                           aDocTypeID,
+                                                           aParticipantIDProvider,
+                                                           aProcessID,
+                                                           sTransportProfileID,
+                                                           aErrHdl);
             }
           }
 
