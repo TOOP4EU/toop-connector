@@ -287,6 +287,7 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
 
         // 3. start message exchange to DC
         // The sender of the response is the DP
+        // TODO is this field filled by the DP?
         final IParticipantIdentifier aDPParticipantID = aIDFactory.createParticipantIdentifier (aRoutingInfo.getDataProviderElectronicAddressIdentifier ()
                                                                                                             .getSchemeID (),
                                                                                                 aRoutingInfo.getDataProviderElectronicAddressIdentifier ()
