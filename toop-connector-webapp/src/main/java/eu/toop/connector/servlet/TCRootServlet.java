@@ -32,7 +32,10 @@ import com.helger.commons.debug.GlobalDebug;
 import com.helger.commons.http.CHttpHeader;
 import com.helger.commons.mime.CMimeType;
 
+import eu.toop.connector.api.as4.IMessageExchangeSPI;
+import eu.toop.connector.api.as4.MessageExchangeManager;
 import eu.toop.connector.app.CTC;
+import eu.toop.connector.app.mp.MPConfig;
 
 /**
  * Servlet for handling the initial calls without any path. This servlet
@@ -47,7 +50,9 @@ public class TCRootServlet extends HttpServlet
   protected void doGet (@Nonnull final HttpServletRequest req,
                         @Nonnull final HttpServletResponse resp) throws ServletException, IOException
   {
-    final String sCSS = "* { font-family: sans-serif; }" + " a:link, a:visited, a:hover, a:active { color: #2255ff; }";
+    final String sCSS = "* { font-family: sans-serif; }" +
+                        " a:link, a:visited, a:hover, a:active { color: #2255ff; }" +
+                        " code { font-family:monospace; color:#e83e8c; }";
 
     final StringBuilder aSB = new StringBuilder ();
     aSB.append ("<html><head><title>TOOP Connector</title><style>").append (sCSS).append ("</style></head><body>");
@@ -56,6 +61,30 @@ public class TCRootServlet extends HttpServlet
     aSB.append ("<div>Build timestamp: ").append (CTC.getBuildTimestamp ()).append ("</div>");
     aSB.append ("<div>Current time: ").append (PDTFactory.getCurrentZonedDateTimeUTC ().toString ()).append ("</div>");
     aSB.append ("<a href='tc-status'>Check /tc-status</a>");
+
+    {
+      aSB.append ("<h2>Registered Message Exchange implementations</h2>");
+      for (final Map.Entry <String, IMessageExchangeSPI> aEntry : CollectionHelper.getSortedByKey (MessageExchangeManager.getAll ())
+                                                                                  .entrySet ())
+      {
+        aSB.append ("<div>ID <code>")
+           .append (aEntry.getKey ())
+           .append ("</code> mapped to ")
+           .append (aEntry.getValue ())
+           .append ("</div>");
+      }
+    }
+
+    {
+      aSB.append ("<h2>Message Processor Configuration</h2>");
+
+      aSB.append ("<div><code>SignatureHelper</code>=").append (MPConfig.getSignatureHelper ()).append ("</div>");
+      aSB.append ("<div><code>SMMConceptProvider</code>=").append (MPConfig.getSMMConceptProvider ()).append ("</div>");
+      aSB.append ("<div><code>ParticipantIDProvider</code>=")
+         .append (MPConfig.getParticipantIDProvider ())
+         .append ("</div>");
+      aSB.append ("<div><code>EndpointProvider</code>=").append (MPConfig.getEndpointProvider ()).append ("</div>");
+    }
 
     if (GlobalDebug.isDebugMode ())
     {
