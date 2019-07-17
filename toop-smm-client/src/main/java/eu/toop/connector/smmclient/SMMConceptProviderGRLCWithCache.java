@@ -27,6 +27,7 @@ import com.helger.commons.annotation.Nonempty;
 import com.helger.commons.collection.impl.CommonsHashMap;
 import com.helger.commons.collection.impl.ICommonsMap;
 import com.helger.commons.concurrent.SimpleReadWriteLock;
+import com.helger.commons.string.ToStringGenerator;
 
 /**
  * Implementation of {@link ISMMConceptProvider} using caching. The retrieval of
@@ -115,5 +116,11 @@ public class SMMConceptProviderGRLCWithCache implements ISMMConceptProvider
     }
 
     return ret;
+  }
+
+  @Override
+  public String toString ()
+  {
+    return new ToStringGenerator (this).append ("Cache", m_aCache).getToString ();
   }
 }

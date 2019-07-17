@@ -29,6 +29,7 @@ import com.helger.commons.annotation.ReturnsMutableCopy;
 import com.helger.commons.collection.impl.CommonsHashMap;
 import com.helger.commons.collection.impl.ICommonsMap;
 import com.helger.commons.error.level.EErrorLevel;
+import com.helger.commons.string.ToStringGenerator;
 
 import eu.toop.kafkaclient.ToopKafkaClient;
 
@@ -130,5 +131,14 @@ public class SMMConceptProviderMapBased implements ISMMConceptProvider
                       "'");
     }
     return ret;
+  }
+
+  @Override
+  public String toString ()
+  {
+    return new ToStringGenerator (this).append ("SourceNS", m_sSourceNamespace)
+                                       .append ("DestNS", m_sDestNamespace)
+                                       .append ("FieldMapping", m_aFieldMapping)
+                                       .getToString ();
   }
 }

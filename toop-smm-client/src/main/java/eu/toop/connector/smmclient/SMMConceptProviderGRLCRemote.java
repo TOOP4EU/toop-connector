@@ -30,6 +30,7 @@ import com.helger.commons.collection.impl.ICommonsOrderedSet;
 import com.helger.commons.error.level.EErrorLevel;
 import com.helger.commons.http.CHttpHeader;
 import com.helger.commons.string.StringHelper;
+import com.helger.commons.string.ToStringGenerator;
 import com.helger.commons.url.ISimpleURL;
 import com.helger.commons.url.SimpleURL;
 import com.helger.httpclient.HttpClientManager;
@@ -233,5 +234,11 @@ public class SMMConceptProviderGRLCRemote implements ISMMConceptProvider
                           () -> sLogPrefix + "SMM remote call returned " + ret.size () + " mapped values");
 
     return ret;
+  }
+
+  @Override
+  public String toString ()
+  {
+    return new ToStringGenerator (this).getToString ();
   }
 }
