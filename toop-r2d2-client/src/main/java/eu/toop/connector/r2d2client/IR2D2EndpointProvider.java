@@ -26,54 +26,13 @@ import com.helger.peppolid.IParticipantIdentifier;
 import com.helger.peppolid.IProcessIdentifier;
 
 /**
- * Resilient Registry-based Dynamic Discovery (R2D2) client interface for
- * Message Processor
+ * The interface to retrieve the technical endpoints of a participant. Usually
+ * this is done by an SMP client lookup.
  *
- * @author Philip Helger, BRZ, AT
+ * @author Philip Helger
  */
-public interface IR2D2Client extends Serializable
+public interface IR2D2EndpointProvider extends Serializable
 {
-  /**
-   * Get a list of all endpoints that match the specified requirements. This is
-   * the API that is to be invoked in the case, where ServiceGroup IDs of the
-   * receiver are unknown and an additional PEPPOL Directory query needs to be
-   * performed.<br>
-   * Internally country code and document type are queried against the correct
-   * TOOP Directory instance (depending on the production or test flag). The
-   * SMPs of the resulting service group IDs are than queried in a loop for all
-   * matching endpoints (of participant ID and document type ID) which are
-   * parsed and converted to simpler R2D2Endpoint instances.
-   *
-   * @param sLogPrefix
-   *        Log prefix to use. May not be <code>null</code> but maybe empty.
-   * @param sCountryCode
-   *        The country code to be queried. Must be a 2-char string. May not be
-   *        <code>null</code>.
-   * @param aDocumentTypeID
-   *        The document type ID to be queried. May not be <code>null</code>.
-   * @param aParticipantIDProvider
-   *        The participant ID provider that uses country code and document type
-   *        ID to determine the set of matching participant identifiers. May not
-   *        be <code>null</code>.
-   * @param aProcessID
-   *        The process ID to be queried. May not be <code>null</code>.
-   * @param sTransportProfileID
-   *        The transport profile ID to be used. May neither be
-   *        <code>null</code> nor empty.
-   * @param aErrorHandler
-   *        The error handler to be used. May not be <code>null</code>.
-   * @return A non-<code>null</code> but maybe empty list of all matching
-   *         endpoints.
-   */
-  @Nonnull
-  ICommonsList <IR2D2Endpoint> getEndpoints (@Nonnull String sLogPrefix,
-                                             @Nonnull @Nonempty String sCountryCode,
-                                             @Nonnull IDocumentTypeIdentifier aDocumentTypeID,
-                                             @Nonnull IR2D2ParticipantIDProvider aParticipantIDProvider,
-                                             @Nonnull IProcessIdentifier aProcessID,
-                                             @Nonnull @Nonempty String sTransportProfileID,
-                                             @Nonnull IR2D2ErrorHandler aErrorHandler);
-
   /**
    * Get a list of all endpoints that match the specified requirements. This is
    * the API that is to be invoked in the case, where the ServiceGroup IDs of

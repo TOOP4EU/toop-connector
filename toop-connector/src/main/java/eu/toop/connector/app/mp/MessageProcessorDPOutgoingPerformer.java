@@ -78,7 +78,6 @@ import eu.toop.connector.api.http.TCHttpClientFactory;
 import eu.toop.connector.app.TCDumpHelper;
 import eu.toop.connector.r2d2client.IR2D2Endpoint;
 import eu.toop.connector.r2d2client.IR2D2ErrorHandler;
-import eu.toop.connector.r2d2client.R2D2Client;
 import eu.toop.kafkaclient.ToopKafkaClient;
 
 /**
@@ -271,12 +270,13 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
                                                                                        sMsg,
                                                                                        aCause));
 
-          aEndpoints = new R2D2Client ().getEndpoints (sLogPrefix,
-                                                       aDCParticipantID,
-                                                       aDocTypeID,
-                                                       aProcessID,
-                                                       sTransportProfileID,
-                                                       aErrHdl);
+          aEndpoints = MPConfig.getEndpointProvider ()
+                               .getEndpoints (sLogPrefix,
+                                              aDCParticipantID,
+                                              aDocTypeID,
+                                              aProcessID,
+                                              sTransportProfileID,
+                                              aErrHdl);
 
           // Expecting exactly one endpoint!
           ToopKafkaClient.send (aEndpoints.size () == 1 ? EErrorLevel.INFO : EErrorLevel.ERROR,

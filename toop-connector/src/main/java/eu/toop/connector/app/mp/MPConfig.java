@@ -24,7 +24,9 @@ import com.helger.commons.ValueEnforcer;
 import com.helger.commons.concurrent.SimpleReadWriteLock;
 
 import eu.toop.connector.api.TCConfig;
+import eu.toop.connector.r2d2client.IR2D2EndpointProvider;
 import eu.toop.connector.r2d2client.IR2D2ParticipantIDProvider;
+import eu.toop.connector.r2d2client.R2D2EndpointIDProviderBDXRSMP1;
 import eu.toop.connector.r2d2client.R2D2ParticipantIDProviderTOOPDirectory;
 import eu.toop.connector.smmclient.ISMMConceptProvider;
 import eu.toop.connector.smmclient.SMMConceptProviderGRLCWithCache;
@@ -48,6 +50,8 @@ public final class MPConfig
   private static ISMMConceptProvider s_aCP = new SMMConceptProviderGRLCWithCache ();
   @GuardedBy ("s_aRWLock")
   private static IR2D2ParticipantIDProvider s_aPIDP = new R2D2ParticipantIDProviderTOOPDirectory ();
+  @GuardedBy ("s_aRWLock")
+  private static IR2D2EndpointProvider s_aEPP = new R2D2EndpointIDProviderBDXRSMP1 ();
 
   private MPConfig ()
   {}
@@ -114,5 +118,26 @@ public final class MPConfig
   {
     ValueEnforcer.notNull (aPIDP, "ParticipantIDProvider");
     s_aRWLock.writeLocked ( () -> s_aPIDP = aPIDP);
+  }
+
+  /**
+   * @return The R2D2 endpoint provider. Never <code>null</code>.
+   * @since 0.10.6
+   */
+  @Nonnull
+  public static IR2D2EndpointProvider getEndpointProvider ()
+  {
+    return s_aRWLock.readLocked ( () -> s_aEPP);
+  }
+
+  /**
+   * @param aEPP
+   *        The R2D2 endpoint provider. May not be <code>null</code>.
+   * @since 0.10.6
+   */
+  public static void setEndpointProvider (@Nonnull final IR2D2EndpointProvider aEPP)
+  {
+    ValueEnforcer.notNull (aEPP, "EndpointProvider");
+    s_aRWLock.writeLocked ( () -> s_aEPP = aEPP);
   }
 }

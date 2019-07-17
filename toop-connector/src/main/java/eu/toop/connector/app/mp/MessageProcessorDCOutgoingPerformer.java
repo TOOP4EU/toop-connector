@@ -80,7 +80,6 @@ import eu.toop.connector.api.as4.MessageExchangeManager;
 import eu.toop.connector.app.TCDumpHelper;
 import eu.toop.connector.r2d2client.IR2D2Endpoint;
 import eu.toop.connector.r2d2client.IR2D2ErrorHandler;
-import eu.toop.connector.r2d2client.IR2D2ParticipantIDProvider;
 import eu.toop.connector.r2d2client.R2D2Client;
 import eu.toop.connector.smmclient.IMappedValueList;
 import eu.toop.connector.smmclient.ISMMClient;
@@ -391,12 +390,13 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
                                                                                          aExplicitQueryAddress.getValue ());
 
             // Find all endpoints of recipient
-            aEndpoints = new R2D2Client ().getEndpoints (sLogPrefix,
-                                                         aRecipientID,
-                                                         aDocTypeID,
-                                                         aProcessID,
-                                                         sTransportProfileID,
-                                                         aErrHdl);
+            aEndpoints = MPConfig.getEndpointProvider ()
+                                 .getEndpoints (sLogPrefix,
+                                                aRecipientID,
+                                                aDocTypeID,
+                                                aProcessID,
+                                                sTransportProfileID,
+                                                aErrHdl);
           }
           else
           {
@@ -417,14 +417,14 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
             if (aErrors.isEmpty ())
             {
               // Find all endpoints by country
-              final IR2D2ParticipantIDProvider aParticipantIDProvider = MPConfig.getParticipantIDProvider ();
-              aEndpoints = new R2D2Client ().getEndpoints (sLogPrefix,
-                                                           sDestinationCountryCode,
-                                                           aDocTypeID,
-                                                           aParticipantIDProvider,
-                                                           aProcessID,
-                                                           sTransportProfileID,
-                                                           aErrHdl);
+              aEndpoints = R2D2Client.getParticipantIDsAndEndpoints (sLogPrefix,
+                                                                     sDestinationCountryCode,
+                                                                     aDocTypeID,
+                                                                     MPConfig.getParticipantIDProvider (),
+                                                                     aProcessID,
+                                                                     sTransportProfileID,
+                                                                     MPConfig.getEndpointProvider (),
+                                                                     aErrHdl);
             }
           }
 
