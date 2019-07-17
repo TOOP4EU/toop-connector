@@ -26,7 +26,7 @@ import com.helger.commons.concurrent.SimpleReadWriteLock;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.r2d2client.IR2D2EndpointProvider;
 import eu.toop.connector.r2d2client.IR2D2ParticipantIDProvider;
-import eu.toop.connector.r2d2client.R2D2EndpointIDProviderBDXRSMP1;
+import eu.toop.connector.r2d2client.R2D2EndpointProviderBDXRSMP1;
 import eu.toop.connector.r2d2client.R2D2ParticipantIDProviderTOOPDirectory;
 import eu.toop.connector.smmclient.ISMMConceptProvider;
 import eu.toop.connector.smmclient.SMMConceptProviderGRLCWithCache;
@@ -51,7 +51,7 @@ public final class MPConfig
   @GuardedBy ("s_aRWLock")
   private static IR2D2ParticipantIDProvider s_aPIDP = new R2D2ParticipantIDProviderTOOPDirectory ();
   @GuardedBy ("s_aRWLock")
-  private static IR2D2EndpointProvider s_aEPP = new R2D2EndpointIDProviderBDXRSMP1 ();
+  private static IR2D2EndpointProvider s_aEPP = new R2D2EndpointProviderBDXRSMP1 ();
 
   private MPConfig ()
   {}
