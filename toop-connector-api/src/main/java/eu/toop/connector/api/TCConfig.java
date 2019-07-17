@@ -440,6 +440,8 @@ public final class TCConfig
     return getConfigFile ().getAsBoolean ("toop.status.enabled", true);
   }
 
+  // Servlet "/from-dc", step 1/4:
+
   public static boolean isDebugFromDCDumpEnabled ()
   {
     return getConfigFile ().getAsBoolean ("toop.debug.from-dc.dump.enabled", false);
@@ -457,6 +459,8 @@ public final class TCConfig
   {
     return isDebugFromDCDumpEnabled () ? getDebugFromDCDumpPath () : null;
   }
+
+  // Servlet "/from-dp", step 3/4:
 
   public static boolean isDebugFromDPDumpEnabled ()
   {
@@ -476,6 +480,8 @@ public final class TCConfig
     return isDebugFromDPDumpEnabled () ? getDebugFromDPDumpPath () : null;
   }
 
+  // MessageProcessorDPOutgoingPerformer, step 3/4
+
   public static boolean isDebugToDCDumpEnabled ()
   {
     return getConfigFile ().getAsBoolean ("toop.debug.to-dc.dump.enabled", false);
@@ -493,6 +499,8 @@ public final class TCConfig
   {
     return isDebugToDCDumpEnabled () ? getDebugToDCDumpPath () : null;
   }
+
+  // MessageProcessorDCOutgoingPerformer, step 1/4
 
   public static boolean isDebugToDPDumpEnabled ()
   {
