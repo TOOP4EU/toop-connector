@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package eu.toop.connector.servlet;
+package eu.toop.connector.app.servlet;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

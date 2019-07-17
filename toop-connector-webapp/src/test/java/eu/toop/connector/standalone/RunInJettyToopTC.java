@@ -31,9 +31,9 @@ public final class RunInJettyToopTC
   public static void main (final String [] args) throws Exception
   {
     final JettyStarter js = new JettyStarter (RunInJettyToopTC.class).setPort (8090)
-                                                                        .setStopPort (9090)
-                                                                        .setSessionCookieName ("TOOP_TC_DC_SESSION")
-                                                                        .setContainerIncludeJarPattern (".*/classes/.*");
+                                                                     .setStopPort (9090)
+                                                                     .setSessionCookieName ("TOOP_TC_SESSION")
+                                                                     .setContainerIncludeJarPattern (JettyStarter.CONTAINER_INCLUDE_JAR_PATTERN_ALL);
     js.run ();
   }
 }
