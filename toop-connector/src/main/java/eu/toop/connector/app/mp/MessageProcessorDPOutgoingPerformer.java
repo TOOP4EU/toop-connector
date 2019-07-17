@@ -225,8 +225,11 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
                                                          .isEmpty () ? null : aResponse.getDataProviderAtIndex (0);
       if (aDataProvider == null)
       {
-        final String sErrorMsg = "The DataProvider element is missing in the response";
-        aErrors.add (_createError (sLogPrefix, EToopErrorCategory.PARSING, EToopErrorCode.IF_001, sErrorMsg, null));
+        aErrors.add (_createError (sLogPrefix,
+                                   EToopErrorCategory.PARSING,
+                                   EToopErrorCode.IF_001,
+                                   "The DataProvider element is missing in the response",
+                                   null));
       }
       else
       {
@@ -287,11 +290,33 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
 
         // 3. start message exchange to DC
         // The sender of the response is the DP
-        // TODO is this field filled by the DP?
-        final IParticipantIdentifier aDPParticipantID = aIDFactory.createParticipantIdentifier (aRoutingInfo.getDataProviderElectronicAddressIdentifier ()
-                                                                                                            .getSchemeID (),
-                                                                                                aRoutingInfo.getDataProviderElectronicAddressIdentifier ()
-                                                                                                            .getValue ());
+        IParticipantIdentifier aDPParticipantID = null;
+        if (aRoutingInfo.getDataProviderElectronicAddressIdentifier () == null)
+        {
+          aErrors.add (_createError (sLogPrefix,
+                                     EToopErrorCategory.PARSING,
+                                     EToopErrorCode.IF_001,
+                                     "The RoutingInformation/DataProviderElectronicAddressIdentifier element is missing in the response",
+                                     null));
+        }
+        else
+        {
+          final String sSchemeID = aRoutingInfo.getDataProviderElectronicAddressIdentifier ().getSchemeID ();
+          final String sValue = aRoutingInfo.getDataProviderElectronicAddressIdentifier ().getValue ();
+          aDPParticipantID = aIDFactory.createParticipantIdentifier (sSchemeID, sValue);
+          if (aDPParticipantID == null)
+          {
+            aErrors.add (_createError (sLogPrefix,
+                                       EToopErrorCategory.PARSING,
+                                       EToopErrorCode.IF_001,
+                                       "The RoutingInformation/DataProviderElectronicAddressIdentifier element contains invalid values '" +
+                                                              sSchemeID +
+                                                              "' and '" +
+                                                              sValue +
+                                                              "'",
+                                       null));
+          }
+        }
 
         if (aEndpoints.isEmpty ())
         {
