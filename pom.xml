@@ -19,10 +19,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>eu.toop</groupId>
-    <artifactId>toop-parent-pom</artifactId>
-    <version>1.1.1</version>
+    <groupId>com.helger</groupId>
+    <artifactId>parent-pom</artifactId>
+    <version>1.10.9</version>
   </parent>
+  <groupId>eu.toop</groupId>
   <artifactId>toop-connector-parent-pom</artifactId>
   <version>0.10.6-SNAPSHOT</version>
   <packaging>pom</packaging>
@@ -134,6 +135,15 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
+  
+  <dependencies>
+    <!-- JUnit 4 for testing -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
 
   <!-- Sub-projects - must match child directory names; order is important! -->
   <modules>
