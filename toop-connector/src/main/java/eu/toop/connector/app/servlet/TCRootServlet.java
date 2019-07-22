@@ -60,7 +60,7 @@ public class TCRootServlet extends HttpServlet
     aSB.append ("<div>Version: ").append (CTC.getVersionNumber ()).append ("</div>");
     aSB.append ("<div>Build timestamp: ").append (CTC.getBuildTimestamp ()).append ("</div>");
     aSB.append ("<div>Current time: ").append (PDTFactory.getCurrentZonedDateTimeUTC ().toString ()).append ("</div>");
-    aSB.append ("<a href='tc-status'>Check /tc-status</a>");
+    aSB.append ("<div><a href='tc-status'>Check /tc-status</a></div>");
 
     {
       aSB.append ("<h2>Registered Message Exchange implementations</h2>");
