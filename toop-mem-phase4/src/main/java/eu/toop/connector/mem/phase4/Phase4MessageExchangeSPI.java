@@ -69,8 +69,8 @@ import com.helger.security.keystore.LoadedKeyStore;
 import com.helger.servlet.ServletHelper;
 
 import eu.toop.commons.error.EToopErrorCode;
-import eu.toop.connector.api.as4.IMERoutingInformation;
 import eu.toop.connector.api.as4.IMEIncomingHandler;
+import eu.toop.connector.api.as4.IMERoutingInformation;
 import eu.toop.connector.api.as4.IMessageExchangeSPI;
 import eu.toop.connector.api.as4.MEException;
 import eu.toop.connector.api.as4.MEMessage;
@@ -186,63 +186,62 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
         throw new InitializationException ("Failed to load key: " + aLK.getErrorText (Locale.US));
     }
 
-    final AS4ResourceManager aResMgr = new AS4ResourceManager ();
-    final AS4ClientUserMessage aClient = new AS4ClientUserMessage (aResMgr);
-    aClient.setSOAPVersion (ESOAPVersion.SOAP_12);
-
-    // Keystore data
-    IReadableResource aRes = new ClassPathResource (aCP.getKeyStorePath ());
-    if (!aRes.exists ())
-      aRes = new FileSystemResource (aCP.getKeyStorePath ());
-    aClient.setKeyStoreResource (aRes);
-    aClient.setKeyStorePassword (aCP.getKeyStorePassword ());
-    aClient.setKeyStoreType (aCP.getKeyStoreType ());
-    aClient.setKeyStoreAlias (aCP.getKeyAlias ());
-    aClient.setKeyStoreKeyPassword (aCP.getKeyPassword ());
-
-    aClient.setCryptoAlgorithmSign (ECryptoAlgorithmSign.RSA_SHA_512);
-    aClient.setCryptoAlgorithmSignDigest (ECryptoAlgorithmSignDigest.DIGEST_SHA_512);
-
-    aClient.setAction ("RequestDocuments");
-    aClient.setServiceType (null);
-    aClient.setServiceValue ("TOOPDataProvisioning");
-    aClient.setConversationID (MessageHelperMethods.createRandomConversationID ());
-    aClient.setAgreementRefValue (null);
-
-    // Backend or gateway?
-    aClient.setFromRole ("http://www.toop.eu/edelivery/backend");
-    aClient.setFromPartyID (Phase4Config.getFromPartyID ());
-    aClient.setToRole ("http://www.toop.eu/edelivery/gateway");
-    aClient.setToPartyID (_getCN (aTheirCert.getSubjectDN ().getName ()));
-    aClient.setPayload (null);
-
-    aClient.ebms3Properties ()
-           .setAll (MessageHelperMethods.createEbms3Property (CAS4.ORIGINAL_SENDER,
-                                                              "urn:oasis:names:tc:ebcore:partyid-type:unregistered:dc"),
-                    MessageHelperMethods.createEbms3Property (CAS4.FINAL_RECIPIENT,
-                                                              "urn:oasis:names:tc:ebcore:partyid-type:unregistered:dp"));
-
-    for (final MEPayload aPayload : aMessage.payloads ())
+    try (final AS4ResourceManager aResMgr = new AS4ResourceManager ())
     {
-      try
-      {
-        aClient.addAttachment (WSS4JAttachment.createOutgoingFileAttachment (aPayload.getData ().bytes (),
-                                                                             "payload.asic",
-                                                                             aPayload.getMimeType (),
-                                                                             null,
-                                                                             aResMgr));
-      }
-      catch (final IOException ex)
-      {
-        throw new MEException (EToopErrorCode.ME_001, ex);
-      }
-    }
+      final AS4ClientUserMessage aClient = new AS4ClientUserMessage (aResMgr);
+      aClient.setSOAPVersion (ESOAPVersion.SOAP_12);
 
-    // Proxy config etc
-    aClient.setHttpClientFactory (new TCHttpClientFactory ());
+      // Keystore data
+      IReadableResource aRes = new ClassPathResource (aCP.getKeyStorePath ());
+      if (!aRes.exists ())
+        aRes = new FileSystemResource (aCP.getKeyStorePath ());
+      aClient.setKeyStoreResource (aRes);
+      aClient.setKeyStorePassword (aCP.getKeyStorePassword ());
+      aClient.setKeyStoreType (aCP.getKeyStoreType ());
+      aClient.setKeyStoreAlias (aCP.getKeyAlias ());
+      aClient.setKeyStoreKeyPassword (aCP.getKeyPassword ());
 
-    try
-    {
+      aClient.setCryptoAlgorithmSign (ECryptoAlgorithmSign.RSA_SHA_512);
+      aClient.setCryptoAlgorithmSignDigest (ECryptoAlgorithmSignDigest.DIGEST_SHA_512);
+
+      aClient.setAction ("RequestDocuments");
+      aClient.setServiceType (null);
+      aClient.setServiceValue ("TOOPDataProvisioning");
+      aClient.setConversationID (MessageHelperMethods.createRandomConversationID ());
+      aClient.setAgreementRefValue (null);
+
+      // Backend or gateway?
+      aClient.setFromRole ("http://www.toop.eu/edelivery/backend");
+      aClient.setFromPartyID (Phase4Config.getFromPartyID ());
+      aClient.setToRole ("http://www.toop.eu/edelivery/gateway");
+      aClient.setToPartyID (_getCN (aTheirCert.getSubjectDN ().getName ()));
+      aClient.setPayload (null);
+
+      aClient.ebms3Properties ()
+             .setAll (MessageHelperMethods.createEbms3Property (CAS4.ORIGINAL_SENDER,
+                                                                "urn:oasis:names:tc:ebcore:partyid-type:unregistered:dc"),
+                      MessageHelperMethods.createEbms3Property (CAS4.FINAL_RECIPIENT,
+                                                                "urn:oasis:names:tc:ebcore:partyid-type:unregistered:dp"));
+
+      for (final MEPayload aPayload : aMessage.payloads ())
+      {
+        try
+        {
+          aClient.addAttachment (WSS4JAttachment.createOutgoingFileAttachment (aPayload.getData ().bytes (),
+                                                                               "payload.asic",
+                                                                               aPayload.getMimeType (),
+                                                                               null,
+                                                                               aResMgr));
+        }
+        catch (final IOException ex)
+        {
+          throw new MEException (EToopErrorCode.ME_001, ex);
+        }
+      }
+
+      // Proxy config etc
+      aClient.setHttpClientFactory (new TCHttpClientFactory ());
+
       // Main sending
       final SentMessage <byte []> aResponseEntity = aClient.sendMessage (aRoutingInfo.getEndpointURL (),
                                                                          new ResponseHandlerByteArray ());
