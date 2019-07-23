@@ -41,11 +41,7 @@ public final class MPConfig
 {
   private static final SimpleReadWriteLock s_aRWLock = new SimpleReadWriteLock ();
   @GuardedBy ("s_aRWLock")
-  private static SignatureHelper s_aSH = new SignatureHelper (TCConfig.getKeystoreType (),
-                                                              TCConfig.getKeystorePath (),
-                                                              TCConfig.getKeystorePassword (),
-                                                              TCConfig.getKeystoreKeyAlias (),
-                                                              TCConfig.getKeystoreKeyPassword ());
+  private static SignatureHelper s_aSH;
   @GuardedBy ("s_aRWLock")
   private static ISMMConceptProvider s_aCP = new SMMConceptProviderGRLCWithCache ();
   @GuardedBy ("s_aRWLock")
@@ -62,7 +58,18 @@ public final class MPConfig
   @Nonnull
   public static SignatureHelper getSignatureHelper ()
   {
-    return s_aRWLock.readLocked ( () -> s_aSH);
+    SignatureHelper ret = s_aRWLock.readLocked ( () -> s_aSH);
+    if (ret == null)
+    {
+      // Lazy init to avoid exception on misconfiguration
+      ret = new SignatureHelper (TCConfig.getKeystoreType (),
+                                 TCConfig.getKeystorePath (),
+                                 TCConfig.getKeystorePassword (),
+                                 TCConfig.getKeystoreKeyAlias (),
+                                 TCConfig.getKeystoreKeyPassword ());
+      setSignatureHelper (ret);
+    }
+    return ret;
   }
 
   /**
