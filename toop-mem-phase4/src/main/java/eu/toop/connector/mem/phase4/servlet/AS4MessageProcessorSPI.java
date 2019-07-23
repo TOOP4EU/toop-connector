@@ -38,6 +38,7 @@ import com.helger.commons.annotation.IsSPIImplementation;
 import com.helger.commons.collection.impl.CommonsArrayList;
 import com.helger.commons.collection.impl.ICommonsList;
 import com.helger.commons.error.level.EErrorLevel;
+import com.helger.commons.http.HttpHeaderMap;
 import com.helger.commons.io.stream.StreamHelper;
 import com.helger.xml.serialize.write.XMLWriter;
 
@@ -74,7 +75,8 @@ public class AS4MessageProcessorSPI implements IAS4ServletMessageProcessorSPI
   }
 
   @Nonnull
-  public AS4MessageProcessorResult processAS4UserMessage (@Nonnull final Ebms3UserMessage aUserMessage,
+  public AS4MessageProcessorResult processAS4UserMessage (@Nonnull final HttpHeaderMap aHttpHeaders,
+                                                          @Nonnull final Ebms3UserMessage aUserMessage,
                                                           @Nonnull final IPMode aPMode,
                                                           @Nullable final Node aPayload,
                                                           @Nullable final ICommonsList <WSS4JAttachment> aIncomingAttachments,
@@ -156,7 +158,8 @@ public class AS4MessageProcessorSPI implements IAS4ServletMessageProcessorSPI
   }
 
   @Nonnull
-  public AS4SignalMessageProcessorResult processAS4SignalMessage (@Nonnull final Ebms3SignalMessage aSignalMessage,
+  public AS4SignalMessageProcessorResult processAS4SignalMessage (@Nonnull final HttpHeaderMap aHttpHeaders,
+                                                                  @Nonnull final Ebms3SignalMessage aSignalMessage,
                                                                   @Nonnull final IPMode aPmode,
                                                                   @Nonnull final IAS4MessageState aState)
   {

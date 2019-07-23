@@ -35,8 +35,9 @@ import com.helger.as4.CAS4;
 import com.helger.as4.attachment.EAS4CompressionMode;
 import com.helger.as4.attachment.WSS4JAttachment;
 import com.helger.as4.client.AS4ClientUserMessage;
-import com.helger.as4.client.AbstractAS4Client.SentMessage;
-import com.helger.as4.crypto.CryptoProperties;
+import com.helger.as4.client.AbstractAS4Client.AS4SentMessage;
+import com.helger.as4.crypto.AS4CryptoFactory;
+import com.helger.as4.crypto.AS4CryptoProperties;
 import com.helger.as4.crypto.ECryptoAlgorithmSign;
 import com.helger.as4.crypto.ECryptoAlgorithmSignDigest;
 import com.helger.as4.http.AS4HttpDebug;
@@ -45,10 +46,10 @@ import com.helger.as4.mgr.MetaAS4Manager;
 import com.helger.as4.model.pmode.PMode;
 import com.helger.as4.model.pmode.PModeManager;
 import com.helger.as4.model.pmode.PModePayloadService;
+import com.helger.as4.model.pmode.resolve.DefaultPModeResolver;
 import com.helger.as4.servlet.AS4ServerInitializer;
-import com.helger.as4.servlet.mgr.AS4ServerSettings;
 import com.helger.as4.soap.ESOAPVersion;
-import com.helger.as4.util.AS4ResourceManager;
+import com.helger.as4.util.AS4ResourceHelper;
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.annotation.IsSPIImplementation;
 import com.helger.commons.annotation.Nonempty;
@@ -62,7 +63,7 @@ import com.helger.commons.string.StringHelper;
 import com.helger.commons.timing.StopWatch;
 import com.helger.datetime.util.PDTIOHelper;
 import com.helger.httpclient.response.ResponseHandlerByteArray;
-import com.helger.photon.basic.app.io.WebFileIO;
+import com.helger.photon.app.io.WebFileIO;
 import com.helger.security.keystore.KeyStoreHelper;
 import com.helger.security.keystore.LoadedKey;
 import com.helger.security.keystore.LoadedKeyStore;
@@ -100,6 +101,12 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
     return ID;
   }
 
+  @Nonnull
+  private static AS4CryptoFactory _getCF ()
+  {
+    return AS4CryptoFactory.DEFAULT_INSTANCE;
+  }
+
   public void registerIncomingHandler (@Nonnull final ServletContext aServletContext,
                                        @Nonnull final IMEIncomingHandler aIncomingHandler) throws MEException
   {
@@ -120,7 +127,7 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
     }
 
     // Register server once
-    AS4ServerInitializer.initAS4Server ();
+    AS4ServerInitializer.initAS4Server (DefaultPModeResolver.DEFAULT_PMODE_RESOLVER, _getCF ());
 
     final PModeManager aPModeMgr = MetaAS4Manager.getPModeMgr ();
     {
@@ -158,7 +165,8 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
     throw new IllegalStateException ("Failed to get CN from '" + sPrincipal + "'");
   }
 
-  private void _sendOutgoing (@Nonnull final IMERoutingInformation aRoutingInfo,
+  private void _sendOutgoing (@Nonnull final AS4CryptoProperties aCP,
+                              @Nonnull final IMERoutingInformation aRoutingInfo,
                               @Nonnull final MEMessage aMessage) throws MEException
   {
     final StopWatch aSW = StopWatch.createdStarted ();
@@ -166,7 +174,6 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
     final X509Certificate aTheirCert = aRoutingInfo.getCertificate ();
 
     // Start crypto stuff
-    final CryptoProperties aCP = AS4ServerSettings.getAS4CryptoFactory ().getCryptoProperties ();
     {
       // Sanity check
       final LoadedKeyStore aLKS = KeyStoreHelper.loadKeyStore (aCP.getKeyStoreType (),
@@ -186,9 +193,9 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
         throw new InitializationException ("Failed to load key: " + aLK.getErrorText (Locale.US));
     }
 
-    try (final AS4ResourceManager aResMgr = new AS4ResourceManager ())
+    try (final AS4ResourceHelper aResHelper = new AS4ResourceHelper ())
     {
-      final AS4ClientUserMessage aClient = new AS4ClientUserMessage (aResMgr);
+      final AS4ClientUserMessage aClient = new AS4ClientUserMessage (aResHelper);
       aClient.setSOAPVersion (ESOAPVersion.SOAP_12);
 
       // Keystore data
@@ -231,7 +238,7 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
                                                                                "payload.asic",
                                                                                aPayload.getMimeType (),
                                                                                null,
-                                                                               aResMgr));
+                                                                               aResHelper));
         }
         catch (final IOException ex)
         {
@@ -243,8 +250,8 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
       aClient.setHttpClientFactory (new TCHttpClientFactory ());
 
       // Main sending
-      final SentMessage <byte []> aResponseEntity = aClient.sendMessage (aRoutingInfo.getEndpointURL (),
-                                                                         new ResponseHandlerByteArray ());
+      final AS4SentMessage <byte []> aResponseEntity = aClient.sendMessage (aRoutingInfo.getEndpointURL (),
+                                                                            new ResponseHandlerByteArray ());
       LOGGER.info ("[phase4] Successfully transmitted document with message ID '" +
                    aResponseEntity.getMessageID () +
                    "' for '" +
@@ -283,7 +290,7 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
   {
     LOGGER.info ("[phase4] sendDCOutgoing");
     // No difference
-    _sendOutgoing (aRoutingInfo, aMessage);
+    _sendOutgoing (_getCF ().getCryptoProperties (), aRoutingInfo, aMessage);
   }
 
   public void sendDPOutgoing (@Nonnull final IMERoutingInformation aRoutingInfo,
@@ -291,7 +298,7 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
   {
     LOGGER.info ("[phase4] sendDPOutgoing");
     // No difference
-    _sendOutgoing (aRoutingInfo, aMessage);
+    _sendOutgoing (_getCF ().getCryptoProperties (), aRoutingInfo, aMessage);
   }
 
   public void shutdown (@Nonnull final ServletContext aServletContext)

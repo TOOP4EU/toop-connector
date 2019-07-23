@@ -17,6 +17,8 @@ package eu.toop.connector.mem.phase4.servlet;
 
 import javax.servlet.annotation.WebServlet;
 
+import com.helger.as4.attachment.IIncomingAttachmentFactory;
+import com.helger.as4.crypto.AS4CryptoFactory;
 import com.helger.as4.servlet.AS4XServletHandler;
 import com.helger.commons.http.EHttpMethod;
 import com.helger.xservlet.AbstractXServlet;
@@ -38,6 +40,8 @@ public class AS4ReceiveServlet extends AbstractXServlet
     // The servlet handler takes all SPI implementations of
     // IAS4ServletMessageProcessorSPI and invokes them.
     // -> see AS4MessageProcessorSPI
-    handlerRegistry ().registerHandler (EHttpMethod.POST, new AS4XServletHandler ());
+    final AS4CryptoFactory aCF = AS4CryptoFactory.DEFAULT_INSTANCE;
+    final IIncomingAttachmentFactory aIAF = IIncomingAttachmentFactory.DEFAULT_INSTANCE;
+    handlerRegistry ().registerHandler (EHttpMethod.POST, new AS4XServletHandler (aCF, aIAF));
   }
 }
