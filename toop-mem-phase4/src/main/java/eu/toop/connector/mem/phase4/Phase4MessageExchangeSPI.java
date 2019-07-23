@@ -245,7 +245,7 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
       // Main sending
       final SentMessage <byte []> aResponseEntity = aClient.sendMessage (aRoutingInfo.getEndpointURL (),
                                                                          new ResponseHandlerByteArray ());
-      LOGGER.info ("Successfully transmitted document with message ID '" +
+      LOGGER.info ("[phase4] Successfully transmitted document with message ID '" +
                    aResponseEntity.getMessageID () +
                    "' for '" +
                    aRoutingInfo.getReceiverID ().getURIEncoded () +
@@ -264,16 +264,16 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
                                  "-response.xml";
         final File aResponseFile = new File (Phase4Config.getSendResponseFolderName (), sFilename);
         if (SimpleFileIO.writeFile (aResponseFile, aResponseEntity.getResponse ()).isSuccess ())
-          LOGGER.info ("Response file was written to '" + aResponseFile.getAbsolutePath () + "'");
+          LOGGER.info ("[phase4] Response file was written to '" + aResponseFile.getAbsolutePath () + "'");
         else
-          LOGGER.error ("Error writing response file to '" + aResponseFile.getAbsolutePath () + "'");
+          LOGGER.error ("[phase4] Error writing response file to '" + aResponseFile.getAbsolutePath () + "'");
       }
       else
-        LOGGER.info ("ResponseEntity is empty");
+        LOGGER.info ("[phase4] ResponseEntity is empty");
     }
     catch (final Exception ex)
     {
-      LOGGER.error ("Error sending message", ex);
+      LOGGER.error ("[phase4] Error sending message", ex);
       throw new MEException (EToopErrorCode.ME_001, ex);
     }
   }
