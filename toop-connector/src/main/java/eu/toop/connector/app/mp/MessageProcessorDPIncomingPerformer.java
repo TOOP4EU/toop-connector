@@ -126,7 +126,8 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
 
   public void runAsync (@Nonnull final ToopRequestWithAttachments140 aRequestWA) throws Exception
   {
-    final TDETOOPRequestType aRequest = aRequestWA.getRequest ();
+    // Create a clone for modification
+    final TDETOOPRequestType aRequest = aRequestWA.getRequest ().clone ();
 
     final String sRequestID = aRequest.getDocumentUniversalUniqueIdentifier () != null ? aRequest.getDocumentUniversalUniqueIdentifier ()
                                                                                                  .getValue ()
@@ -250,7 +251,9 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
       if (LOGGER.isDebugEnabled ())
         LOGGER.debug (sLogPrefix + "No errors found. Now forwarding to the DP");
 
-      if (MPConfig.getToDP ().passRequestOnToDP (aRequest).isFailure ())
+      if (MPConfig.getToDP ()
+                  .passRequestOnToDP (new ToopRequestWithAttachments140 (aRequest, aRequestWA.attachments ()))
+                  .isFailure ())
       {
         aErrors.add (_createError (EErrorLevel.ERROR,
                                    sLogPrefix,

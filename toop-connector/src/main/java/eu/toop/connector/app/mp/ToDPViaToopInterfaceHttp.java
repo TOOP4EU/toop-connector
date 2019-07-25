@@ -29,10 +29,10 @@ import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 import com.helger.commons.state.ESuccess;
 import com.helger.httpclient.HttpClientManager;
 
-import eu.toop.commons.dataexchange.v140.TDETOOPRequestType;
 import eu.toop.commons.exchange.AsicReadEntry;
 import eu.toop.commons.exchange.AsicWriteEntry;
 import eu.toop.commons.exchange.ToopMessageBuilder140;
+import eu.toop.commons.exchange.ToopRequestWithAttachments140;
 import eu.toop.commons.exchange.ToopResponseWithAttachments140;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.http.TCHttpClientFactory;
@@ -47,15 +47,23 @@ import eu.toop.kafkaclient.ToopKafkaClient;
 public class ToDPViaToopInterfaceHttp implements IToDP
 {
   @Nonnull
-  public ESuccess passRequestOnToDP (@Nonnull final TDETOOPRequestType aRequest)
+  public ESuccess passRequestOnToDP (@Nonnull final ToopRequestWithAttachments140 aRequestWA)
   {
     // Send to DP (see ToDPServlet in toop-interface)
     final String sDestinationUrl = TCConfig.getMPToopInterfaceDPUrl ();
 
     try (final NonBlockingByteArrayOutputStream aBAOS = new NonBlockingByteArrayOutputStream ())
     {
+      // Convert read to write attachments
+      final ICommonsList <AsicWriteEntry> aWriteAttachments = new CommonsArrayList <> ();
+      for (final AsicReadEntry aEntry : aRequestWA.attachments ())
+        aWriteAttachments.add (AsicWriteEntry.create (aEntry));
+
       // Create ASIC
-      ToopMessageBuilder140.createRequestMessageAsic (aRequest, aBAOS, MPConfig.getSignatureHelper (), null);
+      ToopMessageBuilder140.createRequestMessageAsic (aRequestWA.getRequest (),
+                                                      aBAOS,
+                                                      MPConfig.getSignatureHelper (),
+                                                      aWriteAttachments);
 
       // Start HTTP to /to-dp interface
       final TCHttpClientFactory aHCFactory = new TCHttpClientFactory ();

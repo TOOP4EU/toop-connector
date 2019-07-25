@@ -21,7 +21,7 @@ import javax.annotation.Nonnull;
 
 import com.helger.commons.state.ESuccess;
 
-import eu.toop.commons.dataexchange.v140.TDETOOPRequestType;
+import eu.toop.commons.exchange.ToopRequestWithAttachments140;
 import eu.toop.commons.exchange.ToopResponseWithAttachments140;
 
 /**
@@ -34,12 +34,12 @@ public interface IToDP extends Serializable
   /**
    * Forward a new TOOP Request to the DP.
    *
-   * @param aRequest
+   * @param aRequestWA
    *        The TOOP request for the DP.
    * @return {@link ESuccess}
    */
   @Nonnull
-  ESuccess passRequestOnToDP (@Nonnull TDETOOPRequestType aRequest);
+  ESuccess passRequestOnToDP (@Nonnull ToopRequestWithAttachments140 aRequestWA);
 
   /**
    * Return a response with errors back to the DP. This is only called, if the
