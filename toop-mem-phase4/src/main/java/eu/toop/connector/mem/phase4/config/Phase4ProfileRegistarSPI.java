@@ -44,6 +44,7 @@ public final class Phase4ProfileRegistarSPI implements IAS4ProfileRegistrarSPI
                                                 AS4_PROFILE_NAME,
                                                 aProfileValidatorProvider,
                                                 (i, r, a) -> TOOPPMode.createTOOPMode (i, r, a, aPModeIDProvider, true),
-                                                aPModeIDProvider));
+                                                aPModeIDProvider,
+                                                false));
   }
 }

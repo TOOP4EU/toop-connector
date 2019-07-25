@@ -235,9 +235,10 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
         try
         {
           aClient.addAttachment (WSS4JAttachment.createOutgoingFileAttachment (aPayload.getData ().bytes (),
+                                                                               (String) null,
                                                                                "payload.asic",
                                                                                aPayload.getMimeType (),
-                                                                               null,
+                                                                               (EAS4CompressionMode) null,
                                                                                aResHelper));
         }
         catch (final IOException ex)
