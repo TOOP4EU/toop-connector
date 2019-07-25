@@ -22,13 +22,18 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.util.EntityUtils;
 
+import com.helger.commons.collection.impl.CommonsArrayList;
+import com.helger.commons.collection.impl.ICommonsList;
 import com.helger.commons.error.level.EErrorLevel;
 import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 import com.helger.commons.state.ESuccess;
 import com.helger.httpclient.HttpClientManager;
 
 import eu.toop.commons.dataexchange.v140.TDETOOPRequestType;
+import eu.toop.commons.exchange.AsicReadEntry;
+import eu.toop.commons.exchange.AsicWriteEntry;
 import eu.toop.commons.exchange.ToopMessageBuilder140;
+import eu.toop.commons.exchange.ToopResponseWithAttachments140;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.http.TCHttpClientFactory;
 import eu.toop.kafkaclient.ToopKafkaClient;
@@ -73,6 +78,52 @@ public class ToDPViaToopInterfaceHttp implements IToDP
     {
       ToopKafkaClient.send (EErrorLevel.ERROR,
                             () -> "Error posting signed ASiC request to '" + sDestinationUrl + "'",
+                            ex);
+      return ESuccess.FAILURE;
+    }
+  }
+
+  @Nonnull
+  public ESuccess returnErrorResponseToDP (@Nonnull final ToopResponseWithAttachments140 aResponseWA)
+  {
+    // Send to DP (see ToDPServlet in toop-interface)
+    final String sDestinationUrl = TCConfig.getMPToopInterfaceDPUrl ();
+
+    try (final NonBlockingByteArrayOutputStream aBAOS = new NonBlockingByteArrayOutputStream ())
+    {
+      // Convert read to write attachments
+      final ICommonsList <AsicWriteEntry> aWriteAttachments = new CommonsArrayList <> ();
+      for (final AsicReadEntry aEntry : aResponseWA.attachments ())
+        aWriteAttachments.add (AsicWriteEntry.create (aEntry));
+
+      // Create ASIC
+      ToopMessageBuilder140.createResponseMessageAsic (aResponseWA.getResponse (),
+                                                       aBAOS,
+                                                       MPConfig.getSignatureHelper (),
+                                                       aWriteAttachments);
+
+      // Start HTTP to /to-dp interface
+      final TCHttpClientFactory aHCFactory = new TCHttpClientFactory ();
+      try (final HttpClientManager aMgr = new HttpClientManager (aHCFactory))
+      {
+        ToopKafkaClient.send (EErrorLevel.INFO,
+                              () -> "Start posting signed ASiC response to '" + sDestinationUrl + "'");
+
+        final HttpPost aHttpPost = new HttpPost (sDestinationUrl);
+        aHttpPost.setEntity (new InputStreamEntity (aBAOS.getAsInputStream ()));
+        try (final CloseableHttpResponse aHttpResponse = aMgr.execute (aHttpPost))
+        {
+          EntityUtils.consume (aHttpResponse.getEntity ());
+        }
+
+        ToopKafkaClient.send (EErrorLevel.INFO, () -> "Done posting signed ASiC response to '" + sDestinationUrl + "'");
+        return ESuccess.SUCCESS;
+      }
+    }
+    catch (final Exception ex)
+    {
+      ToopKafkaClient.send (EErrorLevel.ERROR,
+                            () -> "Error posting signed ASiC response to '" + sDestinationUrl + "'",
                             ex);
       return ESuccess.FAILURE;
     }

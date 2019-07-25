@@ -22,6 +22,7 @@ import javax.annotation.Nonnull;
 import com.helger.commons.state.ESuccess;
 
 import eu.toop.commons.dataexchange.v140.TDETOOPRequestType;
+import eu.toop.commons.exchange.ToopResponseWithAttachments140;
 
 /**
  * Customization interface for forwarding messages from step 2/4 to the real DP.
@@ -31,7 +32,7 @@ import eu.toop.commons.dataexchange.v140.TDETOOPRequestType;
 public interface IToDP extends Serializable
 {
   /**
-   * Forward the TOOP Request to the DP
+   * Forward a new TOOP Request to the DP.
    *
    * @param aRequest
    *        The TOOP request for the DP.
@@ -39,4 +40,16 @@ public interface IToDP extends Serializable
    */
   @Nonnull
   ESuccess passRequestOnToDP (@Nonnull TDETOOPRequestType aRequest);
+
+  /**
+   * Return a response with errors back to the DP. This is only called, if the
+   * transmission back to the requesting DC was not possible (e.g. because of
+   * semantic mapping errors or because of AS4 transmission issues).
+   *
+   * @param aResponseWA
+   *        The TOOP response with the contained errors
+   * @return {@link ESuccess}
+   */
+  @Nonnull
+  ESuccess returnErrorResponseToDP (@Nonnull ToopResponseWithAttachments140 aResponseWA);
 }

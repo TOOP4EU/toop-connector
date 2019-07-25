@@ -22,10 +22,6 @@ import java.util.Locale;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.InputStreamEntity;
-import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -43,7 +39,6 @@ import com.helger.commons.io.ByteArrayWrapper;
 import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 import com.helger.commons.lang.StackTraceHelper;
 import com.helger.commons.text.MultilingualText;
-import com.helger.httpclient.HttpClientManager;
 import com.helger.jaxb.validation.WrappedCollectingValidationEventHandler;
 import com.helger.peppolid.IDocumentTypeIdentifier;
 import com.helger.peppolid.IParticipantIdentifier;
@@ -74,7 +69,6 @@ import eu.toop.connector.api.as4.MEMessage;
 import eu.toop.connector.api.as4.MEPayload;
 import eu.toop.connector.api.as4.MERoutingInformation;
 import eu.toop.connector.api.as4.MessageExchangeManager;
-import eu.toop.connector.api.http.TCHttpClientFactory;
 import eu.toop.connector.api.r2d2.IR2D2Endpoint;
 import eu.toop.connector.api.r2d2.IR2D2ErrorHandler;
 import eu.toop.connector.app.TCDumpHelper;
@@ -122,41 +116,6 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
   private static TDEErrorType _createGenericError (@Nonnull final String sLogPrefix, @Nonnull final Throwable t)
   {
     return _createError (sLogPrefix, EToopErrorCategory.TECHNICAL_ERROR, EToopErrorCode.GEN, t.getMessage (), t);
-  }
-
-  public static void sendTo_to_dp (@Nonnull final ToopResponseWithAttachments140 aResponseWA) throws ToopErrorException,
-                                                                                              IOException
-  {
-    // Forward to the DP at /to-dp interface
-    final TCHttpClientFactory aHCFactory = new TCHttpClientFactory ();
-
-    try (final HttpClientManager aMgr = new HttpClientManager (aHCFactory);
-        final NonBlockingByteArrayOutputStream aBAOS = new NonBlockingByteArrayOutputStream ())
-    {
-      // Convert read to write attachments
-      final ICommonsList <AsicWriteEntry> aWriteAttachments = new CommonsArrayList <> ();
-      for (final AsicReadEntry aEntry : aResponseWA.attachments ())
-        aWriteAttachments.add (AsicWriteEntry.create (aEntry));
-
-      ToopMessageBuilder140.createResponseMessageAsic (aResponseWA.getResponse (),
-                                                       aBAOS,
-                                                       MPConfig.getSignatureHelper (),
-                                                       aWriteAttachments);
-
-      // Send to DP (see ToDPServlet in toop-interface)
-      final String sDestinationUrl = TCConfig.getMPToopInterfaceDPUrl ();
-
-      ToopKafkaClient.send (EErrorLevel.INFO, () -> "Start posting signed ASiC response to '" + sDestinationUrl + "'");
-
-      final HttpPost aHttpPost = new HttpPost (sDestinationUrl);
-      aHttpPost.setEntity (new InputStreamEntity (aBAOS.getAsInputStream ()));
-      try (final CloseableHttpResponse aHttpResponse = aMgr.execute (aHttpPost))
-      {
-        EntityUtils.consume (aHttpResponse.getEntity ());
-      }
-
-      ToopKafkaClient.send (EErrorLevel.INFO, () -> "Done posting signed ASiC response to '" + sDestinationUrl + "'");
-    }
   }
 
   public void runAsync (@Nonnull final ToopResponseWithAttachments140 aResponseWA) throws Exception
@@ -430,17 +389,13 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
     if (nErrorCount > 0)
     {
       ToopKafkaClient.send (EErrorLevel.INFO,
-                            () -> sLogPrefix + nErrorCount + " error(s) were found - posting errors back to DP.");
+                            () -> sLogPrefix + nErrorCount + " error(s) were found - returning errors to DP.");
 
       // send back to DP including errors
       aResponse.getError ().addAll (aErrors);
-      try
+      if (MPConfig.getToDP ().returnErrorResponseToDP (aResponseWA).isFailure ())
       {
-        sendTo_to_dp (aResponseWA);
-      }
-      catch (final IOException | ToopErrorException ex)
-      {
-        ToopKafkaClient.send (EErrorLevel.ERROR, () -> sLogPrefix + "Error sending response back to DP", ex);
+        ToopKafkaClient.send (EErrorLevel.ERROR, () -> sLogPrefix + "Error sending response back to DP");
       }
     }
 
