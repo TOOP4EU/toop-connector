@@ -113,6 +113,7 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
     ValueEnforcer.notNull (aServletContext, "ServletContext");
     ValueEnforcer.notNull (aIncomingHandler, "IncomingHandler");
 
+    if (!WebFileIO.isInited ())
     {
       // Get the ServletContext base path
       final String sServletContextPath = ServletHelper.getServletContextBasePath (aServletContext);
