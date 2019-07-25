@@ -208,8 +208,9 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
       aClient.setKeyStoreAlias (aCP.getKeyAlias ());
       aClient.setKeyStoreKeyPassword (aCP.getKeyPassword ());
 
-      aClient.setCryptoAlgorithmSign (ECryptoAlgorithmSign.RSA_SHA_512);
-      aClient.setCryptoAlgorithmSignDigest (ECryptoAlgorithmSignDigest.DIGEST_SHA_512);
+      aClient.signingParams ()
+             .setAlgorithmSign (ECryptoAlgorithmSign.RSA_SHA_512)
+             .setAlgorithmSignDigest (ECryptoAlgorithmSignDigest.DIGEST_SHA_512);
 
       aClient.setAction ("RequestDocuments");
       aClient.setServiceType (null);
