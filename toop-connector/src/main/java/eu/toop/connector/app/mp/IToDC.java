@@ -21,22 +21,22 @@ import javax.annotation.Nonnull;
 
 import com.helger.commons.state.ESuccess;
 
-import eu.toop.commons.dataexchange.v140.TDETOOPRequestType;
+import eu.toop.commons.exchange.ToopResponseWithAttachments140;
 
 /**
- * Customization interface for forwarding messages from step 2/4 to the real DP.
+ * Customization interface for forwarding messages from step 4/4 to the real DC.
  *
  * @author Philip Helger
  */
-public interface IToDP extends Serializable
+public interface IToDC extends Serializable
 {
   /**
-   * Forward the TOOP Request to the DP
+   * Forward the TOOP Response with attachments to the DC
    *
-   * @param aRequest
-   *        The TOOP request for the DP.
+   * @param aResponseWA
+   *        The TOOP response with attachments for the DC.
    * @return {@link ESuccess}
    */
   @Nonnull
-  ESuccess passRequestOnToDP (@Nonnull TDETOOPRequestType aRequest);
+  ESuccess passResponseOnToDC (@Nonnull ToopResponseWithAttachments140 aResponseWA);
 }

@@ -50,6 +50,8 @@ public final class MPConfig
   private static IR2D2EndpointProvider s_aEPP;
   @GuardedBy ("s_aRWLock")
   private static IToDP s_aToDP;
+  @GuardedBy ("s_aRWLock")
+  private static IToDC s_aToDC;
 
   static
   {
@@ -67,6 +69,7 @@ public final class MPConfig
       s_aPIDP = new R2D2ParticipantIDProviderTOOPDirectory ();
       s_aEPP = new R2D2EndpointProviderBDXRSMP1 ();
       s_aToDP = new ToDPViaToopInterfaceHttp ();
+      s_aToDC = new ToDCViaToopInterfaceHttp ();
     });
   }
 
@@ -185,5 +188,26 @@ public final class MPConfig
   {
     ValueEnforcer.notNull (aToDP, "ToDP");
     s_aRWLock.writeLocked ( () -> s_aToDP = aToDP);
+  }
+
+  /**
+   * @return The To-DC implementation for step 4/4. Never <code>null</code>.
+   * @since 0.10.6
+   */
+  @Nonnull
+  public static IToDC getToDC ()
+  {
+    return s_aRWLock.readLocked ( () -> s_aToDC);
+  }
+
+  /**
+   * @param aToDC
+   *        The To-DC implementation for step 4/4. May not be <code>null</code>.
+   * @since 0.10.6
+   */
+  public static void setToDC (@Nonnull final IToDC aToDC)
+  {
+    ValueEnforcer.notNull (aToDC, "ToDC");
+    s_aRWLock.writeLocked ( () -> s_aToDC = aToDC);
   }
 }

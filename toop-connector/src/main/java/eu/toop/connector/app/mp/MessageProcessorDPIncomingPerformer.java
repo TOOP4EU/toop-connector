@@ -250,7 +250,7 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
       if (LOGGER.isDebugEnabled ())
         LOGGER.debug (sLogPrefix + "No errors found. Now forwarding to the DP");
 
-      if (MPConfig.getToDP ().passOnToDP (aRequest).isFailure ())
+      if (MPConfig.getToDP ().passRequestOnToDP (aRequest).isFailure ())
       {
         aErrors.add (_createError (EErrorLevel.ERROR,
                                    sLogPrefix,
