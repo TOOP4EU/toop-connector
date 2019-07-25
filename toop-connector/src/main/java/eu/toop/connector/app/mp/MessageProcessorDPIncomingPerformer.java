@@ -15,17 +15,12 @@
  */
 package eu.toop.connector.app.mp;
 
-import java.io.IOException;
 import java.util.Locale;
 import java.util.function.Consumer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.InputStreamEntity;
-import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,11 +30,9 @@ import com.helger.commons.concurrent.collector.IConcurrentPerformer;
 import com.helger.commons.error.level.EErrorLevel;
 import com.helger.commons.error.level.IErrorLevel;
 import com.helger.commons.id.factory.GlobalIDFactory;
-import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 import com.helger.commons.lang.StackTraceHelper;
 import com.helger.commons.string.StringHelper;
 import com.helger.commons.text.MultilingualText;
-import com.helger.httpclient.HttpClientManager;
 
 import eu.toop.commons.concept.ConceptValue;
 import eu.toop.commons.concept.EConceptType;
@@ -53,13 +46,11 @@ import eu.toop.commons.error.EToopErrorCode;
 import eu.toop.commons.error.EToopErrorOrigin;
 import eu.toop.commons.error.EToopErrorSeverity;
 import eu.toop.commons.error.IToopErrorCode;
-import eu.toop.commons.error.ToopErrorException;
 import eu.toop.commons.exchange.ToopMessageBuilder140;
 import eu.toop.commons.exchange.ToopRequestWithAttachments140;
 import eu.toop.commons.exchange.ToopResponseWithAttachments140;
 import eu.toop.commons.jaxb.ToopXSDHelper140;
 import eu.toop.connector.api.TCConfig;
-import eu.toop.connector.api.http.TCHttpClientFactory;
 import eu.toop.connector.api.smm.IMappedValueList;
 import eu.toop.connector.api.smm.ISMMClient;
 import eu.toop.connector.api.smm.ISMMMultiMappingCallback;
@@ -104,32 +95,6 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
                          EToopErrorCode.GEN,
                          t.getMessage (),
                          t);
-  }
-
-  public static void sendTo_to_dp (@Nonnull final TDETOOPRequestType aRequest) throws ToopErrorException, IOException
-  {
-    // Forward to the DP at /to-dp interface
-    final TCHttpClientFactory aHCFactory = new TCHttpClientFactory ();
-
-    try (final HttpClientManager aMgr = new HttpClientManager (aHCFactory);
-        final NonBlockingByteArrayOutputStream aBAOS = new NonBlockingByteArrayOutputStream ())
-    {
-      ToopMessageBuilder140.createRequestMessageAsic (aRequest, aBAOS, MPConfig.getSignatureHelper ());
-
-      // Send to DP (see ToDPServlet in toop-interface)
-      final String sDestinationUrl = TCConfig.getMPToopInterfaceDPUrl ();
-
-      ToopKafkaClient.send (EErrorLevel.INFO, () -> "Posting signed ASiC request to " + sDestinationUrl);
-
-      final HttpPost aHttpPost = new HttpPost (sDestinationUrl);
-      aHttpPost.setEntity (new InputStreamEntity (aBAOS.getAsInputStream ()));
-      try (final CloseableHttpResponse aHttpResponse = aMgr.execute (aHttpPost))
-      {
-        EntityUtils.consume (aHttpResponse.getEntity ());
-      }
-
-      ToopKafkaClient.send (EErrorLevel.INFO, () -> "Done posting signed ASiC request to " + sDestinationUrl);
-    }
   }
 
   private static void _iterateTCConcepts (@Nonnull final TDETOOPRequestType aRequest,
@@ -285,18 +250,14 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
       if (LOGGER.isDebugEnabled ())
         LOGGER.debug (sLogPrefix + "No errors found. Now forwarding to the DP");
 
-      try
-      {
-        sendTo_to_dp (aRequest);
-      }
-      catch (final IOException | ToopErrorException ex)
+      if (MPConfig.getToDP ().passOnToDP (aRequest).isFailure ())
       {
         aErrors.add (_createError (EErrorLevel.ERROR,
                                    sLogPrefix,
                                    EToopErrorCategory.E_DELIVERY,
                                    EToopErrorCode.GEN,
                                    "Error sending request to DP",
-                                   ex));
+                                   null));
       }
     }
 

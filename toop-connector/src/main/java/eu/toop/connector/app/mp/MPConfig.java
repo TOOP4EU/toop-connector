@@ -43,14 +43,32 @@ public final class MPConfig
   @GuardedBy ("s_aRWLock")
   private static SignatureHelper s_aSH;
   @GuardedBy ("s_aRWLock")
-  private static ISMMConceptProvider s_aCP = new SMMConceptProviderGRLCWithCache ();
+  private static ISMMConceptProvider s_aCP;
   @GuardedBy ("s_aRWLock")
-  private static IR2D2ParticipantIDProvider s_aPIDP = new R2D2ParticipantIDProviderTOOPDirectory ();
+  private static IR2D2ParticipantIDProvider s_aPIDP;
   @GuardedBy ("s_aRWLock")
-  private static IR2D2EndpointProvider s_aEPP = new R2D2EndpointProviderBDXRSMP1 ();
+  private static IR2D2EndpointProvider s_aEPP;
+  @GuardedBy ("s_aRWLock")
+  private static IToDP s_aToDP;
+
+  static
+  {
+    setToDefault ();
+  }
 
   private MPConfig ()
   {}
+
+  public static void setToDefault ()
+  {
+    s_aRWLock.writeLocked ( () -> {
+      s_aSH = null;
+      s_aCP = new SMMConceptProviderGRLCWithCache ();
+      s_aPIDP = new R2D2ParticipantIDProviderTOOPDirectory ();
+      s_aEPP = new R2D2EndpointProviderBDXRSMP1 ();
+      s_aToDP = new ToDPViaToopInterfaceHttp ();
+    });
+  }
 
   /**
    * @return The {@link SignatureHelper} singleton. Never <code>null</code>.
@@ -146,5 +164,26 @@ public final class MPConfig
   {
     ValueEnforcer.notNull (aEPP, "EndpointProvider");
     s_aRWLock.writeLocked ( () -> s_aEPP = aEPP);
+  }
+
+  /**
+   * @return The To-DP implementation for step 2/4. Never <code>null</code>.
+   * @since 0.10.6
+   */
+  @Nonnull
+  public static IToDP getToDP ()
+  {
+    return s_aRWLock.readLocked ( () -> s_aToDP);
+  }
+
+  /**
+   * @param aToDP
+   *        The To-DP implementation for step 2/4. May not be <code>null</code>.
+   * @since 0.10.6
+   */
+  public static void setToDP (@Nonnull final IToDP aToDP)
+  {
+    ValueEnforcer.notNull (aToDP, "ToDP");
+    s_aRWLock.writeLocked ( () -> s_aToDP = aToDP);
   }
 }
