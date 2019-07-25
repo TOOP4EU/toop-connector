@@ -55,8 +55,9 @@ public class MessageExchangeManager
       }
       if (s_aMap.isEmpty ())
         throw new InitializationException ("No IMessageExchangeSPI implementation is registered!");
-      if (!s_aMap.containsKey (DEFAULT_ID))
-        LOGGER.warn ("The default IMessageExchangeSPI ID '" + DEFAULT_ID + "' is not registered!");
+      if (false)
+        if (!s_aMap.containsKey (DEFAULT_ID))
+          LOGGER.warn ("The default IMessageExchangeSPI ID '" + DEFAULT_ID + "' is not registered!");
     });
   }
 
