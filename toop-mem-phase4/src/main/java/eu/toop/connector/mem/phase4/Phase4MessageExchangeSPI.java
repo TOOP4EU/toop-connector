@@ -36,6 +36,7 @@ import com.helger.as4.attachment.EAS4CompressionMode;
 import com.helger.as4.attachment.WSS4JAttachment;
 import com.helger.as4.client.AS4ClientUserMessage;
 import com.helger.as4.client.AbstractAS4Client.AS4SentMessage;
+import com.helger.as4.client.IAS4ClientBuildMessageCallback;
 import com.helger.as4.crypto.AS4CryptoFactory;
 import com.helger.as4.crypto.AS4CryptoProperties;
 import com.helger.as4.crypto.ECryptoAlgorithmSign;
@@ -253,8 +254,10 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
       aClient.setHttpClientFactory (new TCHttpClientFactory ());
 
       // Main sending
+      final IAS4ClientBuildMessageCallback aCallback = null;
       final AS4SentMessage <byte []> aResponseEntity = aClient.sendMessage (aRoutingInfo.getEndpointURL (),
-                                                                            new ResponseHandlerByteArray ());
+                                                                            new ResponseHandlerByteArray (),
+                                                                            aCallback);
       LOGGER.info ("[phase4] Successfully transmitted document with message ID '" +
                    aResponseEntity.getMessageID () +
                    "' for '" +
