@@ -15,7 +15,6 @@
  */
 package eu.toop.connector.mem.phase4;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.helger.commons.debug.GlobalDebug;
@@ -54,10 +53,10 @@ public final class Phase4Config
     return TCConfig.getConfigFile ().getAsBoolean ("toop.phase4.debug.incoming", GlobalDebug.isDebugMode ());
   }
 
-  @Nonnull
+  @Nullable
   public static String getSendResponseFolderName ()
   {
     // Can be relative or absolute
-    return TCConfig.getConfigFile ().getAsString ("toop.phase4.send.response.folder", "as4-responses");
+    return TCConfig.getConfigFile ().getAsString ("toop.phase4.send.response.folder");
   }
 }

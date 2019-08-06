@@ -268,18 +268,22 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
                    aSW.stopAndGetMillis () +
                    " ms");
 
-      if (aResponseEntity.hasResponse ())
+      if (aResponseEntity.hasResponse () && aResponseEntity.getResponse ().length > 0)
       {
-        final String sMessageID = aResponseEntity.getMessageID ();
-        final String sFilename = PDTIOHelper.getCurrentLocalDateTimeForFilename () +
-                                 "-" +
-                                 FilenameHelper.getAsSecureValidASCIIFilename (sMessageID) +
-                                 "-response.xml";
-        final File aResponseFile = new File (Phase4Config.getSendResponseFolderName (), sFilename);
-        if (SimpleFileIO.writeFile (aResponseFile, aResponseEntity.getResponse ()).isSuccess ())
-          LOGGER.info ("[phase4] Response file was written to '" + aResponseFile.getAbsolutePath () + "'");
-        else
-          LOGGER.error ("[phase4] Error writing response file to '" + aResponseFile.getAbsolutePath () + "'");
+        final String sFolderName = Phase4Config.getSendResponseFolderName ();
+        if (StringHelper.hasText (sFolderName))
+        {
+          final String sMessageID = aResponseEntity.getMessageID ();
+          final String sFilename = PDTIOHelper.getCurrentLocalDateTimeForFilename () +
+                                   "-" +
+                                   FilenameHelper.getAsSecureValidASCIIFilename (sMessageID) +
+                                   "-response.xml";
+          final File aResponseFile = new File (sFolderName, sFilename);
+          if (SimpleFileIO.writeFile (aResponseFile, aResponseEntity.getResponse ()).isSuccess ())
+            LOGGER.info ("[phase4] Response file was written to '" + aResponseFile.getAbsolutePath () + "'");
+          else
+            LOGGER.error ("[phase4] Error writing response file to '" + aResponseFile.getAbsolutePath () + "'");
+        }
       }
       else
         LOGGER.info ("[phase4] ResponseEntity is empty");
