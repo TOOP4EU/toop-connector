@@ -25,12 +25,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
 
+import com.helger.as4.attachment.AS4DecompressException;
 import com.helger.as4.attachment.WSS4JAttachment;
+import com.helger.as4.error.EEbmsError;
 import com.helger.as4.model.pmode.IPMode;
 import com.helger.as4.servlet.IAS4MessageState;
 import com.helger.as4.servlet.spi.AS4MessageProcessorResult;
 import com.helger.as4.servlet.spi.AS4SignalMessageProcessorResult;
 import com.helger.as4.servlet.spi.IAS4ServletMessageProcessorSPI;
+import com.helger.as4lib.ebms3header.Ebms3Error;
 import com.helger.as4lib.ebms3header.Ebms3SignalMessage;
 import com.helger.as4lib.ebms3header.Ebms3UserMessage;
 import com.helger.commons.ValueEnforcer;
@@ -80,7 +83,8 @@ public class AS4MessageProcessorSPI implements IAS4ServletMessageProcessorSPI
                                                           @Nonnull final IPMode aPMode,
                                                           @Nullable final Node aPayload,
                                                           @Nullable final ICommonsList <WSS4JAttachment> aIncomingAttachments,
-                                                          @Nonnull final IAS4MessageState aState)
+                                                          @Nonnull final IAS4MessageState aState,
+                                                          @Nonnull final ICommonsList <Ebms3Error> aProcessingErrors)
   {
     if (Phase4Config.isDebugIncoming ())
     {
@@ -97,14 +101,13 @@ public class AS4MessageProcessorSPI implements IAS4ServletMessageProcessorSPI
           LOGGER.info ("    Attachment Content Type: " + x.getMimeType ());
           if (x.getMimeType ().startsWith ("text") || x.getMimeType ().endsWith ("/xml"))
           {
-            try
+            try (final InputStream aIS = x.getSourceStream ())
             {
-              final InputStream aIS = x.getSourceStream ();
               LOGGER.info ("    Attachment Stream Class: " + aIS.getClass ().getName ());
               final String sContent = StreamHelper.getAllBytesAsString (x.getSourceStream (), x.getCharset ());
               LOGGER.info ("    Attachment Content: " + sContent.length () + " chars");
             }
-            catch (final IllegalStateException ex)
+            catch (final Exception ex)
             {
               LOGGER.warn ("    Attachment Content: CANNOT BE READ", ex);
             }
@@ -143,6 +146,14 @@ public class AS4MessageProcessorSPI implements IAS4ServletMessageProcessorSPI
           else
             ToopKafkaClient.send (EErrorLevel.ERROR, () -> "Unsuspported Message: " + aMsg);
       }
+      catch (final AS4DecompressException ex)
+      {
+        final String sErrorMsg = "Error decompressing a compressed attachment";
+        aProcessingErrors.add (EEbmsError.EBMS_DECOMPRESSION_FAILURE.getAsEbms3Error (aState.getLocale (),
+                                                                                      aState.getRefToMessageID (),
+                                                                                      sErrorMsg));
+        ToopKafkaClient.send (EErrorLevel.ERROR, () -> "Error handling incoming AS4 message: " + sErrorMsg);
+      }
       catch (final Exception ex)
       {
         ToopKafkaClient.send (EErrorLevel.ERROR, () -> "Error handling incoming AS4 message", ex);
@@ -161,7 +172,8 @@ public class AS4MessageProcessorSPI implements IAS4ServletMessageProcessorSPI
   public AS4SignalMessageProcessorResult processAS4SignalMessage (@Nonnull final HttpHeaderMap aHttpHeaders,
                                                                   @Nonnull final Ebms3SignalMessage aSignalMessage,
                                                                   @Nonnull final IPMode aPmode,
-                                                                  @Nonnull final IAS4MessageState aState)
+                                                                  @Nonnull final IAS4MessageState aState,
+                                                                  @Nonnull final ICommonsList <Ebms3Error> aProcessingErrors)
   {
     if (aSignalMessage.getReceipt () != null)
     {
