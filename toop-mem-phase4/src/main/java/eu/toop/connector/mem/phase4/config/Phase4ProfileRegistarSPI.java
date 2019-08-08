@@ -21,6 +21,7 @@ import com.helger.commons.annotation.IsSPIImplementation;
 import com.helger.commons.functional.ISupplier;
 import com.helger.phase4.model.pmode.IPModeIDProvider;
 import com.helger.phase4.profile.AS4Profile;
+import com.helger.phase4.profile.IAS4Profile;
 import com.helger.phase4.profile.IAS4ProfileRegistrar;
 import com.helger.phase4.profile.IAS4ProfileRegistrarSPI;
 import com.helger.phase4.profile.IAS4ProfileValidator;
@@ -40,11 +41,15 @@ public final class Phase4ProfileRegistarSPI implements IAS4ProfileRegistrarSPI
   {
     final ISupplier <? extends IAS4ProfileValidator> aProfileValidatorProvider = () -> null;
     final IPModeIDProvider aPModeIDProvider = IPModeIDProvider.DEFAULT_DYNAMIC;
-    aRegistrar.registerProfile (new AS4Profile (AS4_PROFILE_ID,
-                                                AS4_PROFILE_NAME,
-                                                aProfileValidatorProvider,
-                                                (i, r, a) -> TOOPPMode.createTOOPMode (i, r, a, aPModeIDProvider, true),
-                                                aPModeIDProvider,
-                                                false));
+    final IAS4Profile aProfile = new AS4Profile (AS4_PROFILE_ID,
+                                                 AS4_PROFILE_NAME,
+                                                 aProfileValidatorProvider,
+                                                 (i,
+                                                  r,
+                                                  a) -> TOOPPMode.createTOOPMode (i, r, a, aPModeIDProvider, true),
+                                                 aPModeIDProvider,
+                                                 false);
+    aRegistrar.registerProfile (aProfile);
+    aRegistrar.setDefaultProfile (aProfile);
   }
 }
