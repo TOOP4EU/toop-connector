@@ -17,10 +17,10 @@ package eu.toop.connector.mem.phase4.servlet;
 
 import javax.servlet.annotation.WebServlet;
 
-import com.helger.as4.attachment.IIncomingAttachmentFactory;
-import com.helger.as4.crypto.AS4CryptoFactory;
-import com.helger.as4.servlet.AS4XServletHandler;
 import com.helger.commons.http.EHttpMethod;
+import com.helger.phase4.attachment.IIncomingAttachmentFactory;
+import com.helger.phase4.crypto.AS4CryptoFactory;
+import com.helger.phase4.servlet.AS4XServletHandler;
 import com.helger.xservlet.AbstractXServlet;
 
 /**

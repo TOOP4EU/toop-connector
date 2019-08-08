@@ -17,13 +17,13 @@ package eu.toop.connector.mem.phase4.config;
 
 import javax.annotation.Nonnull;
 
-import com.helger.as4.model.pmode.IPModeIDProvider;
-import com.helger.as4.profile.AS4Profile;
-import com.helger.as4.profile.IAS4ProfileRegistrar;
-import com.helger.as4.profile.IAS4ProfileRegistrarSPI;
-import com.helger.as4.profile.IAS4ProfileValidator;
 import com.helger.commons.annotation.IsSPIImplementation;
 import com.helger.commons.functional.ISupplier;
+import com.helger.phase4.model.pmode.IPModeIDProvider;
+import com.helger.phase4.profile.AS4Profile;
+import com.helger.phase4.profile.IAS4ProfileRegistrar;
+import com.helger.phase4.profile.IAS4ProfileRegistrarSPI;
+import com.helger.phase4.profile.IAS4ProfileValidator;
 
 /**
  * TOOP specific implementation of {@link IAS4ProfileRegistrarSPI}.
