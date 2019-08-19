@@ -38,10 +38,10 @@ import com.helger.commons.url.URLProtocolRegistry;
 import eu.toop.commons.exchange.ToopRequestWithAttachments140;
 import eu.toop.commons.exchange.ToopResponseWithAttachments140;
 import eu.toop.connector.api.TCConfig;
-import eu.toop.connector.app.mp.MPTrigger;
 import eu.toop.connector.api.as4.IMEIncomingHandler;
 import eu.toop.connector.api.as4.MEException;
 import eu.toop.connector.api.as4.MessageExchangeManager;
+import eu.toop.connector.app.mp.MPTrigger;
 import eu.toop.kafkaclient.ToopKafkaClient;
 import eu.toop.kafkaclient.ToopKafkaSettings;
 
@@ -109,11 +109,11 @@ public class TCInit
       ToopKafkaSettings.setKafkaEnabled (TCConfig.isToopTrackerEnabled ());
       if (TCConfig.isToopTrackerEnabled ())
       {
+        // Set tracker URL
         final String sToopTrackerUrl = TCConfig.getToopTrackerUrl ();
         if (StringHelper.hasNoText (sToopTrackerUrl))
           throw new InitializationException ("If the tracker is enabled, the tracker URL MUST be provided in the configuration file!");
-
-        // Consistency check - no protcol like "http://" or so may be present
+        // Consistency check - no protocol like "http://" or so may be present
         final IURLProtocol aProtocol = URLProtocolRegistry.getInstance ().getProtocol (sToopTrackerUrl);
         if (aProtocol != null)
           throw new InitializationException ("The tracker URL MUST NOT start with a protocol like '" +
@@ -121,6 +121,7 @@ public class TCInit
                                              "'!");
         ToopKafkaSettings.defaultProperties ().put (ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, sToopTrackerUrl);
 
+        // Set the topic
         final String sToopTrackerTopic = TCConfig.getToopTrackerTopic ();
         ToopKafkaSettings.setKafkaTopic (sToopTrackerTopic);
       }
