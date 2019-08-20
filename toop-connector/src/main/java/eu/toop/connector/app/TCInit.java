@@ -30,7 +30,7 @@ import com.helger.commons.debug.GlobalDebug;
 import com.helger.commons.error.level.EErrorLevel;
 import com.helger.commons.exception.InitializationException;
 import com.helger.commons.id.factory.GlobalIDFactory;
-import com.helger.commons.id.factory.StringIDFromGlobalLongIDFactory;
+import com.helger.commons.id.factory.StringIDFromGlobalPersistentLongIDFactory;
 import com.helger.commons.string.StringHelper;
 import com.helger.commons.url.IURLProtocol;
 import com.helger.commons.url.URLProtocolRegistry;
@@ -76,7 +76,7 @@ public class TCInit
     if (!INITED.compareAndSet (false, true))
       throw new IllegalStateException ("TOOP Connector is already initialized");
 
-    GlobalIDFactory.setPersistentStringIDFactory (new StringIDFromGlobalLongIDFactory ("toop-mp-"));
+    GlobalIDFactory.setPersistentStringIDFactory (new StringIDFromGlobalPersistentLongIDFactory ("toop-tc-"));
     GlobalDebug.setDebugModeDirect (TCConfig.isGlobalDebug ());
     GlobalDebug.setProductionModeDirect (TCConfig.isGlobalProduction ());
 
