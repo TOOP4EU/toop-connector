@@ -18,6 +18,7 @@ package eu.toop.connector;
 import org.junit.Test;
 
 import com.helger.commons.mock.SPITestHelper;
+import com.helger.photon.core.mock.PhotonCoreValidator;
 
 /**
  * Test SPI definitions and web.xml
@@ -30,6 +31,6 @@ public final class SPITest
   public void testBasic () throws Exception
   {
     SPITestHelper.testIfAllSPIImplementationsAreValid ();
-    // PhotonCoreValidator.validateExternalResources ();
+    PhotonCoreValidator.validateExternalResources ();
   }
 }
