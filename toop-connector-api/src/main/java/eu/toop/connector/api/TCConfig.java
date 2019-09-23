@@ -22,7 +22,7 @@ import javax.annotation.CheckForSigned;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.GuardedBy;
-import javax.annotation.concurrent.Immutable;
+import javax.annotation.concurrent.ThreadSafe;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +31,7 @@ import com.helger.commons.concurrent.SimpleReadWriteLock;
 import com.helger.commons.debug.GlobalDebug;
 import com.helger.commons.io.file.FileOperationManager;
 import com.helger.commons.state.ESuccess;
+import com.helger.commons.string.StringHelper;
 import com.helger.commons.url.URLHelper;
 import com.helger.peppol.sml.ESML;
 import com.helger.peppol.sml.ISMLInfo;
@@ -48,7 +49,7 @@ import eu.toop.connector.api.as4.MessageExchangeManager;
  *
  * @author Philip Helger, BRZ, AT
  */
-@Immutable
+@ThreadSafe
 public final class TCConfig
 {
   private static final Logger LOGGER = LoggerFactory.getLogger (TCConfig.class);
@@ -125,6 +126,11 @@ public final class TCConfig
   public static final boolean DEFAULT_TOOP_TRACKER_ENABLED = false;
   public static final String DEFAULT_TOOP_TRACKER_TOPIC = "toop";
   public static final boolean DEFAULT_USE_SML = true;
+
+  @GuardedBy ("s_aRWLock")
+  private static String s_sMPToopInterfaceDPOverrideUrl = null;
+  @GuardedBy ("s_aRWLock")
+  private static String s_sMPToopInterfaceDCOverrideUrl = null;
 
   private TCConfig ()
   {}
@@ -339,21 +345,81 @@ public final class TCConfig
   }
 
   /**
-   * @return The URL of the DP backend for step 2/4
+   * Override the toop-interface DP URL with the custom URL. This URL has
+   * precedence over the value in the configuration file.
+   *
+   * @param sMPToopInterfaceDPOverrideUrl
+   *        The new override URL to set. May be <code>null</code>.
+   * @since 0.10.6
+   */
+  public static void setMPToopInterfaceDPOverrideUrl (@Nullable final String sMPToopInterfaceDPOverrideUrl)
+  {
+    LOGGER.warn ("Overriding the MP Toop Interface DP URL with '" + sMPToopInterfaceDPOverrideUrl + "'");
+    s_aRWLock.writeLocked ( () -> s_sMPToopInterfaceDPOverrideUrl = sMPToopInterfaceDPOverrideUrl);
+  }
+
+  /**
+   * @return The override URL for the toop-interface DP side. May be
+   *         <code>null</code>. Default is <code>null</code>.
+   * @since 0.10.6
+   */
+  @Nullable
+  public static String getMPToopInterfaceDPOverrideUrl ()
+  {
+    return s_aRWLock.readLocked ( () -> s_sMPToopInterfaceDPOverrideUrl);
+  }
+
+  /**
+   * @return The URL of the DP backend for step 2/4. May be <code>null</code>.
+   * @see #getMPToopInterfaceDPOverrideUrl()
+   * @see #setMPToopInterfaceDPOverrideUrl(String)
    */
   @Nullable
   public static String getMPToopInterfaceDPUrl ()
   {
-    return getConfigFile ().getAsString ("toop.mp.dp.url");
+    String ret = getMPToopInterfaceDPOverrideUrl ();
+    if (StringHelper.hasNoText (ret))
+      ret = getConfigFile ().getAsString ("toop.mp.dp.url");
+    return ret;
   }
 
   /**
-   * @return The URL of the DC backend for step 4/4
+   * Override the toop-interface DC URL with the custom URL. This URL has
+   * precedence over the value in the configuration file.
+   *
+   * @param sMPToopInterfaceDCOverrideUrl
+   *        The new override URL to set. May be <code>null</code>.
+   * @since 0.10.6
+   */
+  public static void setMPToopInterfaceDCOverrideUrl (@Nullable final String sMPToopInterfaceDCOverrideUrl)
+  {
+    LOGGER.warn ("Overriding the MP Toop Interface DC URL with '" + sMPToopInterfaceDCOverrideUrl + "'");
+    s_aRWLock.writeLocked ( () -> s_sMPToopInterfaceDCOverrideUrl = sMPToopInterfaceDCOverrideUrl);
+  }
+
+  /**
+   * @return The override URL for the toop-interface DC side. May be
+   *         <code>null</code>. Default is <code>null</code>.
+   * @since 0.10.6
+   */
+  @Nullable
+  public static String getMPToopInterfaceDCOverrideUrl ()
+  {
+    return s_aRWLock.readLocked ( () -> s_sMPToopInterfaceDCOverrideUrl);
+  }
+
+  /**
+   * @return The URL of the DC backend for step 4/4. May be <code>null</code>.
+   * @see #getMPToopInterfaceDCOverrideUrl()
+   * @see #setMPToopInterfaceDCOverrideUrl(String)
    */
   @Nullable
   public static String getMPToopInterfaceDCUrl ()
   {
-    return getConfigFile ().getAsString ("toop.mp.dc.url");
+    String ret = getMPToopInterfaceDCOverrideUrl ();
+    if (StringHelper.hasNoText (ret))
+      ret = getConfigFile ().getAsString ("toop.mp.dc.url");
+    return ret;
   }
 
   /**
