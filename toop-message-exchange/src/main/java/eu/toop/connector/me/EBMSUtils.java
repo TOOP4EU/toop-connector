@@ -563,7 +563,7 @@ public final class EBMSUtils {
 
     if (response != null) {
       if (LOG.isTraceEnabled()) {
-        LOG.info(SoapUtil.describe(response));
+        LOG.trace(SoapUtil.describe(response));
       }
       validateReceipt(response);
     } // else the receipt is null and we received a HTTP.OK, isn't that great?

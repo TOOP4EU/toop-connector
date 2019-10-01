@@ -110,9 +110,7 @@ public class MEMDelegate extends AbstractGlobalSingleton {
       LOG.debug("Send soap message " + messageID);
     }
 
-    if (LOG.isDebugEnabled()) {
-      LOG.debug("\n" + SoapUtil.describe(soapMessage));
-    }
+    SoapUtil.describe(soapMessage);
 
     EBMSUtils.sendSOAPMessage(soapMessage, URLHelper.getAsURL(TCConfig.getMEMAS4Endpoint()));
     if (LOG.isDebugEnabled())

@@ -21,13 +21,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.soap.MessageFactory;
-import javax.xml.soap.MimeHeaders;
-import javax.xml.soap.SOAPConnection;
-import javax.xml.soap.SOAPConnectionFactory;
-import javax.xml.soap.SOAPConstants;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPMessage;
+import javax.xml.soap.*;
 
 import com.helger.commons.error.level.EErrorLevel;
 import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
@@ -35,6 +29,7 @@ import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 import eu.toop.commons.error.EToopErrorCode;
 import eu.toop.connector.api.as4.MEException;
 import eu.toop.kafkaclient.ToopKafkaClient;
+import javafx.beans.binding.StringBinding;
 
 /**
  * @author myildiz at 12.02.2018.
@@ -96,12 +91,26 @@ public class SoapUtil {
   }
 
   public static String describe(final SOAPMessage message) {
-    try (final NonBlockingByteArrayOutputStream baos = new NonBlockingByteArrayOutputStream()) {
-      message.writeTo(baos);
-      return baos.getAsString(StandardCharsets.UTF_8);
-    } catch (final Exception e) {
-      LOG.error("Whatsoever", e);
-      return "Error:" + e.getMessage();
-    }
+    //try (final NonBlockingByteArrayOutputStream baos = new NonBlockingByteArrayOutputStream()) {
+    //  message.writeTo(baos);
+    //  return baos.getAsString(StandardCharsets.UTF_8);
+    //} catch (final Exception e) {
+    //  LOG.error("Whatsoever", e);
+    //  return "Error:" + e.getMessage();
+    //}
+
+    StringBuilder attSummary = new StringBuilder();
+    message.getAttachments().forEachRemaining(att -> {
+      AttachmentPart ap = (AttachmentPart)att;
+      attSummary.append("ID: ").append(ap.getContentId()).append("\n");
+      attSummary.append("   TYPE: ").append(ap.getContentType()).append("\n");
+      try {
+        attSummary.append("   LEN: ").append(ap.getRawContentBytes().length).append("\n");
+      } catch (SOAPException e) {
+      }
+
+    });
+    return com.helger.xml.serialize.write.XMLWriter.getNodeAsString(message.getSOAPPart()) + "\n\n" +
+        attSummary;
   }
 }
