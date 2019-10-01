@@ -15,10 +15,12 @@
  */
 package eu.toop.connector.mem.def;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
+import com.helger.commons.error.level.EErrorLevel;
+import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
+import eu.toop.commons.error.EToopErrorCode;
+import eu.toop.connector.api.as4.MEException;
+import eu.toop.kafkaclient.ToopKafkaClient;
+import org.w3c.dom.Node;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.soap.*;
@@ -26,17 +28,12 @@ import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.sax.SAXTransformerFactory;
 import javax.xml.transform.stream.StreamResult;
-
-import com.helger.commons.error.level.EErrorLevel;
-
-import eu.toop.commons.error.EToopErrorCode;
-import eu.toop.connector.api.as4.MEException;
-import eu.toop.kafkaclient.ToopKafkaClient;
-import javafx.beans.binding.StringBinding;
-import org.w3c.dom.Node;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 /**
  * @author myildiz at 12.02.2018.
@@ -143,10 +140,10 @@ public class SoapUtil {
   public static String prettyPrint(Node node) {
     try {
       Source xmlSource = new DOMSource(node);
-      StreamResult res = new StreamResult(new ByteArrayOutputStream());
+      StreamResult res = new StreamResult(new NonBlockingByteArrayOutputStream());
       serializer.transform(xmlSource, res);
       serializer.reset();
-      return new String(((ByteArrayOutputStream) res.getOutputStream()).toByteArray());
+      return new String(((NonBlockingByteArrayOutputStream) res.getOutputStream()).toByteArray(), StandardCharsets.UTF_8);
     } catch (Exception e) {
       return node.getTextContent();
     }
