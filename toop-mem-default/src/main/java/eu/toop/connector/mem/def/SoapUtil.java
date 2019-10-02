@@ -15,25 +15,35 @@
  */
 package eu.toop.connector.mem.def;
 
-import com.helger.commons.error.level.EErrorLevel;
-import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
-import eu.toop.commons.error.EToopErrorCode;
-import eu.toop.connector.api.as4.MEException;
-import eu.toop.kafkaclient.ToopKafkaClient;
-import org.w3c.dom.Node;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.soap.*;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.sax.SAXTransformerFactory;
-import javax.xml.transform.stream.StreamResult;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.soap.AttachmentPart;
+import javax.xml.soap.MessageFactory;
+import javax.xml.soap.MimeHeaders;
+import javax.xml.soap.SOAPConnection;
+import javax.xml.soap.SOAPConnectionFactory;
+import javax.xml.soap.SOAPConstants;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPMessage;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.w3c.dom.Node;
+
+import com.helger.commons.error.level.EErrorLevel;
+import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
+
+import eu.toop.commons.error.EToopErrorCode;
+import eu.toop.connector.api.as4.MEException;
+import eu.toop.kafkaclient.ToopKafkaClient;
 
 /**
  * @author myildiz at 12.02.2018.
@@ -50,7 +60,7 @@ public class SoapUtil {
       // Ensure to use SOAP 1.2
       messageFactory = MessageFactory.newInstance(SOAPConstants.SOAP_1_2_PROTOCOL);
       soapConnectionFactory = SOAPConnectionFactory.newInstance();
-      serializer = SAXTransformerFactory.newInstance().newTransformer();
+      serializer = TransformerFactory.newInstance().newTransformer();
       serializer.setOutputProperty(OutputKeys.INDENT, "yes");
       serializer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
     } catch (final Exception e) {
@@ -100,9 +110,9 @@ public class SoapUtil {
    * @param headers the MIME headers that will be used during the transportation
    *                as a HTTP package
    * @param is the input stream that the soap message has been serialized to previously
-   * @return
-   * @throws IOException
-   * @throws SOAPException
+   * @return message
+   * @throws IOException on IO error
+   * @throws SOAPException on SOAP error
    */
   public static SOAPMessage createMessage(final MimeHeaders headers,
                                           final InputStream is) throws IOException, SOAPException {
@@ -112,18 +122,18 @@ public class SoapUtil {
   /**
    * returns a String description of the provided soap message as XML appended to
    * an enumeration of the attachments and provides info such as id, type and length
-   * @param message
-   * @return
+   * @param message message
+   * @return debug string
    */
   public static String describe(final SOAPMessage message) {
-    StringBuilder attSummary = new StringBuilder();
+    final StringBuilder attSummary = new StringBuilder();
     message.getAttachments().forEachRemaining(att -> {
-      AttachmentPart ap = (AttachmentPart) att;
+      final AttachmentPart ap = (AttachmentPart) att;
       attSummary.append("ID: ").append(ap.getContentId()).append("\n");
       attSummary.append("   TYPE: ").append(ap.getContentType()).append("\n");
       try {
         attSummary.append("   LEN: ").append(ap.getRawContentBytes().length).append("\n");
-      } catch (SOAPException e) {
+      } catch (final SOAPException e) {
       }
 
     });
@@ -135,16 +145,17 @@ public class SoapUtil {
   /**
    * Print the given org.w3c.dom.Node object in an indented XML format
    * @param node the node to be serialized to XML
-   * @return
+   * @return formatted XML
    */
-  public static String prettyPrint(Node node) {
-    try {
-      Source xmlSource = new DOMSource(node);
-      StreamResult res = new StreamResult(new NonBlockingByteArrayOutputStream());
+  public static String prettyPrint(final Node node) {
+    try(final NonBlockingByteArrayOutputStream aBAOS = new NonBlockingByteArrayOutputStream ()) {
+      final Source xmlSource = new DOMSource(node);
+
+      final StreamResult res = new StreamResult(aBAOS);
       serializer.transform(xmlSource, res);
       serializer.reset();
-      return new String(((NonBlockingByteArrayOutputStream) res.getOutputStream()).toByteArray(), StandardCharsets.UTF_8);
-    } catch (Exception e) {
+      return aBAOS.getAsString (StandardCharsets.UTF_8);
+    } catch (final Exception e) {
       return node.getTextContent();
     }
   }
