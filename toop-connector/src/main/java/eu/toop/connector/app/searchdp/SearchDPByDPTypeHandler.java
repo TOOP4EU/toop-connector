@@ -35,48 +35,44 @@ import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.http.TCHttpClientFactory;
 
 /**
- * Handler to perform the /search-dp-by-country servlet functionality.
+ * Handler to perform the /search-dp-by-dptype servlet functionality.
  *
  * @author Philip Helger
  */
 @Immutable
-public final class SearchDPByCountryHandler
+public final class SearchDPByDPTypeHandler
 {
-  private static final Logger LOGGER = LoggerFactory.getLogger (SearchDPByCountryHandler.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger (SearchDPByDPTypeHandler.class);
 
-  private SearchDPByCountryHandler ()
+  private SearchDPByDPTypeHandler ()
   {}
 
   /**
    * Extract from the URL in the form
-   * <code>/search-dp-by-country/&lt;countryCode&gt;[/&lt;docType&gt;]</code>
+   * <code>/search-dp-by-dptype/&lt;dpType&gt;</code>
    *
    * @param sPathWithinServlet
    *        Path to extract from. May not be <code>null</code>.
    * @return Never <code>null</code>.
    */
   @Nonnull
-  public static SearchDPByCountryInputParams extractInputParams (@Nonnull final String sPathWithinServlet)
+  public static SearchDPByDPTypeInputParams extractInputParams (@Nonnull final String sPathWithinServlet)
   {
-    final SearchDPByCountryInputParams ret = new SearchDPByCountryInputParams ();
+    final SearchDPByDPTypeInputParams ret = new SearchDPByDPTypeInputParams ();
     final String sBase = StringHelper.trimStartAndEnd (sPathWithinServlet, '/');
     final String [] aParts = StringHelper.getExplodedArray ('/', sBase);
     if (aParts.length >= 1)
     {
-      ret.setCountryCode (aParts[0]);
-      if (aParts.length >= 2)
-      {
-        ret.setDocumentType (aParts[1]);
-      }
+      ret.setDPType (aParts[0]);
     }
     return ret;
   }
 
-  public static void performSearch (@Nonnull final SearchDPByCountryInputParams aInputParams,
+  public static void performSearch (@Nonnull final SearchDPByDPTypeInputParams aInputParams,
                                     @Nonnull final ISearchDPCallback aCallback) throws IOException
   {
     ValueEnforcer.notNull (aInputParams, "InputParams");
-    ValueEnforcer.isTrue ( () -> aInputParams.hasCountryCode (), "InputParams must have a country code");
+    ValueEnforcer.isTrue (aInputParams.hasDPType (), "InputParams must have a DP type");
     ValueEnforcer.notNull (aCallback, "Callback");
 
     // Invoke TOOP Directory search API
@@ -88,12 +84,11 @@ public final class SearchDPByCountryHandler
       final SimpleURL aBaseURL = new SimpleURL (TCConfig.getR2D2DirectoryBaseUrl () + "/search/1.0/xml");
       // More than 1000 is not allowed
       aBaseURL.add ("rpc", 1_000);
-      // Constant defined in CCTF-103
-      aBaseURL.add ("identifierScheme", "DataSubjectIdentifierScheme");
+      // Constant defined in
+      // http://wiki.ds.unipi.gr/display/TOOP/Process+Variations+on+Discovery
+      aBaseURL.add ("identifierScheme", "DataProviderType");
       // Parameters to this servlet
-      aBaseURL.add ("country", aInputParams.getCountryCode ().getCountry ());
-      if (aInputParams.hasDocumentTypeID ())
-        aBaseURL.add ("doctype", aInputParams.getDocumentTypeID ().getURIEncoded ());
+      aBaseURL.add ("identifierValue", aInputParams.getDPType ());
 
       if (LOGGER.isInfoEnabled ())
         LOGGER.info ("Querying " + aBaseURL.getAsStringWithEncodedParameters ());

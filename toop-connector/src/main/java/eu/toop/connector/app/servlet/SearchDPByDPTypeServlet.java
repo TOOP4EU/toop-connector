@@ -29,20 +29,20 @@ import com.helger.xservlet.AbstractXServlet;
 import com.helger.xservlet.handler.simple.IXServletSimpleHandler;
 
 import eu.toop.connector.app.searchdp.ISearchDPCallback;
-import eu.toop.connector.app.searchdp.SearchDPByCountryHandler;
-import eu.toop.connector.app.searchdp.SearchDPByCountryInputParams;
+import eu.toop.connector.app.searchdp.SearchDPByDPTypeHandler;
+import eu.toop.connector.app.searchdp.SearchDPByDPTypeInputParams;
 
 /**
- * Search the TOOP Directory for identifier types used in certain countries
- * (maybe further limited to certain document types as well). See
- * http://jira.ds.unipi.gr/browse/CCTF-102 for the definition.
+ * Search the TOOP Directory for specific identifiers. See
+ * http://wiki.ds.unipi.gr/display/TOOP/Process+Variations+on+Discovery for
+ * details
  *
  * @author Philip Helger
  */
-@WebServlet ("/search-dp-by-country/*")
-public class SearchDPByCountryServlet extends AbstractXServlet
+@WebServlet ("/search-dp-by-dptype/*")
+public class SearchDPByDPTypeServlet extends AbstractXServlet
 {
-  public static final String SERVLET_DEFAULT_NAME = "search-dp-by-country";
+  public static final String SERVLET_DEFAULT_NAME = "search-dp-by-dptype";
   public static final String SERVLET_DEFAULT_PATH = '/' + SERVLET_DEFAULT_NAME;
 
   /**
@@ -61,8 +61,8 @@ public class SearchDPByCountryServlet extends AbstractXServlet
         LOGGER.debug (SERVLET_DEFAULT_PATH + aRequestScope.getPathWithinServlet () + " executed");
 
       // Extract the parameters
-      final SearchDPByCountryInputParams aInputParams = SearchDPByCountryHandler.extractInputParams (aRequestScope.getPathWithinServlet ());
-      if (!aInputParams.hasCountryCode ())
+      final SearchDPByDPTypeInputParams aInputParams = SearchDPByDPTypeHandler.extractInputParams (aRequestScope.getPathWithinServlet ());
+      if (!aInputParams.hasDPType ())
       {
         // Mandatory fields are missing
         aUnifiedResponse.disableCaching ();
@@ -74,12 +74,12 @@ public class SearchDPByCountryServlet extends AbstractXServlet
         final ISearchDPCallback aCallback = new SearchDPCallback (aUnifiedResponse);
 
         // Perform the search
-        SearchDPByCountryHandler.performSearch (aInputParams, aCallback);
+        SearchDPByDPTypeHandler.performSearch (aInputParams, aCallback);
       }
     }
   }
 
-  public SearchDPByCountryServlet ()
+  public SearchDPByDPTypeServlet ()
   {
     handlerRegistry ().registerHandler (EHttpMethod.GET, new MainHandler ());
   }
