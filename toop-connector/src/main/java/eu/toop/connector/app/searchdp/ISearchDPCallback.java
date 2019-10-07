@@ -24,9 +24,9 @@ import com.helger.xml.microdom.IMicroDocument;
 
 /**
  * Callback used in
- * {@link SearchDPHandler#performSearch(SearchDPInputParams, ISearchDPCallback)}
+ * {@link SearchDPByCountryHandler#performSearch(SearchDPByCountryInputParams, ISearchDPCallback)}
  * to handle the response states.
- * 
+ *
  * @author Philip Helger
  */
 public interface ISearchDPCallback extends Serializable

@@ -35,30 +35,30 @@ import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.http.TCHttpClientFactory;
 
 /**
- * Handler to perform the /search-dp servlet functionality.
- * 
+ * Handler to perform the /search-dp-by-country servlet functionality.
+ *
  * @author Philip Helger
  */
 @Immutable
-public final class SearchDPHandler
+public final class SearchDPByCountryHandler
 {
-  private static final Logger LOGGER = LoggerFactory.getLogger (SearchDPHandler.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger (SearchDPByCountryHandler.class);
 
-  private SearchDPHandler ()
+  private SearchDPByCountryHandler ()
   {}
 
   /**
    * Extract from the URL in the form
-   * <code>/search-dp/<countryCode>[/<docType>]</code>
+   * <code>/search-dp-by-country/<countryCode>[/<docType>]</code>
    *
    * @param sPathWithinServlet
    *        Path to extract from
    * @return Never <code>null</code>.
    */
   @Nonnull
-  public static SearchDPInputParams extractInputParams (@Nonnull final String sPathWithinServlet)
+  public static SearchDPByCountryInputParams extractInputParams (@Nonnull final String sPathWithinServlet)
   {
-    final SearchDPInputParams ret = new SearchDPInputParams ();
+    final SearchDPByCountryInputParams ret = new SearchDPByCountryInputParams ();
     final String sBase = StringHelper.trimStartAndEnd (sPathWithinServlet, '/');
     final String [] aParts = StringHelper.getExplodedArray ('/', sBase);
     if (aParts.length >= 1)
@@ -72,7 +72,7 @@ public final class SearchDPHandler
     return ret;
   }
 
-  public static void performSearch (@Nonnull final SearchDPInputParams aInputParams,
+  public static void performSearch (@Nonnull final SearchDPByCountryInputParams aInputParams,
                                     @Nonnull final ISearchDPCallback aCallback) throws IOException
   {
     ValueEnforcer.notNull (aInputParams, "InputParams");

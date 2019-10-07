@@ -31,9 +31,9 @@ import com.helger.peppolid.IDocumentTypeIdentifier;
 
 import eu.toop.connector.api.TCSettings;
 
-public final class SearchDPInputParams implements Serializable
+public final class SearchDPByCountryInputParams implements Serializable
 {
-  private static final Logger LOGGER = LoggerFactory.getLogger (SearchDPInputParams.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger (SearchDPByCountryInputParams.class);
 
   private Locale m_aCountryCode;
   private IDocumentTypeIdentifier m_aDocTypeID;
@@ -49,7 +49,7 @@ public final class SearchDPInputParams implements Serializable
       {
         m_aCountryCode = aCountry;
         if (LOGGER.isInfoEnabled ())
-          LOGGER.info ("Using country code '" + sTrimmedCountryCode + "' for /search-dp");
+          LOGGER.info ("Using country code '" + sTrimmedCountryCode + "' for /search-dp-by-country");
         return ESuccess.SUCCESS;
       }
       if (LOGGER.isWarnEnabled ())
@@ -81,7 +81,7 @@ public final class SearchDPInputParams implements Serializable
       {
         m_aDocTypeID = aDocTypeID;
         if (LOGGER.isInfoEnabled ())
-          LOGGER.info ("Using document type ID '" + sTrimmedDocTypeID + "' for /search-dp");
+          LOGGER.info ("Using document type ID '" + sTrimmedDocTypeID + "' for /search-dp-by-country");
         return ESuccess.SUCCESS;
       }
       if (LOGGER.isWarnEnabled ())
