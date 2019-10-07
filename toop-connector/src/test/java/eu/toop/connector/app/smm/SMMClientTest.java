@@ -28,7 +28,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.helger.commons.collection.CollectionHelper;
+import com.helger.commons.collection.impl.CommonsTreeSet;
 import com.helger.commons.collection.impl.ICommonsOrderedSet;
+import com.helger.commons.collection.impl.ICommonsSortedSet;
+import com.helger.commons.string.StringHelper;
 import com.helger.xml.microdom.IMicroDocument;
 import com.helger.xml.microdom.IMicroElement;
 import com.helger.xml.microdom.MicroDocument;
@@ -43,9 +46,6 @@ import eu.toop.connector.api.smm.ISMMMultiMappingCallback;
 import eu.toop.connector.api.smm.ISMMUnmappableCallback;
 import eu.toop.connector.api.smm.MappedValue;
 import eu.toop.connector.api.smm.MappedValueList;
-import eu.toop.connector.app.smm.SMMClient;
-import eu.toop.connector.app.smm.SMMConceptProviderGRLCRemote;
-import eu.toop.connector.app.smm.SMMConceptProviderGRLCWithCache;
 
 /**
  * Test class for class {@link SMMClient}.
@@ -166,6 +166,7 @@ public final class SMMClientTest
     // Get all namespaces
     final ICommonsOrderedSet <String> aNSs = SMMConceptProviderGRLCRemote.remoteQueryAllNamespaces (CMockSMM.LOG_PREFIX);
     final ISMMConceptProvider aCP = new SMMConceptProviderGRLCRemote ();
+    final ICommonsSortedSet <String> aToopConcepts = new CommonsTreeSet <> ();
 
     // For all namespaces
     for (final String sSrc : aNSs)
@@ -187,11 +188,15 @@ public final class SMMClientTest
           final String sTOOPConcept = aItem.getDestination ().getValue ();
           eItem.setAttribute ("dstval", sTOOPConcept);
 
+          aToopConcepts.add (sTOOPConcept);
+
           if (EToopConcept.getFromIDOrNull (sTOOPConcept) == null)
             LOGGER.warn ("The TOOP concept '" + sTOOPConcept + "' is unknown!");
         }
       }
     MicroWriter.writeToFile (aDoc, new File ("src/test/resources/existing-smm-mappings.xml"));
     LOGGER.info ("done");
+
+    LOGGER.info ("All TOOP concepts:\n" + StringHelper.getImploded ('\n', aToopConcepts));
   }
 }
