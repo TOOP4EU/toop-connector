@@ -25,7 +25,8 @@ import eu.toop.commons.exchange.ToopRequestWithAttachments140;
 import eu.toop.commons.exchange.ToopResponseWithAttachments140;
 
 /**
- * Customization interface for forwarding messages from step 2/4 to the real DP.
+ * Customization interface for forwarding messages from steps 2/4 and 3/4 to the
+ * real DP.
  *
  * @author Philip Helger
  */

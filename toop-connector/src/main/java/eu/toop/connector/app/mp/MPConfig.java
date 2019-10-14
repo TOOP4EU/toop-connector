@@ -170,7 +170,8 @@ public final class MPConfig
   }
 
   /**
-   * @return The To-DP implementation for step 2/4. Never <code>null</code>.
+   * @return The To-DP implementation for steps 2/4 and 3/4. Never
+   *         <code>null</code>.
    * @since 0.10.6
    */
   @Nonnull
@@ -181,7 +182,8 @@ public final class MPConfig
 
   /**
    * @param aToDP
-   *        The To-DP implementation for step 2/4. May not be <code>null</code>.
+   *        The To-DP implementation for steps 2/4 and 3/4. May not be
+   *        <code>null</code>.
    * @since 0.10.6
    */
   public static void setToDP (@Nonnull final IToDP aToDP)

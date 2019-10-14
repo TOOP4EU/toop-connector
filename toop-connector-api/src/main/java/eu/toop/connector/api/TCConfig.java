@@ -370,7 +370,8 @@ public final class TCConfig
   }
 
   /**
-   * @return The URL of the DP backend for step 2/4. May be <code>null</code>.
+   * @return The URL of the DP backend for steps 2/4 and 3/4. May be
+   *         <code>null</code>.
    * @see #getMPToopInterfaceDPOverrideUrl()
    * @see #setMPToopInterfaceDPOverrideUrl(String)
    */
