@@ -91,7 +91,8 @@
       <scope>provided</scope>
     </dependency>
 
-    <!-- Test only -->    <dependency>
+    <!-- Test only -->
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
       <scope>test</scope>
