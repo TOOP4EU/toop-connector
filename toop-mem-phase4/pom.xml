@@ -29,7 +29,7 @@
   <description>Contains the TOOP Message Exchange Module implementation with phase4</description>
   <url>https://github.com/toop4eu/toop-connector/toop-mem-phase4</url>
   <inceptionYear>2018</inceptionYear>
-  
+
   <licenses>
     <license>
       <name>Apache 2</name>
@@ -37,12 +37,12 @@
       <distribution>repo</distribution>
     </license>
   </licenses>
-  
+
   <organization>
     <name>toop.eu</name>
     <url>http://www.toop.eu</url>
   </organization>
-  
+
   <developers>
     <developer>
       <id>philip</id>
@@ -50,7 +50,7 @@
       <email>ph(at)helger.com</email>
     </developer>
   </developers>
-  
+
   <dependencies>
     <dependency>
       <groupId>eu.toop</groupId>
@@ -78,13 +78,13 @@
       <groupId>com.helger</groupId>
       <artifactId>phase4-servlet</artifactId>
     </dependency>
-    
+
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
       <scope>provided</scope>
     </dependency>
-    
+
     <!-- Test only -->
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -104,8 +104,8 @@
             <Export-Package>eu.toop.connector.mem.phase4.*</Export-Package>
             <Import-Package>!javax.annotation.*,*</Import-Package>
             <Require-Capability>osgi.extender; filter:="(osgi.extender=osgi.serviceloader.registrar)"</Require-Capability>
-            <Provide-Capability>osgi.serviceloader; osgi.serviceloader=com.helger.as4.profile.IAS4ProfileRegistrarSPI,
-osgi.serviceloader; osgi.serviceloader=com.helger.as4.servlet.spi.IAS4ServletMessageProcessorSPI,
+            <Provide-Capability>osgi.serviceloader; osgi.serviceloader=com.helger.phase4.profile.IAS4ProfileRegistrarSPI,
+osgi.serviceloader; osgi.serviceloader=com.helger.phase4.servlet.spi.IAS4ServletMessageProcessorSPI,
 osgi.serviceloader; osgi.serviceloader=eu.toop.connector.api.as4.IMessageExchangeSPI</Provide-Capability>
           </instructions>
         </configuration>
