@@ -75,13 +75,17 @@ public final class SearchDPByDPTypeHandler
     ValueEnforcer.isTrue (aInputParams.hasDPType (), "InputParams must have a DP type");
     ValueEnforcer.notNull (aCallback, "Callback");
 
+    final String sBaseURL = TCConfig.getR2D2DirectoryBaseUrl ();
+    if (StringHelper.hasNoText (sBaseURL))
+      throw new IllegalStateException ("The Directory base URL configuration is missing");
+
     // Invoke TOOP Directory search API
     final TCHttpClientFactory aHCFactory = new TCHttpClientFactory ();
 
     try (final HttpClientManager aMgr = new HttpClientManager (aHCFactory))
     {
       // Build base URL and fetch all records per HTTP request
-      final SimpleURL aBaseURL = new SimpleURL (TCConfig.getR2D2DirectoryBaseUrl () + "/search/1.0/xml");
+      final SimpleURL aBaseURL = new SimpleURL (sBaseURL + "/search/1.0/xml");
       // More than 1000 is not allowed
       aBaseURL.add ("rpc", 1_000);
       // Constant defined in
