@@ -250,8 +250,8 @@ public final class TCConfig
       final String sSMLID = getConfigFile ().getAsString ("toop.r2d2.sml.id");
       final ESML eSML = ESML.getFromIDOrNull (sSMLID);
       if (eSML != null)
-      // Pre-configured SML
       {
+        // Pre-configured SML it is
         ret = eSML;
       }
       else
