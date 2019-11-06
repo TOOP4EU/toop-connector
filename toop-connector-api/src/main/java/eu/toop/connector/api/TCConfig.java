@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import com.helger.commons.concurrent.SimpleReadWriteLock;
 import com.helger.commons.debug.GlobalDebug;
+import com.helger.commons.id.factory.GlobalIDFactory;
 import com.helger.commons.io.file.FileOperationManager;
 import com.helger.commons.state.ESuccess;
 import com.helger.commons.string.StringHelper;
@@ -262,7 +263,12 @@ public final class TCConfig
         // E.g. https://edelivery.tech.ec.europa.eu/edelivery-sml
         final String sManagementServiceURL = getConfigFile ().getAsString ("toop.r2d2.sml.serviceurl");
         final boolean bClientCertificateRequired = getConfigFile ().getAsBoolean ("toop.r2d2.sml.clientcert", false);
-        ret = new SMLInfo (sDisplayName, sDNSZone, sManagementServiceURL, bClientCertificateRequired);
+        // No need for a persistent ID here
+        ret = new SMLInfo (GlobalIDFactory.getNewStringID (),
+                           sDisplayName,
+                           sDNSZone,
+                           sManagementServiceURL,
+                           bClientCertificateRequired);
       }
       // Remember in cache
       s_aCachedSMLInfo = ret;
