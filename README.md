@@ -2,7 +2,7 @@
 
 The joint message process for both sides of the process
 
-Latest release: **0.10.5** (2019-06-24)
+Latest release: **0.10.6-1** (2019-11-08)
 
 # How it works
 
@@ -32,6 +32,11 @@ Handle the way on DP side from AS4 to DC (4/4)
 
 # News and noteworthy
 
+* v0.10.6-1 - 2019-11-08
+    * Fixed an Exception when using the new WAR deployment
+* v0.10.6 - 2019-10-17
+    * Abstract all internal interfaces so they can be changed/replaced
+    * Updated to the data model 1.4.1
 * v0.10.5 - 2019-06-24
     * In case of errors, that lead to an immediate response, the document type is now correctly reversed
     * Added new optional configuration item `toop.keystore.type` with the default value `JKS`.
