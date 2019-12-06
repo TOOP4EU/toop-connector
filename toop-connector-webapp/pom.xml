@@ -21,7 +21,7 @@
   <parent>
     <groupId>eu.toop</groupId>
     <artifactId>toop-connector-parent-pom</artifactId>
-    <version>0.10.6-2-SNAPSHOT</version>
+    <version>0.10.6-2</version>
   </parent>
   <artifactId>toop-connector-webapp</artifactId>
   <packaging>war</packaging>
