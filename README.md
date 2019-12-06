@@ -2,7 +2,7 @@
 
 The joint message process for both sides of the process
 
-Latest release: **0.10.6-1** (2019-11-08)
+Latest release: **0.10.6-2** (2019-12-06)
 
 # How it works
 
@@ -32,6 +32,8 @@ Handle the way on DP side from AS4 to DC (4/4)
 
 # News and noteworthy
 
+* v0.10.6-2 - 2019-12-06
+    * Updated base libraries for updated truststore, updated Schematron and higher SMP client configurability
 * v0.10.6-1 - 2019-11-08
     * Fixed an Exception when using the new WAR deployment
 * v0.10.6 - 2019-10-17
