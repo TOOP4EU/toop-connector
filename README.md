@@ -32,6 +32,8 @@ Handle the way on DP side from AS4 to DC (4/4)
 
 # News and noteworthy
 
+* v0.10.7 - work in progress
+    * Updated to phase4 0.9.6
 * v0.10.6-2 - 2019-12-06
     * Updated base libraries for updated truststore, updated Schematron and higher SMP client configurability
 * v0.10.6-1 - 2019-11-08
