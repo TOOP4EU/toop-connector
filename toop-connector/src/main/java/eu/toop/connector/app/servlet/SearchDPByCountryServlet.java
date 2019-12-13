@@ -52,7 +52,7 @@ public class SearchDPByCountryServlet extends AbstractXServlet
    */
   static final class MainHandler implements IXServletSimpleHandler
   {
-    static final Logger LOGGER = LoggerFactory.getLogger (MainHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger (MainHandler.class);
 
     public void handleRequest (@Nonnull final IRequestWebScopeWithoutResponse aRequestScope,
                                @Nonnull final UnifiedResponse aUnifiedResponse) throws Exception

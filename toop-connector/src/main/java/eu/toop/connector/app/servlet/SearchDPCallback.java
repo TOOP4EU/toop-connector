@@ -18,6 +18,9 @@ package eu.toop.connector.app.servlet;
 import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.helger.commons.mime.CMimeType;
 import com.helger.commons.mime.MimeType;
 import com.helger.commons.string.StringHelper;
@@ -32,6 +35,7 @@ import eu.toop.connector.app.searchdp.ISearchDPCallback;
 
 final class SearchDPCallback implements ISearchDPCallback
 {
+  private static final Logger LOGGER = LoggerFactory.getLogger (SearchDPCallback.class);
   private final UnifiedResponse m_aUnifiedResponse;
 
   SearchDPCallback (@Nonnull final UnifiedResponse aUnifiedResponse)
@@ -57,10 +61,8 @@ final class SearchDPCallback implements ISearchDPCallback
     aXWS.setNamespaceContext (aNSCtx);
     final String sResponse = MicroWriter.getNodeAsString (aDoc, aXWS);
 
-    if (SearchDPByCountryServlet.MainHandler.LOGGER.isInfoEnabled ())
-      SearchDPByCountryServlet.MainHandler.LOGGER.info ("Returning " +
-                                                        sResponse.length () +
-                                                        " characters of successul XML response back");
+    if (LOGGER.isInfoEnabled ())
+      LOGGER.info ("Returning " + sResponse.length () + " characters of successul XML response back");
 
     // Put XML on response
     m_aUnifiedResponse.disableCaching ();
