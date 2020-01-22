@@ -53,7 +53,6 @@ import com.helger.phase4.mgr.MetaAS4Manager;
 import com.helger.phase4.model.pmode.IPModeManager;
 import com.helger.phase4.model.pmode.PMode;
 import com.helger.phase4.model.pmode.PModePayloadService;
-import com.helger.phase4.model.pmode.resolve.DefaultPModeResolver;
 import com.helger.phase4.servlet.AS4ServerInitializer;
 import com.helger.phase4.soap.ESOAPVersion;
 import com.helger.phase4.util.AS4ResourceHelper;
@@ -125,8 +124,7 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
     }
 
     // Register server once
-    AS4ServerInitializer.initAS4Server (DefaultPModeResolver.DEFAULT_PMODE_RESOLVER,
-                                        AS4CryptoFactory.getDefaultInstance ());
+    AS4ServerInitializer.initAS4Server ();
 
     final IPModeManager aPModeMgr = MetaAS4Manager.getPModeMgr ();
     {

@@ -20,6 +20,8 @@ import javax.servlet.annotation.WebServlet;
 import com.helger.commons.http.EHttpMethod;
 import com.helger.phase4.attachment.IIncomingAttachmentFactory;
 import com.helger.phase4.crypto.AS4CryptoFactory;
+import com.helger.phase4.model.pmode.resolve.DefaultPModeResolver;
+import com.helger.phase4.model.pmode.resolve.IPModeResolver;
 import com.helger.phase4.servlet.AS4XServletHandler;
 import com.helger.xservlet.AbstractXServlet;
 
@@ -40,8 +42,9 @@ public class AS4ReceiveServlet extends AbstractXServlet
     // The servlet handler takes all SPI implementations of
     // IAS4ServletMessageProcessorSPI and invokes them.
     // -> see AS4MessageProcessorSPI
-    final AS4CryptoFactory aCF = AS4CryptoFactory.DEFAULT_INSTANCE;
+    final AS4CryptoFactory aCF = AS4CryptoFactory.getDefaultInstance ();
+    final IPModeResolver aPMR = DefaultPModeResolver.DEFAULT_PMODE_RESOLVER;
     final IIncomingAttachmentFactory aIAF = IIncomingAttachmentFactory.DEFAULT_INSTANCE;
-    handlerRegistry ().registerHandler (EHttpMethod.POST, new AS4XServletHandler (aCF, aIAF));
+    handlerRegistry ().registerHandler (EHttpMethod.POST, new AS4XServletHandler (aCF, aPMR, aIAF));
   }
 }

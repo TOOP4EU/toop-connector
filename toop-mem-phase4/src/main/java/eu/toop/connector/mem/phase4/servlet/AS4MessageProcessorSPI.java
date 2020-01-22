@@ -150,7 +150,7 @@ public class AS4MessageProcessorSPI implements IAS4ServletMessageProcessorSPI
       {
         final String sErrorMsg = "Error decompressing a compressed attachment";
         aProcessingErrors.add (EEbmsError.EBMS_DECOMPRESSION_FAILURE.getAsEbms3Error (aState.getLocale (),
-                                                                                      aState.getRefToMessageID (),
+                                                                                      aState.getMessageID (),
                                                                                       sErrorMsg));
         ToopKafkaClient.send (EErrorLevel.ERROR, () -> "Error handling incoming AS4 message: " + sErrorMsg);
       }
