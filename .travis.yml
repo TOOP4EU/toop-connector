@@ -1,6 +1,7 @@
 dist: xenial
 sudo: required
 language: java
+
 env:
   global:
   - SONATYPE_USERNAME=ph@phloc.com
@@ -11,6 +12,7 @@ env:
       iDFdPKTsMVS9Rx5AzdfLy7/z1sZEayGFmXqlGwKOwyRk7mkIGubfxM=
   - DOCKER_USERNAME=toop4eu
   - secure: WjQKn7FgP73OkGaUytq2KyaCmlPetlQMVGcLYx+VQtXbWR1YJXeAtPmWKZ2Tu13GSksyyfZo++s1suM+RMz/MrjDU0Wf1WFYFQYoNUKdJPBPLr+iMrPOWVvrPvpZyxuGNQ6OGUVd6mfD7PznRgVxpQm/WgTTYB0aZqQSrsLUux7ow3v1Tbo1nx8Rb+FzKKyDZpjDfqT+zEnlgjkNuG1DfnFSpzbBT23eRcTUbiFv8/tLHdv6BDe3DNLT5Q5+ExaUZ7AkX2GsZZYCENem2ZRUDK2pdsYhKdW2X1nBAdy5Tb8n1ASphIPldS0Q2EGFu05dO8lxgTzKn7V46oG1B1SrYdmn6pf/GxFyu4U9PHVAEh7iAn6lsJ44bl2net3/vKAqO4bgQXnfNxKxgGlxXxtel9Kivu/fWs0ezEp8u8CdIPSToJlE4s0ovSHeYovLZJ9yeWtWKWlJh/gGfcNP0SUe6mL2azgFxp0kktWj++P74DTIdH02wCgt7HE6mJg0WIGnTqR2C1UY8J8l63vNy2wNRPFqbwoQbz7Pch5vme2WXDr8kKXESjYoLE+p0TWO7j6rXYdoH960AC0HRdZZQz2XH9iMyZ3Fii0dgW6Sb4r2ogpirNgyecWmf9jf9UXWmj3Ez9pbTffn2yghjJm9lOyUYA/s/4NCWXaqVUxBs/9G2uc=
+
 addons:
   sonarcloud:
     organization: toop4eu
@@ -20,14 +22,18 @@ addons:
         EmXu5Mg39p2fYQvUM0EoPAWer02ZaMUpQ6CaVYd2ecGqWo08l3gKG9LlhEGjBCJidIP+rd2b1Q1qJ/8ATKn3gI8wdBOY75N4/q1QNhh7b+IoVbTCLbZbTbHarOOoq7ZfkwYpJIJFIMFjH6QRPnUcwMgEVsTJH/yH
         TjcAuXimpxV5y/3BTA3HgrgqGPAVbFbSkhzEudgUCf9MBO1ZQn02wQdDG+Rtuklj6o+uvzaxyDgqZv7eb6eBfFyHtjWpdkTJ+mkS3HWQ6x3ZQui+a3WMeoHPfH3bXGZ+bSwboSBmUTm5VBBgsiqFUhsyiv6vu66j
         6SOSX+IUO59jgngs2AzCBRWdlqVPSk1vVH/qBe8Fxv7qkaABH0Kztc=
+
 install:
 - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V -U
+
 cache:
   directories:
   - "$HOME/.m2"
+
 branches:
   only:
   - master
+
 jobs:
   include:
   - stage: test
@@ -37,9 +43,9 @@ jobs:
     after_success:
     - mvn deploy --settings travis-settings.xml -DskipTests=true -B -P travis-deploy
     - docker pull toop/tomcat-jdk-image:1
-    - docker build --build-arg TOOP_CONNECTOR_VERSION=0.10.5-SNAPSHOT -t toop/toop-connector-webapp:0.10.5-SNAPSHOT .
+    - docker build --build-arg TOOP_CONNECTOR_VERSION=0.10.7-SNAPSHOT -t toop/toop-connector-webapp:0.10.7-SNAPSHOT .
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-    - docker push toop/toop-connector-webapp:0.10.5-SNAPSHOT
+    - docker push toop/toop-connector-webapp:0.10.7-SNAPSHOT
     - docker logout
     - bash <(curl -s https://codecov.io/bash)
   - stage: test
