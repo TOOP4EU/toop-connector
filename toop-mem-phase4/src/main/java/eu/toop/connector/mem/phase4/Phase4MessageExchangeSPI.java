@@ -44,9 +44,9 @@ import com.helger.phase4.attachment.WSS4JAttachment;
 import com.helger.phase4.client.AS4ClientSentMessage;
 import com.helger.phase4.client.AS4ClientUserMessage;
 import com.helger.phase4.client.IAS4ClientBuildMessageCallback;
-import com.helger.phase4.crypto.AS4CryptoFactory;
 import com.helger.phase4.crypto.ECryptoAlgorithmSign;
 import com.helger.phase4.crypto.ECryptoAlgorithmSignDigest;
+import com.helger.phase4.crypto.IAS4CryptoFactory;
 import com.helger.phase4.http.AS4HttpDebug;
 import com.helger.phase4.messaging.domain.MessageHelperMethods;
 import com.helger.phase4.mgr.MetaAS4Manager;
@@ -81,20 +81,12 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
   public static final String ID = "mem-phase4";
   private static final Logger LOGGER = LoggerFactory.getLogger (Phase4MessageExchangeSPI.class);
 
-  static
-  {
-    // Sanity check
-    final KeyStore aOurKS = AS4CryptoFactory.getDefaultInstance ().getKeyStore ();
-    if (aOurKS == null)
-      throw new InitializationException ("Failed to load configured AS4 keystore");
-
-    final PrivateKeyEntry aOurKey = AS4CryptoFactory.getDefaultInstance ().getPrivateKeyEntry ();
-    if (aOurKey == null)
-      throw new InitializationException ("Failed to load configured AS4 key");
-  }
+  private final IAS4CryptoFactory m_aCF;
 
   public Phase4MessageExchangeSPI ()
-  {}
+  {
+    m_aCF = Phase4Config.getCryptoFactory ();
+  }
 
   @Nonnull
   @Nonempty
@@ -123,6 +115,17 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
       WebFileIO.initPaths (aDataPath, sServletContextPath, false);
     }
 
+    // Sanity check
+    {
+      final KeyStore aOurKS = m_aCF.getKeyStore ();
+      if (aOurKS == null)
+        throw new InitializationException ("Failed to load configured phase4 keystore (crypto.properties)");
+
+      final PrivateKeyEntry aOurKey = m_aCF.getPrivateKeyEntry ();
+      if (aOurKey == null)
+        throw new InitializationException ("Failed to load configured phase4 key (crypto.properties)");
+    }
+
     // Register server once
     AS4ServerInitializer.initAS4Server ();
 
@@ -146,7 +149,7 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
       AS4HttpDebug.setEnabled (true);
   }
 
-  private void _sendOutgoing (@Nonnull final AS4CryptoFactory aCF,
+  private void _sendOutgoing (@Nonnull final IAS4CryptoFactory aCF,
                               @Nonnull final IMERoutingInformation aRoutingInfo,
                               @Nonnull final MEMessage aMessage) throws MEException
   {
@@ -250,7 +253,7 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
   {
     LOGGER.info ("[phase4] sendDCOutgoing");
     // No difference
-    _sendOutgoing (AS4CryptoFactory.getDefaultInstance (), aRoutingInfo, aMessage);
+    _sendOutgoing (m_aCF, aRoutingInfo, aMessage);
   }
 
   public void sendDPOutgoing (@Nonnull final IMERoutingInformation aRoutingInfo,
@@ -258,7 +261,7 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
   {
     LOGGER.info ("[phase4] sendDPOutgoing");
     // No difference
-    _sendOutgoing (AS4CryptoFactory.getDefaultInstance (), aRoutingInfo, aMessage);
+    _sendOutgoing (m_aCF, aRoutingInfo, aMessage);
   }
 
   public void shutdown (@Nonnull final ServletContext aServletContext)
