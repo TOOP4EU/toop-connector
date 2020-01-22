@@ -171,7 +171,7 @@ public class AS4MessageProcessorSPI implements IAS4ServletMessageProcessorSPI
   @Nonnull
   public AS4SignalMessageProcessorResult processAS4SignalMessage (@Nonnull final HttpHeaderMap aHttpHeaders,
                                                                   @Nonnull final Ebms3SignalMessage aSignalMessage,
-                                                                  @Nonnull final IPMode aPmode,
+                                                                  @Nullable final IPMode aPmode,
                                                                   @Nonnull final IAS4MessageState aState,
                                                                   @Nonnull final ICommonsList <Ebms3Error> aProcessingErrors)
   {

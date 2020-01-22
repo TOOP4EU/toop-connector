@@ -360,7 +360,8 @@ public final class TCConfig
    */
   public static void setMPToopInterfaceDPOverrideUrl (@Nullable final String sMPToopInterfaceDPOverrideUrl)
   {
-    LOGGER.warn ("Overriding the MP Toop Interface DP URL with '" + sMPToopInterfaceDPOverrideUrl + "'");
+    if (LOGGER.isWarnEnabled ())
+      LOGGER.warn ("Overriding the MP Toop Interface DP URL with '" + sMPToopInterfaceDPOverrideUrl + "'");
     s_aRWLock.writeLocked ( () -> s_sMPToopInterfaceDPOverrideUrl = sMPToopInterfaceDPOverrideUrl);
   }
 
@@ -400,7 +401,8 @@ public final class TCConfig
    */
   public static void setMPToopInterfaceDCOverrideUrl (@Nullable final String sMPToopInterfaceDCOverrideUrl)
   {
-    LOGGER.warn ("Overriding the MP Toop Interface DC URL with '" + sMPToopInterfaceDCOverrideUrl + "'");
+    if (LOGGER.isWarnEnabled ())
+      LOGGER.warn ("Overriding the MP Toop Interface DC URL with '" + sMPToopInterfaceDCOverrideUrl + "'");
     s_aRWLock.writeLocked ( () -> s_sMPToopInterfaceDCOverrideUrl = sMPToopInterfaceDCOverrideUrl);
   }
 
