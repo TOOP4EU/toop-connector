@@ -284,7 +284,8 @@ final class MessageProcessorDPOutgoingPerformer implements IConcurrentPerformer 
                                      EToopErrorCategory.DYNAMIC_DISCOVERY,
                                      EToopErrorCode.DD_004,
                                      "Found no matching DC endpoint - not transmitting response from DP '" +
-                                                            aDPParticipantID.getURIEncoded () +
+                                                            (aDPParticipantID == null ? "null"
+                                                                                      : aDPParticipantID.getURIEncoded ()) +
                                                             "' to DC '" +
                                                             aDCParticipantID.getURIEncoded () +
                                                             "'!",

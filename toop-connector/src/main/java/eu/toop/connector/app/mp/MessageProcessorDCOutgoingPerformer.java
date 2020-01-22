@@ -457,18 +457,18 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
 
           if (aErrors.isEmpty ())
           {
-            final int nEnpointCount = aEndpoints.size ();
+            final int nEndpointCount = aEndpoints == null ? 0 : aEndpoints.size ();
             ToopKafkaClient.send (EErrorLevel.INFO,
                                   () -> sLogPrefix +
                                         "R2D2 found " +
-                                        nEnpointCount +
+                                        nEndpointCount +
                                         " endpoints for " +
                                         (bIsExplicitParticipant ? "single participant" : "multi participant") +
                                         " lookup");
             if (LOGGER.isDebugEnabled ())
               LOGGER.debug (sLogPrefix + "Endpoint details: " + aEndpoints);
 
-            if (aEndpoints.isEmpty ())
+            if (nEndpointCount == 0)
             {
               aErrors.add (_createError (sLogPrefix,
                                          EToopErrorCategory.DYNAMIC_DISCOVERY,
