@@ -34,6 +34,7 @@ import com.helger.commons.string.StringHelper;
 import com.helger.commons.string.ToStringGenerator;
 import com.helger.peppol.bdxrclient.BDXRClient;
 import com.helger.peppol.bdxrclient.BDXRClientReadOnly;
+import com.helger.peppol.bdxrclient.IBDXRServiceMetadataProvider;
 import com.helger.peppol.smpclient.exception.SMPClientException;
 import com.helger.peppol.url.PeppolDNSResolutionException;
 import com.helger.peppolid.IDocumentTypeIdentifier;
@@ -98,7 +99,7 @@ public class R2D2EndpointProviderBDXRSMP1 implements IR2D2EndpointProvider
     final ICommonsList <IR2D2Endpoint> ret = new CommonsArrayList <> ();
     try
     {
-      BDXRClient aSMPClient;
+      final IBDXRServiceMetadataProvider aSMPClient;
       if (TCConfig.isR2D2UseDNS ())
       {
         // Use dynamic lookup via DNS - can throw exception
@@ -111,8 +112,8 @@ public class R2D2EndpointProviderBDXRSMP1 implements IR2D2EndpointProvider
       }
 
       // Query SMP
-      final SignedServiceMetadataType aSG = aSMPClient.getServiceRegistration (aRecipientID, aDocumentTypeID);
-      final ServiceInformationType aSI = aSG.getServiceMetadata ().getServiceInformation ();
+      final SignedServiceMetadataType aSG = aSMPClient.getServiceMetadataOrNull (aRecipientID, aDocumentTypeID);
+      final ServiceInformationType aSI = aSG == null ? null : aSG.getServiceMetadata ().getServiceInformation ();
       if (aSI != null)
       {
         // Find the first process that matches (should be only one!)
