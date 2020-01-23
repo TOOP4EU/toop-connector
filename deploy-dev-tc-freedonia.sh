@@ -18,7 +18,7 @@
 
 DATE=`date +%Y%m%d`
 BASEDIR=/opt/tomcat/webapps
-FILENAME=toop-connector-webapp-0.10.6-SNAPSHOT.war
+FILENAME=toop-connector-webapp-0.10.8-SNAPSHOT.war
 
 if [ -f ~/$FILENAME ]
   then
