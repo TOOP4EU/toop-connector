@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2018-2020 toop.eu
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<root>
+  <value-list srcns="http://toop.sk/slovakia-business-register" dstns="http://toop.eu/registered-organization">
+    <item srcval="DátumVzniku" dstval="foundationDate" />
+    <item srcval="EmailováAdresa" dstval="EmailAddress" />
+    <item srcval="FaxovéČíslo" dstval="FaxNumber" />
+    <item srcval="Identifikátor" dstval="RegistrationNumber" />
+    <item srcval="IČO" dstval="CompanyCode" />
+    <item srcval="Mesto" dstval="locality" />
+    <item srcval="Názov" dstval="companyName" />
+    <item srcval="PSČ" dstval="postalCode" />
+    <item srcval="PrávnaForma" dstval="companyType" />
+    <item srcval="PrávnyStav" dstval="legalStatus" />
+    <item srcval="SKNACE" dstval="naceCode" />
+    <item srcval="TelefónneČíslo" dstval="TelephoneNumber" />
+    <item srcval="UlicaČíslo" dstval="streetAddress" />
+    <item srcval="Štát" dstval="countryName" />
+  </value-list>
+  <value-list srcns="http://toop.es/sweden-business-register" dstns="http://toop.eu/registered-organization">
+    <item srcval="FöretagetsRegistreringsdatum" dstval="registrationDate" />
+    <item srcval="Företagsform" dstval="companyType" />
+    <item srcval="Företagsnamn" dstval="companyName" />
+    <item srcval="Organisationsnummer" dstval="CompanyCode" />
+    <item srcval="Postadress" dstval="streetAddress" />
+    <item srcval="Status" dstval="legalStatus" />
+  </value-list>
+  <value-list srcns="http://toop.it/registroimprese" dstns="http://toop.eu/registered-organization">
+    <item srcval="AutoritaDiRegistrazione" dstval="RegistrationAuthority" />
+    <item srcval="CAP" dstval="postalCode" />
+    <item srcval="CodiceFiscale" dstval="CompanyCode" />
+    <item srcval="CodiceImpresa" dstval="RegistrationNumber" />
+    <item srcval="CodiceNACE" dstval="naceCode" />
+    <item srcval="Cognome" dstval="familyName" />
+    <item srcval="Comune" dstval="locality" />
+    <item srcval="DataDiCostituzione" dstval="foundationDate" />
+    <item srcval="DataDiIscrizione" dstval="registrationDate" />
+    <item srcval="DataDiNascita" dstval="birthDate" />
+    <item srcval="Denominazione" dstval="companyName" />
+    <item srcval="DescrizioneAttivita" dstval="activityDescription" />
+    <item srcval="Email" dstval="EmailAddress" />
+    <item srcval="Fax" dstval="FaxNumber" />
+    <item srcval="FormaGiuridica" dstval="companyType" />
+    <item srcval="ITSSNumber" dstval="SSNumber" />
+    <item srcval="Indirizzo" dstval="streetAddress" />
+    <item srcval="Nome" dstval="givenName" />
+    <item srcval="PartitaIVA" dstval="VATNumber" />
+    <item srcval="Provincia" dstval="region" />
+    <item srcval="StatoAttivita" dstval="legalStatus" />
+    <item srcval="Telefono" dstval="TelephoneNumber" />
+  </value-list>
+  <value-list srcns="http://toop.elo/elonia-business-register" dstns="http://toop.eu/registered-organization">
+    <item srcval="EloniaActivityDescription" dstval="activityDescription" />
+    <item srcval="EloniaBirthDate" dstval="birthDate" />
+    <item srcval="EloniaCapitalType" dstval="capitalType" />
+    <item srcval="EloniaCompanyCode" dstval="CompanyCode" />
+    <item srcval="EloniaCompanyName" dstval="companyName" />
+    <item srcval="EloniaCompanyType" dstval="companyType" />
+    <item srcval="EloniaCountryName" dstval="countryName" />
+    <item srcval="EloniaEmailAddress" dstval="EmailAddress" />
+    <item srcval="EloniaFamilyName" dstval="familyName" />
+    <item srcval="EloniaFaxNumber" dstval="FaxNumber" />
+    <item srcval="EloniaFoundationDate" dstval="foundationDate" />
+    <item srcval="EloniaGivenName" dstval="givenName" />
+    <item srcval="EloniaHasLegalRepresentative" dstval="hasLegalRepresentative" />
+    <item srcval="EloniaLegalStatus" dstval="legalStatus" />
+    <item srcval="EloniaLegalStatusEffectiveDate" dstval="legalStatusEffectiveDate" />
+    <item srcval="EloniaLocality" dstval="locality" />
+    <item srcval="EloniaNaceCode" dstval="naceCode" />
+    <item srcval="EloniaPerson" dstval="Person" />
+    <item srcval="EloniaPostalCode" dstval="postalCode" />
+    <item srcval="EloniaRegion" dstval="region" />
+    <item srcval="EloniaRegisteredOrganization" dstval="RegisteredOrganization" />
+    <item srcval="EloniaRegistrationAuthority" dstval="RegistrationAuthority" />
+    <item srcval="EloniaRegistrationDate" dstval="registrationDate" />
+    <item srcval="EloniaRegistrationNumber" dstval="RegistrationNumber" />
+    <item srcval="EloniaSSNumber" dstval="SSNumber" />
+    <item srcval="EloniaStreetAddress" dstval="streetAddress" />
+    <item srcval="EloniaTelephoneNumber" dstval="TelephoneNumber" />
+    <item srcval="EloniaVATNumber" dstval="VATNumber" />
+  </value-list>
+  <value-list srcns="http://toop.fre/freedonia-business-register" dstns="http://toop.eu/registered-organization">
+    <item srcval="FreedoniaActivityDescription" dstval="activityDescription" />
+    <item srcval="FreedoniaBirthDate" dstval="birthDate" />
+    <item srcval="FreedoniaCapitalType" dstval="capitalType" />
+    <item srcval="FreedoniaCompanyCode" dstval="CompanyCode" />
+    <item srcval="FreedoniaCompanyName" dstval="companyName" />
+    <item srcval="FreedoniaCompanyType" dstval="companyType" />
+    <item srcval="FreedoniaCountryName" dstval="countryName" />
+    <item srcval="FreedoniaEmailAddress" dstval="EmailAddress" />
+    <item srcval="FreedoniaFamilyName" dstval="familyName" />
+    <item srcval="FreedoniaFaxNumber" dstval="FaxNumber" />
+    <item srcval="FreedoniaFoundationDate" dstval="foundationDate" />
+    <item srcval="FreedoniaGivenName" dstval="givenName" />
+    <item srcval="FreedoniaHasLegalRepresentative" dstval="hasLegalRepresentative" />
+    <item srcval="FreedoniaLegalStatus" dstval="legalStatus" />
+    <item srcval="FreedoniaLegalStatusEffectiveDate" dstval="legalStatusEffectiveDate" />
+    <item srcval="FreedoniaLocality" dstval="locality" />
+    <item srcval="FreedoniaNaceCode" dstval="naceCode" />
+    <item srcval="FreedoniaPerson" dstval="Person" />
+    <item srcval="FreedoniaPostalCode" dstval="postalCode" />
+    <item srcval="FreedoniaRegion" dstval="region" />
+    <item srcval="FreedoniaRegisteredOrganization" dstval="RegisteredOrganization" />
+    <item srcval="FreedoniaRegistrationAuthority" dstval="RegistrationAuthority" />
+    <item srcval="FreedoniaRegistrationDate" dstval="registrationDate" />
+    <item srcval="FreedoniaRegistrationNumber" dstval="RegistrationNumber" />
+    <item srcval="FreedoniaSSNumber" dstval="SSNumber" />
+    <item srcval="FreedoniaStreetAddress" dstval="streetAddress" />
+    <item srcval="FreedoniaTelephoneNumber" dstval="TelephoneNumber" />
+    <item srcval="FreedoniaVATNumber" dstval="VATNumber" />
+  </value-list>
+</root>

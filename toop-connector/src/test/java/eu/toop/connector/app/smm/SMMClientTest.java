@@ -166,7 +166,7 @@ public final class SMMClientTest
     // Get all namespaces
     final ICommonsOrderedSet <String> aNSs = SMMConceptProviderGRLCRemote.remoteQueryAllNamespaces (CMockSMM.LOG_PREFIX);
     final ISMMConceptProvider aCP = new SMMConceptProviderGRLCRemote ();
-    final ICommonsSortedSet <String> aToopConcepts = new CommonsTreeSet <> ();
+    final ICommonsSortedSet <String> aToopConcepts = new CommonsTreeSet <> ( (x, y) -> x.compareToIgnoreCase (y));
 
     // For all namespaces
     for (final String sSrc : aNSs)

@@ -182,6 +182,7 @@ public final class TCConfig
     return getConfigFile ().getAsString ("toop.tracker.topic", DEFAULT_TOOP_TRACKER_TOPIC);
   }
 
+  // toop.smm.grlc.url was removed in 0.10.8
   /**
    * @return The SMM query URL to GRLC. Should end with a slash. May be
    *         <code>null</code> - no default.
