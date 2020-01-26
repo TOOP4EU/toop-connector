@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mappings>
+  <toop ns="http://toop.eu/registered-organization">
+    <external ns="http://toop.sk/slovakia-business-register">
+      <item toop="CompanyCode" external="IČO" />
+      <item toop="CompanyName" external="Názov" />
+      <item toop="CompanyType" external="PrávnaForma" />
+      <item toop="CountryName" external="Štát" />
+      <item toop="EmailAddress" external="EmailováAdresa" />
+      <item toop="FaxNumber" external="FaxovéČíslo" />
+      <item toop="FoundationDate" external="DátumVzniku" />
+      <item toop="LegalStatus" external="PrávnyStav" />
+      <item toop="Locality" external="Mesto" />
+      <item toop="NaceCode" external="SKNACE" />
+      <item toop="PostalCode" external="PSČ" />
+      <item toop="RegistrationNumber" external="Identifikátor" />
+      <item toop="StreetAddress" external="UlicaČíslo" />
+      <item toop="TelephoneNumber" external="TelefónneČíslo" />
+    </external>
+    <external ns="http://toop.es/sweden-business-register">
+      <item toop="CompanyCode" external="Organisationsnummer" />
+      <item toop="CompanyName" external="Företagsnamn" />
+      <item toop="CompanyType" external="Företagsform" />
+      <item toop="LegalStatus" external="Status" />
+      <item toop="RegistrationDate" external="FöretagetsRegistreringsdatum" />
+      <item toop="StreetAddress" external="Postadress" />
+    </external>
+    <external ns="http://toop.it/registroimprese">
+      <item toop="ActivityDescription" external="DescrizioneAttivita" />
+      <item toop="CompanyCode" external="CodiceFiscale" />
+      <item toop="CompanyName" external="Denominazione" />
+      <item toop="CompanyType" external="FormaGiuridica" />
+      <item toop="EmailAddress" external="Email" />
+      <item toop="FaxNumber" external="Fax" />
+      <item toop="FoundationDate" external="DataDiCostituzione" />
+      <item toop="LegalRepresentativeBirthDate" external="DataDiNascita" />
+      <item toop="LegalRepresentativeFamilyName" external="Cognome" />
+      <item toop="LegalRepresentativeGivenName" external="Nome" />
+      <item toop="LegalStatus" external="StatoAttivita" />
+      <item toop="Locality" external="Comune" />
+      <item toop="NaceCode" external="CodiceNACE" />
+      <item toop="PostalCode" external="CAP" />
+      <item toop="Region" external="Provincia" />
+      <item toop="RegistrationAuthority" external="AutoritaDiRegistrazione" />
+      <item toop="RegistrationDate" external="DataDiIscrizione" />
+      <item toop="RegistrationNumber" external="CodiceImpresa" />
+      <item toop="SSNumber" external="ITSSNumber" />
+      <item toop="StreetAddress" external="Indirizzo" />
+      <item toop="TelephoneNumber" external="Telefono" />
+      <item toop="VATNumber" external="PartitaIVA" />
+    </external>
+    <external ns="http://toop.elo/elonia-business-register">
+      <item toop="ActivityDescription" external="EloniaActivityDescription" />
+      <item toop="CapitalType" external="EloniaCapitalType" />
+      <item toop="CompanyCode" external="EloniaCompanyCode" />
+      <item toop="CompanyName" external="EloniaCompanyName" />
+      <item toop="CompanyType" external="EloniaCompanyType" />
+      <item toop="CountryName" external="EloniaCountryName" />
+      <item toop="EmailAddress" external="EloniaEmailAddress" />
+      <item toop="FaxNumber" external="EloniaFaxNumber" />
+      <item toop="FoundationDate" external="EloniaFoundationDate" />
+      <item toop="HasLegalRepresentative" external="EloniaHasLegalRepresentative" />
+      <item toop="LegalRepresentativeBirthDate" external="EloniaBirthDate" />
+      <item toop="LegalRepresentativeFamilyName" external="EloniaFamilyName" />
+      <item toop="LegalRepresentativeGivenName" external="EloniaGivenName" />
+      <item toop="LegalStatus" external="EloniaLegalStatus" />
+      <item toop="LegalStatusEffectiveDate" external="EloniaLegalStatusEffectiveDate" />
+      <item toop="Locality" external="EloniaLocality" />
+      <item toop="NaceCode" external="EloniaNaceCode" />
+      <item toop="Person" external="EloniaPerson" />
+      <item toop="PostalCode" external="EloniaPostalCode" />
+      <item toop="Region" external="EloniaRegion" />
+      <item toop="RegisteredOrganization" external="EloniaRegisteredOrganization" />
+      <item toop="RegistrationAuthority" external="EloniaRegistrationAuthority" />
+      <item toop="RegistrationDate" external="EloniaRegistrationDate" />
+      <item toop="RegistrationNumber" external="EloniaRegistrationNumber" />
+      <item toop="SSNumber" external="EloniaSSNumber" />
+      <item toop="StreetAddress" external="EloniaStreetAddress" />
+      <item toop="TelephoneNumber" external="EloniaTelephoneNumber" />
+      <item toop="VATNumber" external="EloniaVATNumber" />
+    </external>
+    <external ns="http://toop.fre/freedonia-business-register">
+      <item toop="ActivityDescription" external="FreedoniaActivityDescription" />
+      <item toop="CapitalType" external="FreedoniaCapitalType" />
+      <item toop="CompanyCode" external="FreedoniaCompanyCode" />
+      <item toop="CompanyName" external="FreedoniaCompanyName" />
+      <item toop="CompanyType" external="FreedoniaCompanyType" />
+      <item toop="CountryName" external="FreedoniaCountryName" />
+      <item toop="EmailAddress" external="FreedoniaEmailAddress" />
+      <item toop="FaxNumber" external="FreedoniaFaxNumber" />
+      <item toop="FoundationDate" external="FreedoniaFoundationDate" />
+      <item toop="HasLegalRepresentative" external="FreedoniaHasLegalRepresentative" />
+      <item toop="LegalRepresentativeBirthDate" external="FreedoniaBirthDate" />
+      <item toop="LegalRepresentativeFamilyName" external="FreedoniaFamilyName" />
+      <item toop="LegalRepresentativeGivenName" external="FreedoniaGivenName" />
+      <item toop="LegalStatus" external="FreedoniaLegalStatus" />
+      <item toop="LegalStatusEffectiveDate" external="FreedoniaLegalStatusEffectiveDate" />
+      <item toop="Locality" external="FreedoniaLocality" />
+      <item toop="NaceCode" external="FreedoniaNaceCode" />
+      <item toop="Person" external="FreedoniaPerson" />
+      <item toop="PostalCode" external="FreedoniaPostalCode" />
+      <item toop="Region" external="FreedoniaRegion" />
+      <item toop="RegisteredOrganization" external="FreedoniaRegisteredOrganization" />
+      <item toop="RegistrationAuthority" external="FreedoniaRegistrationAuthority" />
+      <item toop="RegistrationDate" external="FreedoniaRegistrationDate" />
+      <item toop="RegistrationNumber" external="FreedoniaRegistrationNumber" />
+      <item toop="SSNumber" external="FreedoniaSSNumber" />
+      <item toop="StreetAddress" external="FreedoniaStreetAddress" />
+      <item toop="TelephoneNumber" external="FreedoniaTelephoneNumber" />
+      <item toop="VATNumber" external="FreedoniaVATNumber" />
+    </external>
+  </toop>
+</mappings>

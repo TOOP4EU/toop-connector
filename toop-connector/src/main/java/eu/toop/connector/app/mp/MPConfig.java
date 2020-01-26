@@ -29,7 +29,7 @@ import eu.toop.connector.api.r2d2.IR2D2ParticipantIDProvider;
 import eu.toop.connector.api.smm.ISMMConceptProvider;
 import eu.toop.connector.app.r2d2.R2D2EndpointProviderBDXRSMP1;
 import eu.toop.connector.app.r2d2.R2D2ParticipantIDProviderTOOPDirectory;
-import eu.toop.connector.app.smm.SMMConceptProviderGRLCWithCache;
+import eu.toop.connector.app.smm.SMMConceptProviderFileBased;
 
 /**
  * Message Processor WebApp configuration
@@ -65,7 +65,7 @@ public final class MPConfig
   {
     s_aRWLock.writeLocked ( () -> {
       s_aSH = null;
-      s_aCP = new SMMConceptProviderGRLCWithCache ();
+      s_aCP = new SMMConceptProviderFileBased ();
       s_aPIDP = new R2D2ParticipantIDProviderTOOPDirectory ();
       s_aEPP = new R2D2EndpointProviderBDXRSMP1 ();
       s_aToDP = new ToDPViaToopInterfaceHttp ();

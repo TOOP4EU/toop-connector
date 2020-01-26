@@ -183,19 +183,6 @@ public final class TCConfig
   }
 
   // toop.smm.grlc.url was removed in 0.10.8
-  /**
-   * @return The SMM query URL to GRLC. Should end with a slash. May be
-   *         <code>null</code> - no default.
-   */
-  @Nullable
-  public static String getSMMGRLCURL ()
-  {
-    // E.g.
-    // http://localhost:8001/
-    // https://hamster.tno.nl/plasido-grlc/
-    // http://sms.acc.exchange.toop.eu/
-    return getConfigFile ().getAsString ("toop.smm.grlc.url");
-  }
 
   /**
    * @return The destination namespace URI to map to (for DP incoming step 2/4)
