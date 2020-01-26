@@ -19,8 +19,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.io.IOException;
-
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +51,7 @@ public final class SMMClientTest
   };
 
   @Test
-  public void testEmpty () throws IOException
+  public void testEmpty ()
   {
     for (final ISMMConceptProvider aCP : CP)
     {
@@ -67,7 +65,7 @@ public final class SMMClientTest
   }
 
   @Test
-  public void testOneMatch () throws IOException
+  public void testOneMatch ()
   {
     for (final ISMMConceptProvider aCP : CP)
     {
@@ -90,7 +88,7 @@ public final class SMMClientTest
   }
 
   @Test
-  public void testOneMatchOneNotFound () throws IOException
+  public void testOneMatchOneNotFound ()
   {
     for (final ISMMConceptProvider aCP : CP)
     {
@@ -115,7 +113,7 @@ public final class SMMClientTest
   }
 
   @Test
-  public void testNoMappingNeeded () throws IOException
+  public void testNoMappingNeeded ()
   {
     for (final ISMMConceptProvider aCP : CP)
     {

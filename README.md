@@ -2,7 +2,7 @@
 
 The joint message process for both sides of the process
 
-Latest release: **0.10.7** (2020-01-23)
+Latest release: **0.10.8** (2020-01-26)
 
 # How it works
 
@@ -32,6 +32,10 @@ Handle the way on DP side from AS4 to DC (4/4)
 
 # News and noteworthy
 
+* v0.10.8 - 2020-01-26
+    * Fixed a bug in the "to-dp" dumping (was always created 0 byte files)
+    * Updated to toop-commons 0.10.8 with new GBM concept names
+    * Changed the semantic mapping from remote GRLC to local file based
 * v0.10.7 - 2020-01-23
     * Updated to phase4 0.9.7
     * Updated base libraries to work around Schematron bug
