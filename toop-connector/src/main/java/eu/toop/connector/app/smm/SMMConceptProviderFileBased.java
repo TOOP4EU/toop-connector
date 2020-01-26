@@ -68,6 +68,8 @@ public class SMMConceptProviderFileBased implements ISMMConceptProvider
                                              @Nonnull final String sSourceNamespace,
                                              @Nonnull final String sDestNamespace)
   {
+    LOGGER.info (sLogPrefix + "getAllMappedValues (" + sSourceNamespace + ", " + sDestNamespace + ")");
+
     final MappedValueList ret = new MappedValueList ();
 
     final boolean bToopToExternal;
@@ -93,11 +95,10 @@ public class SMMConceptProviderFileBased implements ISMMConceptProvider
           if (bToopToExternal)
             ret.addMappedValue (sSourceNamespace, aEntry.getKey (), sDestNamespace, aEntry.getValue ());
           else
-            ret.addMappedValue (sDestNamespace, aEntry.getValue (), sSourceNamespace, aEntry.getKey ());
+            ret.addMappedValue (sSourceNamespace, aEntry.getValue (), sDestNamespace, aEntry.getKey ());
       }
     }
 
     return ret;
   }
-
 }
