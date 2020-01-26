@@ -1,6 +1,5 @@
 package eu.toop.connector.app.smm;
 
-import java.io.IOException;
 import java.util.Map;
 
 import javax.annotation.Nonnull;
@@ -67,7 +66,7 @@ public class SMMConceptProviderFileBased implements ISMMConceptProvider
   @Nonnull
   public MappedValueList getAllMappedValues (@Nonnull final String sLogPrefix,
                                              @Nonnull final String sSourceNamespace,
-                                             @Nonnull final String sDestNamespace) throws IOException
+                                             @Nonnull final String sDestNamespace)
   {
     final MappedValueList ret = new MappedValueList ();
 
