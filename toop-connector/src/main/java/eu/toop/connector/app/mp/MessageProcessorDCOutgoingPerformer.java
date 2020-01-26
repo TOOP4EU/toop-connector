@@ -39,6 +39,7 @@ import com.helger.commons.id.factory.GlobalIDFactory;
 import com.helger.commons.io.ByteArrayWrapper;
 import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream;
 import com.helger.commons.lang.StackTraceHelper;
+import com.helger.commons.mutable.MutableInt;
 import com.helger.commons.string.StringHelper;
 import com.helger.commons.text.MultilingualText;
 import com.helger.jaxb.validation.WrappedCollectingValidationEventHandler;
@@ -363,7 +364,10 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
             final IMappedValueList aFinalMappedValues = aMappedValues;
 
             // add all the mapped values in the request
+            final MutableInt aCounter = new MutableInt (0);
             _iterateNonTCConcepts (aRequest, c -> {
+              aCounter.inc ();
+
               // Now the source was mapped
               c.getSemanticMappingExecutionIndicator ().setValue (true);
 
@@ -380,7 +384,11 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
               }
             });
 
-            ToopKafkaClient.send (EErrorLevel.INFO, () -> sLogPrefix + "Finished mapping to shared concept");
+            ToopKafkaClient.send (EErrorLevel.INFO,
+                                  () -> sLogPrefix +
+                                        "Finished mapping to shared concept with " +
+                                        aCounter.intValue () +
+                                        " invocations");
           }
         }
 
@@ -498,7 +506,7 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
                                                                                TCConfig.getDebugToDPDumpPathIfEnabled (),
                                                                                "to-dp.asic"))
             {
-              ToopMessageBuilder140.createRequestMessageAsic (aRequest, aBAOS, MPConfig.getSignatureHelper ());
+              ToopMessageBuilder140.createRequestMessageAsic (aRequest, aDumpOS, MPConfig.getSignatureHelper ());
             }
             catch (final ToopErrorException ex)
             {
