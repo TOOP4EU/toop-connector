@@ -60,9 +60,9 @@
       <item toop="FaxNumber" external="EloniaFaxNumber" />
       <item toop="FoundationDate" external="EloniaFoundationDate" />
       <item toop="HasLegalRepresentative" external="EloniaHasLegalRepresentative" />
-      <item toop="LegalRepresentativeBirthDate" external="EloniaBirthDate" />
-      <item toop="LegalRepresentativeFamilyName" external="EloniaFamilyName" />
-      <item toop="LegalRepresentativeGivenName" external="EloniaGivenName" />
+      <item toop="LegalRepresentativeBirthDate" external="EloniaLegalRepresentativeBirthDate" />
+      <item toop="LegalRepresentativeFamilyName" external="EloniaLegalRepresentativeFamilyName" />
+      <item toop="LegalRepresentativeGivenName" external="EloniaLegalRepresentativeGivenName" />
       <item toop="LegalStatus" external="EloniaLegalStatus" />
       <item toop="LegalStatusEffectiveDate" external="EloniaLegalStatusEffectiveDate" />
       <item toop="Locality" external="EloniaLocality" />
@@ -90,9 +90,9 @@
       <item toop="FaxNumber" external="FreedoniaFaxNumber" />
       <item toop="FoundationDate" external="FreedoniaFoundationDate" />
       <item toop="HasLegalRepresentative" external="FreedoniaHasLegalRepresentative" />
-      <item toop="LegalRepresentativeBirthDate" external="FreedoniaBirthDate" />
-      <item toop="LegalRepresentativeFamilyName" external="FreedoniaFamilyName" />
-      <item toop="LegalRepresentativeGivenName" external="FreedoniaGivenName" />
+      <item toop="LegalRepresentativeBirthDate" external="FreedoniaLegalRepresentativeBirthDate" />
+      <item toop="LegalRepresentativeFamilyName" external="FreedoniaLegalRepresentativeFamilyName" />
+      <item toop="LegalRepresentativeGivenName" external="FreedoniaLegalRepresentativeGivenName" />
       <item toop="LegalStatus" external="FreedoniaLegalStatus" />
       <item toop="LegalStatusEffectiveDate" external="FreedoniaLegalStatusEffectiveDate" />
       <item toop="Locality" external="FreedoniaLocality" />
