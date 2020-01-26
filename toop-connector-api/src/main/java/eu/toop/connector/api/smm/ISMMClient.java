@@ -15,7 +15,6 @@
  */
 package eu.toop.connector.api.smm;
 
-import java.io.IOException;
 import java.io.Serializable;
 
 import javax.annotation.Nonnegative;
@@ -39,30 +38,30 @@ public interface ISMMClient extends Serializable
   /**
    * Add a new concept that requires mapping
    *
-   * @param sConceptNamespace
+   * @param sSrcConceptNamespace
    *        The concept namespace to be used. May neither be <code>null</code>
    *        nor empty.
-   * @param sConceptValue
+   * @param sSrcConceptValue
    *        The concept value to be used. May neither be <code>null</code> nor
    *        empty.
    * @return this for chaining
    */
   @Nonnull
-  ISMMClient addConceptToBeMapped (@Nonnull @Nonempty String sConceptNamespace,
-                                   @Nonnull @Nonempty String sConceptValue);
+  ISMMClient addConceptToBeMapped (@Nonnull @Nonempty String sSrcConceptNamespace,
+                                   @Nonnull @Nonempty String sSrcConceptValue);
 
   /**
    * Add a new concept that requires mapping
    *
-   * @param aConceptValue
+   * @param aSrcConceptValue
    *        The concept value to be mapped. May not be <code>null</code>.
    * @return this for chaining
    */
   @Nonnull
-  default ISMMClient addConceptToBeMapped (@Nonnull final ConceptValue aConceptValue)
+  default ISMMClient addConceptToBeMapped (@Nonnull final ConceptValue aSrcConceptValue)
   {
-    ValueEnforcer.notNull (aConceptValue, "ConceptValue");
-    return addConceptToBeMapped (aConceptValue.getNamespace (), aConceptValue.getValue ());
+    ValueEnforcer.notNull (aSrcConceptValue, "ConceptValue");
+    return addConceptToBeMapped (aSrcConceptValue.getNamespace (), aSrcConceptValue.getValue ());
   }
 
   /**
@@ -87,18 +86,12 @@ public interface ISMMClient extends Serializable
    * @param aUnmappableCallback
    *        Callback to be invoked if a non-mappable entry was found. May be
    *        <code>null</code>.
-   * @param aMultiMappingCallback
-   *        Callback to be invoked if 1:n mappings were found. May be
-   *        <code>null</code>.
    * @return A non-<code>null</code> but maybe empty list of mappings.
-   * @throws IOException
-   *         in case of HTTP IO error
    */
   @Nonnull
   @ReturnsMutableCopy
   IMappedValueList performMapping (@Nonnull String sLogPrefix,
                                    @Nonnull @Nonempty String sDestNamespace,
                                    @Nonnull ISMMConceptProvider aConceptProvider,
-                                   @Nullable ISMMUnmappableCallback aUnmappableCallback,
-                                   @Nullable ISMMMultiMappingCallback aMultiMappingCallback) throws IOException;
+                                   @Nullable ISMMUnmappableCallback aUnmappableCallback);
 }

@@ -31,7 +31,6 @@ import eu.toop.commons.usecase.SMMDocumentTypeMapping;
 import eu.toop.connector.api.smm.IMappedValueList;
 import eu.toop.connector.api.smm.ISMMClient;
 import eu.toop.connector.api.smm.ISMMConceptProvider;
-import eu.toop.connector.api.smm.ISMMMultiMappingCallback;
 import eu.toop.connector.api.smm.ISMMUnmappableCallback;
 import eu.toop.connector.api.smm.MappedValue;
 
@@ -52,13 +51,6 @@ public final class SMMClientTest
   private static final ISMMUnmappableCallback UCB = (sLogPrefix, aSourceNamespace, aSourceValue, aDestNamespace) -> {
     // Do nothing
   };
-  private static final ISMMMultiMappingCallback MMCB = (sLogPrefix,
-                                                        aSourceNamespace,
-                                                        aSourceValue,
-                                                        aDestNamespace,
-                                                        aMappings) -> {
-    // Do nothing
-  };
 
   @Test
   public void testEmpty () throws IOException
@@ -67,7 +59,7 @@ public final class SMMClientTest
     {
       LOGGER.info ("Starting testEmpty");
       final ISMMClient aClient = new SMMClient ();
-      final IMappedValueList ret = aClient.performMapping (CMockSMM.LOG_PREFIX, CMockSMM.NS_FREEDONIA, aCP, UCB, MMCB);
+      final IMappedValueList ret = aClient.performMapping (CMockSMM.LOG_PREFIX, CMockSMM.NS_FREEDONIA, aCP, UCB);
       assertNotNull (ret);
       assertTrue (ret.isEmpty ());
       assertEquals (0, ret.size ());
@@ -82,7 +74,7 @@ public final class SMMClientTest
       LOGGER.info ("Starting testOneMatch");
       final ISMMClient aClient = new SMMClient ();
       aClient.addConceptToBeMapped (CONCEPT_TOOP_1);
-      final IMappedValueList ret = aClient.performMapping (CMockSMM.LOG_PREFIX, CMockSMM.NS_FREEDONIA, aCP, UCB, MMCB);
+      final IMappedValueList ret = aClient.performMapping (CMockSMM.LOG_PREFIX, CMockSMM.NS_FREEDONIA, aCP, UCB);
       assertNotNull (ret);
       assertEquals (1, ret.size ());
 
@@ -107,7 +99,7 @@ public final class SMMClientTest
       aClient.addConceptToBeMapped (CONCEPT_TOOP_1);
       aClient.addConceptToBeMapped (SMMDocumentTypeMapping.SMM_DOMAIN_REGISTERED_ORGANIZATION, "NonExistingField");
       aClient.addConceptToBeMapped ("SourceNamespace", "NonExistingField");
-      final IMappedValueList ret = aClient.performMapping (CMockSMM.LOG_PREFIX, CMockSMM.NS_FREEDONIA, aCP, UCB, MMCB);
+      final IMappedValueList ret = aClient.performMapping (CMockSMM.LOG_PREFIX, CMockSMM.NS_FREEDONIA, aCP, UCB);
       assertNotNull (ret);
       assertEquals (1, ret.size ());
 
@@ -130,7 +122,7 @@ public final class SMMClientTest
       LOGGER.info ("Starting testNoMappingNeeded");
       final ISMMClient aClient = new SMMClient ();
       aClient.addConceptToBeMapped (CONCEPT_FR_1);
-      final IMappedValueList ret = aClient.performMapping (CMockSMM.LOG_PREFIX, CMockSMM.NS_FREEDONIA, aCP, UCB, MMCB);
+      final IMappedValueList ret = aClient.performMapping (CMockSMM.LOG_PREFIX, CMockSMM.NS_FREEDONIA, aCP, UCB);
       assertNotNull (ret);
       assertEquals (1, ret.size ());
 

@@ -82,7 +82,6 @@ import eu.toop.connector.api.r2d2.IR2D2Endpoint;
 import eu.toop.connector.api.r2d2.IR2D2ErrorHandler;
 import eu.toop.connector.api.smm.IMappedValueList;
 import eu.toop.connector.api.smm.ISMMClient;
-import eu.toop.connector.api.smm.ISMMMultiMappingCallback;
 import eu.toop.connector.api.smm.ISMMUnmappableCallback;
 import eu.toop.connector.api.smm.MappedValue;
 import eu.toop.connector.api.smm.MappedValueList;
@@ -140,15 +139,15 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
   private static void _iterateNonTCConcepts (@Nonnull final TDETOOPRequestType aRequest,
                                              @Nonnull final Consumer <TDEConceptRequestType> aConsumer)
   {
-    for (final TDEDataElementRequestType aDER1 : aRequest.getDataElementRequest ())
+    for (final TDEDataElementRequestType aDER : aRequest.getDataElementRequest ())
     {
-      final TDEConceptRequestType aConcept1 = aDER1.getConceptRequest ();
+      final TDEConceptRequestType aConcept = aDER.getConceptRequest ();
 
-      // Only handle TC type codes
-      if (!aConcept1.getSemanticMappingExecutionIndicator ().isValue () &&
-          !EConceptType.TC.getID ().equals (aConcept1.getConceptTypeCode ().getValue ()))
+      // Only handle non-TC type codes
+      if (!aConcept.getSemanticMappingExecutionIndicator ().isValue () &&
+          !EConceptType.TC.getID ().equals (aConcept.getConceptTypeCode ().getValue ()))
       {
-        aConsumer.accept (aConcept1);
+        aConsumer.accept (aConcept);
       }
     }
   }
@@ -311,21 +310,6 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
                                            sErrorMsg,
                                            null));
               };
-              final ISMMMultiMappingCallback aMultiMappingCallback = (sLogPrefix1,
-                                                                      sSourceNamespace,
-                                                                      sSourceValue,
-                                                                      sDestNamespace,
-                                                                      aMatching) -> ToopKafkaClient.send (EErrorLevel.WARN,
-                                                                                                          () -> sLogPrefix1 +
-                                                                                                                "Found " +
-                                                                                                                aMatching.size () +
-                                                                                                                " mappings for '" +
-                                                                                                                sSourceNamespace +
-                                                                                                                '#' +
-                                                                                                                sSourceValue +
-                                                                                                                "' to destination namespace '" +
-                                                                                                                sDestNamespace +
-                                                                                                                "'");
 
               ToopKafkaClient.send (EErrorLevel.INFO,
                                     () -> sLogPrefix +
@@ -338,14 +322,13 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
               aMappedValues = aSMMClient.performMapping (sLogPrefix,
                                                          sSMMDomain,
                                                          MPConfig.getSMMConceptProvider (),
-                                                         aUnmappableCallback,
-                                                         aMultiMappingCallback);
+                                                         aUnmappableCallback);
 
               ToopKafkaClient.send (EErrorLevel.INFO,
                                     sLogPrefix + "SMM client mapping found " + aMappedValues.size () + " mapping(s)");
             }
           }
-          catch (final IllegalArgumentException | IOException ex)
+          catch (final Exception ex)
           {
             // send back async error
             final String sErrorMsg = "Failed to invoke semantic mapping";
@@ -368,9 +351,7 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
             _iterateNonTCConcepts (aRequest, c -> {
               aCounter.inc ();
 
-              // Now the source was mapped
-              c.getSemanticMappingExecutionIndicator ().setValue (true);
-
+              boolean bFoundMapping = false;
               final ConceptValue aSrcCV = ConceptValue.create (c);
               for (final MappedValue aMV : aFinalMappedValues.getAllBySource (x -> x.equals (aSrcCV)))
               {
@@ -381,6 +362,22 @@ final class MessageProcessorDCOutgoingPerformer implements IConcurrentPerformer 
                                                                                         .getNamespace ()));
                 aToopConcept.setConceptName (ToopXSDHelper140.createText (aMV.getDestination ().getValue ()));
                 c.addConceptRequest (aToopConcept);
+                bFoundMapping = true;
+              }
+
+              if (bFoundMapping)
+              {
+                // Now the source was mapped
+                c.getSemanticMappingExecutionIndicator ().setValue (true);
+              }
+              else
+              {
+                ToopKafkaClient.send (EErrorLevel.WARN,
+                                      () -> sLogPrefix +
+                                            "Found no source mapping of " +
+                                            aSrcCV +
+                                            " in " +
+                                            aFinalMappedValues);
               }
             });
 

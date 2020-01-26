@@ -15,7 +15,6 @@
  */
 package eu.toop.connector.api.smm;
 
-import java.io.IOException;
 import java.io.Serializable;
 
 import javax.annotation.Nonnull;
@@ -41,11 +40,9 @@ public interface ISMMConceptProvider extends Serializable
    * @param sDestNamespace
    *        Target namespace to map to. May not be <code>null</code>.
    * @return The non-<code>null</code> but maybe empty list of mapped values.
-   * @throws IOException
-   *         In case fetching from server failed
    */
   @Nonnull
   MappedValueList getAllMappedValues (@Nonnull String sLogPrefix,
                                       @Nonnull String sSourceNamespace,
-                                      @Nonnull String sDestNamespace) throws IOException;
+                                      @Nonnull String sDestNamespace);
 }

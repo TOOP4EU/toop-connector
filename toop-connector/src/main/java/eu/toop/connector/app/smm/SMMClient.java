@@ -15,7 +15,6 @@
  */
 package eu.toop.connector.app.smm;
 
-import java.io.IOException;
 import java.util.Map;
 
 import javax.annotation.Nonnegative;
@@ -35,7 +34,6 @@ import eu.toop.commons.concept.ConceptValue;
 import eu.toop.connector.api.smm.IMappedValueList;
 import eu.toop.connector.api.smm.ISMMClient;
 import eu.toop.connector.api.smm.ISMMConceptProvider;
-import eu.toop.connector.api.smm.ISMMMultiMappingCallback;
 import eu.toop.connector.api.smm.ISMMUnmappableCallback;
 import eu.toop.connector.api.smm.MappedValue;
 import eu.toop.connector.api.smm.MappedValueList;
@@ -77,8 +75,7 @@ public class SMMClient implements ISMMClient
   public IMappedValueList performMapping (@Nonnull final String sLogPrefix,
                                           @Nonnull @Nonempty final String sDestNamespace,
                                           @Nonnull final ISMMConceptProvider aConceptProvider,
-                                          @Nullable final ISMMUnmappableCallback aUnmappableCallback,
-                                          @Nullable final ISMMMultiMappingCallback aMultiMappingCallback) throws IOException
+                                          @Nullable final ISMMUnmappableCallback aUnmappableCallback)
   {
 
     ValueEnforcer.notNull (sLogPrefix, "LogPrefix");
@@ -87,13 +84,13 @@ public class SMMClient implements ISMMClient
 
     final MappedValueList ret = new MappedValueList ();
     // for all source namespaces (maybe many)
-    for (final Map.Entry <String, ICommonsList <String>> aEntry : m_aSrcMap.entrySet ())
+    for (final Map.Entry <String, ICommonsList <String>> aSrcEntry : m_aSrcMap.entrySet ())
     {
-      final String sSourceNamespace = aEntry.getKey ();
+      final String sSourceNamespace = aSrcEntry.getKey ();
       if (sSourceNamespace.equals (sDestNamespace))
       {
         // No mapping needed - use unmapped values
-        for (final String sSourceValue : aEntry.getValue ())
+        for (final String sSourceValue : aSrcEntry.getValue ())
         {
           final ConceptValue aValue = new ConceptValue (sSourceNamespace, sSourceValue);
           ret.addMappedValue (new MappedValue (aValue, aValue));
@@ -102,13 +99,12 @@ public class SMMClient implements ISMMClient
       else
       {
         // Namespace are different - get the mapping list
-        // This eventually performs a remote call!
         final MappedValueList aValueList = aConceptProvider.getAllMappedValues (sLogPrefix,
                                                                                 sSourceNamespace,
                                                                                 sDestNamespace);
 
         // Map all source values
-        for (final String sSourceValue : aEntry.getValue ())
+        for (final String sSourceValue : aSrcEntry.getValue ())
         {
           // The source value may be mapped to 0, 1 or n elements
           final MappedValueList aMatching = aValueList.getAllBySource (x -> x.hasValue (sSourceValue));
@@ -122,14 +118,7 @@ public class SMMClient implements ISMMClient
           else
           {
             if (aMatching.size () > 1)
-            {
-              if (aMultiMappingCallback != null)
-                aMultiMappingCallback.onMultiMapping (sLogPrefix,
-                                                      sSourceNamespace,
-                                                      sSourceValue,
-                                                      sDestNamespace,
-                                                      aMatching);
-            }
+              throw new IllegalStateException ();
             ret.addAllMappedValues (aMatching);
           }
         }

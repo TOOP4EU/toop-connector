@@ -53,7 +53,6 @@ import eu.toop.commons.jaxb.ToopXSDHelper140;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.smm.IMappedValueList;
 import eu.toop.connector.api.smm.ISMMClient;
-import eu.toop.connector.api.smm.ISMMMultiMappingCallback;
 import eu.toop.connector.api.smm.ISMMUnmappableCallback;
 import eu.toop.connector.api.smm.MappedValue;
 import eu.toop.connector.app.smm.SMMClient;
@@ -191,27 +190,11 @@ final class MessageProcessorDPIncomingPerformer implements IConcurrentPerformer 
             ToopKafkaClient.send (EErrorLevel.WARN, () -> sLogPrefix1 + sErrorMsg);
           }
         };
-        final ISMMMultiMappingCallback aMultiMappingCallback = (sLogPrefix1,
-                                                                sSourceNamespace,
-                                                                sSourceValue,
-                                                                sDestNamespace,
-                                                                aMatching) -> ToopKafkaClient.send (EErrorLevel.WARN,
-                                                                                                    () -> sLogPrefix1 +
-                                                                                                          "Found " +
-                                                                                                          aMatching.size () +
-                                                                                                          " mappings for '" +
-                                                                                                          sSourceNamespace +
-                                                                                                          '#' +
-                                                                                                          sSourceValue +
-                                                                                                          "' to destination namespace '" +
-                                                                                                          sDestNamespace +
-                                                                                                          "'");
 
         final IMappedValueList aMappedValues = aSMMClient.performMapping (sLogPrefix,
                                                                           sDestinationMappingURI,
                                                                           MPConfig.getSMMConceptProvider (),
-                                                                          aUnmappableCallback,
-                                                                          aMultiMappingCallback);
+                                                                          aUnmappableCallback);
 
         ToopKafkaClient.send (EErrorLevel.INFO,
                               () -> sLogPrefix + "SMM client mapping found " + aMappedValues.size () + " mapping(s)");
