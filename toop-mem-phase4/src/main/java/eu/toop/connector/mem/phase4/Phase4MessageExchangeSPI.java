@@ -54,7 +54,7 @@ import com.helger.phase4.model.pmode.IPModeManager;
 import com.helger.phase4.model.pmode.PMode;
 import com.helger.phase4.model.pmode.PModePayloadService;
 import com.helger.phase4.servlet.AS4ServerInitializer;
-import com.helger.phase4.soap.ESOAPVersion;
+import com.helger.phase4.soap.ESoapVersion;
 import com.helger.phase4.util.AS4ResourceHelper;
 import com.helger.photon.app.io.WebFileIO;
 import com.helger.servlet.ServletHelper;
@@ -160,7 +160,7 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
     try (final AS4ResourceHelper aResHelper = new AS4ResourceHelper ())
     {
       final AS4ClientUserMessage aClient = new AS4ClientUserMessage (aResHelper);
-      aClient.setSOAPVersion (ESOAPVersion.SOAP_12);
+      aClient.setSoapVersion (ESoapVersion.SOAP_12);
       aClient.setAS4CryptoFactory (aCF);
 
       aClient.signingParams ()

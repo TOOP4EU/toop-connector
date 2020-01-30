@@ -19,7 +19,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.helger.commons.debug.GlobalDebug;
-import com.helger.phase4.crypto.AS4CryptoFactory;
+import com.helger.phase4.crypto.AS4CryptoFactoryPropertiesFile;
 import com.helger.phase4.crypto.IAS4CryptoFactory;
 
 import eu.toop.connector.api.TCConfig;
@@ -66,6 +66,6 @@ public final class Phase4Config
   @Nonnull
   public static IAS4CryptoFactory getCryptoFactory ()
   {
-    return AS4CryptoFactory.getDefaultInstance ();
+    return AS4CryptoFactoryPropertiesFile.getDefaultInstance ();
   }
 }

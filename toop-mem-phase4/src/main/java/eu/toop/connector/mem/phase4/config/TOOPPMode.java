@@ -97,7 +97,7 @@ public class TOOPPMode
                                     DEFAULT_AGREEMENT_ID,
                                     EMEP.ONE_WAY,
                                     EMEPBinding.PUSH,
-                                    new PModeLeg (PModeLegProtocol.createForDefaultSOAPVersion (sResponderAddress),
+                                    new PModeLeg (PModeLegProtocol.createForDefaultSoapVersion (sResponderAddress),
                                                   new PModeLegBusinessInformation ("http://www.toop.eu/edelivery/bit",
                                                                                    "Deliver",
                                                                                    (Long) null,
