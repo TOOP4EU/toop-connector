@@ -57,6 +57,12 @@
   </developers>
   
   <dependencies>
+    <!-- Required for the class SOAPException in Java9+ -->
+    <dependency>
+      <groupId>com.helger</groupId>
+      <artifactId>ph-jaxws-pom</artifactId>
+      <type>pom</type>
+    </dependency>
     <dependency>
       <groupId>com.helger</groupId>
       <artifactId>ph-commons</artifactId>
