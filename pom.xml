@@ -81,7 +81,7 @@
       <dependency>
         <groupId>com.helger</groupId>
         <artifactId>peppol-commons-parent-pom</artifactId>
-        <version>7.0.6</version>
+        <version>8.0.0</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
@@ -95,14 +95,14 @@
       <dependency>
         <groupId>com.helger</groupId>
         <artifactId>phase4-parent-pom</artifactId>
-        <version>0.9.8</version>
+        <version>0.9.9-SNAPSHOT</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>eu.toop</groupId>
         <artifactId>toop-commons-parent-pom</artifactId>
-        <version>0.10.8</version>
+        <version>0.10.9-SNAPSHOT</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
