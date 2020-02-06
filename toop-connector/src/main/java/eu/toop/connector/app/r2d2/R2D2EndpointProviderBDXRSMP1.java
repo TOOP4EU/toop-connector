@@ -41,6 +41,7 @@ import com.helger.smpclient.bdxr1.BDXRClient;
 import com.helger.smpclient.bdxr1.BDXRClientReadOnly;
 import com.helger.smpclient.bdxr1.IBDXRServiceMetadataProvider;
 import com.helger.smpclient.exception.SMPClientException;
+import com.helger.smpclient.url.BDXLURLProvider;
 import com.helger.smpclient.url.PeppolDNSResolutionException;
 import com.helger.xsds.bdxr.smp1.EndpointType;
 import com.helger.xsds.bdxr.smp1.ProcessType;
@@ -49,7 +50,6 @@ import com.helger.xsds.bdxr.smp1.SignedServiceMetadataType;
 
 import eu.toop.commons.error.EToopErrorCode;
 import eu.toop.connector.api.TCConfig;
-import eu.toop.connector.api.TCSettings;
 import eu.toop.connector.api.r2d2.IR2D2Endpoint;
 import eu.toop.connector.api.r2d2.IR2D2EndpointProvider;
 import eu.toop.connector.api.r2d2.IR2D2ErrorHandler;
@@ -103,7 +103,7 @@ public class R2D2EndpointProviderBDXRSMP1 implements IR2D2EndpointProvider
       if (TCConfig.isR2D2UseDNS ())
       {
         // Use dynamic lookup via DNS - can throw exception
-        aSMPClient = new BDXRClient (TCSettings.getSMPUrlProvider (), aRecipientID, TCConfig.getR2D2SML ());
+        aSMPClient = new BDXRClient (BDXLURLProvider.INSTANCE, aRecipientID, TCConfig.getR2D2SML ());
       }
       else
       {

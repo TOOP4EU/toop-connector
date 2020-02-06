@@ -30,6 +30,5 @@ public final class TCSettingsTest
   public void testBasic ()
   {
     assertNotNull (TCSettings.getIdentifierFactory ());
-    assertNotNull (TCSettings.getSMPUrlProvider ());
   }
 }

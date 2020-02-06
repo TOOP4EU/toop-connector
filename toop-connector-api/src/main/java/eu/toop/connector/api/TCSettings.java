@@ -18,8 +18,6 @@ package eu.toop.connector.api;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
-import com.helger.peppol.url.BDXLURLProvider;
-import com.helger.peppol.url.IPeppolURLProvider;
 import com.helger.peppolid.factory.IIdentifierFactory;
 
 /**
@@ -37,11 +35,5 @@ public final class TCSettings
   public static IIdentifierFactory getIdentifierFactory ()
   {
     return TCIdentifierFactory.INSTANCE_TC;
-  }
-
-  @Nonnull
-  public static IPeppolURLProvider getSMPUrlProvider ()
-  {
-    return BDXLURLProvider.INSTANCE;
   }
 }
