@@ -32,7 +32,7 @@ import com.helger.httpclient.response.ResponseHandlerMicroDom;
 import com.helger.xml.microdom.IMicroDocument;
 
 import eu.toop.connector.api.TCConfig;
-import eu.toop.connector.api.http.TCHttpClientFactory;
+import eu.toop.connector.api.http.TCHttpClientSettings;
 
 /**
  * Handler to perform the /search-dp-by-country servlet functionality.
@@ -84,9 +84,7 @@ public final class SearchDPByCountryHandler
       throw new IllegalStateException ("The Directory base URL configuration is missing");
 
     // Invoke TOOP Directory search API
-    final TCHttpClientFactory aHCFactory = new TCHttpClientFactory ();
-
-    try (final HttpClientManager aMgr = new HttpClientManager (aHCFactory))
+    try (final HttpClientManager aMgr = HttpClientManager.create (new TCHttpClientSettings ()))
     {
       // Build base URL and fetch all records per HTTP request
       final SimpleURL aBaseURL = new SimpleURL (sBaseURL + "/search/1.0/xml");

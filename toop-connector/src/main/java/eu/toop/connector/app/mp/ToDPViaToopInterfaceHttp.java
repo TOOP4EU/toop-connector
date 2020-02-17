@@ -35,7 +35,7 @@ import eu.toop.commons.exchange.ToopMessageBuilder140;
 import eu.toop.commons.exchange.ToopRequestWithAttachments140;
 import eu.toop.commons.exchange.ToopResponseWithAttachments140;
 import eu.toop.connector.api.TCConfig;
-import eu.toop.connector.api.http.TCHttpClientFactory;
+import eu.toop.connector.api.http.TCHttpClientSettings;
 import eu.toop.kafkaclient.ToopKafkaClient;
 
 /**
@@ -66,8 +66,7 @@ public class ToDPViaToopInterfaceHttp implements IToDP
                                                       aWriteAttachments);
 
       // Start HTTP to /to-dp interface
-      final TCHttpClientFactory aHCFactory = new TCHttpClientFactory ();
-      try (final HttpClientManager aMgr = new HttpClientManager (aHCFactory))
+      try (final HttpClientManager aMgr = HttpClientManager.create (new TCHttpClientSettings ()))
       {
         ToopKafkaClient.send (EErrorLevel.INFO, () -> "Start posting signed ASiC request to '" + sDestinationUrl + "'");
 
@@ -111,8 +110,7 @@ public class ToDPViaToopInterfaceHttp implements IToDP
                                                        aWriteAttachments);
 
       // Start HTTP to /to-dp interface
-      final TCHttpClientFactory aHCFactory = new TCHttpClientFactory ();
-      try (final HttpClientManager aMgr = new HttpClientManager (aHCFactory))
+      try (final HttpClientManager aMgr = HttpClientManager.create (new TCHttpClientSettings ()))
       {
         ToopKafkaClient.send (EErrorLevel.INFO,
                               () -> "Start posting signed ASiC response to '" + sDestinationUrl + "'");

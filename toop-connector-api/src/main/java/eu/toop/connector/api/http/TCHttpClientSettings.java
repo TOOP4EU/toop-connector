@@ -20,7 +20,7 @@ import java.security.GeneralSecurityException;
 import org.apache.http.HttpHost;
 
 import com.helger.commons.exception.InitializationException;
-import com.helger.httpclient.HttpClientFactory;
+import com.helger.httpclient.HttpClientSettings;
 
 import eu.toop.connector.api.TCConfig;
 
@@ -29,9 +29,9 @@ import eu.toop.connector.api.TCConfig;
  *
  * @author Philip Helger
  */
-public final class TCHttpClientFactory extends HttpClientFactory
+public class TCHttpClientSettings extends HttpClientSettings
 {
-  public TCHttpClientFactory ()
+  public TCHttpClientSettings ()
   {
     if (TCConfig.isUseHttpSystemProperties ())
     {
@@ -43,7 +43,7 @@ public final class TCHttpClientFactory extends HttpClientFactory
       // Add settings from configuration file here centrally
       if (TCConfig.isProxyServerEnabled ())
       {
-        setProxy (new HttpHost (TCConfig.getProxyServerAddress (), TCConfig.getProxyServerPort ()));
+        setProxyHost (new HttpHost (TCConfig.getProxyServerAddress (), TCConfig.getProxyServerPort ()));
 
         // Non-proxy hosts
         addNonProxyHostsFromPipeString (TCConfig.getProxyServerNonProxyHosts ());

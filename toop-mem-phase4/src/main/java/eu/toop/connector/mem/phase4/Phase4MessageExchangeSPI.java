@@ -36,6 +36,7 @@ import com.helger.commons.io.file.SimpleFileIO;
 import com.helger.commons.string.StringHelper;
 import com.helger.commons.timing.StopWatch;
 import com.helger.datetime.util.PDTIOHelper;
+import com.helger.httpclient.HttpClientFactory;
 import com.helger.httpclient.response.ResponseHandlerByteArray;
 import com.helger.peppol.utils.PeppolCertificateHelper;
 import com.helger.phase4.CAS4;
@@ -47,6 +48,7 @@ import com.helger.phase4.client.IAS4ClientBuildMessageCallback;
 import com.helger.phase4.crypto.ECryptoAlgorithmSign;
 import com.helger.phase4.crypto.ECryptoAlgorithmSignDigest;
 import com.helger.phase4.crypto.IAS4CryptoFactory;
+import com.helger.phase4.dump.IAS4OutgoingDumper;
 import com.helger.phase4.http.AS4HttpDebug;
 import com.helger.phase4.messaging.domain.MessageHelperMethods;
 import com.helger.phase4.mgr.MetaAS4Manager;
@@ -66,7 +68,7 @@ import eu.toop.connector.api.as4.IMessageExchangeSPI;
 import eu.toop.connector.api.as4.MEException;
 import eu.toop.connector.api.as4.MEMessage;
 import eu.toop.connector.api.as4.MEPayload;
-import eu.toop.connector.api.http.TCHttpClientFactory;
+import eu.toop.connector.api.http.TCHttpClientSettings;
 import eu.toop.connector.mem.phase4.config.TOOPPMode;
 import eu.toop.connector.mem.phase4.servlet.AS4MessageProcessorSPI;
 
@@ -204,13 +206,15 @@ public class Phase4MessageExchangeSPI implements IMessageExchangeSPI
       }
 
       // Proxy config etc
-      aClient.setHttpClientFactory (new TCHttpClientFactory ());
+      aClient.setHttpClientFactory (new HttpClientFactory (new TCHttpClientSettings ()));
 
       // Main sending
       final IAS4ClientBuildMessageCallback aCallback = null;
+      final IAS4OutgoingDumper aOutgoingDumper = null;
       final AS4ClientSentMessage <byte []> aResponseEntity = aClient.sendMessageWithRetries (aRoutingInfo.getEndpointURL (),
                                                                                              new ResponseHandlerByteArray (),
-                                                                                             aCallback);
+                                                                                             aCallback,
+                                                                                             aOutgoingDumper);
       LOGGER.info ("[phase4] Successfully transmitted document with message ID '" +
                    aResponseEntity.getMessageID () +
                    "' for '" +

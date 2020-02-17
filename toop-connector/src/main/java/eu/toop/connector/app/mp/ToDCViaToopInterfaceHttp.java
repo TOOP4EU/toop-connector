@@ -34,7 +34,7 @@ import eu.toop.commons.exchange.AsicWriteEntry;
 import eu.toop.commons.exchange.ToopMessageBuilder140;
 import eu.toop.commons.exchange.ToopResponseWithAttachments140;
 import eu.toop.connector.api.TCConfig;
-import eu.toop.connector.api.http.TCHttpClientFactory;
+import eu.toop.connector.api.http.TCHttpClientSettings;
 import eu.toop.kafkaclient.ToopKafkaClient;
 
 /**
@@ -64,8 +64,7 @@ public class ToDCViaToopInterfaceHttp implements IToDC
                                                        MPConfig.getSignatureHelper (),
                                                        aWriteAttachments);
 
-      final TCHttpClientFactory aHCFactory = new TCHttpClientFactory ();
-      try (final HttpClientManager aMgr = new HttpClientManager (aHCFactory))
+      try (final HttpClientManager aMgr = HttpClientManager.create (new TCHttpClientSettings ()))
       {
         ToopKafkaClient.send (EErrorLevel.INFO,
                               () -> "Start posting signed ASiC response to '" + sDestinationUrl + "'");

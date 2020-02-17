@@ -41,7 +41,7 @@ import com.helger.peppolid.IParticipantIdentifier;
 import eu.toop.commons.error.EToopErrorCode;
 import eu.toop.connector.api.TCConfig;
 import eu.toop.connector.api.TCSettings;
-import eu.toop.connector.api.http.TCHttpClientFactory;
+import eu.toop.connector.api.http.TCHttpClientSettings;
 import eu.toop.connector.api.r2d2.IR2D2ErrorHandler;
 import eu.toop.connector.api.r2d2.IR2D2ParticipantIDProvider;
 import eu.toop.kafkaclient.ToopKafkaClient;
@@ -117,9 +117,7 @@ public class R2D2ParticipantIDProviderTOOPDirectory implements IR2D2ParticipantI
   {
     final ICommonsSet <IParticipantIdentifier> ret = new CommonsHashSet <> ();
 
-    final TCHttpClientFactory aHCFactory = new TCHttpClientFactory ();
-
-    try (final HttpClientManager aMgr = new HttpClientManager (aHCFactory))
+    try (final HttpClientManager aMgr = HttpClientManager.create (new TCHttpClientSettings ()))
     {
       // Build base URL and fetch x records per HTTP request
       final SimpleURL aBaseURL = new SimpleURL (m_sBaseURL + "/search/1.0/json")
