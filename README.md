@@ -4,6 +4,8 @@ The joint message process for both sides of the process
 
 Latest release: **0.10.8** (2020-01-26)
 
+# This project is superseded by [TOOP Connector NG](https://github.com/TOOP4EU/toop-connector-ng)
+
 # How it works
 
 Handle the way on DC side from DC backend to AS4 (1/4)
